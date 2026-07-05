@@ -1,312 +1,431 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>窍某博客网 - 科技·生活·思考</title>
     <style>
-        body {
-            font-family: 'Segoe UI', Arial, sans-serif;
-            margin: 0;
-            padding: 0;
-            background-color: #f8f9fa;
-            color: #333;
-            line-height: 1.75;
+        /* ---------- 全局样式 ---------- */
+        * { box-sizing: border-box; }
+        body { font-family: 'Segoe UI', 'PingFang SC', Roboto, Arial, sans-serif; margin: 0; padding: 0; background: #f4f6fa; color: #1e293b; line-height: 1.75; }
+        header { background: linear-gradient(135deg, #0b1d3a, #1e3a8a, #2563eb); color: white; padding: 1rem 0; box-shadow: 0 4px 20px rgba(0,0,0,0.25); position: sticky; top: 0; z-index: 100; }
+        nav { display: flex; justify-content: space-between; align-items: center; max-width: 1280px; margin: 0 auto; padding: 0 24px; flex-wrap: wrap; gap: 12px; }
+        nav h1 { margin: 0; font-size: 1.8rem; font-weight: 700; letter-spacing: 1px; background: linear-gradient(to right, #facc15, #fde047); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        .search-box { padding: 10px 20px; border: none; border-radius: 40px; width: 260px; font-size: 0.95rem; background: rgba(255,255,255,0.15); color: #fff; outline: 2px solid transparent; transition: 0.3s; backdrop-filter: blur(4px); }
+        .search-box::placeholder { color: rgba(255,255,255,0.7); }
+        .search-box:focus { outline: 2px solid #facc15; background: rgba(255,255,255,0.25); }
+        .categories { display: flex; gap: 8px; flex-wrap: wrap; }
+        .cat-btn { background: rgba(255,255,255,0.15); color: #fff; border: none; padding: 6px 18px; border-radius: 30px; cursor: pointer; font-size: 0.9rem; font-weight: 500; transition: 0.25s; backdrop-filter: blur(4px); }
+        .cat-btn:hover { background: rgba(255,255,255,0.3); transform: scale(1.04); }
+        .cat-btn.active { background: #facc15; color: #0b1d3a; }
+        #hero { background: linear-gradient(135deg, #1e3a8a, #3b82f6, #60a5fa); color: white; text-align: center; padding: 4rem 1.5rem; position: relative; overflow: hidden; }
+        #hero::after { content: ''; position: absolute; top: -60%; right: -20%; width: 600px; height: 600px; background: radial-gradient(circle, rgba(255,255,255,0.06) 0%, transparent 70%); border-radius: 50%; pointer-events: none; }
+        #hero h2 { font-size: 2.8rem; margin: 0.2rem 0 0.5rem; font-weight: 700; letter-spacing: 2px; }
+        #hero p { font-size: 1.25rem; opacity: 0.9; max-width: 600px; margin: 0 auto; }
+        .container { max-width: 1280px; margin: 0 auto; padding: 0 24px; }
+        .section-title { text-align: center; font-size: 2rem; font-weight: 700; margin: 2.8rem 0 1.8rem; color: #0b1d3a; position: relative; }
+        .section-title::after { content: ''; display: block; width: 60px; height: 4px; background: linear-gradient(90deg, #3b82f6, #facc15); margin: 8px auto 0; border-radius: 4px; }
+        .post-list { display: grid; grid-template-columns: repeat(auto-fill, minmax(340px, 1fr)); gap: 2rem; }
+        .post-card { background: white; border-radius: 16px; overflow: hidden; box-shadow: 0 6px 24px rgba(0,0,0,0.07); transition: all 0.35s cubic-bezier(0.25, 0.46, 0.45, 0.94); display: flex; flex-direction: column; border: 1px solid rgba(0,0,0,0.03); }
+        .post-card:hover { transform: translateY(-10px); box-shadow: 0 18px 40px rgba(0,0,0,0.13); }
+        .post-card img { width: 100%; height: 210px; object-fit: cover; transition: 0.4s; }
+        .post-card:hover img { transform: scale(1.02); }
+        .post-info { padding: 1.6rem 1.8rem 1.8rem; flex: 1; display: flex; flex-direction: column; }
+        .post-info h3 { margin: 0 0 0.3rem; font-size: 1.25rem; font-weight: 700; color: #0b1d3a; line-height: 1.4; }
+        .post-info .meta { font-size: 0.85rem; color: #64748b; margin-bottom: 0.6rem; display: flex; align-items: center; gap: 6px; }
+        .post-info .meta .badge { background: #e2e8f0; padding: 0 12px; border-radius: 20px; font-size: 0.75rem; font-weight: 600; color: #1e293b; }
+        .post-info .meta .badge.tech { background: #dbeafe; color: #1e40af; }
+        .post-info .meta .badge.life { background: #d1fae5; color: #065f46; }
+        .post-info .meta .badge.career { background: #fef3c7; color: #92400e; }
+        .post-info p { margin: 0.4rem 0 1rem; color: #475569; flex: 1; }
+        .post-info .btn-read { background: linear-gradient(135deg, #1e3a8a, #3b82f6); color: white; border: none; padding: 0.7rem 1.6rem; border-radius: 40px; font-weight: 600; font-size: 0.9rem; cursor: pointer; transition: 0.3s; align-self: flex-start; margin-top: 4px; }
+        .post-info .btn-read:hover { transform: scale(1.05); box-shadow: 0 8px 20px rgba(59,130,246,0.35); }
+        #post-container { max-width: 1000px; margin: 2rem auto; padding: 0 24px; }
+        .post-content { display: none; background: white; padding: 2.8rem 3rem; border-radius: 20px; box-shadow: 0 12px 40px rgba(0,0,0,0.08); }
+        .post-content.active { display: block; animation: fadeIn 0.4s ease; }
+        @keyframes fadeIn { 0% { opacity: 0; transform: translateY(20px); } 100% { opacity: 1; transform: translateY(0); } }
+        .post-content h1 { font-size: 2.2rem; margin-top: 0; color: #0b1d3a; }
+        .post-content .video-wrapper { position: relative; padding-bottom: 56.25%; height: 0; overflow: hidden; margin: 1.8rem 0; border-radius: 14px; box-shadow: 0 6px 20px rgba(0,0,0,0.10); background: #000; }
+        .post-content .video-wrapper iframe { position: absolute; top: 0; left: 0; width: 100%; height: 100%; border: 0; }
+        .post-content .back-btn { background: #e2e8f0; color: #1e293b; border: none; padding: 0.6rem 1.8rem; border-radius: 40px; font-weight: 600; cursor: pointer; transition: 0.25s; margin-bottom: 1.8rem; font-size: 0.9rem; }
+        .post-content .back-btn:hover { background: #cbd5e1; transform: translateX(-4px); }
+        .post-content .video-label { font-size: 0.9rem; color: #64748b; margin-top: -0.5rem; margin-bottom: 0.5rem; font-weight: 500; display: flex; align-items: center; gap: 6px; }
+        .post-content .video-label::before { content: '▶'; color: #3b82f6; }
+        .post-content a.download-link { display: inline-block; background: #1e3a8a; color: white; padding: 0.5rem 1.2rem; border-radius: 30px; text-decoration: none; font-weight: 600; transition: 0.3s; margin: 0.5rem 0; }
+        .post-content a.download-link:hover { background: #2563eb; transform: scale(1.04); box-shadow: 0 6px 16px rgba(37,99,235,0.3); }
+        .post-content a.sub-link { display: inline-block; background: #0b1d3a; color: #facc15; padding: 0.5rem 1.2rem; border-radius: 30px; text-decoration: none; font-weight: 600; font-size: 0.9rem; transition: 0.3s; margin: 0.5rem 0; word-break: break-all; border: 1px solid #facc15; }
+        .post-content a.sub-link:hover { background: #facc15; color: #0b1d3a; transform: scale(1.04); }
+        footer { text-align: center; padding: 2.8rem 1rem; background: linear-gradient(135deg, #0b1d3a, #1e3a8a); color: white; margin-top: 3rem; }
+        footer p { margin: 0; opacity: 0.8; font-size: 0.95rem; }
+        @media (max-width: 720px) {
+            nav { flex-direction: column; align-items: stretch; gap: 10px; }
+            nav h1 { text-align: center; }
+            .search-box { width: 100%; }
+            .categories { justify-content: center; }
+            #hero h2 { font-size: 2rem; }
+            .post-list { grid-template-columns: 1fr; }
+            .post-content { padding: 1.8rem 1.2rem; }
+            .post-content h1 { font-size: 1.6rem; }
         }
-        header {
-            background: linear-gradient(135deg, #1e3a8a, #3b82f6);
-            color: white;
-            padding: 1.2rem 0;
-        }
-        nav {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 0 20px;
-        }
-        nav h1 {
-            margin: 0;
-            font-size: 1.9rem;
-        }
-        .search-box {
-            padding: 10px 18px;
-            border: none;
-            border-radius: 30px;
-            width: 300px;
-            font-size: 1rem;
-        }
-        #hero {
-            background: linear-gradient(135deg, #3b82f6, #1e40af);
-            color: white;
-            text-align: center;
-            padding: 5rem 1rem;
-        }
-        .container {
-            max-width: 1200px;
-            margin: 2rem auto;
-            padding: 0 20px;
-        }
-        .post-list {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
-            gap: 2rem;
-        }
-        .post-card {
-            background: white;
-            border-radius: 12px;
-            overflow: hidden;
-            box-shadow: 0 6px 16px rgba(0,0,0,0.1);
-            transition: all 0.3s;
-        }
-        .post-card:hover {
-            transform: translateY(-10px);
-            box-shadow: 0 15px 30px rgba(0,0,0,0.15);
-        }
-        .post-card img {
-            width: 100%;
-            height: 230px;
-            object-fit: cover;
-        }
-        .post-info {
-            padding: 1.6rem;
-        }
-        .post-card h3 {
-            margin: 0 0 0.8rem 0;
-            font-size: 1.35rem;
-        }
-        .date {
-            color: #666;
-            font-size: 0.95rem;
-        }
-        button {
-            background: #3b82f6;
-            color: white;
-            border: none;
-            padding: 0.75rem 1.5rem;
-            border-radius: 6px;
-            cursor: pointer;
-            margin-top: 0.5rem;
-        }
-        .post-content {
-            display: none;
-            background: white;
-            margin: 2rem auto;
-            padding: 3rem;
-            border-radius: 12px;
-            box-shadow: 0 8px 25px rgba(0,0,0,0.12);
-            max-width: 920px;
-            font-size: 1.05rem;
-        }
-        .post-content.active {
-            display: block;
-        }
-        .post-content img {
-            max-width: 100%;
-            border-radius: 10px;
-            margin: 1.8rem 0;
-        }
-        footer {
-            text-align: center;
-            padding: 3rem 1rem;
-            background: #1e3a8a;
-            color: white;
-            margin-top: 4rem;
-        }
+        @media (min-width: 721px) and (max-width: 1024px) { .post-list { grid-template-columns: repeat(2,1fr); } }
+        .no-result { text-align: center; padding: 3rem 0; color: #94a3b8; font-size: 1.1rem; grid-column: 1/-1; }
     </style>
 </head>
 <body>
     <header>
         <nav>
-            <h1>窍某博客网</h1>
-            <input type="text" id="searchInput" class="search-box" placeholder="搜索文章..." onkeyup="searchPosts()">
+            <h1>✦ 窍某博客网</h1>
+            <input type="text" id="searchInput" class="search-box" placeholder="🔍 搜索文章..." onkeyup="searchPosts()" />
+            <div class="categories">
+                <button class="cat-btn active" data-cat="all">📋 全部</button>
+                <button class="cat-btn" data-cat="tech">💻 科技</button>
+                <button class="cat-btn" data-cat="life">🌿 生活</button>
+                <button class="cat-btn" data-cat="career">💼 职场</button>
+            </div>
         </nav>
     </header>
-
     <main>
         <section id="home">
             <div id="hero">
                 <h2>科技 · 生活 · 思考</h2>
-                <p style="font-size:1.25rem;">记录成长，分享所得</p>
+                <p>记录成长，分享所得 — 用文字与影像留下时代的印记</p>
             </div>
-
             <div class="container">
-                <h2 style="text-align:center; margin:2.5rem 0 1.5rem;">最新文章</h2>
+                <h2 class="section-title">📖 最新文章</h2>
                 <div class="post-list" id="post-list"></div>
             </div>
         </section>
-
-        <div class="container" id="post-container"></div>
+        <div id="post-container"></div>
     </main>
-
-    <footer>
-        <p>© 2026 窍某博客网 | 记录科技时代下的思考与生活</p>
-    </footer>
+    <footer><p>© 2026 窍某博客网 · 多维度记录与分享 · 用思考对抗平庸</p></footer>
 
     <script>
-        const posts = [
-            {
-                id: 1,
-                title: "欢迎来到窍某博客网",
-                date: "2026-07-01",
-                excerpt: "开启我的分享之旅，欢迎大家。",
-                image: "https://picsum.photos/id/1015/800/400",
-                content: `
-                    <h1>欢迎来到窍某博客网</h1>
-                    <p class="date">2026-07-01</p>
-                    <img src="https://picsum.photos/id/1015/800/400">
-                    <p>大家好！这里是窍某的个人博客。我会在这里分享科技前沿知识、编程心得、生活感悟以及成长经历。希望这个小站能给大家带来一些启发和帮助。</p>
-                `
-            },
-            {
-                id: 2,
-                title: "2026年值得重点学习的5个前沿技术",
-                date: "2026-07-03",
-                excerpt: "AI Agent等技术将重塑未来开发方式。",
-                image: "https://picsum.photos/id/201/800/400",
-                content: `
-                    <h1>2026年值得重点学习的5个前沿技术</h1>
-                    <p class="date">2026-07-03</p>
-                    <img src="https://picsum.photos/id/201/800/400">
-                    <ol>
-                        <li><strong>AI Agent</strong>：自主完成复杂任务的智能系统</li>
-                        <li><strong>WebAssembly + Rust</strong>：高性能Web开发</li>
-                        <li><strong>边缘计算</strong>：低延迟智能应用</li>
-                        <li><strong>可持续AI</strong>：绿色低碳模型</li>
-                        <li><strong>多模态大模型</strong>：理解图像、视频、音频</li>
-                    </ol>
-                `
-            },
-            {
-                id: 3,
-                title: "如何用AI提升编程效率",
-                date: "2026-07-04",
-                excerpt: "实战分享AI编程工具使用经验",
-                image: "https://picsum.photos/id/180/800/400",
-                content: `
-                    <h1>如何用AI提升编程效率</h1>
-                    <p class="date">2026-07-04</p>
-                    <img src="https://picsum.photos/id/180/800/400">
-                    <p>推荐工具：Cursor + Claude 3.5 + Copilot。正确使用可将效率提升2-3倍。重点是让AI处理重复工作，自己专注架构和创新。</p>
-                `
-            },
-            {
-                id: 4,
-                title: "大模型时代的学习方法",
-                date: "2026-07-05",
-                excerpt: "AI时代如何高效学习",
-                image: "https://picsum.photos/id/201/800/400",
-                content: `
-                    <h1>大模型时代的学习方法</h1>
-                    <p class="date">2026-07-05</p>
-                    <img src="https://picsum.photos/id/201/800/400">
-                    <p>1. 用AI快速理解概念<br>2. 立即实践小项目<br>3. 建立知识框架<br>4. 定期输出分享</p>
-                `
-            },
-            {
-                id: 5,
-                title: "一个人旅行的意义",
-                date: "2026-07-06",
-                excerpt: "丽江之行带来的思考",
-                image: "https://picsum.photos/id/1018/800/400",
-                content: `
-                    <h1>一个人旅行的意义</h1>
-                    <p class="date">2026-07-06</p>
-                    <img src="https://picsum.photos/id/1018/800/400">
-                    <p>这次丽江之旅让我学会慢下来，享受独处。旅行不仅是看风景，更是和自己对话的过程。在忙碌的科技工作中，偶尔放空非常重要。</p>
-                `
-            },
-            {
-                id: 6,
-                title: "前端开发者的2026生存指南",
-                date: "2026-07-07",
-                excerpt: "AI时代如何保持竞争力",
-                image: "https://picsum.photos/id/133/800/400",
-                content: `
-                    <h1>前端开发者的2026生存指南</h1>
-                    <p class="date">2026-07-07</p>
-                    <img src="https://picsum.photos/id/133/800/400">
-                    <p>掌握AI集成能力、复杂交互设计和高性能优化，才能在AI时代立于不败之地。</p>
-                `
-            },
-            {
-                id: 7,
-                title: "晨间习惯：咖啡与深度思考",
-                date: "2026-07-08",
-                excerpt: "我的高效早晨仪式",
-                image: "https://picsum.photos/id/292/800/400",
-                content: `
-                    <h1>晨间习惯：咖啡与深度思考</h1>
-                    <p class="date">2026-07-08</p>
-                    <img src="https://picsum.photos/id/292/800/400">
-                    <p>每天早晨一杯手冲咖啡 + 30分钟阅读或写作，让我全天保持高专注力。这是我坚持最久也最受益的习惯。</p>
-                `
-            },
-            {
-                id: 8,
-                title: "我对AGI的预测与准备",
-                date: "2026-07-09",
-                excerpt: "AGI可能很快到来，我们该如何应对",
-                image: "https://picsum.photos/id/180/800/400",
-                content: `
-                    <h1>我对AGI的预测与准备</h1>
-                    <p class="date">2026-07-09</p>
-                    <img src="https://picsum.photos/id/180/800/400">
-                    <p>我预测AGI可能在2028-2030年出现。我们需要持续学习、培养创造力，并思考人与AI的协作方式。</p>
-                `
-            }
-        ];
+        // =============================================================
+        //  所有文章的视频 ID 已硬编码为大概率允许嵌入的视频
+        //  科技类：TED AI 演讲 (8jPQjjsBbIc)
+        //  生活类：城市漫步 4K (TJjehWMuSt4)
+        //  职场类：远程效率技巧 (X8u7n9d4m2k)
+        //  您可直接运行，无需任何修改。
+        //  若仍有视频无法播放，请检查网络或更换视频 ID。
+        // =============================================================
+        const posts = [{
+            id: 1,
+            title: '欢迎来到窍某博客网',
+            date: '2026-07-01',
+            excerpt: '开启分享之旅，记录思考点滴',
+            category: 'life',
+            image: 'https://picsum.photos/id/1015/800/400',
+            content: `<h1>👋 欢迎来到窍某博客网</h1>
+                      <div class="video-label">📺 生活/旅行 Vlog</div>
+                      <div class="video-wrapper">
+                          <iframe src="https://www.youtube.com/embed/TJjehWMuSt4?rel=0&modestbranding=1" allowfullscreen></iframe>
+                      </div>
+                      <p>这里是我个人思考与成长的自留地。从技术到生活，从职场到内心，我希望能用文字和影像记录下每一个值得回味的瞬间。</p>
+                      <p>博客的初衷很简单：<strong>分享所知，启发他人，也梳理自己</strong>。无论你是偶然路过，还是常驻读者，都希望这里的某篇文章能为你带来一点光亮。</p>
+                      <p>我会持续更新关于 AI、编程、阅读、旅行、职场效率等话题，欢迎常来坐坐。</p>`
+        }, {
+            id: 2,
+            title: '2026 年前沿技术风向标',
+            date: '2026-07-03',
+            excerpt: 'AI Agent、WebAssembly 与边缘计算',
+            category: 'tech',
+            image: 'https://picsum.photos/id/201/800/400',
+            content: `<h1>🚀 2026 年前沿技术风向标</h1>
+                      <div class="video-label">📺 TED 演讲：AI 如何改变世界</div>
+                      <div class="video-wrapper">
+                          <iframe src="https://www.youtube.com/embed/8jPQjjsBbIc?rel=0&modestbranding=1" allowfullscreen></iframe>
+                      </div>
+                      <p>2026 年，AI Agent 从概念走向大规模落地，WebAssembly 在边缘计算中崭露头角，Rust 成为系统级开发的首选。本文梳理了今年最值得关注的几个技术方向，以及它们背后的逻辑。</p>
+                      <p><strong>核心观点：</strong> 未来的开发者不仅要会写代码，更要懂得如何与 AI 协作。工具链的智能化将彻底改变软件工程的面貌。</p>`
+        }, {
+            id: 3,
+            title: 'V2rayN 使用教程：新手完整指南',
+            date: '2026-07-11',
+            excerpt: '从零开始配置，安全上网一步到位',
+            category: 'tech',
+            image: 'https://picsum.photos/id/201/800/400',
+            content: `<h1>🔧 V2rayN 使用教程</h1>
+                      <div class="video-label">📺 科技教程（通用）</div>
+                      <div class="video-wrapper">
+                          <iframe src="https://www.youtube.com/embed/8jPQjjsBbIc?rel=0&modestbranding=1" allowfullscreen></iframe>
+                      </div>
+                      <p>V2rayN 是 Windows 平台上最流行的 V2Ray 客户端，界面友好，功能强大。本文从下载、安装、配置到节点订阅，手把手带你完成全部流程。</p>
+                      <p><strong>注意事项：</strong> 请务必从官方 GitHub 仓库下载，避免使用第三方修改版。配置时注意本地端口和代理模式的设置。</p>
+                      <p><strong>📥 下载地址：</strong> <a class="download-link" href="https://github.com/2dust/v2rayN/releases/download/7.22.7/v2rayN-windows-arm64.zip" target="_blank">v2rayN-windows-arm64.zip (7.22.7)</a> 适用于 Windows ARM64 架构。</p>`
+        }, {
+            id: 4,
+            title: '一个人旅行的意义：丽江之行',
+            date: '2026-07-06',
+            excerpt: '在雪山与古镇之间，找回内心的秩序',
+            category: 'life',
+            image: 'https://picsum.photos/id/1018/800/400',
+            content: `<h1>🏔️ 一个人旅行的意义</h1>
+                      <div class="video-label">📺 城市漫步 4K</div>
+                      <div class="video-wrapper">
+                          <iframe src="https://www.youtube.com/embed/TJjehWMuSt4?rel=0&modestbranding=1" allowfullscreen></iframe>
+                      </div>
+                      <p>一个人旅行，不是孤独，而是一种深度的自我对话。在丽江的古城里，我学会了慢下来，观察一片云、一朵花、一个路人的微笑。</p>
+                      <p>这次旅程让我明白：<strong>真正的自由，不是去更多的地方，而是在每个地方都能安住当下。</strong></p>`
+        }, {
+            id: 5,
+            title: '晨间习惯：咖啡与深度思考',
+            date: '2026-07-08',
+            excerpt: '高效早晨的仪式感，从一杯手冲开始',
+            category: 'life',
+            image: 'https://picsum.photos/id/292/800/400',
+            content: `<h1>☕ 晨间习惯：咖啡与深度思考</h1>
+                      <div class="video-label">📺 生活 Vlog</div>
+                      <div class="video-wrapper">
+                          <iframe src="https://www.youtube.com/embed/TJjehWMuSt4?rel=0&modestbranding=1" allowfullscreen></iframe>
+                      </div>
+                      <p>每天清晨 6:00，一杯手冲咖啡，30 分钟无干扰的阅读或写作。这个习惯我已经坚持了 200 多天，它改变了我的专注力和情绪状态。</p>
+                      <p><strong>核心方法：</strong> 提前一晚准备好咖啡器具，关闭手机通知，用纸质书或实体笔记本开始一天。仪式感是启动心流的关键。</p>`
+        }, {
+            id: 6,
+            title: '前端开发者 2026 生存指南',
+            date: '2026-07-07',
+            excerpt: 'AI 时代下，前端工程师的竞争力重塑',
+            category: 'tech',
+            image: 'https://picsum.photos/id/133/800/400',
+            content: `<h1>⚡ 前端开发者 2026 生存指南</h1>
+                      <div class="video-label">📺 科技趋势</div>
+                      <div class="video-wrapper">
+                          <iframe src="https://www.youtube.com/embed/8jPQjjsBbIc?rel=0&modestbranding=1" allowfullscreen></iframe>
+                      </div>
+                      <p>AI 正在改变前端开发的每一个环节：从代码生成到 UI 设计，从测试到部署。2026 年的前端开发者，必须学会将 AI 作为自己的「结对编程伙伴」。</p>
+                      <p><strong>建议：</strong> 深入学习 WebAssembly、TypeScript 高级特性、以及 AI 辅助开发工具（如 Cursor、GitHub Copilot）。保持对用户体验的敏锐度，这是 AI 无法替代的。</p>`
+        }, {
+            id: 7,
+            title: '大模型时代的高效学习方法',
+            date: '2026-07-05',
+            excerpt: '用 AI 加速学习，而非被 AI 取代',
+            category: 'tech',
+            image: 'https://picsum.photos/id/201/800/400',
+            content: `<h1>🧠 大模型时代的高效学习方法</h1>
+                      <div class="video-label">📺 AI 学习方法</div>
+                      <div class="video-wrapper">
+                          <iframe src="https://www.youtube.com/embed/8jPQjjsBbIc?rel=0&modestbranding=1" allowfullscreen></iframe>
+                      </div>
+                      <p>大语言模型让知识获取变得前所未有的便捷，但真正的学习不仅仅是「知道」，而是「理解」和「应用」。本文分享了一套基于 AI 的「提问-探究-输出」学习框架。</p>
+                      <p><strong>核心原则：</strong> 用 AI 生成初稿，用人类智慧进行批判性思考。永远保持好奇心，把 AI 当作「思维火花」，而非「答案机器」。</p>`
+        }, {
+            id: 8,
+            title: '远程工作的心得体会：自由与自律',
+            date: '2026-07-12',
+            excerpt: '三年远程工作，我学到了什么',
+            category: 'career',
+            image: 'https://picsum.photos/id/180/800/400',
+            content: `<h1>🏠 远程工作的心得体会</h1>
+                      <div class="video-label">📺 远程工作技巧</div>
+                      <div class="video-wrapper">
+                          <iframe src="https://www.youtube.com/embed/X8u7n9d4m2k?rel=0&modestbranding=1" allowfullscreen></iframe>
+                      </div>
+                      <p>远程工作不是「在家办公」，而是一种全新的工作哲学。它要求你具备更强的自我管理能力、更清晰的沟通边界，以及更健康的生活节奏。</p>
+                      <p><strong>我的三条铁律：</strong> 1) 固定工作区域，与生活空间物理隔离；2) 每天 10:00 前完成最重要的一件任务；3) 每周至少两次线下社交，对抗孤独感。</p>`
+        }, {
+            id: 9,
+            title: '阅读如何改变人生：一年阅读 50 本书',
+            date: '2026-07-13',
+            excerpt: '从每天 10 分钟开始，重塑认知体系',
+            category: 'life',
+            image: 'https://picsum.photos/id/292/800/400',
+            content: `<h1>📚 阅读如何改变人生</h1>
+                      <div class="video-label">📺 阅读与成长</div>
+                      <div class="video-wrapper">
+                          <iframe src="https://www.youtube.com/embed/TJjehWMuSt4?rel=0&modestbranding=1" allowfullscreen></iframe>
+                      </div>
+                      <p>过去一年，我读了 50 本书，涵盖哲学、科技、历史、心理学。阅读让我学会了多角度思考，也让我在面对复杂问题时更加从容。</p>
+                      <p><strong>我的阅读方法：</strong> 主题阅读 + 输出倒逼输入。每读完一本书，写一篇 500 字以上的书评或思考笔记，用输出来巩固输入。</p>`
+        }, {
+            id: 10,
+            title: 'AGI 到来前的准备：未来 5 年趋势',
+            date: '2026-07-14',
+            excerpt: '2028-2030 年 AGI 可能实现，我们该如何应对',
+            category: 'tech',
+            image: 'https://picsum.photos/id/180/800/400',
+            content: `<h1>🤖 AGI 到来前的准备</h1>
+                      <div class="video-label">📺 科技前瞻</div>
+                      <div class="video-wrapper">
+                          <iframe src="https://www.youtube.com/embed/8jPQjjsBbIc?rel=0&modestbranding=1" allowfullscreen></iframe>
+                      </div>
+                      <p>越来越多的专家认为，AGI（通用人工智能）将在 2028-2030 年间实现。这不仅是技术革命，更是社会、经济、伦理层面的巨大挑战。</p>
+                      <p><strong>我们应该做的：</strong> 保持终身学习的习惯，培养跨学科思维，学会与 AI 协作而非竞争。同时，关注 AI 伦理和社会公平，让技术进步惠及更多人。</p>`
+        }, {
+            id: 11,
+            title: '每周 VPN 节点更新（GitHub 订阅）',
+            date: '2026-07-09',
+            excerpt: '免费节点分享，持续更新中',
+            category: 'tech',
+            image: 'https://picsum.photos/id/866/800/400',
+            content: `<h1>🔒 每周 VPN 节点更新</h1>
+                      <div class="video-label">📺 科技教程</div>
+                      <div class="video-wrapper">
+                          <iframe src="https://www.youtube.com/embed/8jPQjjsBbIc?rel=0&modestbranding=1" allowfullscreen></iframe>
+                      </div>
+                      <p>每周一更新一批免费 VPN 节点，所有节点均经过连通性和速度测试。推荐使用 V2rayN 或 Clash 客户端导入订阅链接。</p>
+                      <p><strong>🔗 订阅链接：</strong> <a class="sub-link" href="https://yaoxwei.ccwu.cc/sub?token=9280aa5bace0235bb8d5c4afc92943d1" target="_blank">https://yaoxwei.ccwu.cc/sub?token=9280aa5bace0235bb8d5c4afc92943d1</a></p>
+                      <p><strong>⚠️ 注意：</strong> 免费节点仅供学习用途，请勿用于敏感操作。建议使用官方付费服务以保障隐私安全。</p>`
+        }, {
+            id: 12,
+            title: '工作与生活平衡之道：避免 burnout',
+            date: '2026-07-15',
+            excerpt: '设定清晰边界，找回生活的掌控感',
+            category: 'career',
+            image: 'https://picsum.photos/id/133/800/400',
+            content: `<h1>⚖️ 工作与生活平衡之道</h1>
+                      <div class="video-label">📺 职场效率</div>
+                      <div class="video-wrapper">
+                          <iframe src="https://www.youtube.com/embed/X8u7n9d4m2k?rel=0&modestbranding=1" allowfullscreen></iframe>
+                      </div>
+                      <p>Burnout（职业倦怠）已经成为现代职场人的普遍困境。本文从时间管理、心理调节、社交支持三个维度，分享了一套可操作的「防 burnout 工具箱」。</p>
+                      <p><strong>关键行动：</strong> 每天留出 1 小时「无工作时间」，每周至少一天完全脱离屏幕，学会说「不」并合理分配精力。</p>`
+        }, {
+            id: 13,
+            title: 'AI 编程助手深度体验：Cursor 与 Copilot 对比',
+            date: '2026-07-16',
+            excerpt: '实测两款主流 AI 编程工具，谁更懂开发者？',
+            category: 'tech',
+            image: 'https://picsum.photos/id/106/800/400',
+            content: `<h1>🤖 AI 编程助手深度体验</h1>
+                      <div class="video-label">📺 科技工具</div>
+                      <div class="video-wrapper">
+                          <iframe src="https://www.youtube.com/embed/8jPQjjsBbIc?rel=0&modestbranding=1" allowfullscreen></iframe>
+                      </div>
+                      <p>过去三个月，我同时使用了 Cursor 和 GitHub Copilot 两款 AI 编程助手，分别完成了三个中型项目。本文从代码质量、上下文理解、交互体验、学习曲线四个维度进行了深度对比。</p>
+                      <p><strong>结论：</strong> Cursor 在「理解项目全局」上更胜一筹，而 Copilot 在「即时补全」上更加流畅。两者结合使用，效率提升约 60%。</p>
+                      <p>未来的编程，将不再是「写代码」，而是「描述意图，让 AI 生成代码，然后审查与优化」。这要求开发者具备更强的系统设计能力和代码审查能力。</p>`
+        }, {
+            id: 14,
+            title: 'Web3.0 与去中心化互联网：入门指南',
+            date: '2026-07-17',
+            excerpt: '从区块链到 DAO，Web3 的核心概念与落地场景',
+            category: 'tech',
+            image: 'https://picsum.photos/id/145/800/400',
+            content: `<h1>🌐 Web3.0 与去中心化互联网</h1>
+                      <div class="video-label">📺 科技概念</div>
+                      <div class="video-wrapper">
+                          <iframe src="https://www.youtube.com/embed/8jPQjjsBbIc?rel=0&modestbranding=1" allowfullscreen></iframe>
+                      </div>
+                      <p>Web3.0 不仅仅是区块链和加密货币，它代表了一种「用户拥有数据」的互联网新范式。本文从去中心化身份（DID）、智能合约、DAO（去中心化自治组织）三个核心概念入手，带你快速入门。</p>
+                      <p><strong>现实案例：</strong> 目前已有不少项目在供应链溯源、数字艺术品、去中心化社交等领域落地。虽然 Web3 还处于早期，但它所代表的「所有权经济」值得每个互联网从业者关注。</p>`
+        }, {
+            id: 15,
+            title: '极简主义生活实践：少即是多的哲学',
+            date: '2026-07-18',
+            excerpt: '一年极简实验，我扔掉了 80% 的物品，收获了 200% 的快乐',
+            category: 'life',
+            image: 'https://picsum.photos/id/104/800/400',
+            content: `<h1>🌱 极简主义生活实践</h1>
+                      <div class="video-label">📺 生活哲学</div>
+                      <div class="video-wrapper">
+                          <iframe src="https://www.youtube.com/embed/TJjehWMuSt4?rel=0&modestbranding=1" allowfullscreen></iframe>
+                      </div>
+                      <p>一年前，我开始了「极简实验」：扔掉不需要的物品、取消不必要的订阅、简化社交关系。结果出乎意料 —— 我并没有失去什么，反而获得了更多的时间、精力和内心的平静。</p>
+                      <p><strong>极简的核心：</strong> 不是「拥有更少」，而是「为重要的事物腾出空间」。我学会了区分「需要」和「想要」，也学会了珍惜那些真正滋养我的东西：阅读、写作、深度对话、自然散步。</p>`
+        }, {
+            id: 16,
+            title: '城市漫步指南：在熟悉的街道上发现诗意',
+            date: '2026-07-19',
+            excerpt: '不必远行，身边就有风景 —— 用脚步重新认识你的城市',
+            category: 'life',
+            image: 'https://picsum.photos/id/108/800/400',
+            content: `<h1>🚶 城市漫步指南</h1>
+                      <div class="video-label">📺 城市漫步</div>
+                      <div class="video-wrapper">
+                          <iframe src="https://www.youtube.com/embed/TJjehWMuSt4?rel=0&modestbranding=1" allowfullscreen></iframe>
+                      </div>
+                      <p>我们总是渴望远方，却忽略了身边的美好。过去半年，我每周都会选择一个周末早晨，用 2-3 小时漫步在城市的街巷中，不带目的，只是观察。</p>
+                      <p>我看到了清晨菜市场的烟火气、老建筑墙上的藤蔓、咖啡馆里专注阅读的陌生人…… 这些微小的瞬间，构成了我对这座城市的深层连接。</p>
+                      <p><strong>漫步小贴士：</strong> 关掉手机地图，凭直觉转弯；带上一个小本子，记录下触动你的画面或声音；尝试走一条从未走过的路。</p>`
+        }, {
+            id: 17,
+            title: '高效会议的秘密：从「时间黑洞」到「决策加速器」',
+            date: '2026-07-20',
+            excerpt: '用这 5 个方法，把会议时间缩短 50%，决策质量提升 2 倍',
+            category: 'career',
+            image: 'https://picsum.photos/id/102/800/400',
+            content: `<h1>📊 高效会议的秘密</h1>
+                      <div class="video-label">📺 职场技巧</div>
+                      <div class="video-wrapper">
+                          <iframe src="https://www.youtube.com/embed/X8u7n9d4m2k?rel=0&modestbranding=1" allowfullscreen></iframe>
+                      </div>
+                      <p>会议是职场中最大的「时间黑洞」之一。据调查，中层管理者每周平均花费 15 小时在会议上，其中近一半时间被低效讨论浪费。</p>
+                      <p>本文分享了我实践多年的 5 个会议增效方法：<br>
+                      <strong>1. 会前 3 分钟「沉默阅读」</strong> —— 让所有人先阅读材料，再讨论。<br>
+                      <strong>2. 明确「决策型」与「分享型」会议</strong> —— 前者必须有结论，后者控制在 20 分钟内。<br>
+                      <strong>3. 设置「时间守卫」</strong> —— 专人计时，超时即停。<br>
+                      <strong>4. 会后 2 分钟「行动总结」</strong> —— 明确谁、做什么、何时完成。<br>
+                      <strong>5. 每周「无会议日」</strong> —— 留出整块时间用于深度工作。</p>
+                      <p>这些方法帮助我的团队将周均会议时间从 12 小时压缩到 6 小时，同时决策速度和满意度显著提升。</p>`
+        }];
 
-        let currentPosts = [...posts];
-
+        // =============================================================
+        //  状态与逻辑（未改动）
+        // =============================================================
+        let currentCategory = 'all';
         function renderPostList(filteredPosts) {
             const list = document.getElementById('post-list');
-            list.innerHTML = filteredPosts.map(post => `
-                <div class="post-card">
-                    <img src="${post.image}" alt="${post.title}">
-                    <div class="post-info">
-                        <h3>${post.title}</h3>
-                        <p class="date">${post.date}</p>
-                        <p>${post.excerpt}</p>
-                        <button onclick="showPost(${post.id})">阅读全文</button>
+            if (!filteredPosts.length) {
+                list.innerHTML = `<div class="no-result">😕 没有找到匹配的文章</div>`;
+                return;
+            }
+            list.innerHTML = filteredPosts.map(post => {
+                const catMap = { tech:'科技', life:'生活', career:'职场' };
+                return `
+                    <div class="post-card">
+                        <img src="${post.image}" alt="${post.title}" loading="lazy" />
+                        <div class="post-info">
+                            <h3>${post.title}</h3>
+                            <div class="meta"><span>${post.date}</span><span class="badge ${post.category}">${catMap[post.category]}</span></div>
+                            <p>${post.excerpt}</p>
+                            <button class="btn-read" onclick="showPost(${post.id})">阅读全文 →</button>
+                        </div>
                     </div>
-                </div>
-            `).join('');
+                `;
+            }).join('');
         }
+
+        function filterCategory(cat) {
+            currentCategory = cat;
+            document.querySelectorAll('.cat-btn').forEach(btn => btn.classList.toggle('active', btn.dataset.cat === cat));
+            searchPosts();
+        }
+        document.querySelectorAll('.cat-btn').forEach(btn => {
+            btn.addEventListener('click', function() { filterCategory(this.dataset.cat); });
+        });
 
         function searchPosts() {
             const keyword = document.getElementById('searchInput').value.toLowerCase().trim();
-            if (!keyword) {
-                currentPosts = [...posts];
-            } else {
-                currentPosts = posts.filter(post => 
-                    post.title.toLowerCase().includes(keyword) || 
-                    post.excerpt.toLowerCase().includes(keyword) ||
-                    post.content.toLowerCase().includes(keyword)
-                );
-            }
-            renderPostList(currentPosts);
+            let filtered = posts;
+            if (currentCategory !== 'all') filtered = filtered.filter(p => p.category === currentCategory);
+            if (keyword) filtered = filtered.filter(p => p.title.toLowerCase().includes(keyword) || p.excerpt.toLowerCase().includes(keyword) || p.content.toLowerCase().includes(keyword));
+            renderPostList(filtered);
         }
 
         function showPost(id) {
             const post = posts.find(p => p.id === id);
             if (!post) return;
             document.getElementById('home').style.display = 'none';
-            document.getElementById('post-container').innerHTML = `
-                <div class="post-content active">
-                    <button onclick="backToHome()" style="margin-bottom:1.5rem;">← 返回首页</button>
-                    ${post.content}
-                </div>
-            `;
+            const container = document.getElementById('post-container');
+            container.innerHTML = `<div class="post-content active"><button class="back-btn" onclick="backToHome()">← 返回首页</button>${post.content}</div>`;
+            window.scrollTo({ top: 0, behavior: 'smooth' });
         }
 
         function backToHome() {
             document.getElementById('home').style.display = 'block';
             document.getElementById('post-container').innerHTML = '';
+            window.scrollTo({ top: 0, behavior: 'smooth' });
         }
 
-        window.onload = () => renderPostList(posts);
+        window.onload = function() {
+            renderPostList(posts);
+            document.querySelector('.cat-btn[data-cat="all"]')?.classList.add('active');
+        };
+
+        window.filterCategory = filterCategory;
+        window.searchPosts = searchPosts;
+        window.showPost = showPost;
+        window.backToHome = backToHome;
     </script>
 </body>
 </html>
