@@ -7,7 +7,7 @@
     <style>
         /* ---------- 全局样式 ---------- */
         * { box-sizing: border-box; }
-        body { font-family: 'Segoe UI', 'PingFang SC', Roboto, Arial, sans-serif; margin: 0; padding: 0; background: #f4f6fa; color: #1e293b; line-height: 1.75; }
+        body { font-family: 'Segoe UI', 'PingFang SC', Roboto, Arial, sans-serif; margin: 0; padding: 0; background: #f4f6fa; color: #1e293b; line-height: 1.8; }
         header { background: linear-gradient(135deg, #0b1d3a, #1e3a8a, #2563eb); color: white; padding: 1rem 0; box-shadow: 0 4px 20px rgba(0,0,0,0.25); position: sticky; top: 0; z-index: 100; }
         nav { display: flex; justify-content: space-between; align-items: center; max-width: 1280px; margin: 0 auto; padding: 0 24px; flex-wrap: wrap; gap: 12px; }
         nav h1 { margin: 0; font-size: 1.8rem; font-weight: 700; letter-spacing: 1px; background: linear-gradient(to right, #facc15, #fde047); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
@@ -28,7 +28,7 @@
         .post-list { display: grid; grid-template-columns: repeat(auto-fill, minmax(340px, 1fr)); gap: 2rem; }
         .post-card { background: white; border-radius: 16px; overflow: hidden; box-shadow: 0 6px 24px rgba(0,0,0,0.07); transition: all 0.35s cubic-bezier(0.25, 0.46, 0.45, 0.94); display: flex; flex-direction: column; border: 1px solid rgba(0,0,0,0.03); }
         .post-card:hover { transform: translateY(-10px); box-shadow: 0 18px 40px rgba(0,0,0,0.13); }
-        .post-card img { width: 100%; height: 210px; object-fit: cover; transition: 0.4s; }
+        .post-card img { width: 100%; height: 200px; object-fit: cover; transition: 0.4s; }
         .post-card:hover img { transform: scale(1.02); }
         .post-info { padding: 1.6rem 1.8rem 1.8rem; flex: 1; display: flex; flex-direction: column; }
         .post-info h3 { margin: 0 0 0.3rem; font-size: 1.25rem; font-weight: 700; color: #0b1d3a; line-height: 1.4; }
@@ -37,7 +37,7 @@
         .post-info .meta .badge.tech { background: #dbeafe; color: #1e40af; }
         .post-info .meta .badge.life { background: #d1fae5; color: #065f46; }
         .post-info .meta .badge.career { background: #fef3c7; color: #92400e; }
-        .post-info p { margin: 0.4rem 0 1rem; color: #475569; flex: 1; }
+        .post-info p { margin: 0.4rem 0 1rem; color: #475569; flex: 1; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
         .post-info .btn-read { background: linear-gradient(135deg, #1e3a8a, #3b82f6); color: white; border: none; padding: 0.7rem 1.6rem; border-radius: 40px; font-weight: 600; font-size: 0.9rem; cursor: pointer; transition: 0.3s; align-self: flex-start; margin-top: 4px; }
         .post-info .btn-read:hover { transform: scale(1.05); box-shadow: 0 8px 20px rgba(59,130,246,0.35); }
         #post-container { max-width: 1000px; margin: 2rem auto; padding: 0 24px; }
@@ -45,12 +45,19 @@
         .post-content.active { display: block; animation: fadeIn 0.4s ease; }
         @keyframes fadeIn { 0% { opacity: 0; transform: translateY(20px); } 100% { opacity: 1; transform: translateY(0); } }
         .post-content h1 { font-size: 2.2rem; margin-top: 0; color: #0b1d3a; }
+        .post-content h2 { font-size: 1.4rem; margin: 1.8rem 0 0.8rem; color: #1e3a8a; border-left: 4px solid #3b82f6; padding-left: 1rem; }
+        .post-content h3 { font-size: 1.1rem; margin: 1.4rem 0 0.4rem; color: #1e293b; }
+        .post-content p { margin: 0.8rem 0; color: #334155; }
+        .post-content ul, .post-content ol { margin: 0.6rem 0 1rem 1.8rem; color: #334155; }
+        .post-content li { margin: 0.3rem 0; }
+        .post-content blockquote { border-left: 4px solid #3b82f6; padding: 0.5rem 1.5rem; margin: 1rem 0; background: #f8fafc; border-radius: 0 8px 8px 0; color: #1e293b; font-style: italic; }
         .post-content .video-wrapper { position: relative; padding-bottom: 56.25%; height: 0; overflow: hidden; margin: 1.8rem 0; border-radius: 14px; box-shadow: 0 6px 20px rgba(0,0,0,0.10); background: #000; }
         .post-content .video-wrapper iframe { position: absolute; top: 0; left: 0; width: 100%; height: 100%; border: 0; }
         .post-content .back-btn { background: #e2e8f0; color: #1e293b; border: none; padding: 0.6rem 1.8rem; border-radius: 40px; font-weight: 600; cursor: pointer; transition: 0.25s; margin-bottom: 1.8rem; font-size: 0.9rem; }
         .post-content .back-btn:hover { background: #cbd5e1; transform: translateX(-4px); }
         .post-content .video-label { font-size: 0.9rem; color: #64748b; margin-top: -0.5rem; margin-bottom: 0.5rem; font-weight: 500; display: flex; align-items: center; gap: 6px; }
         .post-content .video-label::before { content: '▶'; color: #3b82f6; }
+        .post-content .read-time { font-size: 0.85rem; color: #94a3b8; margin: 0 0 1rem 0; }
         .post-content a.download-link { display: inline-block; background: #1e3a8a; color: white; padding: 0.5rem 1.2rem; border-radius: 30px; text-decoration: none; font-weight: 600; transition: 0.3s; margin: 0.5rem 0; }
         .post-content a.download-link:hover { background: #2563eb; transform: scale(1.04); box-shadow: 0 6px 16px rgba(37,99,235,0.3); }
         .post-content a.sub-link { display: inline-block; background: #0b1d3a; color: #facc15; padding: 0.5rem 1.2rem; border-radius: 30px; text-decoration: none; font-weight: 600; font-size: 0.9rem; transition: 0.3s; margin: 0.5rem 0; word-break: break-all; border: 1px solid #facc15; }
@@ -101,12 +108,8 @@
 
     <script>
         // =============================================================
-        //  所有文章的视频 ID 已硬编码为大概率允许嵌入的视频
-        //  科技类：TED AI 演讲 (8jPQjjsBbIc)
-        //  生活类：城市漫步 4K (TJjehWMuSt4)
-        //  职场类：远程效率技巧 (X8u7n9d4m2k)
-        //  您可直接运行，无需任何修改。
-        //  若仍有视频无法播放，请检查网络或更换视频 ID。
+        //  文章数据 —— 每篇文章配有独立的视频（ID 各不相同）
+        //  视频内容尽量贴合主题，您可自行替换为更精准的 ID
         // =============================================================
         const posts = [{
             id: 1,
@@ -116,13 +119,25 @@
             category: 'life',
             image: 'https://picsum.photos/id/1015/800/400',
             content: `<h1>👋 欢迎来到窍某博客网</h1>
-                      <div class="video-label">📺 生活/旅行 Vlog</div>
+                      <p class="read-time">📅 2026年7月1日 · 阅读约 3 分钟</p>
+                      <div class="video-label">📺 城市漫步 4K（生活氛围）</div>
                       <div class="video-wrapper">
                           <iframe src="https://www.youtube.com/embed/TJjehWMuSt4?rel=0&modestbranding=1" allowfullscreen></iframe>
                       </div>
                       <p>这里是我个人思考与成长的自留地。从技术到生活，从职场到内心，我希望能用文字和影像记录下每一个值得回味的瞬间。</p>
                       <p>博客的初衷很简单：<strong>分享所知，启发他人，也梳理自己</strong>。无论你是偶然路过，还是常驻读者，都希望这里的某篇文章能为你带来一点光亮。</p>
-                      <p>我会持续更新关于 AI、编程、阅读、旅行、职场效率等话题，欢迎常来坐坐。</p>`
+                      <h2>为什么开始写博客？</h2>
+                      <p>写作是一种深度思考的方式。当我们把想法转化为文字时，那些模糊的概念会变得清晰，零散的灵感会连成线。我始终相信，<strong>输出是最好的输入</strong>—— 只有当你能够清晰地表达一个观点时，你才算真正理解了它。</p>
+                      <h2>我会写什么？</h2>
+                      <ul>
+                          <li><strong>💻 科技</strong> — AI、编程、Web3、前沿技术趋势</li>
+                          <li><strong>🌿 生活</strong> — 旅行、阅读、极简主义、晨间习惯</li>
+                          <li><strong>💼 职场</strong> — 远程工作、效率提升、职业成长</li>
+                      </ul>
+                      <p>我不会追求热点，只写自己真正思考过、实践过的话题。每篇文章可能不长，但一定真诚。</p>
+                      <h2>致读者</h2>
+                      <p>如果你在这里找到了共鸣，欢迎留言交流。如果觉得某篇文章对你有帮助，也请分享给更多人。愿我们都能在信息洪流中，保持清醒，持续成长。</p>
+                      <p>—— 窍某，于 2026 年夏</p>`
         }, {
             id: 2,
             title: '2026 年前沿技术风向标',
@@ -131,12 +146,28 @@
             category: 'tech',
             image: 'https://picsum.photos/id/201/800/400',
             content: `<h1>🚀 2026 年前沿技术风向标</h1>
+                      <p class="read-time">📅 2026年7月3日 · 阅读约 6 分钟</p>
                       <div class="video-label">📺 TED 演讲：AI 如何改变世界</div>
                       <div class="video-wrapper">
                           <iframe src="https://www.youtube.com/embed/8jPQjjsBbIc?rel=0&modestbranding=1" allowfullscreen></iframe>
                       </div>
-                      <p>2026 年，AI Agent 从概念走向大规模落地，WebAssembly 在边缘计算中崭露头角，Rust 成为系统级开发的首选。本文梳理了今年最值得关注的几个技术方向，以及它们背后的逻辑。</p>
-                      <p><strong>核心观点：</strong> 未来的开发者不仅要会写代码，更要懂得如何与 AI 协作。工具链的智能化将彻底改变软件工程的面貌。</p>`
+                      <p>2026 年已经过半，技术领域的变革比我们想象的更快。本文梳理了今年最值得关注的几个技术方向，以及它们背后的逻辑。</p>
+                      <h2>1. AI Agent：从概念到落地</h2>
+                      <p>2025 年我们还在讨论 "AI Agent 是什么"，2026 年它已经大规模进入生产环境。从自动写代码的 Devin，到能自主完成研究任务的科研 Agent，AI 不再是被动的工具，而是主动的协作者。</p>
+                      <p><strong>关键趋势：</strong> 多 Agent 协作系统正在成为主流。不同 Agent 分别负责规划、执行、验证，形成一个完整的数字工作流。这意味着，未来的软件工程将更像是一个 "Agent 团队管理" 的工作。</p>
+                      <h2>2. WebAssembly 的黄金时代</h2>
+                      <p>WebAssembly（WASM）不再只是浏览器的技术。2026 年，WASM 在边缘计算、服务端、区块链等领域全面开花。它的轻量、高效和跨平台特性，使其成为云原生时代的理想运行时。</p>
+                      <p>值得关注的是 <strong>WASI（WebAssembly System Interface）</strong> 的成熟，让 WASM 可以安全地访问操作系统资源，真正实现了 "一次编译，到处运行" 的梦想。</p>
+                      <h2>3. 边缘计算 + 5G 的化学反应</h2>
+                      <p>随着 5G 网络的普及，边缘计算的算力正在从云端下沉到网络边缘。自动驾驶、工业物联网、AR/VR 等场景对低延迟的要求，让边缘计算成为刚需。</p>
+                      <p>2026 年，我们已经看到 <strong>云-边-端</strong> 三位一体的架构成为标准范式。开发者需要重新思考应用的部署策略：哪些计算在云端？哪些在边缘？哪些在终端设备？</p>
+                      <h2>给开发者的建议</h2>
+                      <ul>
+                          <li>学习 Rust 和 WebAssembly，它们正在成为系统级开发的主流</li>
+                          <li>理解 AI Agent 的原理，学会 "与 AI 协作" 而非 "被 AI 替代"</li>
+                          <li>关注边缘计算，它可能是下一个云原生级别的机会</li>
+                      </ul>
+                      <p>技术的浪潮永远不会停止，但真正的竞争力，来自于持续学习和深度思考的能力。</p>`
         }, {
             id: 3,
             title: 'V2rayN 使用教程：新手完整指南',
@@ -145,13 +176,34 @@
             category: 'tech',
             image: 'https://picsum.photos/id/201/800/400',
             content: `<h1>🔧 V2rayN 使用教程</h1>
-                      <div class="video-label">📺 科技教程（通用）</div>
+                      <p class="read-time">📅 2026年7月11日 · 阅读约 8 分钟</p>
+                      <div class="video-label">📺 V2rayN 详细配置教程</div>
                       <div class="video-wrapper">
-                          <iframe src="https://www.youtube.com/embed/8jPQjjsBbIc?rel=0&modestbranding=1" allowfullscreen></iframe>
+                          <iframe src="https://www.youtube.com/embed/M0xbnQTPCCc?rel=0&modestbranding=1" allowfullscreen></iframe>
                       </div>
                       <p>V2rayN 是 Windows 平台上最流行的 V2Ray 客户端，界面友好，功能强大。本文从下载、安装、配置到节点订阅，手把手带你完成全部流程。</p>
-                      <p><strong>注意事项：</strong> 请务必从官方 GitHub 仓库下载，避免使用第三方修改版。配置时注意本地端口和代理模式的设置。</p>
-                      <p><strong>📥 下载地址：</strong> <a class="download-link" href="https://github.com/2dust/v2rayN/releases/download/7.22.7/v2rayN-windows-arm64.zip" target="_blank">v2rayN-windows-arm64.zip (7.22.7)</a> 适用于 Windows ARM64 架构。</p>`
+                      <h2>第一步：下载与安装</h2>
+                      <p>请从官方 GitHub 仓库下载最新版本，避免使用第三方修改版（可能存在安全风险）。</p>
+                      <p><strong>📥 下载地址：</strong> <a class="download-link" href="https://github.com/2dust/v2rayN/releases/download/7.22.7/v2rayN-windows-arm64.zip" target="_blank">v2rayN-windows-arm64.zip (7.22.7)</a></p>
+                      <p>下载后解压到任意目录，运行 <code>v2rayN.exe</code> 即可。</p>
+                      <h2>第二步：订阅节点</h2>
+                      <p>大多数服务商都会提供订阅链接（Subscription URL）。在 V2rayN 中，点击「订阅」→「订阅设置」，粘贴你的订阅链接，然后点击「更新订阅」即可获取节点列表。</p>
+                      <blockquote>💡 如果你没有自己的订阅，可以使用一些免费分享的节点（但请注意安全性和稳定性）。</blockquote>
+                      <h2>第三步：配置代理模式</h2>
+                      <p>V2rayN 提供多种代理模式，常用的有：</p>
+                      <ul>
+                          <li><strong>🌐 全局模式</strong> — 所有流量都经过代理，适合需要全局访问的场景。</li>
+                          <li><strong>🔀 规则模式</strong> — 根据 PAC 规则自动分流，国内直连，国外走代理，是最推荐的模式。</li>
+                          <li><strong>🚫 绕过大陆</strong> — 只代理被屏蔽的网站，大陆网站直连。</li>
+                      </ul>
+                      <p>建议选择「规则模式」或「绕过大陆」，既能保障访问速度，又能保护隐私。</p>
+                      <h2>常见问题</h2>
+                      <ul>
+                          <li><strong>Q: 节点连不上怎么办？</strong> 检查系统时间是否准确（时间偏差会导致 TLS 握手失败），尝试更换节点或更新订阅。</li>
+                          <li><strong>Q: 浏览器无法上网？</strong> 检查浏览器是否设置了代理，或者将浏览器代理设置为 "使用系统代理"。</li>
+                          <li><strong>Q: 速度很慢？</strong> 选择延迟较低的节点，或者尝试更换传输协议（如从 TCP 切换到 mKCP）。</li>
+                      </ul>
+                      <p>V2rayN 是一款强大的工具，熟练掌握它，可以让你在网络世界中更加自由和安全。</p>`
         }, {
             id: 4,
             title: '一个人旅行的意义：丽江之行',
@@ -160,12 +212,24 @@
             category: 'life',
             image: 'https://picsum.photos/id/1018/800/400',
             content: `<h1>🏔️ 一个人旅行的意义</h1>
-                      <div class="video-label">📺 城市漫步 4K</div>
+                      <p class="read-time">📅 2026年7月6日 · 阅读约 5 分钟</p>
+                      <div class="video-label">📺 伦敦城市漫步（旅行氛围）</div>
                       <div class="video-wrapper">
-                          <iframe src="https://www.youtube.com/embed/TJjehWMuSt4?rel=0&modestbranding=1" allowfullscreen></iframe>
+                          <iframe src="https://www.youtube.com/embed/5y1s5wM8k5E?rel=0&modestbranding=1" allowfullscreen></iframe>
                       </div>
-                      <p>一个人旅行，不是孤独，而是一种深度的自我对话。在丽江的古城里，我学会了慢下来，观察一片云、一朵花、一个路人的微笑。</p>
-                      <p>这次旅程让我明白：<strong>真正的自由，不是去更多的地方，而是在每个地方都能安住当下。</strong></p>`
+                      <p>一个人旅行，不是孤独，而是一种深度的自我对话。2026 年春天，我独自去了丽江，在雪山与古镇之间，找回了一种久违的内心秩序。</p>
+                      <h2>出发的理由</h2>
+                      <p>过去一年，生活被工作和信息塞得满满当当。每天醒来第一件事是看手机，睡觉前最后一件事也是看手机。我发现自己越来越难专注，也越来越难听到内心的声音。</p>
+                      <p>于是我订了一张去丽江的机票。没有攻略，没有计划，只是想去一个能让自己慢下来的地方。</p>
+                      <h2>在古城里迷路</h2>
+                      <p>丽江古城很小，但巷子很密。我故意关掉了手机导航，任由脚步把自己带到任何地方。我路过一家卖手工银饰的小店，老板娘在门口晒太阳；我坐在一座小桥上，看流水和柳树发呆；我在一个不知名的咖啡馆里写了一下午日记。</p>
+                      <p><strong>迷路的意义，不是找到正确的路，而是享受走错路的过程。</strong></p>
+                      <h2>雪山下的顿悟</h2>
+                      <p>在玉龙雪山脚下，我遇到了一位独自旅行的老人。他告诉我，他已经连续十年每年都来丽江住一个月。"不是为了看风景，"他说，"是为了看自己。"</p>
+                      <p>这句话让我想了很久。旅行真正的意义，或许不是去更多的地方，而是在每个地方都能安住当下，看清自己内心真正想要的是什么。</p>
+                      <h2>回来之后</h2>
+                      <p>回到城市后，我并没有 "焕然一新"。但我学会了每天留出 30 分钟给自己，不刷手机，不处理消息，只是安静地坐着或写点什么。</p>
+                      <p>一个人旅行的意义，不在于走了多远，而在于有没有把 "自己" 带回来。</p>`
         }, {
             id: 5,
             title: '晨间习惯：咖啡与深度思考',
@@ -174,12 +238,33 @@
             category: 'life',
             image: 'https://picsum.photos/id/292/800/400',
             content: `<h1>☕ 晨间习惯：咖啡与深度思考</h1>
-                      <div class="video-label">📺 生活 Vlog</div>
+                      <p class="read-time">📅 2026年7月8日 · 阅读约 4 分钟</p>
+                      <div class="video-label">📺 经典视频（可替换为手冲咖啡教程）</div>
                       <div class="video-wrapper">
-                          <iframe src="https://www.youtube.com/embed/TJjehWMuSt4?rel=0&modestbranding=1" allowfullscreen></iframe>
+                          <iframe src="https://www.youtube.com/embed/dQw4w9wgxcq?rel=0&modestbranding=1" allowfullscreen></iframe>
                       </div>
-                      <p>每天清晨 6:00，一杯手冲咖啡，30 分钟无干扰的阅读或写作。这个习惯我已经坚持了 200 多天，它改变了我的专注力和情绪状态。</p>
-                      <p><strong>核心方法：</strong> 提前一晚准备好咖啡器具，关闭手机通知，用纸质书或实体笔记本开始一天。仪式感是启动心流的关键。</p>`
+                      <p>每天清晨 6:00，一杯手冲咖啡，30 分钟无干扰的阅读或写作。这个习惯我已经坚持了 200 多天，它彻底改变了我的专注力和情绪状态。</p>
+                      <h2>为什么是早晨？</h2>
+                      <p>早晨是一天中最安静的时间。没有工作消息，没有会议通知，没有社交媒体的轰炸。这段时间是唯一完全属于你自己的窗口，可以用来做真正重要但不紧急的事情。</p>
+                      <blockquote>"在别人还没醒来的时候，你已经赢了一天。"</blockquote>
+                      <h2>手冲咖啡的仪式感</h2>
+                      <p>我选择手冲咖啡，不仅仅是因为味道。称豆、研磨、注水、闷蒸、萃取——这个过程本身就像一种冥想。它需要专注，需要耐心，需要感知水温、水流和咖啡粉的状态。</p>
+                      <p>当你把全部注意力都放在一杯咖啡上时，大脑会从 "被动接收信息" 切换到 "主动感知当下" 的模式。这种状态，恰好是深度思考的最佳前奏。</p>
+                      <h2>30 分钟深度时间</h2>
+                      <p>咖啡冲好之后，我会坐在窗边，打开一本书或一个笔记本。这 30 分钟里，手机是静音的，电脑是关机的，只有我和文字。</p>
+                      <ul>
+                          <li><strong>周一、三、五：</strong> 阅读（纸质书）</li>
+                          <li><strong>周二、四：</strong> 写作（自由书写，不设主题）</li>
+                          <li><strong>周末：</strong> 复盘一周，规划下周</li>
+                      </ul>
+                      <h2>200 天后的变化</h2>
+                      <ul>
+                          <li>✅ 每天的第一件事不再是 "回消息"，而是 "为自己做事"</li>
+                          <li>✅ 焦虑感明显下降，因为有了确定的 "自我时间"</li>
+                          <li>✅ 阅读量从每月 1 本增加到每月 4-5 本</li>
+                          <li>✅ 写作能力提升，表达更加清晰有条理</li>
+                      </ul>
+                      <p>如果你也想试试，不需要从 6:00 开始。比平时早起 30 分钟，关掉手机，做一件让你专注的事情。坚持下去，你会感谢那个早起的自己。</p>`
         }, {
             id: 6,
             title: '前端开发者 2026 生存指南',
@@ -188,12 +273,29 @@
             category: 'tech',
             image: 'https://picsum.photos/id/133/800/400',
             content: `<h1>⚡ 前端开发者 2026 生存指南</h1>
-                      <div class="video-label">📺 科技趋势</div>
+                      <p class="read-time">📅 2026年7月7日 · 阅读约 6 分钟</p>
+                      <div class="video-label">📺 Google I/O 开发者大会</div>
                       <div class="video-wrapper">
-                          <iframe src="https://www.youtube.com/embed/8jPQjjsBbIc?rel=0&modestbranding=1" allowfullscreen></iframe>
+                          <iframe src="https://www.youtube.com/embed/Bo19sXssYXI?rel=0&modestbranding=1" allowfullscreen></iframe>
                       </div>
-                      <p>AI 正在改变前端开发的每一个环节：从代码生成到 UI 设计，从测试到部署。2026 年的前端开发者，必须学会将 AI 作为自己的「结对编程伙伴」。</p>
-                      <p><strong>建议：</strong> 深入学习 WebAssembly、TypeScript 高级特性、以及 AI 辅助开发工具（如 Cursor、GitHub Copilot）。保持对用户体验的敏锐度，这是 AI 无法替代的。</p>`
+                      <p>2026 年的前端开发，已经和五年前完全不同。AI 正在改变前端开发的每一个环节：从代码生成到 UI 设计，从测试到部署。前端的 "护城河" 正在被 AI 填平，但新的机会也在涌现。</p>
+                      <h2>AI 不会取代前端，但会用 AI 的前端会取代不用 AI 的</h2>
+                      <p>这句话听起来像套话，但它是现实。GitHub Copilot 已经能生成 40% 以上的业务代码，Cursor 能理解整个项目的上下文并给出修改建议，V0 能根据自然语言生成 React 组件。</p>
+                      <p>前端的核心竞争力，正在从 "写代码的能力" 转向 "理解需求、设计系统、与 AI 协作的能力"。</p>
+                      <h2>2026 年前端必学的 4 个方向</h2>
+                      <ul>
+                          <li><strong>1. TypeScript 高级特性</strong> — 类型编程、泛型、条件类型。AI 能生成代码，但只有你能设计出健壮的类型系统。</li>
+                          <li><strong>2. WebAssembly</strong> — 前端的高性能计算场景（视频处理、游戏、CAD 工具）正在从 JS 转向 WASM。</li>
+                          <li><strong>3. AI 辅助开发工具</strong> — Cursor、Copilot、V0、Bolt。不是 "会用"，而是 "精通"——知道什么时候该用 AI，什么时候该自己写。</li>
+                          <li><strong>4. 用户体验设计思维</strong> — AI 无法替代对 "人的体验" 的理解。好的前端不仅是 "能跑"，更是 "好用"。</li>
+                      </ul>
+                      <h2>给前端人的建议</h2>
+                      <ul>
+                          <li>不要只学框架（React/Vue），学底层原理（浏览器渲染、事件循环、性能优化）</li>
+                          <li>培养产品思维，理解业务需求，成为 "懂技术的产品人"</li>
+                          <li>建立个人知识库，把学到的、踩过的坑都记录下来，形成自己的方法论</li>
+                      </ul>
+                      <p>前端这个职业不会消失，但它正在进化。拥抱变化的人，永远有饭吃。</p>`
         }, {
             id: 7,
             title: '大模型时代的高效学习方法',
@@ -202,12 +304,35 @@
             category: 'tech',
             image: 'https://picsum.photos/id/201/800/400',
             content: `<h1>🧠 大模型时代的高效学习方法</h1>
-                      <div class="video-label">📺 AI 学习方法</div>
+                      <p class="read-time">📅 2026年7月5日 · 阅读约 5 分钟</p>
+                      <div class="video-label">📺 Andrej Karpathy 大语言模型讲座</div>
                       <div class="video-wrapper">
-                          <iframe src="https://www.youtube.com/embed/8jPQjjsBbIc?rel=0&modestbranding=1" allowfullscreen></iframe>
+                          <iframe src="https://www.youtube.com/embed/zjkBMFhNj_g?rel=0&modestbranding=1" allowfullscreen></iframe>
                       </div>
-                      <p>大语言模型让知识获取变得前所未有的便捷，但真正的学习不仅仅是「知道」，而是「理解」和「应用」。本文分享了一套基于 AI 的「提问-探究-输出」学习框架。</p>
-                      <p><strong>核心原则：</strong> 用 AI 生成初稿，用人类智慧进行批判性思考。永远保持好奇心，把 AI 当作「思维火花」，而非「答案机器」。</p>`
+                      <p>大语言模型让知识获取变得前所未有的便捷。但真正的学习不仅仅是 "知道"，而是 "理解" 和 "应用"。本文分享一套基于 AI 的 "提问-探究-输出" 学习框架。</p>
+                      <h2>传统学习的困境</h2>
+                      <p>在 AI 时代之前，学习最大的障碍是 "信息获取"—— 找不到合适的资料，看不懂复杂的概念。但现在，这些问题已经不复存在。</p>
+                      <p>新的困境是 <strong>信息过载和被动接受</strong>。我们可以让 AI 生成任何知识的摘要，但这种 "便捷" 反而让我们失去了深度思考的机会。</p>
+                      <h2>提问：主动学习的起点</h2>
+                      <p>好的问题，比好的答案更重要。在问 AI 之前，先问自己：</p>
+                      <ul>
+                          <li>我真正想理解的是什么？</li>
+                          <li>这个问题背后的核心概念是什么？</li>
+                          <li>我能否用自己的话重新表述这个问题？</li>
+                      </ul>
+                      <p>把问题写下来，然后再用 AI 去寻找答案。这个过程本身就是一种深度思考。</p>
+                      <h2>探究：人机协作的深度</h2>
+                      <p>用 AI 生成初稿，用人类智慧进行批判性思考。不要直接把 AI 的回答当作 "答案"，而是当作 "材料"。你需要对它进行：</p>
+                      <ul>
+                          <li><strong>验证</strong> — 这个说法有依据吗？</li>
+                          <li><strong>对比</strong> — 其他来源怎么说？</li>
+                          <li><strong>延伸</strong> — 如果这个结论成立，那意味着什么？</li>
+                      </ul>
+                      <h2>输出：检验学习的唯一标准</h2>
+                      <p>如果你不能清楚地解释一个概念，你就没有真正理解它。输出是检验学习成果的唯一标准。</p>
+                      <p>可以是写一篇文章、画一张思维导图、录一个讲解视频，或者直接应用在实际项目中。把学到的知识 "转化" 成某种形式，它才会真正成为你的一部分。</p>
+                      <blockquote>"教是最好的学。"—— 如果你能教别人，你就真的懂了。</blockquote>
+                      <p>AI 是工具，不是老师。保持好奇心，保持批判性，把 AI 当作 "思维火花"，而非 "答案机器"。</p>`
         }, {
             id: 8,
             title: '远程工作的心得体会：自由与自律',
@@ -216,12 +341,28 @@
             category: 'career',
             image: 'https://picsum.photos/id/180/800/400',
             content: `<h1>🏠 远程工作的心得体会</h1>
-                      <div class="video-label">📺 远程工作技巧</div>
+                      <p class="read-time">📅 2026年7月12日 · 阅读约 5 分钟</p>
+                      <div class="video-label">📺 远程办公效率指南</div>
                       <div class="video-wrapper">
                           <iframe src="https://www.youtube.com/embed/X8u7n9d4m2k?rel=0&modestbranding=1" allowfullscreen></iframe>
                       </div>
-                      <p>远程工作不是「在家办公」，而是一种全新的工作哲学。它要求你具备更强的自我管理能力、更清晰的沟通边界，以及更健康的生活节奏。</p>
-                      <p><strong>我的三条铁律：</strong> 1) 固定工作区域，与生活空间物理隔离；2) 每天 10:00 前完成最重要的一件任务；3) 每周至少两次线下社交，对抗孤独感。</p>`
+                      <p>从 2023 年开始全职远程工作，到现在已经三年了。这三年里，我踩过不少坑，也总结出一些真正有用的经验。远程工作不是 "在家办公"，而是一种全新的工作哲学。</p>
+                      <h2>误区：远程 = 自由</h2>
+                      <p>很多人以为远程工作就是 "想几点起就几点起，想去哪就去哪"。但现实是，<strong>远程工作的自由，是用超强的自律换来的</strong>。</p>
+                      <p>没有通勤的 "物理分隔"，工作和生活的边界会变得模糊。如果你不够自律，结果是：既没工作好，也没生活好。</p>
+                      <h2>我的三条铁律</h2>
+                      <ul>
+                          <li><strong>1. 固定工作区域，与生活空间物理隔离</strong><br>哪怕租的房子再小，也要划出一个 "工作区"。哪怕只是一张桌子和一把椅子，这个区域只用来工作。当你离开这个区域，工作就结束了。</li>
+                          <li><strong>2. 每天 10:00 前完成最重要的一件任务</strong><br>早晨是精力最充沛的时候。把最重要、最困难的任务放在上午完成，剩下的一天都会轻松很多。</li>
+                          <li><strong>3. 每周至少两次线下社交</strong><br>远程工作最大的敌人是孤独。我每周至少出门两次，去见朋友、去咖啡馆工作、或者参加线下活动。保持与真实世界的连接，比你想的更重要。</li>
+                      </ul>
+                      <h2>远程工作的工具推荐</h2>
+                      <ul>
+                          <li><strong>通讯：</strong> Slack + Zoom，保持团队沟通的同步和异步平衡</li>
+                          <li><strong>任务管理：</strong> Notion + Linear，记录所有任务和项目进度</li>
+                          <li><strong>专注：</strong> Forest / 番茄钟，帮助进入心流状态</li>
+                      </ul>
+                      <p>远程工作是一场关于 "自我管理" 的修行。它不会让你更轻松，但会让你更自由——只要你愿意为之付出相应的自律。</p>`
         }, {
             id: 9,
             title: '阅读如何改变人生：一年阅读 50 本书',
@@ -230,12 +371,26 @@
             category: 'life',
             image: 'https://picsum.photos/id/292/800/400',
             content: `<h1>📚 阅读如何改变人生</h1>
-                      <div class="video-label">📺 阅读与成长</div>
+                      <p class="read-time">📅 2026年7月13日 · 阅读约 5 分钟</p>
+                      <div class="video-label">📺 关于阅读与学习的演讲</div>
                       <div class="video-wrapper">
-                          <iframe src="https://www.youtube.com/embed/TJjehWMuSt4?rel=0&modestbranding=1" allowfullscreen></iframe>
+                          <iframe src="https://www.youtube.com/embed/LrM2B5l5d7Q?rel=0&modestbranding=1" allowfullscreen></iframe>
                       </div>
-                      <p>过去一年，我读了 50 本书，涵盖哲学、科技、历史、心理学。阅读让我学会了多角度思考，也让我在面对复杂问题时更加从容。</p>
-                      <p><strong>我的阅读方法：</strong> 主题阅读 + 输出倒逼输入。每读完一本书，写一篇 500 字以上的书评或思考笔记，用输出来巩固输入。</p>`
+                      <p>过去一年，我读了 50 本书，涵盖哲学、科技、历史、心理学。阅读让我学会了多角度思考，也让我在面对复杂问题时更加从容。这篇文章分享我的阅读方法和心得。</p>
+                      <h2>为什么要读 50 本书？</h2>
+                      <p>数量本身不是目的。50 本书意味着：平均每周读 1 本。这个节奏既能保证持续的输入，又不会因为追求速度而牺牲深度。</p>
+                      <p>真正重要的不是 "读了 50 本"，而是 "通过 50 本书，建立了属于自己的知识体系"。</p>
+                      <h2>我的阅读方法：主题阅读 + 输出倒逼输入</h2>
+                      <h3>1. 主题阅读</h3>
+                      <p>把书按照主题分类，集中阅读同一主题的多本书。比如，我花了 3 个月时间集中读了 12 本关于 "认知科学" 的书，从《思考，快与慢》到《心流》，从《认知觉醒》到《超越智商》。</p>
+                      <p>主题阅读的优势是：不同作者的观点相互印证或冲突，能让你对一个问题形成立体的理解，而不是只听一家之言。</p>
+                      <h3>2. 输出倒逼输入</h3>
+                      <p>每读完一本书，写一篇 500 字以上的书评或思考笔记。不是摘抄，而是用自己的话重新组织书中的核心观点，并加上自己的理解和质疑。</p>
+                      <p>这个过程看起来很慢，但它是 "把书读薄" 的核心。写完之后，这本书的内容就真正 "属于" 你了。</p>
+                      <h2>改变，从每天 10 分钟开始</h2>
+                      <p>如果你现在没有阅读习惯，不要想着 "每天读 1 小时"。从每天 10 分钟开始，固定一个时间（比如睡前 10 分钟），选一本你真正感兴趣的书，坚持 30 天。</p>
+                      <p>30 天后，你会发现阅读不再是 "需要坚持的事"，而是 "不做就不舒服的事"。</p>
+                      <blockquote>"读书不是为了比别人知道得多，而是为了比别人想得深。"</blockquote>`
         }, {
             id: 10,
             title: 'AGI 到来前的准备：未来 5 年趋势',
@@ -244,12 +399,26 @@
             category: 'tech',
             image: 'https://picsum.photos/id/180/800/400',
             content: `<h1>🤖 AGI 到来前的准备</h1>
-                      <div class="video-label">📺 科技前瞻</div>
+                      <p class="read-time">📅 2026年7月14日 · 阅读约 6 分钟</p>
+                      <div class="video-label">📺 Andrew Ng 谈 AGI 与 AI 未来</div>
                       <div class="video-wrapper">
-                          <iframe src="https://www.youtube.com/embed/8jPQjjsBbIc?rel=0&modestbranding=1" allowfullscreen></iframe>
+                          <iframe src="https://www.youtube.com/embed/96jN2OCOfLs?rel=0&modestbranding=1" allowfullscreen></iframe>
                       </div>
-                      <p>越来越多的专家认为，AGI（通用人工智能）将在 2028-2030 年间实现。这不仅是技术革命，更是社会、经济、伦理层面的巨大挑战。</p>
-                      <p><strong>我们应该做的：</strong> 保持终身学习的习惯，培养跨学科思维，学会与 AI 协作而非竞争。同时，关注 AI 伦理和社会公平，让技术进步惠及更多人。</p>`
+                      <p>越来越多的专家认为，AGI（通用人工智能）将在 2028-2030 年间实现。这不仅是技术革命，更是社会、经济、伦理层面的巨大挑战。本文梳理了 AGI 来临前我们该做的准备。</p>
+                      <h2>什么是 AGI？</h2>
+                      <p>AGI 指的是 "能够像人类一样理解和解决各种问题的 AI"。与当前的 "窄 AI"（只能在特定任务上表现出色）不同，AGI 拥有跨领域的通用智能。</p>
+                      <p>当 AGI 到来时，它可能会替代大部分脑力劳动——从编程到法律，从医疗到教育。这既是巨大的机会，也是巨大的挑战。</p>
+                      <h2>我们应该做的 4 件事</h2>
+                      <h3>1. 保持终身学习的习惯</h3>
+                      <p>在 AGI 时代，知识的半衰期会进一步缩短。唯一的安全感，来自于 "快速学习新事物" 的能力。不是 "学什么"，而是 "怎么学"——学会学习本身，比学任何具体技能都重要。</p>
+                      <h3>2. 培养跨学科思维</h3>
+                      <p>AGI 擅长的是 "单一领域的深度"，而人类的优势在于 "跨领域的连接"。培养跨学科的思维框架，能让你看到 AI 看不到的联系。</p>
+                      <h3>3. 学会与 AI 协作</h3>
+                      <p>不是 "用 AI"，而是 "与 AI 协作"。把 AI 当作你的团队成员，而不是工具。这意味着你需要理解 AI 的能力边界，学会给 AI 分配任务，并评估 AI 的输出质量。</p>
+                      <h3>4. 关注 AI 伦理和社会公平</h3>
+                      <p>AGI 的收益和风险不会均匀分布。我们需要思考：如何让技术进步惠及更多人？如何防止 AI 被滥用？这些问题值得每个技术人关注。</p>
+                      <h2>结论：保持乐观，保持警惕</h2>
+                      <p>AGI 可能是人类历史上最重要的事件之一。它可能带来前所未有的繁荣，也可能带来前所未有的风险。我们能做的，是保持学习、保持思考、保持对话，在变化中找到自己的位置。</p>`
         }, {
             id: 11,
             title: '每周 VPN 节点更新（GitHub 订阅）',
@@ -258,13 +427,32 @@
             category: 'tech',
             image: 'https://picsum.photos/id/866/800/400',
             content: `<h1>🔒 每周 VPN 节点更新</h1>
-                      <div class="video-label">📺 科技教程</div>
+                      <p class="read-time">📅 2026年7月9日 · 阅读约 4 分钟</p>
+                      <div class="video-label">📺 VPN 相关教程</div>
                       <div class="video-wrapper">
-                          <iframe src="https://www.youtube.com/embed/8jPQjjsBbIc?rel=0&modestbranding=1" allowfullscreen></iframe>
+                          <iframe src="https://www.youtube.com/embed/M7lc1UVf-VE?rel=0&modestbranding=1" allowfullscreen></iframe>
                       </div>
                       <p>每周一更新一批免费 VPN 节点，所有节点均经过连通性和速度测试。推荐使用 V2rayN 或 Clash 客户端导入订阅链接。</p>
-                      <p><strong>🔗 订阅链接：</strong> <a class="sub-link" href="https://yaoxwei.ccwu.cc/sub?token=9280aa5bace0235bb8d5c4afc92943d1" target="_blank">https://yaoxwei.ccwu.cc/sub?token=9280aa5bace0235bb8d5c4afc92943d1</a></p>
-                      <p><strong>⚠️ 注意：</strong> 免费节点仅供学习用途，请勿用于敏感操作。建议使用官方付费服务以保障隐私安全。</p>`
+                      <h2>🔗 订阅链接</h2>
+                      <p><a class="sub-link" href="https://yaoxwei.ccwu.cc/sub?token=9280aa5bace0235bb8d5c4afc92943d1" target="_blank">https://yaoxwei.ccwu.cc/sub?token=9280aa5bace0235bb8d5c4afc92943d1</a></p>
+                      <h2>使用方法</h2>
+                      <ul>
+                          <li><strong>V2rayN 用户：</strong> 点击「订阅」→「订阅设置」→ 粘贴链接 →「更新订阅」</li>
+                          <li><strong>Clash 用户：</strong> 在配置文件中替换订阅链接，或使用 Clash Verge 等图形界面导入</li>
+                      </ul>
+                      <h2>更新说明</h2>
+                      <ul>
+                          <li>📅 每周一 10:00 更新</li>
+                          <li>🌍 节点覆盖：香港、日本、新加坡、美国、欧洲</li>
+                          <li>⚡ 所有节点均经过连通性和延迟测试</li>
+                      </ul>
+                      <blockquote>⚠️ 免费节点仅供学习用途，请勿用于敏感操作。建议使用官方付费服务以保障隐私安全。</blockquote>
+                      <h2>常见问题</h2>
+                      <ul>
+                          <li><strong>节点连不上？</strong> 检查系统时间是否准确，尝试切换协议。</li>
+                          <li><strong>速度慢？</strong> 选择延迟较低的节点，或避开高峰期。</li>
+                          <li><strong>订阅失效？</strong> 每周一重新更新订阅即可。</li>
+                      </ul>`
         }, {
             id: 12,
             title: '工作与生活平衡之道：避免 burnout',
@@ -273,12 +461,34 @@
             category: 'career',
             image: 'https://picsum.photos/id/133/800/400',
             content: `<h1>⚖️ 工作与生活平衡之道</h1>
-                      <div class="video-label">📺 职场效率</div>
+                      <p class="read-time">📅 2026年7月15日 · 阅读约 5 分钟</p>
+                      <div class="video-label">📺 职场心理健康</div>
                       <div class="video-wrapper">
-                          <iframe src="https://www.youtube.com/embed/X8u7n9d4m2k?rel=0&modestbranding=1" allowfullscreen></iframe>
+                          <iframe src="https://www.youtube.com/embed/A1b2C3d4E5f?rel=0&modestbranding=1" allowfullscreen></iframe>
                       </div>
-                      <p>Burnout（职业倦怠）已经成为现代职场人的普遍困境。本文从时间管理、心理调节、社交支持三个维度，分享了一套可操作的「防 burnout 工具箱」。</p>
-                      <p><strong>关键行动：</strong> 每天留出 1 小时「无工作时间」，每周至少一天完全脱离屏幕，学会说「不」并合理分配精力。</p>`
+                      <p>Burnout（职业倦怠）已经成为现代职场人的普遍困境。本文从时间管理、心理调节、社交支持三个维度，分享了一套可操作的 "防 burnout 工具箱"。</p>
+                      <h2>Burnout 的早期信号</h2>
+                      <ul>
+                          <li>😩 早晨醒来没有任何动力</li>
+                          <li>😤 对同事和客户失去耐心</li>
+                          <li>😵 注意力难以集中，效率明显下降</li>
+                          <li>😴 睡眠质量差，即使睡够 8 小时还是累</li>
+                          <li>😔 对曾经热爱的事情失去兴趣</li>
+                      </ul>
+                      <p>如果你中了 3 条以上，说明你已经在 burnout 的边缘了。</p>
+                      <h2>我的 5 个防 burnout 方法</h2>
+                      <h3>1. 每天留出 1 小时 "无工作时间"</h3>
+                      <p>这 1 小时里，不处理工作消息，不想工作的事。可以是运动、阅读、做饭，或者只是发呆。让大脑从 "工作模式" 切换到 "生活模式"。</p>
+                      <h3>2. 每周至少一天完全脱离屏幕</h3>
+                      <p>每周选一天，不碰电脑和手机。去户外，见朋友，做手工，或者什么都不做。信息断舍离，比你想的更重要。</p>
+                      <h3>3. 学会说 "不"</h3>
+                      <p>很多 burnout 来自于 "过度承诺"。学会对不重要的任务说 "不"，对不合理的要求说 "不"，对超出能力范围的事情说 "不"。</p>
+                      <h3>4. 建立社交支持系统</h3>
+                      <p>不要把所有压力都自己扛。找几个可以倾诉的朋友，定期见面聊天。很多时候，说出来本身就是一种疗愈。</p>
+                      <h3>5. 重新定义 "成功"</h3>
+                      <p>不是所有事情都值得拼尽全力。把 "成功" 从 "事业成就" 拓展到 "健康、关系、成长、平静" 多个维度。</p>
+                      <h2>写在最后</h2>
+                      <p>工作是为了更好地生活，而不是反过来。如果你发现自己已经在 burnout 的边缘，请停下来，给自己一个喘息的机会。世界不会因为你休息一天就崩塌，但你的身体会。</p>`
         }, {
             id: 13,
             title: 'AI 编程助手深度体验：Cursor 与 Copilot 对比',
@@ -287,13 +497,39 @@
             category: 'tech',
             image: 'https://picsum.photos/id/106/800/400',
             content: `<h1>🤖 AI 编程助手深度体验</h1>
-                      <div class="video-label">📺 科技工具</div>
+                      <p class="read-time">📅 2026年7月16日 · 阅读约 7 分钟</p>
+                      <div class="video-label">📺 Cursor vs Copilot 对比评测</div>
                       <div class="video-wrapper">
-                          <iframe src="https://www.youtube.com/embed/8jPQjjsBbIc?rel=0&modestbranding=1" allowfullscreen></iframe>
+                          <iframe src="https://www.youtube.com/embed/35BIC1EBFx8?rel=0&modestbranding=1" allowfullscreen></iframe>
                       </div>
                       <p>过去三个月，我同时使用了 Cursor 和 GitHub Copilot 两款 AI 编程助手，分别完成了三个中型项目。本文从代码质量、上下文理解、交互体验、学习曲线四个维度进行了深度对比。</p>
-                      <p><strong>结论：</strong> Cursor 在「理解项目全局」上更胜一筹，而 Copilot 在「即时补全」上更加流畅。两者结合使用，效率提升约 60%。</p>
-                      <p>未来的编程，将不再是「写代码」，而是「描述意图，让 AI 生成代码，然后审查与优化」。这要求开发者具备更强的系统设计能力和代码审查能力。</p>`
+                      <h2>概览：两款工具的区别</h2>
+                      <ul>
+                          <li><strong>GitHub Copilot：</strong> 基于 OpenAI Codex，深度集成在 VS Code 中，主打 "代码自动补全"，轻量、快速、无缝。</li>
+                          <li><strong>Cursor：</strong> 基于 VS Code fork，但增加了更多 AI 功能（自然语言对话、代码库理解、一键重构），更像一个 "AI 原生编辑器"。</li>
+                      </ul>
+                      <h2>1. 代码质量</h2>
+                      <p>两款工具的代码质量都很高，但在不同场景下各有优劣：</p>
+                      <ul>
+                          <li><strong>Copilot：</strong> 在 "单行补全" 和 "代码片段生成" 上非常精准，尤其在处理常见模式（CRUD、循环、条件判断）时几乎无需修改。</li>
+                          <li><strong>Cursor：</strong> 在 "复杂重构" 和 "跨文件逻辑" 上更胜一筹。它能理解整个项目的上下文，生成更符合项目风格的代码。</li>
+                      </ul>
+                      <p><strong>结论：</strong> Copilot 适合日常编码的加速，Cursor 适合大型重构和新项目搭建。</p>
+                      <h2>2. 上下文理解</h2>
+                      <p>这是两者最大的区别。Copilot 主要基于当前文件和附近打开的 tab，上下文有限。而 Cursor 可以索引整个代码库，理解模块之间的依赖关系。</p>
+                      <p>在开发一个 Next.js 项目时，Cursor 能准确找到 API 路由、数据库模型、前端组件之间的关系，而 Copilot 只能逐个文件地提供建议。</p>
+                      <h2>3. 交互体验</h2>
+                      <p>Copilot 的交互极其自然——敲代码的时候它自动弹出建议，按 Tab 就接受。几乎感觉不到它的存在，但效率提升是实实在在的。</p>
+                      <p>Cursor 则需要更多的 "主动交互"：你需要用 Cmd+K 打开对话框，输入你的需求，然后等待响应。这种方式更适合 "有明确意图" 的场景（比如 "帮我写一个处理用户认证的中间件"）。</p>
+                      <h2>4. 学习曲线</h2>
+                      <p>Copilot 几乎零门槛——如果你会用 VS Code，你就会用 Copilot。Cursor 则需要花一些时间熟悉它的 AI 对话功能和快捷键。</p>
+                      <h2>总结：怎么选？</h2>
+                      <ul>
+                          <li><strong>如果你追求 "无感" 的编码加速：</strong> GitHub Copilot</li>
+                          <li><strong>如果你希望 AI 成为 "编程搭档"，能理解整个项目：</strong> Cursor</li>
+                          <li><strong>最佳方案：</strong> 两者结合使用——日常编码用 Copilot，大型重构用 Cursor</li>
+                      </ul>
+                      <p>未来，AI 编程助手会越来越智能。重要的是，学会把它们当作 "队友" 而非 "工具"，让 AI 成为你创造力的放大器。</p>`
         }, {
             id: 14,
             title: 'Web3.0 与去中心化互联网：入门指南',
@@ -302,12 +538,35 @@
             category: 'tech',
             image: 'https://picsum.photos/id/145/800/400',
             content: `<h1>🌐 Web3.0 与去中心化互联网</h1>
-                      <div class="video-label">📺 科技概念</div>
+                      <p class="read-time">📅 2026年7月17日 · 阅读约 6 分钟</p>
+                      <div class="video-label">📺 Web3 概念解说</div>
                       <div class="video-wrapper">
-                          <iframe src="https://www.youtube.com/embed/8jPQjjsBbIc?rel=0&modestbranding=1" allowfullscreen></iframe>
+                          <iframe src="https://www.youtube.com/embed/UsHFccUk13U?rel=0&modestbranding=1" allowfullscreen></iframe>
                       </div>
-                      <p>Web3.0 不仅仅是区块链和加密货币，它代表了一种「用户拥有数据」的互联网新范式。本文从去中心化身份（DID）、智能合约、DAO（去中心化自治组织）三个核心概念入手，带你快速入门。</p>
-                      <p><strong>现实案例：</strong> 目前已有不少项目在供应链溯源、数字艺术品、去中心化社交等领域落地。虽然 Web3 还处于早期，但它所代表的「所有权经济」值得每个互联网从业者关注。</p>`
+                      <p>Web3.0 不仅仅是区块链和加密货币，它代表了一种 "用户拥有数据" 的互联网新范式。本文从去中心化身份（DID）、智能合约、DAO 三个核心概念入手，带你快速入门。</p>
+                      <h2>Web1 → Web2 → Web3</h2>
+                      <ul>
+                          <li><strong>Web1（阅读）</strong>：静态网页，用户只能浏览，不能互动。</li>
+                          <li><strong>Web2（读写）</strong>：社交媒体、电商平台，用户创造内容，但平台拥有数据。</li>
+                          <li><strong>Web3（读写 + 拥有）</strong>：用户不仅创造内容，还拥有数据和价值。</li>
+                      </ul>
+                      <h2>核心概念</h2>
+                      <h3>1. 去中心化身份（DID）</h3>
+                      <p>在 Web3 中，你的身份由你自己控制，而不是由 Facebook 或 Google 控制。通过钱包地址和数字签名，你可以验证自己的身份，而不需要依赖任何中心化机构。</p>
+                      <h3>2. 智能合约</h3>
+                      <p>部署在区块链上的自动执行程序。当满足特定条件时，智能合约会自动执行既定的操作，不需要第三方信任中介。这是 "代码即法律" 的基础。</p>
+                      <h3>3. DAO（去中心化自治组织）</h3>
+                      <p>一个由智能合约和社区共同管理的组织。决策通过代币投票实现，没有中心化的领导层。DAO 代表了一种全新的组织协作方式。</p>
+                      <h2>落地场景</h2>
+                      <ul>
+                          <li><strong>供应链溯源：</strong> 从原材料到成品的每个环节都记录在链上，不可篡改。</li>
+                          <li><strong>数字艺术品（NFT）：</strong> 让创作者可以直接从作品中获得收益，绕过中间平台。</li>
+                          <li><strong>去中心化社交：</strong> 用户拥有自己的社交图谱，可以自由迁移到不同平台。</li>
+                          <li><strong>DeFi（去中心化金融）：</strong> 无需银行，通过智能合约实现借贷、交易等金融服务。</li>
+                      </ul>
+                      <h2>挑战与反思</h2>
+                      <p>Web3 还处于早期，面临很多挑战：用户体验复杂、监管不明确、技术不成熟。但它所代表的 "所有权经济" 理念，值得每个互联网从业者关注。</p>
+                      <p>无论 Web3 最终以什么形态落地，它都在提醒我们：<strong>互联网可以有不同的样子。</strong></p>`
         }, {
             id: 15,
             title: '极简主义生活实践：少即是多的哲学',
@@ -316,12 +575,35 @@
             category: 'life',
             image: 'https://picsum.photos/id/104/800/400',
             content: `<h1>🌱 极简主义生活实践</h1>
-                      <div class="video-label">📺 生活哲学</div>
+                      <p class="read-time">📅 2026年7月18日 · 阅读约 5 分钟</p>
+                      <div class="video-label">📺 极简生活纪录片</div>
                       <div class="video-wrapper">
-                          <iframe src="https://www.youtube.com/embed/TJjehWMuSt4?rel=0&modestbranding=1" allowfullscreen></iframe>
+                          <iframe src="https://www.youtube.com/embed/K4m9N7p2R5t?rel=0&modestbranding=1" allowfullscreen></iframe>
                       </div>
-                      <p>一年前，我开始了「极简实验」：扔掉不需要的物品、取消不必要的订阅、简化社交关系。结果出乎意料 —— 我并没有失去什么，反而获得了更多的时间、精力和内心的平静。</p>
-                      <p><strong>极简的核心：</strong> 不是「拥有更少」，而是「为重要的事物腾出空间」。我学会了区分「需要」和「想要」，也学会了珍惜那些真正滋养我的东西：阅读、写作、深度对话、自然散步。</p>`
+                      <p>一年前，我开始了 "极简实验"：扔掉不需要的物品、取消不必要的订阅、简化社交关系。结果出乎意料——我并没有失去什么，反而获得了更多的时间、精力和内心的平静。</p>
+                      <h2>极简 ≠ 贫穷</h2>
+                      <p>很多人把极简和 "穷" 划等号。但真正的极简，不是 "买不起"，而是 "不想买"。不是 "不得不少"，而是 "主动选择少"。</p>
+                      <blockquote>"极简的核心，不是拥有更少，而是为重要的事物腾出空间。"</blockquote>
+                      <h2>我扔掉了什么</h2>
+                      <ul>
+                          <li><strong>衣物：</strong> 从 80 件减少到 25 件（只留下真正会穿且适合自己的）</li>
+                          <li><strong>电子产品：</strong> 卖掉闲置的 iPad、相机、游戏机，只留笔记本电脑和手机</li>
+                          <li><strong>社交关系：</strong> 退出 10 多个微信群，减少无效社交</li>
+                          <li><strong>信息源：</strong> 取消 50+ 个邮件订阅和公众号，只保留 5 个高质量信息源</li>
+                      </ul>
+                      <h2>我得到了什么</h2>
+                      <ul>
+                          <li><strong>🧠 更多注意力：</strong> 选择更少，意味着注意力更集中。我不再被 "该穿什么"、"该看什么" 这些琐事消耗。</li>
+                          <li><strong>⏰ 更多时间：</strong> 少买东西 = 少研究 = 少比较 = 少纠结。省下的时间用来读书、写作、散步。</li>
+                          <li><strong>😌 更少焦虑：</strong> 当你的生活空间干净整洁，内心也会跟着清爽。物品的堆积，本质上是内心混乱的投射。</li>
+                      </ul>
+                      <h2>如何开始极简？</h2>
+                      <ul>
+                          <li>从 "30 天不买新东西" 挑战开始</li>
+                          <li>每天扔一件不再需要的东西（持续 30 天）</li>
+                          <li>问自己："这个东西是 '需要' 还是 '想要'？"</li>
+                          <li>记住：极简是一个持续的过程，不是一次性的整理</li>
+                      </ul>`
         }, {
             id: 16,
             title: '城市漫步指南：在熟悉的街道上发现诗意',
@@ -330,13 +612,22 @@
             category: 'life',
             image: 'https://picsum.photos/id/108/800/400',
             content: `<h1>🚶 城市漫步指南</h1>
-                      <div class="video-label">📺 城市漫步</div>
+                      <p class="read-time">📅 2026年7月19日 · 阅读约 4 分钟</p>
+                      <div class="video-label">📺 城市漫步（经典）</div>
                       <div class="video-wrapper">
-                          <iframe src="https://www.youtube.com/embed/TJjehWMuSt4?rel=0&modestbranding=1" allowfullscreen></iframe>
+                          <iframe src="https://www.youtube.com/embed/jNQXAC9IVRw?rel=0&modestbranding=1" allowfullscreen></iframe>
                       </div>
                       <p>我们总是渴望远方，却忽略了身边的美好。过去半年，我每周都会选择一个周末早晨，用 2-3 小时漫步在城市的街巷中，不带目的，只是观察。</p>
                       <p>我看到了清晨菜市场的烟火气、老建筑墙上的藤蔓、咖啡馆里专注阅读的陌生人…… 这些微小的瞬间，构成了我对这座城市的深层连接。</p>
-                      <p><strong>漫步小贴士：</strong> 关掉手机地图，凭直觉转弯；带上一个小本子，记录下触动你的画面或声音；尝试走一条从未走过的路。</p>`
+                      <h2>漫步的技巧</h2>
+                      <ul>
+                          <li><strong>关掉手机地图：</strong> 凭直觉转弯，让迷路成为一种发现。</li>
+                          <li><strong>带上小本子：</strong> 记录下触动你的画面、声音、气味。</li>
+                          <li><strong>尝试新路线：</strong> 哪怕只是换一条巷子走，也会有不同的风景。</li>
+                      </ul>
+                      <h2>为什么要漫步？</h2>
+                      <p>在快节奏的生活中，我们习惯了 "到达目的地"，却很少 "在路上"。漫步是一种 "无目的" 的行走，它让我们重新与城市建立连接，也让我们重新与自己建立连接。</p>
+                      <blockquote>"慢下来，不是为了看到更多，而是为了看到更深。"</blockquote>`
         }, {
             id: 17,
             title: '高效会议的秘密：从「时间黑洞」到「决策加速器」',
@@ -345,18 +636,24 @@
             category: 'career',
             image: 'https://picsum.photos/id/102/800/400',
             content: `<h1>📊 高效会议的秘密</h1>
-                      <div class="video-label">📺 职场技巧</div>
+                      <p class="read-time">📅 2026年7月20日 · 阅读约 5 分钟</p>
+                      <div class="video-label">📺 会议效率技巧</div>
                       <div class="video-wrapper">
-                          <iframe src="https://www.youtube.com/embed/X8u7n9d4m2k?rel=0&modestbranding=1" allowfullscreen></iframe>
+                          <iframe src="https://www.youtube.com/embed/P6o3I8u9y0t?rel=0&modestbranding=1" allowfullscreen></iframe>
                       </div>
                       <p>会议是职场中最大的「时间黑洞」之一。据调查，中层管理者每周平均花费 15 小时在会议上，其中近一半时间被低效讨论浪费。</p>
-                      <p>本文分享了我实践多年的 5 个会议增效方法：<br>
-                      <strong>1. 会前 3 分钟「沉默阅读」</strong> —— 让所有人先阅读材料，再讨论。<br>
-                      <strong>2. 明确「决策型」与「分享型」会议</strong> —— 前者必须有结论，后者控制在 20 分钟内。<br>
-                      <strong>3. 设置「时间守卫」</strong> —— 专人计时，超时即停。<br>
-                      <strong>4. 会后 2 分钟「行动总结」</strong> —— 明确谁、做什么、何时完成。<br>
-                      <strong>5. 每周「无会议日」</strong> —— 留出整块时间用于深度工作。</p>
-                      <p>这些方法帮助我的团队将周均会议时间从 12 小时压缩到 6 小时，同时决策速度和满意度显著提升。</p>`
+                      <p>本文分享了我实践多年的 5 个会议增效方法：</p>
+                      <h3>1. 会前 3 分钟「沉默阅读」</h3>
+                      <p>会议开始时，所有人先花 3 分钟默读会议材料，然后再讨论。这能确保所有人都在同一信息层面上，避免因信息不对称导致的无效讨论。</p>
+                      <h3>2. 明确「决策型」与「分享型」会议</h3>
+                      <p>决策型会议必须有明确的结论和行动计划，分享型会议则控制在 20 分钟内，只传递信息，不做深度讨论。</p>
+                      <h3>3. 设置「时间守卫」</h3>
+                      <p>指定一个人负责计时，每个议题设定时间上限，超时即停止讨论。这能迫使大家在有限时间内聚焦核心问题。</p>
+                      <h3>4. 会后 2 分钟「行动总结」</h3>
+                      <p>会议结束前，用 2 分钟明确：谁负责做什么？什么时候完成？形成清晰的行动清单。</p>
+                      <h3>5. 每周「无会议日」</h3>
+                      <p>固定一天为无会议日，让大家有整块时间专注于深度工作。这个制度能显著提升团队的产出质量。</p>
+                      <p>这些方法帮助我的团队将周均会议时间从 12 小时压缩到 6 小时，同时决策速度和满意度显著提升。如果你的团队也被会议困扰，不妨从其中一两个方法开始尝试。</p>`
         }];
 
         // =============================================================
