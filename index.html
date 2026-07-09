@@ -662,7 +662,7 @@
         }
 
         /* ============================================================
-                   🦶 页脚 —— 联系方式
+                   🦶 页脚 —— 联系方式 + 投稿邮箱
                    ============================================================ */
         footer {
             text-align: center;
@@ -678,7 +678,7 @@
             justify-content: center;
             gap: 20px;
             flex-wrap: wrap;
-            margin: 0.5rem 0 1rem;
+            margin: 0.5rem 0 0.8rem;
         }
         footer .social-links a {
             color: var(--text-muted);
@@ -699,6 +699,17 @@
         footer .social-links .github-icon {
             font-size: 1.2rem;
         }
+        footer .email-line {
+            margin: 0.2rem 0 0.8rem;
+        }
+        footer .email-line a {
+            color: var(--text-muted);
+            text-decoration: none;
+            transition: color 0.3s;
+        }
+        footer .email-line a:hover {
+            color: var(--text-primary);
+        }
         footer p {
             margin: 0.3rem 0;
         }
@@ -718,6 +729,7 @@
             .post-content { padding: 1.8rem 1.4rem; }
             .post-content h1 { font-size: 1.6rem; }
             .post-content .video-wrapper { margin: 1.2rem 0; }
+            footer .social-links { gap: 12px; }
         }
 
         @media (min-width: 821px) and (max-width: 1100px) {
@@ -786,6 +798,10 @@
             <a href="https://www.tiktok.com/@mr.qiaomou" target="_blank" title="TikTok"><i>🎵</i> @mr.qiaomou</a>
             <a href="https://github.com/3880374029-sketch/78" target="_blank" title="GitHub"><span class="github-icon">🐙</span> GitHub</a>
         </div>
+        <!-- 新增投稿邮箱 -->
+        <div class="email-line">
+            📧 投稿邮箱：<a href="mailto:3880374029@qq.com">3880374029@qq.com</a>
+        </div>
         <p>© 2026 窍某博客网 · 多维度记录与分享 · 用思考对抗平庸</p>
     </footer>
 
@@ -798,7 +814,6 @@
         function googleTranslateElementInit() {
             new google.translate.TranslateElement({
                 pageLanguage: 'zh-CN',
-                // 不指定 includedLanguages 则默认显示所有语言（超过100种）
                 layout: google.translate.TranslateElement.InlineLayout.SIMPLE,
                 autoDisplay: false,
                 multilanguagePage: true
@@ -1600,7 +1615,6 @@
         window.onload = function() {
             renderPostList(posts);
             document.querySelector('.cat-btn[data-cat="all"]')?.classList.add('active');
-            // 隐藏 Google Translate 的顶部横幅（已通过CSS隐藏）
         };
 
         // 暴露全局函数
