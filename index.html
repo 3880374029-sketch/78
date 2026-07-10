@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>窍某博客网</title>
+    <title>窍某论坛</title>
     <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
@@ -27,42 +27,69 @@
         #adminLink{color:rgba(255,255,255,0.5);text-decoration:none;font-size:0.85rem;border:1px solid rgba(255,255,255,0.1);padding:4px 12px;border-radius:20px;display:none;}
         #adminLink:hover{color:#fff;border-color:rgba(255,255,255,0.3);}
 
-        /* 布局：主区域 + 侧边栏 */
+        /* 论坛布局 */
+        .forum-stats{display:flex;gap:20px;flex-wrap:wrap;margin-bottom:16px;padding:12px 16px;background:rgba(255,255,255,0.03);border-radius:12px;}
+        .forum-stats span{color:rgba(255,255,255,0.5);font-size:0.85rem;}
+        .forum-stats strong{color:#a5b4fc;}
+
         .main-layout{display:flex;gap:30px;align-items:flex-start;flex-wrap:wrap;}
         .main-content{flex:2;min-width:0;}
         .sidebar{flex:1;min-width:260px;}
 
-        /* 热门排行 */
-        .hot-list{background:rgba(255,255,255,0.04);border-radius:16px;padding:16px 20px;border:1px solid rgba(255,255,255,0.06);margin-bottom:20px;}
-        .hot-list h3{font-size:1.2rem;margin-bottom:12px;color:#fcd34d;}
-        .hot-item{padding:6px 0;border-bottom:1px solid rgba(255,255,255,0.06);}
-        .hot-item:last-child{border-bottom:none;}
-        .hot-item a{color:#a5b4fc;text-decoration:none;display:flex;justify-content:space-between;}
-        .hot-item a:hover{color:#fff;}
-        .hot-item .hot-num{color:#fcd34d;font-weight:700;margin-right:8px;}
+        /* 版块导航 */
+        .board-nav{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px;padding:12px 0;border-bottom:1px solid rgba(255,255,255,0.06);}
+        .board-nav .board-btn{background:transparent;border:1px solid rgba(255,255,255,0.08);color:rgba(255,255,255,0.5);padding:4px 16px;border-radius:20px;cursor:pointer;font-size:0.85rem;transition:0.3s;}
+        .board-nav .board-btn:hover{background:rgba(255,255,255,0.05);color:#fff;}
+        .board-nav .board-btn.active{background:#6d5bff;color:#fff;border-color:#6d5bff;}
 
-        .post-card{background:rgba(255,255,255,0.04);border-radius:16px;padding:16px 20px;margin-bottom:16px;border:1px solid rgba(255,255,255,0.06);}
-        .post-card h3{margin:0 0 4px;}
-        .post-card .meta{color:rgba(255,255,255,0.4);font-size:0.8rem;}
-        .post-card .badge{padding:2px 12px;border-radius:30px;font-size:0.7rem;}
+        /* 帖子卡片（论坛风格） */
+        .post-card{background:rgba(255,255,255,0.03);border-radius:12px;padding:16px 20px;margin-bottom:12px;border:1px solid rgba(255,255,255,0.05);transition:0.3s;}
+        .post-card:hover{border-color:rgba(255,255,255,0.12);}
+        .post-card .post-title{font-size:1.1rem;font-weight:600;color:#e8edf5;text-decoration:none;cursor:pointer;}
+        .post-card .post-title:hover{color:#a5b4fc;}
+        .post-card .post-meta{color:rgba(255,255,255,0.35);font-size:0.8rem;margin:4px 0 8px;}
+        .post-card .post-meta .author{color:#a5b4fc;}
+        .post-card .post-excerpt{color:rgba(255,255,255,0.5);font-size:0.9rem;}
+        .post-card .post-footer{display:flex;align-items:center;gap:16px;margin-top:10px;font-size:0.8rem;color:rgba(255,255,255,0.3);}
+        .post-card .post-footer .like-btn{cursor:pointer;user-select:none;color:rgba(255,255,255,0.4);}
+        .post-card .post-footer .like-btn.liked{color:#ef4444;}
+        .post-card .badge{padding:2px 10px;border-radius:30px;font-size:0.65rem;font-weight:600;}
         .post-card .badge.tech{background:rgba(96,165,250,0.15);color:#93bbfc;}
         .post-card .badge.life{background:rgba(52,211,153,0.12);color:#6ee7b7;}
         .post-card .badge.career{background:rgba(251,191,36,0.12);color:#fcd34d;}
         .post-card .badge.topic{background:rgba(251,191,36,0.15);color:#fcd34d;}
-        .post-card p{color:rgba(255,255,255,0.6);}
-        .post-card img{width:100%;height:200px;object-fit:cover;border-radius:12px;margin-bottom:12px;}
-        .post-card .actions{display:flex;align-items:center;gap:16px;margin-top:8px;}
-        .post-card .actions .like-btn{cursor:pointer;user-select:none;}
-        .post-card .actions .like-btn.liked{color:#ef4444;}
-        .btn-read{background:transparent;border:1px solid #6d5bff;color:#6d5bff;padding:4px 16px;border-radius:20px;cursor:pointer;}
-        .btn-read:hover{background:#6d5bff;color:#fff;}
+
+        /* 帖子详情 */
         .post-content{background:rgba(255,255,255,0.04);padding:24px;border-radius:20px;border:1px solid rgba(255,255,255,0.06);margin-top:20px;}
         .post-content .back-btn{background:rgba(255,255,255,0.06);border:1px solid #444;color:#e8edf5;padding:6px 16px;border-radius:30px;cursor:pointer;margin-bottom:16px;}
-        textarea,input,select{width:100%;padding:10px 14px;border-radius:12px;border:1px solid #444;background:rgba(255,255,255,0.05);color:#e8edf5;font-size:0.95rem;margin-top:6px;}
-        .publish-form{display:none;background:rgba(255,255,255,0.04);padding:20px;border-radius:16px;margin-top:12px;}
-        .comment-item{border-bottom:1px solid rgba(255,255,255,0.06);padding:12px 0;}
-        .comment-item strong{color:#a5b4fc;}
-        .comment-item .c-time{color:rgba(255,255,255,0.3);font-size:0.8rem;margin-left:8px;}
+        .post-content .post-author{color:#a5b4fc;font-weight:600;}
+        .post-content .post-time{color:rgba(255,255,255,0.3);font-size:0.85rem;margin-left:12px;}
+        .post-content .post-body{margin:16px 0;}
+        .post-content .post-body p{margin:8px 0;color:rgba(255,255,255,0.75);}
+        .post-content .post-actions{display:flex;align-items:center;gap:20px;padding:12px 0;border-top:1px solid rgba(255,255,255,0.06);margin-top:12px;}
+        .post-content .post-actions .like-btn{cursor:pointer;user-select:none;}
+
+        /* 回复列表 */
+        .reply-item{border-bottom:1px solid rgba(255,255,255,0.06);padding:12px 0;}
+        .reply-item .reply-author{color:#a5b4fc;font-weight:600;}
+        .reply-item .reply-time{color:rgba(255,255,255,0.3);font-size:0.8rem;margin-left:10px;}
+        .reply-item .reply-content{margin:4px 0 0;color:rgba(255,255,255,0.65);}
+
+        /* 发帖表单 */
+        .publish-form{display:none;background:rgba(255,255,255,0.04);padding:20px;border-radius:16px;margin-top:12px;border:1px solid rgba(255,255,255,0.06);}
+        textarea,input,select{width:100%;padding:10px 14px;border-radius:12px;border:1px solid #444;background:rgba(255,255,255,0.05);color:#e8edf5;font-size:0.95rem;margin-top:6px;font-family:inherit;}
+        textarea:focus,input:focus,select:focus{outline:none;border-color:#6d5bff;}
+
+        /* 侧边栏热门 */
+        .hot-list{background:rgba(255,255,255,0.03);border-radius:16px;padding:16px 20px;border:1px solid rgba(255,255,255,0.05);margin-bottom:20px;}
+        .hot-list h3{font-size:1.1rem;margin-bottom:12px;color:#fcd34d;}
+        .hot-item{padding:6px 0;border-bottom:1px solid rgba(255,255,255,0.04);}
+        .hot-item:last-child{border-bottom:none;}
+        .hot-item a{color:rgba(255,255,255,0.7);text-decoration:none;display:flex;justify-content:space-between;font-size:0.9rem;}
+        .hot-item a:hover{color:#fff;}
+        .hot-item .hot-num{color:#fcd34d;font-weight:700;margin-right:6px;}
+
+        /* 模态框 */
         .modal{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.7);backdrop-filter:blur(8px);justify-content:center;align-items:center;z-index:999;}
         .modal.active{display:flex;}
         .modal-box{background:#1a1a2e;padding:30px;border-radius:20px;max-width:420px;width:100%;max-height:90vh;overflow-y:auto;position:relative;}
@@ -80,23 +107,23 @@
         .divider::before,.divider::after{content:'';flex:1;height:1px;background:#333;}
         .auth-switch{text-align:center;color:rgba(255,255,255,0.4);}
         .auth-switch a{color:#6d5bff;cursor:pointer;}
+
         footer{text-align:center;margin-top:40px;padding:20px;border-top:1px solid rgba(255,255,255,0.04);color:rgba(255,255,255,0.2);font-size:0.85rem;}
         .social-links{display:flex;justify-content:center;gap:20px;flex-wrap:wrap;margin-bottom:8px;}
         .social-links a{color:rgba(255,255,255,0.3);text-decoration:none;}
         .social-links a:hover{color:rgba(255,255,255,0.7);}
-        .no-result{text-align:center;padding:20px;color:rgba(255,255,255,0.3);}
-        .empty-state{padding:40px 20px;text-align:center;border:2px dashed rgba(255,255,255,0.1);border-radius:16px;margin:20px 0;}
-        .empty-state h3{color:rgba(255,255,255,0.5);margin-bottom:12px;}
-        .topic-tag{display:inline-block;background:rgba(251,191,36,0.1);padding:2px 12px;border-radius:20px;color:#fcd34d;font-size:0.75rem;margin-left:6px;}
-        .btn-sm{padding:4px 12px;font-size:0.8rem;}
+        .empty-state{padding:40px 20px;text-align:center;border:2px dashed rgba(255,255,255,0.08);border-radius:16px;margin:20px 0;}
+        .empty-state h3{color:rgba(255,255,255,0.4);margin-bottom:8px;}
+
+        @media (max-width:820px){.main-layout{flex-direction:column;}.sidebar{width:100%;}.search-box{width:100%;}nav{flex-direction:column;align-items:stretch;}.nav-controls{flex-wrap:wrap;justify-content:center;}}
     </style>
 </head>
 <body>
 <div class="container">
     <header>
-        <h1>✦ 窍某博客网</h1>
+        <h1>✦ 窍某论坛</h1>
         <div class="nav-controls">
-            <input type="text" id="searchInput" class="search-box" placeholder="🔍 搜索文章..." onkeyup="searchPosts()" />
+            <input type="text" id="searchInput" class="search-box" placeholder="🔍 搜索帖子..." onkeyup="searchPosts()" />
             <button class="btn btn-outline" onclick="toggleTheme()" id="themeToggle">🌙</button>
             <div class="auth-section">
                 <button class="btn" id="loginBtn" onclick="openModal()">登录</button>
@@ -106,49 +133,59 @@
                 <a id="adminLink" href="admin.html">⚙️ 管理</a>
             </div>
         </div>
-        <div>
-            <button class="btn btn-outline cat-btn active" data-cat="all">全部</button>
-            <button class="btn btn-outline cat-btn" data-cat="tech">科技</button>
-            <button class="btn btn-outline cat-btn" data-cat="life">生活</button>
-            <button class="btn btn-outline cat-btn" data-cat="career">职场</button>
-            <!-- 动态话题分类将由JS生成 -->
-            <span id="topicCats"></span>
-        </div>
     </header>
 
-    <div style="display:flex;gap:12px;flex-wrap:wrap;margin-bottom:12px;">
-        <button class="btn" onclick="togglePublish()">📝 发布新文章</button>
-        <button class="btn" onclick="openNewTopic()">🏷️ 新建话题</button>
+    <!-- 论坛统计 -->
+    <div class="forum-stats">
+        <span>📄 帖子：<strong id="statPosts">0</strong></span>
+        <span>💬 回复：<strong id="statComments">0</strong></span>
+        <span>👤 用户：<strong id="statUsers">0</strong></span>
+        <span>🏷️ 版块：<strong id="statTopics">0</strong></span>
     </div>
 
+    <!-- 操作栏 -->
+    <div style="display:flex;gap:12px;flex-wrap:wrap;margin-bottom:12px;">
+        <button class="btn" onclick="togglePublish()">📝 发帖</button>
+        <button class="btn" onclick="openNewTopic()">🏷️ 新建版块</button>
+    </div>
+
+    <!-- 发帖表单 -->
     <div class="publish-form" id="publishForm">
-        <h3>发布新内容</h3>
+        <h3 style="margin-bottom:6px;">📝 发布新帖子</h3>
         <input type="text" id="newTitle" maxlength="100" placeholder="标题（限100字符）" />
         <input type="text" id="newExcerpt" maxlength="300" placeholder="摘要（可选）" />
         <select id="newCategory">
-            <option value="tech">科技</option>
-            <option value="life">生活</option>
-            <option value="career">职场</option>
-            <!-- 动态话题将加入这里 -->
+            <option value="tech">💻 科技</option>
+            <option value="life">🌿 生活</option>
+            <option value="career">💼 职场</option>
         </select>
-        <textarea id="newContent" rows="6" maxlength="50000" placeholder="正文内容（限50000字符）"></textarea>
-        <button class="btn" onclick="publishPost()" id="publishBtn">提交</button>
-        <p style="color:rgba(255,255,255,0.3);font-size:0.8rem;margin-top:4px;">已有内容请勿重复提交</p>
+        <textarea id="newContent" rows="6" maxlength="50000" placeholder="正文内容"></textarea>
+        <button class="btn" onclick="publishPost()" id="publishBtn">提交帖子</button>
+        <p style="color:rgba(255,255,255,0.2);font-size:0.8rem;margin-top:4px;">请勿重复提交</p>
     </div>
 
-    <hr style="border-color:#333;margin:20px 0;" />
+    <!-- 版块导航 -->
+    <div class="board-nav" id="boardNav">
+        <button class="board-btn active" data-cat="all" onclick="setCategory('all')">📋 全部</button>
+        <button class="board-btn" data-cat="tech" onclick="setCategory('tech')">💻 科技</button>
+        <button class="board-btn" data-cat="life" onclick="setCategory('life')">🌿 生活</button>
+        <button class="board-btn" data-cat="career" onclick="setCategory('career')">💼 职场</button>
+        <span id="dynamicBoards"></span>
+    </div>
 
+    <hr style="border-color:#333;margin:16px 0;" />
+
+    <!-- 主布局 -->
     <div class="main-layout">
         <div class="main-content">
-            <h2>📖 最新文章</h2>
             <div id="postList"></div>
             <div id="detailArea" class="hidden"></div>
         </div>
         <div class="sidebar">
-            <!-- 热门排行 -->
+            <!-- 热门帖子 -->
             <div class="hot-list" id="hotList">
-                <h3>🔥 热门排行</h3>
-                <div id="hotContent"><p style="color:rgba(255,255,255,0.3);">加载中...</p></div>
+                <h3>🔥 热门帖子</h3>
+                <div id="hotContent"><p style="color:rgba(255,255,255,0.2);font-size:0.9rem;">加载中...</p></div>
             </div>
         </div>
     </div>
@@ -162,7 +199,7 @@
         <a href="https://github.com/3880374029-sketch/78">🐙 GitHub</a>
     </div>
     <div>📧 投稿邮箱：<a href="mailto:3880374029@qq.com" style="color:rgba(255,255,255,0.3);">3880374029@qq.com</a></div>
-    <p>© 2026 窍某博客网</p>
+    <p>© 2026 窍某论坛</p>
 </footer>
 
 <!-- 登录模态框 -->
@@ -204,21 +241,21 @@
     </div>
 </div>
 
-<!-- 新建话题模态框 -->
+<!-- 新建版块模态框 -->
 <div class="modal" id="topicModal">
     <div class="modal-box">
         <span class="close" onclick="closeTopicModal()">&times;</span>
-        <h2>🏷️ 新建话题</h2>
-        <p style="color:rgba(255,255,255,0.4);margin-bottom:16px;">输入新话题名称，创建后即可在发布文章时选择</p>
-        <input type="text" id="newTopicName" maxlength="30" placeholder="话题名称（限30字符）" />
-        <button class="btn" onclick="createTopic()" style="margin-top:12px;width:100%;">创建话题</button>
+        <h2>🏷️ 新建版块</h2>
+        <p style="color:rgba(255,255,255,0.4);margin-bottom:16px;">输入新版块名称，创建后即可在发帖时选择</p>
+        <input type="text" id="newTopicName" maxlength="30" placeholder="版块名称（限30字符）" />
+        <button class="btn" onclick="createTopic()" style="margin-top:12px;width:100%;">创建版块</button>
         <div id="topicMsg" style="margin-top:8px;"></div>
     </div>
 </div>
 
 <script>
 // =============================================================
-// 🔥 Firebase 配置（已填）
+// 🔥 Firebase 配置
 // =============================================================
 const firebaseConfig = {
     apiKey: "AIzaSyB8ZalWGiP8at0EUIfKN46CbwQ3eH4iM8E",
@@ -242,10 +279,10 @@ let currentUser = null;
 let isPopupOpen = false;
 let isSubmitting = false;
 let lastSubmitTime = 0;
-let topicsCache = []; // 存储话题列表
+let topicsCache = [];
 
 // =============================================================
-// 日期格式化
+// 格式化
 // =============================================================
 function formatDate(date) {
     if (!date) return '';
@@ -253,20 +290,15 @@ function formatDate(date) {
     if (date instanceof Date) return date.toLocaleDateString('zh-CN');
     return new Date(date).toLocaleDateString('zh-CN');
 }
-
-function sortByDate(a, b) {
-    const getTime = (item) => {
-        const d = item.created_at;
-        if (!d) return 0;
-        if (d.seconds) return d.seconds;
-        if (d instanceof Date) return d.getTime() / 1000;
-        return new Date(d).getTime() / 1000;
-    };
-    return getTime(b) - getTime(a);
+function formatTime(date) {
+    if (!date) return '';
+    if (date.seconds) return new Date(date.seconds * 1000).toLocaleString('zh-CN');
+    if (date instanceof Date) return date.toLocaleString('zh-CN');
+    return new Date(date).toLocaleString('zh-CN');
 }
 
 // =============================================================
-// 话题管理
+// 话题/版块管理
 // =============================================================
 async function loadTopics() {
     try {
@@ -277,45 +309,29 @@ async function loadTopics() {
             data.id = doc.id;
             topicsCache.push(data);
         });
-        updateTopicUI();
+        updateBoardNav();
         updateCategorySelect();
-    } catch (e) {
-        console.warn('加载话题失败:', e);
-    }
+        updateStats();
+    } catch (e) { console.warn(e); }
 }
 
-function updateTopicUI() {
-    // 更新分类按钮中的话题
-    const container = document.getElementById('topicCats');
+function updateBoardNav() {
+    const container = document.getElementById('dynamicBoards');
     if (!container) return;
     let html = '';
     topicsCache.forEach(t => {
         const name = t.name;
-        const safeName = name.replace(/"/g, '&quot;');
-        html += `<button class="btn btn-outline cat-btn" data-cat="${encodeURIComponent(name)}" onclick="setCategoryFromTopic('${encodeURIComponent(name)}')">🏷️ ${name}</button>`;
+        html += `<button class="board-btn" data-cat="${encodeURIComponent(name)}" onclick="setCategory('${encodeURIComponent(name)}')">🏷️ ${name}</button>`;
     });
     container.innerHTML = html;
-    // 重新绑定话题分类点击（因为动态生成，需要重新绑定事件）
-    document.querySelectorAll('#topicCats .cat-btn').forEach(btn => {
-        btn.addEventListener('click', function() {
-            const cat = decodeURIComponent(this.dataset.cat);
-            setCategory(cat);
-        });
-    });
+    // 重新绑定点击事件（已通过 onclick 属性绑定）
 }
 
 function updateCategorySelect() {
     const select = document.getElementById('newCategory');
-    // 保留原有的固定分类选项（tech, life, career）
-    const fixedOptions = ['tech', 'life', 'career'];
-    // 清除动态添加的话题选项（保留固定选项）
-    const currentOptions = select.querySelectorAll('option');
-    currentOptions.forEach(opt => {
-        if (!fixedOptions.includes(opt.value)) {
-            opt.remove();
-        }
-    });
-    // 添加话题
+    const fixed = ['tech','life','career'];
+    const opts = select.querySelectorAll('option');
+    opts.forEach(o => { if(!fixed.includes(o.value)) o.remove(); });
     topicsCache.forEach(t => {
         const opt = document.createElement('option');
         opt.value = t.name;
@@ -324,9 +340,10 @@ function updateCategorySelect() {
     });
 }
 
-function setCategoryFromTopic(encodedName) {
-    const name = decodeURIComponent(encodedName);
-    setCategory(name);
+function updateStats() {
+    document.getElementById('statPosts').textContent = postsCache.length;
+    document.getElementById('statTopics').textContent = topicsCache.length;
+    // 其他统计在 loadPosts 和 loadComments 中更新
 }
 
 function openNewTopic() {
@@ -334,53 +351,34 @@ function openNewTopic() {
     document.getElementById('newTopicName').value = '';
     document.getElementById('topicMsg').innerHTML = '';
 }
-
-function closeTopicModal() {
-    document.getElementById('topicModal').classList.remove('active');
-}
+function closeTopicModal() { document.getElementById('topicModal').classList.remove('active'); }
 
 async function createTopic() {
     const name = document.getElementById('newTopicName').value.trim();
     const msg = document.getElementById('topicMsg');
-    if (!name) {
-        msg.innerHTML = '<p style="color:#ef4444;">请输入话题名称</p>';
-        return;
-    }
-    if (name.length > 30) {
-        msg.innerHTML = '<p style="color:#ef4444;">话题名称不能超过30字符</p>';
-        return;
-    }
-    // 检查是否已存在
-    if (topicsCache.some(t => t.name === name)) {
-        msg.innerHTML = '<p style="color:#ef4444;">该话题已存在</p>';
-        return;
-    }
+    if (!name) { msg.innerHTML = '<p style="color:#ef4444;">请输入版块名称</p>'; return; }
+    if (name.length > 30) { msg.innerHTML = '<p style="color:#ef4444;">名称不能超过30字符</p>'; return; }
+    if (topicsCache.some(t => t.name === name)) { msg.innerHTML = '<p style="color:#ef4444;">该版块已存在</p>'; return; }
     try {
-        await db.collection('topics').add({
-            name: name,
-            created_at: firebase.firestore.FieldValue.serverTimestamp()
-        });
-        msg.innerHTML = '<p style="color:#6ee7b7;">✅ 话题创建成功！</p>';
-        await loadTopics(); // 刷新话题列表
+        await db.collection('topics').add({ name, created_at: firebase.firestore.FieldValue.serverTimestamp() });
+        msg.innerHTML = '<p style="color:#6ee7b7;">✅ 版块创建成功！</p>';
+        await loadTopics();
         document.getElementById('newTopicName').value = '';
         setTimeout(closeTopicModal, 1000);
-    } catch (e) {
-        msg.innerHTML = '<p style="color:#ef4444;">创建失败：' + e.message + '</p>';
-    }
+    } catch(e) { msg.innerHTML = '<p style="color:#ef4444;">创建失败：'+e.message+'</p>'; }
 }
 
 function setCategory(cat) {
     currentCategory = cat;
-    // 更新所有分类按钮的高亮
-    document.querySelectorAll('.cat-btn').forEach(btn => {
-        btn.classList.toggle('active', btn.dataset.cat === cat);
+    document.querySelectorAll('.board-btn').forEach(b => {
+        b.classList.toggle('active', b.dataset.cat === cat || b.dataset.cat === decodeURIComponent(cat));
     });
     const keyword = document.getElementById('searchInput').value.trim();
     loadPosts(cat, keyword);
 }
 
 // =============================================================
-// 核心：加载文章（从 Firebase）
+// 加载帖子
 // =============================================================
 async function loadPosts(category = 'all', keyword = '') {
     try {
@@ -389,17 +387,13 @@ async function loadPosts(category = 'all', keyword = '') {
             query = query.where('category', '==', category);
         }
         const snapshot = await query.get();
-        const fbPosts = [];
+        postsCache = [];
         snapshot.forEach(doc => {
             const data = doc.data();
             data.id = doc.id;
-            fbPosts.push(data);
+            postsCache.push(data);
         });
-        postsCache = fbPosts;
-    } catch (err) {
-        console.error('加载文章失败:', err);
-        postsCache = [];
-    }
+    } catch(e) { console.error(e); postsCache = []; }
 
     let filtered = postsCache;
     if (category !== 'all') {
@@ -414,165 +408,159 @@ async function loadPosts(category = 'all', keyword = '') {
         );
     }
     renderPostList(filtered);
-    setTimeout(updateAllLikes, 100);
-    // 更新热门排行
     renderHotList();
+    updateStats();
+    setTimeout(updateAllLikes, 100);
 }
 
 // =============================================================
-// 热门排行
+// 渲染帖子列表
+// =============================================================
+function renderPostList(posts) {
+    const list = document.getElementById('postList');
+    if (!posts || posts.length === 0) {
+        list.innerHTML = `<div class="empty-state"><h3>📭 还没有帖子</h3><p style="color:rgba(255,255,255,0.3);">登录后点击「发帖」开始讨论！</p></div>`;
+        return;
+    }
+    const catMap = { tech:'科技', life:'生活', career:'职场' };
+    list.innerHTML = posts.map(p => {
+        const badgeClass = ['tech','life','career'].includes(p.category) ? `badge ${p.category}` : 'badge topic';
+        const badgeText = catMap[p.category] || p.category;
+        return `
+            <div class="post-card">
+                <div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;">
+                    <span class="post-title" onclick="showPost('${p.id}')">${p.title}</span>
+                    <span class="badge ${badgeClass}" style="flex-shrink:0;margin-top:2px;">${badgeText}</span>
+                </div>
+                <div class="post-meta">
+                    <span class="author">${p.author_name || '匿名'}</span>
+                    <span> · ${formatDate(p.created_at)}</span>
+                </div>
+                <div class="post-excerpt">${p.excerpt || (p.content ? p.content.replace(/<[^>]+>/g,'').slice(0,80)+'...' : '')}</div>
+                <div class="post-footer">
+                    <span class="like-btn" onclick="toggleLike('${p.id}')" id="like-btn-${p.id}">❤️ <span id="like-count-${p.id}">${p.likes || 0}</span></span>
+                    <span>💬 ${p.commentCount || 0}</span>
+                    <span>👁️ ${p.views || 0}</span>
+                </div>
+            </div>
+        `;
+    }).join('');
+    // 更新评论数（异步加载）
+    updateCommentCounts();
+}
+
+// =============================================================
+// 更新评论数
+// =============================================================
+async function updateCommentCounts() {
+    for (const post of postsCache) {
+        try {
+            const snap = await db.collection('comments').where('post_id', '==', post.id).get();
+            post.commentCount = snap.size;
+        } catch(e) {}
+    }
+    // 重新渲染列表（只更新评论数）
+    // 简单起见，已在内联中显示，但每次加载都会重新获取
+}
+
+// =============================================================
+// 热门帖子
 // =============================================================
 function renderHotList() {
     const container = document.getElementById('hotContent');
     if (!container) return;
-    // 按点赞数降序取前5
-    const sorted = [...postsCache].sort((a, b) => (b.likes || 0) - (a.likes || 0));
-    const top = sorted.slice(0, 5);
-    if (!top.length) {
-        container.innerHTML = '<p style="color:rgba(255,255,255,0.3);">暂无文章</p>';
-        return;
-    }
+    const sorted = [...postsCache].sort((a,b) => (b.likes||0) - (a.likes||0));
+    const top = sorted.slice(0,5);
+    if (!top.length) { container.innerHTML = '<p style="color:rgba(255,255,255,0.2);font-size:0.9rem;">暂无帖子</p>'; return; }
     let html = '';
-    top.forEach((p, index) => {
-        const num = index + 1;
-        const emoji = num === 1 ? '🥇' : num === 2 ? '🥈' : num === 3 ? '🥉' : `#${num}`;
-        html += `
-            <div class="hot-item">
-                <a href="#" onclick="showPost('${p.id}');return false;">
-                    <span><span class="hot-num">${emoji}</span> ${p.title}</span>
-                    <span>❤️ ${p.likes || 0}</span>
-                </a>
-            </div>
-        `;
+    top.forEach((p, i) => {
+        const emoji = i===0?'🥇':i===1?'🥈':i===2?'🥉':`#${i+1}`;
+        html += `<div class="hot-item"><a href="#" onclick="showPost('${p.id}');return false;"><span><span class="hot-num">${emoji}</span> ${p.title}</span><span>❤️ ${p.likes||0}</span></a></div>`;
     });
     container.innerHTML = html;
 }
 
 // =============================================================
-// 渲染文章列表
-// =============================================================
-function renderPostList(posts) {
-    const list = document.getElementById('postList');
-    if (!posts || posts.length === 0) {
-        list.innerHTML = `
-            <div class="empty-state">
-                <h3>📭 还没有文章</h3>
-                <p style="color:rgba(255,255,255,0.4);">登录后点击「发布新文章」或「新建话题」开始创作！</p>
-            </div>
-        `;
-        return;
-    }
-    const catMap = { tech: '科技', life: '生活', career: '职场' };
-    list.innerHTML = posts.map(p => {
-        const dateStr = formatDate(p.created_at);
-        const badgeText = catMap[p.category] || p.category;
-        const badgeClass = (p.category === 'tech' || p.category === 'life' || p.category === 'career') ? `badge ${p.category}` : 'badge topic';
-        return `
-            <div class="post-card">
-                <img src="${p.cover_image || 'https://picsum.photos/seed/'+p.id+'/800/400'}" alt="${p.title}" />
-                <h3>${p.title}</h3>
-                <div class="meta">${dateStr} · <span class="${badgeClass}">${badgeText}</span></div>
-                <p>${p.excerpt || (p.content ? p.content.replace(/<[^>]+>/g,'').slice(0,80)+'...' : '')}</p>
-                <div class="actions">
-                    <span class="like-btn" onclick="toggleLike('${p.id}')" id="like-btn-${p.id}">❤️ <span id="like-count-${p.id}">${p.likes || 0}</span></span>
-                    <span>👁️ ${p.views || 0}</span>
-                </div>
-                <button class="btn-read" onclick="showPost('${p.id}')">阅读全文 →</button>
-            </div>
-        `;
-    }).join('');
-}
-
-// =============================================================
-// 显示文章详情
+// 显示帖子详情
 // =============================================================
 async function showPost(postId) {
-    let post = postsCache.find(p => p.id === postId);
-    if (!post) { alert('文章不存在'); return; }
+    const post = postsCache.find(p => p.id === postId);
+    if (!post) { alert('帖子不存在'); return; }
 
     document.getElementById('postList').style.display = 'none';
     const area = document.getElementById('detailArea');
     area.classList.remove('hidden');
-    const dateStr = formatDate(post.created_at);
 
     area.innerHTML = `
         <div class="post-content">
             <button class="back-btn" onclick="backToList()">← 返回列表</button>
-            <h1>${post.title}</h1>
-            <p style="color:rgba(255,255,255,0.4);font-size:0.9rem;">${dateStr} · 作者：${post.author_name || '匿名'} · 阅读 ${post.views || 0}</p>
-            <div style="display:flex;align-items:center;gap:20px;margin:12px 0;">
-                <span style="cursor:pointer;" onclick="toggleLike('${postId}')" id="like-btn-detail-${postId}">❤️ <span id="like-count-detail-${postId}">${post.likes || 0}</span></span>
-                <span>👁️ ${post.views || 0}</span>
+            <h1 style="font-size:1.6rem;">${post.title}</h1>
+            <div style="color:rgba(255,255,255,0.4);font-size:0.9rem;">
+                <span class="post-author">${post.author_name || '匿名'}</span>
+                <span class="post-time">${formatTime(post.created_at)}</span>
+                <span style="margin-left:12px;">👁️ ${post.views || 0}</span>
             </div>
-            <div>${post.content}</div>
-            <hr style="border-color:#333;margin:20px 0;" />
-            <h3>💬 评论</h3>
-            <div id="commentsArea"><p style="color:rgba(255,255,255,0.3);">⏳ 加载中...</p></div>
+            <div class="post-body">${post.content}</div>
+            <div class="post-actions">
+                <span class="like-btn" onclick="toggleLike('${postId}')" id="like-btn-detail-${postId}">❤️ <span id="like-count-detail-${postId}">${post.likes || 0}</span></span>
+                <span>💬 回复 <span id="reply-count">0</span></span>
+            </div>
+            <hr style="border-color:#333;margin:16px 0;" />
+            <h3 style="margin-bottom:12px;">💬 全部回复</h3>
+            <div id="commentsArea"><p style="color:rgba(255,255,255,0.3);">加载中...</p></div>
             ${currentUser ? `
-                <textarea id="commentInput" rows="3" maxlength="2000" placeholder="写下你的评论..."></textarea>
-                <button class="btn" onclick="publishComment('${postId}')" id="commentSubmitBtn">发表评论</button>
-            ` : '<p style="color:rgba(255,255,255,0.3);margin-top:12px;">登录后即可评论</p>'}
+                <div style="margin-top:16px;">
+                    <textarea id="commentInput" rows="3" maxlength="2000" placeholder="写下你的回复..."></textarea>
+                    <button class="btn" onclick="publishComment('${postId}')" id="commentSubmitBtn" style="margin-top:8px;">发表回复</button>
+                </div>
+            ` : '<p style="color:rgba(255,255,255,0.3);margin-top:12px;">登录后即可回复</p>'}
         </div>
     `;
 
-    await loadComments(postId);
+    // 加载回复
+    try {
+        const snap = await db.collection('comments').where('post_id','==',postId).orderBy('created_at','asc').get();
+        const areaC = document.getElementById('commentsArea');
+        const replyCount = document.getElementById('reply-count');
+        if (snap.empty) {
+            areaC.innerHTML = '<p style="color:rgba(255,255,255,0.3);">还没有回复，来抢沙发！</p>';
+            if (replyCount) replyCount.textContent = '0';
+        } else {
+            let html = '';
+            snap.forEach(doc => {
+                const d = doc.data();
+                const t = d.created_at && d.created_at.toDate ? d.created_at.toDate().toLocaleString() : '';
+                html += `<div class="reply-item"><span class="reply-author">${d.username || '用户'}</span><span class="reply-time">${t}</span><div class="reply-content">${d.content}</div></div>`;
+            });
+            areaC.innerHTML = html;
+            if (replyCount) replyCount.textContent = snap.size;
+        }
+    } catch(e) { console.error(e); }
+
+    // 增加浏览量
     try {
         await db.collection('posts').doc(postId).update({ views: firebase.firestore.FieldValue.increment(1) });
         post.views = (post.views || 0) + 1;
-    } catch (e) {}
+    } catch(e) {}
     await updateLikeUI(postId);
     window.scrollTo({ top: 0 });
 }
 
 // =============================================================
-// 评论功能
+// 回复功能
 // =============================================================
-async function loadComments(postId) {
-    const area = document.getElementById('commentsArea');
-    if (!area) return;
-    try {
-        const snapshot = await db.collection('comments')
-            .where('post_id', '==', postId)
-            .orderBy('created_at', 'asc')
-            .get();
-        if (snapshot.empty) {
-            area.innerHTML = '<p style="color:rgba(255,255,255,0.3);">💬 暂无评论，来抢沙发吧！</p>';
-            return;
-        }
-        let html = '';
-        snapshot.forEach(doc => {
-            const data = doc.data();
-            const date = data.created_at && data.created_at.toDate ?
-                data.created_at.toDate().toLocaleString() :
-                '';
-            html += `<div class="comment-item"><strong>${data.username || '用户'}</strong><span class="c-time">${date}</span><p>${data.content}</p></div>`;
-        });
-        area.innerHTML = html;
-    } catch (e) {
-        console.error('加载评论失败:', e);
-        area.innerHTML = '<p style="color:#ef4444;">❌ 加载评论失败</p>';
-    }
-}
-
 async function publishComment(postId) {
-    if (isSubmitting) {
-        alert('请勿重复提交，稍后再试');
-        return;
-    }
+    if (isSubmitting) { alert('请勿重复提交'); return; }
     const now = Date.now();
-    if (now - lastSubmitTime < 5000) {
-        alert('操作过于频繁，请等待5秒后再试');
-        return;
-    }
+    if (now - lastSubmitTime < 5000) { alert('操作频繁，请等待5秒'); return; }
     const input = document.getElementById('commentInput');
     if (!input) return;
     const content = input.value.trim();
-    if (!content) { alert('请输入评论内容'); return; }
-    if (content.length > 2000) { alert('评论内容不能超过2000字符'); return; }
+    if (!content) { alert('请输入回复内容'); return; }
+    if (content.length > 2000) { alert('回复不能超过2000字符'); return; }
     if (!currentUser) { alert('请先登录'); return; }
 
-    isSubmitting = true;
-    lastSubmitTime = now;
+    isSubmitting = true; lastSubmitTime = now;
     const btn = document.getElementById('commentSubmitBtn');
     if (btn) btn.disabled = true;
 
@@ -585,14 +573,10 @@ async function publishComment(postId) {
             created_at: firebase.firestore.FieldValue.serverTimestamp()
         });
         input.value = '';
-        await loadComments(postId);
-        alert('评论成功！');
-    } catch (e) {
-        alert('评论失败：' + e.message);
-    } finally {
-        isSubmitting = false;
-        if (btn) btn.disabled = false;
-    }
+        showPost(postId); // 刷新
+        alert('回复成功！');
+    } catch(e) { alert('回复失败：'+e.message); }
+    finally { isSubmitting = false; if(btn) btn.disabled = false; }
 }
 
 function backToList() {
@@ -603,29 +587,10 @@ function backToList() {
 }
 
 // =============================================================
-// 搜索和分类（绑定事件）
-// =============================================================
-function searchPosts() {
-    const keyword = document.getElementById('searchInput').value.trim();
-    loadPosts(currentCategory, keyword);
-}
-
-// 初始分类按钮事件（固定分类 + 动态话题由 loadTopics 绑定）
-document.querySelectorAll('.cat-btn:not(#topicCats .cat-btn)').forEach(btn => {
-    btn.addEventListener('click', function() {
-        const cat = this.dataset.cat;
-        setCategory(cat);
-    });
-});
-
-// =============================================================
-// 🔥 点赞功能
+// 点赞
 // =============================================================
 async function toggleLike(postId) {
-    if (!currentUser) {
-        alert('请先登录');
-        return;
-    }
+    if (!currentUser) { alert('请先登录'); return; }
     const likeRef = db.collection('likes').doc(`${currentUser.uid}_${postId}`);
     const postRef = db.collection('posts').doc(postId);
     try {
@@ -633,61 +598,47 @@ async function toggleLike(postId) {
         if (doc.exists) {
             await likeRef.delete();
             await postRef.update({ likes: firebase.firestore.FieldValue.increment(-1) });
-            const post = postsCache.find(p => p.id === postId);
-            if (post) post.likes = Math.max((post.likes || 0) - 1, 0);
+            const p = postsCache.find(p => p.id === postId);
+            if (p) p.likes = Math.max((p.likes||0)-1,0);
         } else {
-            await likeRef.set({
-                userId: currentUser.uid,
-                postId: postId,
-                createdAt: firebase.firestore.FieldValue.serverTimestamp()
-            });
+            await likeRef.set({ userId: currentUser.uid, postId, createdAt: firebase.firestore.FieldValue.serverTimestamp() });
             await postRef.update({ likes: firebase.firestore.FieldValue.increment(1) });
-            const post = postsCache.find(p => p.id === postId);
-            if (post) post.likes = (post.likes || 0) + 1;
+            const p = postsCache.find(p => p.id === postId);
+            if (p) p.likes = (p.likes||0)+1;
         }
         await updateLikeUI(postId);
-        renderHotList(); // 更新热门排行
-    } catch (err) {
-        console.error('点赞操作失败:', err);
-        alert('操作失败，请重试');
-    }
+        renderHotList();
+    } catch(e) { console.error(e); alert('操作失败'); }
 }
 
 async function updateLikeUI(postId) {
-    const post = postsCache.find(p => p.id === postId);
-    if (!post) return;
-    const countEl = document.getElementById(`like-count-${postId}`);
-    if (countEl) countEl.textContent = post.likes || 0;
-    const countDetail = document.getElementById(`like-count-detail-${postId}`);
-    if (countDetail) countDetail.textContent = post.likes || 0;
+    const p = postsCache.find(p => p.id === postId);
+    if (!p) return;
+    ['','-detail'].forEach(suffix => {
+        const el = document.getElementById(`like-count${suffix}-${postId}`);
+        if (el) el.textContent = p.likes || 0;
+    });
     if (currentUser) {
         const likeRef = db.collection('likes').doc(`${currentUser.uid}_${postId}`);
         const doc = await likeRef.get();
-        const hearts = document.querySelectorAll(`[id^="like-btn-"]`);
-        hearts.forEach(el => {
-            if (el.id === `like-btn-${postId}` || el.id === `like-btn-detail-${postId}`) {
-                el.style.color = doc.exists ? '#ef4444' : '';
-            }
+        document.querySelectorAll(`#like-btn${suffix}-${postId}`).forEach(el => {
+            el.style.color = doc.exists ? '#ef4444' : '';
         });
     }
 }
-
 async function updateAllLikes() {
     if (!currentUser) return;
-    for (const post of postsCache) {
-        const likeRef = db.collection('likes').doc(`${currentUser.uid}_${post.id}`);
+    for (const p of postsCache) {
+        const likeRef = db.collection('likes').doc(`${currentUser.uid}_${p.id}`);
         const doc = await likeRef.get();
-        const hearts = document.querySelectorAll(`[id^="like-btn-"]`);
-        hearts.forEach(el => {
-            if (el.id === `like-btn-${post.id}` || el.id === `like-btn-detail-${post.id}`) {
-                el.style.color = doc.exists ? '#ef4444' : '';
-            }
+        document.querySelectorAll(`#like-btn-${p.id}, #like-btn-detail-${p.id}`).forEach(el => {
+            el.style.color = doc.exists ? '#ef4444' : '';
         });
     }
 }
 
 // =============================================================
-// 发布文章（含话题选择）
+// 发布帖子
 // =============================================================
 function togglePublish() {
     const form = document.getElementById('publishForm');
@@ -695,209 +646,163 @@ function togglePublish() {
 }
 
 async function publishPost() {
-    if (isSubmitting) {
-        alert('请勿重复提交，稍后再试');
-        return;
-    }
+    if (isSubmitting) { alert('请勿重复提交'); return; }
     const now = Date.now();
-    if (now - lastSubmitTime < 10000) {
-        alert('操作过于频繁，请等待10秒后再试');
-        return;
-    }
+    if (now - lastSubmitTime < 10000) { alert('操作频繁，请等待10秒'); return; }
     if (!currentUser) { alert('请先登录'); return; }
     const title = document.getElementById('newTitle').value.trim();
     const content = document.getElementById('newContent').value.trim();
     const excerpt = document.getElementById('newExcerpt').value.trim();
     const category = document.getElementById('newCategory').value;
-
     if (!title) { alert('请输入标题'); return; }
     if (title.length > 100) { alert('标题不能超过100字符'); return; }
-    if (!content) { alert('请输入正文内容'); return; }
-    if (content.length > 50000) { alert('正文内容不能超过50000字符'); return; }
-    if (excerpt.length > 300) { alert('摘要不能超过300字符'); return; }
+    if (!content) { alert('请输入正文'); return; }
+    if (content.length > 50000) { alert('正文过长'); return; }
+    if (excerpt.length > 300) { alert('摘要过长'); return; }
 
-    isSubmitting = true;
-    lastSubmitTime = now;
+    isSubmitting = true; lastSubmitTime = now;
     const btn = document.getElementById('publishBtn');
     if (btn) btn.disabled = true;
 
     try {
         await db.collection('posts').add({
             title, content, excerpt, category,
-            cover_image: 'https://picsum.photos/seed/' + Date.now() + '/800/400',
+            cover_image: 'https://picsum.photos/seed/'+Date.now()+'/800/400',
             author_name: currentUser.displayName || currentUser.email,
-            views: 0,
-            likes: 0,
+            views: 0, likes: 0,
             created_at: firebase.firestore.FieldValue.serverTimestamp()
         });
-        alert('发布成功！🎉');
+        alert('发帖成功！🎉');
         document.getElementById('newTitle').value = '';
         document.getElementById('newContent').value = '';
         document.getElementById('newExcerpt').value = '';
         loadPosts(currentCategory);
-    } catch (e) {
-        alert('发布失败：' + e.message);
-    } finally {
-        isSubmitting = false;
-        if (btn) btn.disabled = false;
-    }
+    } catch(e) { alert('发帖失败：'+e.message); }
+    finally { isSubmitting = false; if(btn) btn.disabled = false; }
+}
+
+// =============================================================
+// 搜索
+// =============================================================
+function searchPosts() {
+    const keyword = document.getElementById('searchInput').value.trim();
+    loadPosts(currentCategory, keyword);
 }
 
 // =============================================================
 // 认证
 // =============================================================
-function openModal() { document.getElementById('authModal').classList.add('active'); }
-function closeModal() { document.getElementById('authModal').classList.remove('active'); }
-document.getElementById('authModal').addEventListener('click', function(e) {
-    if (e.target === this) closeModal();
-});
-document.addEventListener('keydown', function(e) {
-    if (e.key === 'Escape') closeModal();
-});
+function openModal(){document.getElementById('authModal').classList.add('active');}
+function closeModal(){document.getElementById('authModal').classList.remove('active');}
+document.getElementById('authModal').addEventListener('click',function(e){if(e.target===this)closeModal();});
+document.addEventListener('keydown',function(e){if(e.key==='Escape')closeModal();});
 
-function switchTab(tab) {
-    document.querySelectorAll('.modal-tabs button').forEach(b => b.classList.toggle('active', b.dataset.tab === tab));
-    document.getElementById('loginForm').classList.toggle('active', tab === 'login');
-    document.getElementById('registerForm').classList.toggle('active', tab === 'register');
-    document.getElementById('modalTitle').textContent = tab === 'login' ? '欢迎回来' : '创建账号';
-    document.getElementById('modalSub').textContent = tab === 'login' ? '登录你的账号' : '加入窍某博客网社区';
+function switchTab(tab){
+    document.querySelectorAll('.modal-tabs button').forEach(b=>b.classList.toggle('active',b.dataset.tab===tab));
+    document.getElementById('loginForm').classList.toggle('active',tab==='login');
+    document.getElementById('registerForm').classList.toggle('active',tab==='register');
+    document.getElementById('modalTitle').textContent=tab==='login'?'欢迎回来':'创建账号';
+    document.getElementById('modalSub').textContent=tab==='login'?'登录你的账号':'加入窍某论坛';
 }
 
-async function handleLogin(e) {
+async function handleLogin(e){
     e.preventDefault();
-    const email = document.getElementById('loginEmail').value.trim();
-    const pass = document.getElementById('loginPassword').value.trim();
-    if (!email || !pass) { alert('请填写完整'); return; }
-    try {
-        await auth.signInWithEmailAndPassword(email, pass);
-        closeModal();
-        loadPosts(currentCategory);
-    } catch (err) { alert(err.message); }
+    const email=document.getElementById('loginEmail').value.trim();
+    const pass=document.getElementById('loginPassword').value.trim();
+    if(!email||!pass){alert('请填写完整');return;}
+    try{await auth.signInWithEmailAndPassword(email,pass);closeModal();loadPosts(currentCategory);}
+    catch(err){alert(err.message);}
 }
-
-async function handleRegister(e) {
+async function handleRegister(e){
     e.preventDefault();
-    const name = document.getElementById('regName').value.trim();
-    const email = document.getElementById('regEmail').value.trim();
-    const pass = document.getElementById('regPassword').value;
-    const confirm = document.getElementById('regConfirm').value;
-    if (!name || !email || !pass || !confirm) { alert('请填写完整'); return; }
-    if (pass !== confirm) { alert('密码不一致'); return; }
-    if (pass.length < 6) { alert('密码至少6位'); return; }
-    if (name.length > 30) { alert('昵称不能超过30字符'); return; }
-    try {
-        const cred = await auth.createUserWithEmailAndPassword(email, pass);
-        await cred.user.updateProfile({ displayName: name });
-        closeModal();
-        alert('注册成功！');
-        loadPosts(currentCategory);
-    } catch (err) { alert(err.message); }
+    const name=document.getElementById('regName').value.trim();
+    const email=document.getElementById('regEmail').value.trim();
+    const pass=document.getElementById('regPassword').value;
+    const confirm=document.getElementById('regConfirm').value;
+    if(!name||!email||!pass||!confirm){alert('请填写完整');return;}
+    if(pass!==confirm){alert('密码不一致');return;}
+    if(pass.length<6){alert('密码至少6位');return;}
+    if(name.length>30){alert('昵称过长');return;}
+    try{
+        const cred=await auth.createUserWithEmailAndPassword(email,pass);
+        await cred.user.updateProfile({displayName:name});
+        closeModal();alert('注册成功！');loadPosts(currentCategory);
+    }catch(err){alert(err.message);}
 }
-
-async function handleSocialLogin(provider) {
-    if (isPopupOpen) return;
-    isPopupOpen = true;
-    let prov;
-    if (provider === 'google') prov = new firebase.auth.GoogleAuthProvider();
-    else if (provider === 'github') prov = new firebase.auth.GithubAuthProvider();
-    else return;
-    try {
-        const result = await auth.signInWithPopup(prov);
-        const user = result.user;
-        const userRef = db.collection('users').doc(user.uid);
-        const doc = await userRef.get();
-        if (!doc.exists) {
+async function handleSocialLogin(provider){
+    if(isPopupOpen)return;
+    isPopupOpen=true;
+    let prov=provider==='google'?new firebase.auth.GoogleAuthProvider():provider==='github'?new firebase.auth.GithubAuthProvider():null;
+    if(!prov)return;
+    try{
+        const result=await auth.signInWithPopup(prov);
+        const user=result.user;
+        const userRef=db.collection('users').doc(user.uid);
+        const doc=await userRef.get();
+        if(!doc.exists){
             await userRef.set({
-                username: user.displayName || (provider === 'google' ? 'Google用户' : 'GitHub用户'),
-                email: user.email,
-                avatar_url: user.photoURL || null,
-                created_at: firebase.firestore.FieldValue.serverTimestamp()
+                username:user.displayName||(provider==='google'?'Google用户':'GitHub用户'),
+                email:user.email,
+                avatar_url:user.photoURL||null,
+                created_at:firebase.firestore.FieldValue.serverTimestamp()
             });
         }
-        closeModal();
-        loadPosts(currentCategory);
-    } catch (err) {
-        if (err.code !== 'auth/cancelled-popup-request') {
-            alert('登录失败：' + err.message);
-        }
-    } finally { isPopupOpen = false; }
+        closeModal();loadPosts(currentCategory);
+    }catch(err){if(err.code!=='auth/cancelled-popup-request')alert('登录失败：'+err.message);}
+    finally{isPopupOpen=false;}
 }
+async function logout(){await auth.signOut();loadPosts(currentCategory);}
 
-async function logout() {
-    await auth.signOut();
-    loadPosts(currentCategory);
-}
-
-// =============================================================
-// 登录状态监听 & 管理员入口
-// =============================================================
-const ADMIN_UID = "FEQmE2qlzwQqmIgKqU3VFuaYh602";
-
-auth.onAuthStateChanged(user => {
-    currentUser = user;
-    const loginBtn = document.getElementById('loginBtn');
-    const avatar = document.getElementById('userAvatar');
-    const nameEl = document.getElementById('userName');
-    const logoutBtn = document.getElementById('logoutBtn');
-    const adminLink = document.getElementById('adminLink');
-
-    if (user) {
-        loginBtn.style.display = 'none';
+const ADMIN_UID="FEQmE2qlzwQqmIgKqU3VFuaYh602";
+auth.onAuthStateChanged(user=>{
+    currentUser=user;
+    const loginBtn=document.getElementById('loginBtn');
+    const avatar=document.getElementById('userAvatar');
+    const nameEl=document.getElementById('userName');
+    const logoutBtn=document.getElementById('logoutBtn');
+    const adminLink=document.getElementById('adminLink');
+    if(user){
+        loginBtn.style.display='none';
         avatar.classList.remove('hidden');
-        avatar.src = user.photoURL || 'https://ui-avatars.com/api/?name=' + encodeURIComponent(user.displayName || user.email) + '&background=6d5bff&color=fff&size=36';
+        avatar.src=user.photoURL||'https://ui-avatars.com/api/?name='+encodeURIComponent(user.displayName||user.email)+'&background=6d5bff&color=fff&size=36';
         nameEl.classList.remove('hidden');
-        nameEl.textContent = user.displayName || user.email;
+        nameEl.textContent=user.displayName||user.email;
         logoutBtn.classList.remove('hidden');
-        if (user.uid === ADMIN_UID) adminLink.style.display = 'inline-block';
-        else adminLink.style.display = 'none';
-    } else {
-        loginBtn.style.display = 'inline-block';
+        adminLink.style.display=user.uid===ADMIN_UID?'inline-block':'none';
+    }else{
+        loginBtn.style.display='inline-block';
         avatar.classList.add('hidden');
         nameEl.classList.add('hidden');
         logoutBtn.classList.add('hidden');
-        adminLink.style.display = 'none';
+        adminLink.style.display='none';
     }
 });
 
-// =============================================================
-// 主题切换
-// =============================================================
-function toggleTheme() {
-    const body = document.body;
-    const btn = document.getElementById('themeToggle');
-    if (body.style.background === '#f0f2f8') {
-        body.style.background = '#0b0e1a';
-        body.style.color = '#e8edf5';
-        btn.textContent = '🌙';
-        document.querySelectorAll('.post-card, .publish-form, .post-content, .modal-box').forEach(el => {
-            el.style.background = 'rgba(255,255,255,0.04)';
-        });
-    } else {
-        body.style.background = '#f0f2f8';
-        body.style.color = '#1a1a2e';
-        btn.textContent = '☀️';
-        document.querySelectorAll('.post-card, .publish-form, .post-content, .modal-box').forEach(el => {
-            el.style.background = 'rgba(255,255,255,0.7)';
-        });
+function toggleTheme(){
+    const body=document.body;
+    const btn=document.getElementById('themeToggle');
+    if(body.style.background==='#f0f2f8'){
+        body.style.background='#0b0e1a';body.style.color='#e8edf5';btn.textContent='🌙';
+        document.querySelectorAll('.post-card,.publish-form,.post-content,.modal-box').forEach(el=>el.style.background='rgba(255,255,255,0.04)');
+    }else{
+        body.style.background='#f0f2f8';body.style.color='#1a1a2e';btn.textContent='☀️';
+        document.querySelectorAll('.post-card,.publish-form,.post-content,.modal-box').forEach(el=>el.style.background='rgba(255,255,255,0.7)');
     }
 }
 
 // =============================================================
 // 初始化
 // =============================================================
-window.onload = function() {
-    loadTopics().then(() => {
-        loadPosts('all', '');
-    });
+window.onload = function(){
+    loadTopics().then(()=>{ loadPosts('all',''); });
 };
 
-// 暴露全局函数
+// 暴露全局
 window.searchPosts = searchPosts;
 window.showPost = showPost;
 window.backToList = backToList;
 window.publishComment = publishComment;
 window.toggleLike = toggleLike;
-window.updateLikeUI = updateLikeUI;
 window.publishPost = publishPost;
 window.togglePublish = togglePublish;
 window.openNewTopic = openNewTopic;
