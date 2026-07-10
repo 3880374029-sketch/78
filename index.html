@@ -23,17 +23,900 @@
     <script type="text/javascript" src="//translate.google.com/translate_a/element.js?cb=googleTranslateElementInit">
     </script>
 
-    <!-- ===== 样式（保持不变，略... 实际需要完整样式，这里为了节省篇幅只保留关键部分） ===== -->
     <style>
-        /* ===== 完整样式（与之前完全相同，但为了篇幅，这里省略，实际使用请复制你原来的完整样式） ===== */
-        /* 注意：你原来有完整的样式，我在这直接引用，实际回答中会包含完整样式 */
-        /* 因为文字限制，我会在最终代码中提供完整样式 */
+        /* ============================================================
+                   完整样式
+                   ============================================================ */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', sans-serif;
+            min-height: 100vh;
+            background: #0b0e1a;
+            color: #e8edf5;
+            line-height: 1.8;
+            overflow-x: hidden;
+            transition: background 0.3s, color 0.3s;
+        }
+        .bg-layer {
+            position: fixed;
+            inset: 0;
+            z-index: -2;
+            background:
+                radial-gradient(ellipse at 20% 50%, rgba(88, 50, 200, 0.45) 0%, transparent 60%),
+                radial-gradient(ellipse at 80% 20%, rgba(30, 80, 220, 0.40) 0%, transparent 50%),
+                radial-gradient(ellipse at 50% 100%, rgba(180, 60, 220, 0.25) 0%, transparent 50%),
+                linear-gradient(145deg, #0b0e1a 0%, #151b30 40%, #1a1040 100%);
+        }
+        .bg-grid {
+            position: fixed;
+            inset: 0;
+            z-index: -1;
+            background-image:
+                linear-gradient(rgba(255, 255, 255, 0.02) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(255, 255, 255, 0.02) 1px, transparent 1px);
+            background-size: 60px 60px;
+            pointer-events: none;
+        }
+        .container {
+            max-width: 1280px;
+            margin: 0 auto;
+            padding: 0 24px;
+        }
+
+        /* 头部 */
+        header {
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            backdrop-filter: blur(18px);
+            -webkit-backdrop-filter: blur(18px);
+            background: rgba(11, 14, 26, 0.65);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+            padding: 0.9rem 0;
+        }
+        nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 14px;
+        }
+        nav h1 {
+            margin: 0;
+            font-size: 1.7rem;
+            font-weight: 800;
+            letter-spacing: 1px;
+            background: linear-gradient(135deg, #c4b5fd, #818cf8, #60a5fa);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        .nav-controls {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+        .search-box {
+            padding: 10px 22px;
+            border: 1px solid rgba(255, 255, 255, 0.10);
+            border-radius: 40px;
+            width: 200px;
+            font-size: 0.9rem;
+            background: rgba(255, 255, 255, 0.06);
+            color: #e8edf5;
+            outline: none;
+            transition: all 0.35s;
+        }
+        .search-box::placeholder {
+            color: rgba(255, 255, 255, 0.35);
+        }
+        .search-box:focus {
+            border-color: rgba(130, 100, 255, 0.5);
+            background: rgba(255, 255, 255, 0.10);
+        }
+        #google_translate_element .goog-te-combo {
+            background: rgba(255, 255, 255, 0.06);
+            border: 1px solid rgba(255, 255, 255, 0.10);
+            color: #e8edf5;
+            padding: 8px 16px;
+            border-radius: 40px;
+            font-size: 0.85rem;
+            cursor: pointer;
+            outline: none;
+            max-width: 140px;
+        }
+        .goog-te-banner-frame {
+            display: none !important;
+        }
+        body {
+            top: 0 !important;
+        }
+        .skiptranslate {
+            display: none !important;
+        }
+        .theme-toggle {
+            background: rgba(255, 255, 255, 0.06);
+            border: 1px solid rgba(255, 255, 255, 0.10);
+            color: #e8edf5;
+            padding: 6px 12px;
+            border-radius: 30px;
+            cursor: pointer;
+            font-size: 1.2rem;
+            transition: all 0.3s;
+        }
+        .theme-toggle:hover {
+            background: rgba(255, 255, 255, 0.12);
+        }
+
+        /* 登录控件 */
+        .auth-section {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .auth-btn {
+            background: linear-gradient(135deg, #6d5bff, #8b5cf6);
+            color: #fff;
+            border: none;
+            padding: 6px 18px;
+            border-radius: 30px;
+            cursor: pointer;
+            font-size: 0.85rem;
+            font-weight: 600;
+            transition: all 0.3s;
+            box-shadow: 0 4px 16px rgba(109, 91, 255, 0.20);
+        }
+        .auth-btn:hover {
+            transform: scale(1.04);
+            box-shadow: 0 8px 30px rgba(109, 91, 255, 0.35);
+        }
+        .user-avatar {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 2px solid rgba(255, 255, 255, 0.15);
+            cursor: pointer;
+            display: none;
+        }
+        .user-name {
+            font-size: 0.85rem;
+            color: rgba(255, 255, 255, 0.6);
+            display: none;
+            cursor: pointer;
+            max-width: 80px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+        .logout-btn {
+            background: transparent;
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            color: rgba(255, 255, 255, 0.4);
+            padding: 4px 12px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 0.75rem;
+            transition: all 0.3s;
+            display: none;
+        }
+        .logout-btn:hover {
+            background: rgba(255, 0, 0, 0.1);
+            border-color: rgba(255, 0, 0, 0.3);
+            color: #ef4444;
+        }
+
+        .categories {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+        .cat-btn {
+            background: rgba(255, 255, 255, 0.06);
+            color: rgba(255, 255, 255, 0.5);
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            padding: 6px 18px;
+            border-radius: 30px;
+            cursor: pointer;
+            font-size: 0.85rem;
+            font-weight: 500;
+            transition: all 0.3s;
+        }
+        .cat-btn:hover {
+            background: rgba(255, 255, 255, 0.12);
+            color: #fff;
+        }
+        .cat-btn.active {
+            background: linear-gradient(135deg, #6d5bff, #8b5cf6);
+            color: #fff;
+            border-color: transparent;
+            box-shadow: 0 4px 20px rgba(109, 91, 255, 0.30);
+        }
+
+        /* Hero */
+        #hero {
+            text-align: center;
+            padding: 4.5rem 1.5rem 3.5rem;
+        }
+        #hero h2 {
+            font-size: 3rem;
+            font-weight: 800;
+            background: linear-gradient(135deg, #f0f0ff, #a5b4fc, #818cf8);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 0.5rem;
+        }
+        #hero p {
+            font-size: 1.15rem;
+            color: rgba(255, 255, 255, 0.4);
+            max-width: 580px;
+            margin: 0 auto;
+        }
+
+        .section-title {
+            text-align: center;
+            font-size: 1.8rem;
+            font-weight: 700;
+            margin: 2.4rem 0 2rem;
+            color: #e8edf5;
+        }
+        .section-title::after {
+            content: '';
+            display: block;
+            width: 60px;
+            height: 3px;
+            margin: 10px auto 0;
+            background: linear-gradient(90deg, #6d5bff, #8b5cf6);
+            border-radius: 10px;
+        }
+
+        .post-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+            gap: 2rem;
+        }
+
+        .post-card {
+            background: rgba(255, 255, 255, 0.04);
+            backdrop-filter: blur(16px);
+            border-radius: 20px;
+            overflow: hidden;
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.35);
+            transition: all 0.45s cubic-bezier(0.23, 1, 0.32, 1);
+            display: flex;
+            flex-direction: column;
+        }
+        .post-card:hover {
+            transform: translateY(-10px);
+            border-color: rgba(255, 255, 255, 0.12);
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.50);
+        }
+        .post-card img {
+            width: 100%;
+            height: 200px;
+            object-fit: cover;
+            transition: transform 0.5s ease;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+        }
+        .post-card:hover img {
+            transform: scale(1.03);
+        }
+        .post-info {
+            padding: 1.6rem 1.8rem 1.8rem;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+        }
+        .post-info h3 {
+            margin: 0 0 0.3rem;
+            font-size: 1.2rem;
+            font-weight: 700;
+            color: #f0f0ff;
+            line-height: 1.4;
+        }
+        .post-info .meta {
+            font-size: 0.8rem;
+            color: rgba(255, 255, 255, 0.35);
+            margin-bottom: 0.6rem;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+        .post-info .meta .badge {
+            padding: 0 14px;
+            border-radius: 30px;
+            font-size: 0.7rem;
+            font-weight: 600;
+            background: rgba(255, 255, 255, 0.06);
+            color: rgba(255, 255, 255, 0.5);
+            border: 1px solid rgba(255, 255, 255, 0.06);
+        }
+        .post-info .meta .badge.tech {
+            background: rgba(96, 165, 250, 0.15);
+            color: #93bbfc;
+        }
+        .post-info .meta .badge.life {
+            background: rgba(52, 211, 153, 0.12);
+            color: #6ee7b7;
+        }
+        .post-info .meta .badge.career {
+            background: rgba(251, 191, 36, 0.12);
+            color: #fcd34d;
+        }
+        .post-info p {
+            margin: 0.4rem 0 1rem;
+            color: rgba(255, 255, 255, 0.5);
+            flex: 1;
+            display: -webkit-box;
+            -webkit-line-clamp: 3;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+            font-size: 0.95rem;
+            line-height: 1.6;
+        }
+        .post-info .btn-read {
+            background: linear-gradient(135deg, #6d5bff, #8b5cf6);
+            color: #fff;
+            border: none;
+            padding: 0.65rem 1.8rem;
+            border-radius: 40px;
+            font-weight: 600;
+            font-size: 0.85rem;
+            cursor: pointer;
+            transition: all 0.35s;
+            align-self: flex-start;
+            margin-top: 6px;
+            box-shadow: 0 4px 16px rgba(109, 91, 255, 0.20);
+        }
+        .post-info .btn-read:hover {
+            transform: scale(1.04);
+            box-shadow: 0 8px 30px rgba(109, 91, 255, 0.35);
+        }
+
+        /* 文章详情 */
+        #post-container {
+            max-width: 1000px;
+            margin: 2rem auto;
+            padding: 0 24px;
+        }
+        .post-content {
+            display: none;
+            background: rgba(255, 255, 255, 0.04);
+            backdrop-filter: blur(20px);
+            padding: 2.8rem 3rem;
+            border-radius: 24px;
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.45);
+        }
+        .post-content.active {
+            display: block;
+            animation: fadeSlide 0.5s ease;
+        }
+        @keyframes fadeSlide {
+            0% {
+                opacity: 0;
+                transform: translateY(24px);
+            }
+            100% {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        .post-content h1 {
+            font-size: 2.2rem;
+            margin-top: 0;
+            color: #f0f0ff;
+        }
+        .post-content h2 {
+            font-size: 1.4rem;
+            margin: 1.8rem 0 0.8rem;
+            color: #c4b5fd;
+            border-left: 4px solid #818cf8;
+            padding-left: 1rem;
+        }
+        .post-content p {
+            margin: 0.8rem 0;
+            color: rgba(255, 255, 255, 0.7);
+            line-height: 1.9;
+        }
+        .post-content ul,
+        .post-content ol {
+            margin: 0.6rem 0 1rem 1.8rem;
+            color: rgba(255, 255, 255, 0.7);
+        }
+        .post-content blockquote {
+            border-left: 4px solid #818cf8;
+            padding: 0.5rem 1.5rem;
+            margin: 1rem 0;
+            background: rgba(255, 255, 255, 0.04);
+            border-radius: 0 12px 12px 0;
+            color: rgba(255, 255, 255, 0.6);
+            font-style: italic;
+        }
+        .post-content .video-wrapper {
+            position: relative;
+            padding-bottom: 56.25%;
+            height: 0;
+            overflow: hidden;
+            margin: 1.8rem 0;
+            border-radius: 16px;
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.40);
+            background: #000;
+        }
+        .post-content .video-wrapper iframe {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            border: 0;
+        }
+        .post-content .back-btn {
+            background: rgba(255, 255, 255, 0.06);
+            color: rgba(255, 255, 255, 0.5);
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            padding: 0.6rem 1.8rem;
+            border-radius: 40px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s;
+            margin-bottom: 1.8rem;
+            font-size: 0.9rem;
+            backdrop-filter: blur(4px);
+        }
+        .post-content .back-btn:hover {
+            background: rgba(255, 255, 255, 0.12);
+            color: #fff;
+            transform: translateX(-4px);
+        }
+        .post-content .read-time {
+            font-size: 0.85rem;
+            color: rgba(255, 255, 255, 0.3);
+            margin: 0 0 1rem 0;
+        }
+
+        /* 模态框 */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            z-index: 1000;
+            background: rgba(0, 0, 0, 0.7);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            justify-content: center;
+            align-items: center;
+        }
+        .modal-overlay.active {
+            display: flex;
+        }
+        .modal-box {
+            background: rgba(20, 24, 50, 0.95);
+            border-radius: 24px;
+            padding: 2.5rem 2.8rem;
+            max-width: 480px;
+            width: 100%;
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            box-shadow: 0 30px 80px rgba(0, 0, 0, 0.5);
+            position: relative;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+        .modal-box .close-modal {
+            position: absolute;
+            top: 16px;
+            right: 20px;
+            background: none;
+            border: none;
+            color: rgba(255, 255, 255, 0.4);
+            font-size: 1.8rem;
+            cursor: pointer;
+            transition: color 0.3s;
+            line-height: 1;
+        }
+        .modal-box .close-modal:hover {
+            color: #fff;
+        }
+        .modal-box h2 {
+            text-align: center;
+            margin-bottom: 0.5rem;
+            font-size: 1.6rem;
+            font-weight: 700;
+            color: #f0f0ff;
+        }
+        .modal-box .subtitle {
+            text-align: center;
+            color: rgba(255, 255, 255, 0.4);
+            font-size: 0.9rem;
+            margin-bottom: 1.8rem;
+        }
+        .modal-tabs {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 1.8rem;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+            padding-bottom: 0.8rem;
+        }
+        .modal-tabs button {
+            flex: 1;
+            background: transparent;
+            border: none;
+            padding: 8px 0;
+            font-size: 0.95rem;
+            font-weight: 600;
+            color: rgba(255, 255, 255, 0.4);
+            cursor: pointer;
+            transition: all 0.3s;
+            border-bottom: 2px solid transparent;
+        }
+        .modal-tabs button.active {
+            color: #f0f0ff;
+            border-bottom-color: #818cf8;
+        }
+        .auth-form {
+            display: none;
+            flex-direction: column;
+            gap: 16px;
+        }
+        .auth-form.active {
+            display: flex;
+        }
+        .auth-form label {
+            font-size: 0.85rem;
+            font-weight: 500;
+            color: rgba(255, 255, 255, 0.6);
+        }
+        .auth-form input {
+            padding: 12px 16px;
+            border-radius: 12px;
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            background: rgba(255, 255, 255, 0.06);
+            color: #e8edf5;
+            font-size: 0.95rem;
+            outline: none;
+            transition: border-color 0.3s;
+            width: 100%;
+        }
+        .auth-form input:focus {
+            border-color: rgba(130, 100, 255, 0.5);
+        }
+        .auth-form .submit-btn {
+            background: linear-gradient(135deg, #6d5bff, #8b5cf6);
+            color: #fff;
+            border: none;
+            padding: 12px;
+            border-radius: 12px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            margin-top: 4px;
+        }
+        .auth-form .submit-btn:hover {
+            transform: scale(1.02);
+            box-shadow: 0 8px 30px rgba(109, 91, 255, 0.35);
+        }
+        .divider {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            margin: 8px 0;
+            color: rgba(255, 255, 255, 0.3);
+            font-size: 0.85rem;
+        }
+        .divider::before,
+        .divider::after {
+            content: '';
+            flex: 1;
+            height: 1px;
+            background: rgba(255, 255, 255, 0.06);
+        }
+
+        .social-btn {
+            width: 100%;
+            padding: 10px;
+            border-radius: 12px;
+            border: none;
+            font-size: 0.95rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+        .social-btn:hover {
+            transform: scale(1.02);
+        }
+        .google-btn {
+            background: #ffffff;
+            color: #333;
+        }
+        .google-btn:hover {
+            background: #f0f0f0;
+        }
+        .github-btn {
+            background: #24292e;
+            color: #fff;
+        }
+        .github-btn:hover {
+            background: #1a1e22;
+        }
+
+        .auth-switch {
+            text-align: center;
+            font-size: 0.85rem;
+            color: rgba(255, 255, 255, 0.4);
+            margin-top: 8px;
+        }
+        .auth-switch a {
+            color: #818cf8;
+            cursor: pointer;
+            text-decoration: none;
+            font-weight: 600;
+        }
+        .auth-switch a:hover {
+            text-decoration: underline;
+        }
+
+        .publish-area {
+            margin: 1.5rem 0 2rem;
+        }
+        .publish-toggle {
+            background: linear-gradient(135deg, #6d5bff, #8b5cf6);
+            color: #fff;
+            border: none;
+            padding: 10px 24px;
+            border-radius: 30px;
+            cursor: pointer;
+            font-size: 1rem;
+            font-weight: 600;
+            transition: all 0.3s;
+            box-shadow: 0 4px 16px rgba(109, 91, 255, 0.20);
+        }
+        .publish-toggle:hover {
+            transform: scale(1.04);
+            box-shadow: 0 8px 30px rgba(109, 91, 255, 0.35);
+        }
+        .publish-form {
+            display: none;
+            background: rgba(255, 255, 255, 0.04);
+            backdrop-filter: blur(16px);
+            padding: 1.8rem;
+            border-radius: 20px;
+            margin-top: 1rem;
+            border: 1px solid rgba(255, 255, 255, 0.06);
+        }
+        .publish-form input,
+        .publish-form select,
+        .publish-form textarea {
+            width: 100%;
+            padding: 12px 16px;
+            border-radius: 12px;
+            border: 1px solid rgba(255, 255, 255, 0.10);
+            background: rgba(255, 255, 255, 0.06);
+            color: #e8edf5;
+            font-size: 0.95rem;
+            outline: none;
+            transition: border-color 0.3s;
+            font-family: inherit;
+        }
+        .publish-form input:focus,
+        .publish-form select:focus,
+        .publish-form textarea:focus {
+            border-color: rgba(130, 100, 255, 0.5);
+        }
+        .publish-form select option {
+            background: #1a1a2e;
+            color: #e8edf5;
+        }
+        .publish-form .submit-post {
+            background: linear-gradient(135deg, #6d5bff, #8b5cf6);
+            color: #fff;
+            border: none;
+            padding: 12px;
+            border-radius: 30px;
+            cursor: pointer;
+            font-size: 1rem;
+            font-weight: 600;
+            transition: all 0.3s;
+            margin-top: 8px;
+        }
+        .publish-form .submit-post:hover {
+            transform: scale(1.02);
+            box-shadow: 0 8px 30px rgba(109, 91, 255, 0.35);
+        }
+
+        /* 页脚 */
+        footer {
+            text-align: center;
+            padding: 2.2rem 1rem 1.8rem;
+            margin-top: 3rem;
+            border-top: 1px solid rgba(255, 255, 255, 0.04);
+            color: rgba(255, 255, 255, 0.25);
+            font-size: 0.9rem;
+        }
+        footer .social-links {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            flex-wrap: wrap;
+            margin: 0.5rem 0 0.8rem;
+        }
+        footer .social-links a {
+            color: rgba(255, 255, 255, 0.3);
+            text-decoration: none;
+            font-size: 0.95rem;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            transition: color 0.3s;
+        }
+        footer .social-links a:hover {
+            color: rgba(255, 255, 255, 0.8);
+        }
+        footer .email-line {
+            margin: 0.2rem 0 0.8rem;
+        }
+        footer .email-line a {
+            color: rgba(255, 255, 255, 0.3);
+            text-decoration: none;
+            transition: color 0.3s;
+        }
+        footer .email-line a:hover {
+            color: rgba(255, 255, 255, 0.8);
+        }
+        footer p {
+            margin: 0.3rem 0;
+        }
+        .no-result {
+            text-align: center;
+            padding: 3rem 0;
+            color: rgba(255, 255, 255, 0.3);
+            font-size: 1.1rem;
+            grid-column: 1 / -1;
+        }
+
+        @media (max-width: 820px) {
+            nav {
+                flex-direction: column;
+                align-items: stretch;
+                gap: 12px;
+            }
+            nav h1 {
+                text-align: center;
+            }
+            .nav-controls {
+                justify-content: center;
+                flex-wrap: wrap;
+            }
+            .search-box {
+                width: 100%;
+            }
+            #google_translate_element .goog-te-combo {
+                max-width: 100%;
+                width: 100%;
+            }
+            .categories {
+                justify-content: center;
+            }
+            #hero h2 {
+                font-size: 2.2rem;
+            }
+            .post-list {
+                grid-template-columns: 1fr;
+            }
+            .post-content {
+                padding: 1.8rem 1.4rem;
+            }
+            .post-content h1 {
+                font-size: 1.6rem;
+            }
+            .post-content .video-wrapper {
+                margin: 1.2rem 0;
+            }
+            footer .social-links {
+                gap: 12px;
+            }
+            .modal-box {
+                padding: 1.8rem 1.4rem;
+                margin: 0 16px;
+                max-width: 100%;
+            }
+        }
+        @media (min-width: 821px) and (max-width: 1100px) {
+            .post-list {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
     </style>
 </head>
 <body>
-    <!-- ===== HTML 结构保持不变，只修改登录模态框，增加 Google 和 GitHub 按钮 ===== -->
-    <!-- 其他不变 -->
 
+    <!-- ===== 背景层 ===== -->
+    <div class="bg-layer"></div>
+    <div class="bg-grid"></div>
+
+    <!-- ===== 头部 ===== -->
+    <header>
+        <nav class="container">
+            <h1>✦ 窍某博客网</h1>
+            <div class="nav-controls">
+                <input type="text" id="searchInput" class="search-box" placeholder="🔍 搜索文章..." onkeyup="searchPosts()" />
+                <div id="google_translate_element"></div>
+                <button class="theme-toggle" id="themeToggle" onclick="toggleTheme()">🌙</button>
+                <div class="auth-section">
+                    <button class="auth-btn" id="loginBtn" onclick="openModal()">登录</button>
+                    <img id="userAvatar" class="user-avatar" alt="头像" />
+                    <span id="userName" class="user-name"></span>
+                    <button class="logout-btn" id="logoutBtn" onclick="logoutUser()">退出</button>
+                </div>
+            </div>
+            <div class="categories">
+                <button class="cat-btn active" data-cat="all">📋 全部</button>
+                <button class="cat-btn" data-cat="tech">💻 科技</button>
+                <button class="cat-btn" data-cat="life">🌿 生活</button>
+                <button class="cat-btn" data-cat="career">💼 职场</button>
+            </div>
+        </nav>
+    </header>
+
+    <!-- ===== 主内容 ===== -->
+    <main>
+        <section id="home">
+            <div id="hero" class="container">
+                <h2>科技 · 生活 · 思考</h2>
+                <p>记录成长，分享所得 — 用文字与影像留下时代的印记</p>
+            </div>
+            <div class="container">
+                <div class="publish-area">
+                    <button class="publish-toggle" onclick="togglePublishForm()">📝 发布新文章</button>
+                    <div class="publish-form" id="publishForm">
+                        <h3 style="margin-bottom:0.8rem;">发布新文章</h3>
+                        <div style="display:flex;flex-direction:column;gap:12px;">
+                            <input type="text" id="newTitle" placeholder="标题" />
+                            <input type="text" id="newExcerpt" placeholder="摘要（可选）" />
+                            <select id="newCategory">
+                                <option value="tech">💻 科技</option>
+                                <option value="life">🌿 生活</option>
+                                <option value="career">💼 职场</option>
+                            </select>
+                            <textarea id="newContent" placeholder="正文内容（支持 HTML）" rows="6"></textarea>
+                            <button class="submit-post" onclick="publishNewPost()">提交文章</button>
+                        </div>
+                    </div>
+                </div>
+                <h2 class="section-title">📖 最新文章</h2>
+                <div class="post-list" id="post-list"></div>
+            </div>
+        </section>
+        <div id="post-container"></div>
+    </main>
+
+    <!-- ===== 页脚 ===== -->
+    <footer>
+        <div class="social-links">
+            <a href="https://qm.qq.com/q/3880374029" target="_blank">💬 QQ: 3880374029</a>
+            <a href="https://www.youtube.com/@qiaomouqiao" target="_blank">▶️ @qiaomouqiao</a>
+            <a href="https://www.tiktok.com/@mr.qiaomou" target="_blank">🎵 @mr.qiaomou</a>
+            <a href="https://github.com/3880374029-sketch/78" target="_blank">🐙 GitHub</a>
+        </div>
+        <div class="email-line">
+            📧 投稿邮箱：<a href="mailto:3880374029@qq.com">3880374029@qq.com</a>
+        </div>
+        <p>© 2026 窍某博客网 · 多维度记录与分享 · 用思考对抗平庸</p>
+    </footer>
+
+    <!-- ===== 登录模态框 ===== -->
     <div class="modal-overlay" id="authModal">
         <div class="modal-box">
             <button class="close-modal" onclick="closeModal()">&times;</button>
@@ -43,7 +926,7 @@
                 <button class="active" data-tab="login" onclick="switchTab('login')">登录</button>
                 <button data-tab="register" onclick="switchTab('register')">注册</button>
             </div>
-            <!-- 登录表单 -->
+            <!-- 登录 -->
             <form class="auth-form active" id="loginForm" onsubmit="handleLogin(event)">
                 <label for="loginEmail">邮箱地址</label>
                 <input type="email" id="loginEmail" placeholder="your@email.com" required />
@@ -51,12 +934,11 @@
                 <input type="password" id="loginPassword" placeholder="••••••••" required />
                 <button type="submit" class="submit-btn">登录</button>
                 <div class="divider">或</div>
-                <!-- Google 和 GitHub 按钮 -->
                 <button type="button" class="social-btn google-btn" onclick="handleSocialLogin('google')">🔵 使用 Google 登录</button>
                 <button type="button" class="social-btn github-btn" onclick="handleSocialLogin('github')">🐙 使用 GitHub 登录</button>
                 <div class="auth-switch">还没有账号？ <a onclick="switchTab('register')">立即注册</a></div>
             </form>
-            <!-- 注册表单 -->
+            <!-- 注册 -->
             <form class="auth-form" id="registerForm" onsubmit="handleRegister(event)">
                 <label for="regName">昵称</label>
                 <input type="text" id="regName" placeholder="你的昵称" required />
@@ -75,29 +957,12 @@
         </div>
     </div>
 
-    <!-- ===== 发布文章按钮 ===== -->
-    <div class="container" style="margin-top: 1rem;">
-        <button id="showPublishBtn" onclick="togglePublishForm()" style="background:linear-gradient(135deg,#6d5bff,#8b5cf6);color:#fff;border:none;padding:10px 24px;border-radius:30px;cursor:pointer;">📝 发布新文章</button>
-        <div id="publishForm" style="display:none;background:rgba(255,255,255,0.04);backdrop-filter:blur(16px);padding:1.5rem;border-radius:20px;margin-top:1rem;">
-            <h3>发布新文章</h3>
-            <div style="display:flex;flex-direction:column;gap:12px;">
-                <input type="text" id="newTitle" placeholder="标题" style="padding:12px;border-radius:8px;border:1px solid rgba(255,255,255,0.1);background:rgba(255,255,255,0.06);color:#e8edf5;" />
-                <input type="text" id="newExcerpt" placeholder="摘要（可选）" style="padding:12px;border-radius:8px;border:1px solid rgba(255,255,255,0.1);background:rgba(255,255,255,0.06);color:#e8edf5;" />
-                <select id="newCategory" style="padding:12px;border-radius:8px;border:1px solid rgba(255,255,255,0.1);background:rgba(255,255,255,0.06);color:#e8edf5;">
-                    <option value="tech">💻 科技</option>
-                    <option value="life">🌿 生活</option>
-                    <option value="career">💼 职场</option>
-                </select>
-                <textarea id="newContent" placeholder="正文内容（支持 HTML）" rows="6" style="padding:12px;border-radius:8px;border:1px solid rgba(255,255,255,0.1);background:rgba(255,255,255,0.06);color:#e8edf5;"></textarea>
-                <button onclick="publishNewPost()" style="background:linear-gradient(135deg,#6d5bff,#8b5cf6);color:#fff;border:none;padding:12px;border-radius:30px;cursor:pointer;">提交文章</button>
-            </div>
-        </div>
-    </div>
-
-    <!-- ===== JavaScript 部分 ===== -->
+    <!-- ============================================================ -->
+    <!--  JavaScript  -->
+    <!-- ============================================================ -->
     <script>
         // =============================================================
-        // Firebase 配置（你的真实配置）
+        // Firebase 配置
         // =============================================================
         const firebaseConfig = {
             apiKey: "AIzaSyB8ZalWGiP8at0EUIfKN46CbwQ3eH4iM8E",
@@ -114,21 +979,610 @@
         const db = firebase.firestore();
 
         // =============================================================
-        // 内置文章（22篇，用于快速显示）
+        // 📝 完整 22 篇内置文章
         // =============================================================
-        const builtInPosts = [ /* 这里存放你原来的全部 22 篇文章数据，为了节省篇幅，略... 实际代码中要有 */ ];
+        const builtInPosts = [{
+            id: 'builtin-1',
+            title: '欢迎来到窍某博客网',
+            content: `
+                <p>这里是我个人思考与成长的自留地。从技术到生活，从职场到内心，我希望能用文字和影像记录下每一个值得回味的瞬间。</p>
+                <p>博客的初衷很简单：<strong>分享所知，启发他人，也梳理自己</strong>。无论你是偶然路过，还是常驻读者，都希望这里的某篇文章能为你带来一点光亮。</p>
+                <h2>为什么开始写博客？</h2>
+                <p>写作是一种深度思考的方式。当我们把想法转化为文字时，那些模糊的概念会变得清晰，零散的灵感会连成线。我始终相信，<strong>输出是最好的输入</strong>——只有当你能够清晰地表达一个观点时，你才算真正理解了它。</p>
+                <h2>我会写什么？</h2>
+                <ul>
+                    <li><strong>💻 科技</strong> — AI、编程、Web3、前沿技术趋势</li>
+                    <li><strong>🌿 生活</strong> — 旅行、阅读、极简主义、晨间习惯</li>
+                    <li><strong>💼 职场</strong> — 远程工作、效率提升、职业成长</li>
+                </ul>
+                <p>我不会追求热点，只写自己真正思考过、实践过的话题。每篇文章可能不长，但一定真诚。</p>
+                <h2>致读者</h2>
+                <p>如果你在这里找到了共鸣，欢迎留言交流。如果觉得某篇文章对你有帮助，也请分享给更多人。愿我们都能在信息洪流中，保持清醒，持续成长。</p>
+                <p>—— 窍某，于 2026 年夏</p>
+            `,
+            excerpt: '开启分享之旅，记录思考点滴',
+            category: 'life',
+            cover_image: 'https://picsum.photos/id/1015/800/400',
+            author_name: '窍某',
+            views: 128,
+            created_at: new Date('2026-07-01')
+        }, {
+            id: 'builtin-2',
+            title: '2026 年前沿技术风向标',
+            content: `
+                <p>2026 年已经过半，技术领域的变革比我们想象的更快。本文梳理了今年最值得关注的几个技术方向，以及它们背后的逻辑。</p>
+                <h2>1. AI Agent：从概念到落地</h2>
+                <p>2025 年我们还在讨论 "AI Agent 是什么"，2026 年它已经大规模进入生产环境。从自动写代码的 Devin，到能自主完成研究任务的科研 Agent，AI 不再是被动的工具，而是主动的协作者。</p>
+                <p><strong>关键趋势：</strong> 多 Agent 协作系统正在成为主流。不同 Agent 分别负责规划、执行、验证，形成一个完整的数字工作流。这意味着，未来的软件工程将更像是一个 "Agent 团队管理" 的工作。</p>
+                <h2>2. WebAssembly 的黄金时代</h2>
+                <p>WebAssembly（WASM）不再只是浏览器的技术。2026 年，WASM 在边缘计算、服务端、区块链等领域全面开花。它的轻量、高效和跨平台特性，使其成为云原生时代的理想运行时。</p>
+                <p>值得关注的是 <strong>WASI（WebAssembly System Interface）</strong> 的成熟，让 WASM 可以安全地访问操作系统资源，真正实现了 "一次编译，到处运行" 的梦想。</p>
+                <h2>3. 边缘计算 + 5G 的化学反应</h2>
+                <p>随着 5G 网络的普及，边缘计算的算力正在从云端下沉到网络边缘。自动驾驶、工业物联网、AR/VR 等场景对低延迟的要求，让边缘计算成为刚需。</p>
+                <p>2026 年，我们已经看到 <strong>云-边-端</strong> 三位一体的架构成为标准范式。开发者需要重新思考应用的部署策略：哪些计算在云端？哪些在边缘？哪些在终端设备？</p>
+                <h2>给开发者的建议</h2>
+                <ul>
+                    <li>学习 Rust 和 WebAssembly，它们正在成为系统级开发的主流</li>
+                    <li>理解 AI Agent 的原理，学会 "与 AI 协作" 而非 "被 AI 替代"</li>
+                    <li>关注边缘计算，它可能是下一个云原生级别的机会</li>
+                </ul>
+                <p>技术的浪潮永远不会停止，但真正的竞争力，来自于持续学习和深度思考的能力。</p>
+            `,
+            excerpt: 'AI Agent、WebAssembly 与边缘计算',
+            category: 'tech',
+            cover_image: 'https://picsum.photos/id/201/800/400',
+            author_name: '窍某',
+            views: 256,
+            created_at: new Date('2026-07-03')
+        }, {
+            id: 'builtin-3',
+            title: 'V2rayN 使用教程：新手完整指南',
+            content: `
+                <p>V2rayN 是 Windows 平台上最流行的 V2Ray 客户端，界面友好，功能强大。本文从下载、安装、配置到节点订阅，手把手带你完成全部流程。</p>
+                <h2>第一步：下载与安装</h2>
+                <p>请从官方 GitHub 仓库下载最新版本，避免使用第三方修改版（可能存在安全风险）。</p>
+                <p><strong>📥 下载地址：</strong> <a href="https://github.com/2dust/v2rayN/releases/download/7.22.7/v2rayN-windows-arm64.zip" target="_blank">v2rayN-windows-arm64.zip (7.22.7)</a></p>
+                <p>下载后解压到任意目录，运行 <code>v2rayN.exe</code> 即可。</p>
+                <h2>第二步：订阅节点</h2>
+                <p>大多数服务商都会提供订阅链接（Subscription URL）。在 V2rayN 中，点击「订阅」→「订阅设置」，粘贴你的订阅链接，然后点击「更新订阅」即可获取节点列表。</p>
+                <blockquote>💡 如果你没有自己的订阅，可以使用一些免费分享的节点（但请注意安全性和稳定性）。</blockquote>
+                <h2>第三步：配置代理模式</h2>
+                <p>V2rayN 提供多种代理模式，常用的有：</p>
+                <ul>
+                    <li><strong>🌐 全局模式</strong> — 所有流量都经过代理</li>
+                    <li><strong>🔀 规则模式</strong> — 根据 PAC 规则自动分流</li>
+                    <li><strong>🚫 绕过大陆</strong> — 只代理被屏蔽的网站</li>
+                </ul>
+                <p>建议选择「规则模式」或「绕过大陆」，既能保障访问速度，又能保护隐私。</p>
+                <h2>常见问题</h2>
+                <ul>
+                    <li><strong>Q: 节点连不上？</strong> 检查系统时间是否准确，尝试更换节点或更新订阅。</li>
+                    <li><strong>Q: 浏览器无法上网？</strong> 检查浏览器代理设置。</li>
+                    <li><strong>Q: 速度很慢？</strong> 选择延迟较低的节点，或尝试更换传输协议。</li>
+                </ul>
+                <p>V2rayN 是一款强大的工具，熟练掌握它，可以让你在网络世界中更加自由和安全。</p>
+            `,
+            excerpt: '从零开始配置，安全上网一步到位',
+            category: 'tech',
+            cover_image: 'https://picsum.photos/id/202/800/400',
+            author_name: '窍某',
+            views: 345,
+            created_at: new Date('2026-07-11')
+        }, {
+            id: 'builtin-4',
+            title: '一个人旅行的意义：丽江之行',
+            content: `
+                <p>一个人旅行，不是孤独，而是一种深度的自我对话。2026 年春天，我独自去了丽江，在雪山与古镇之间，找回了一种久违的内心秩序。</p>
+                <h2>出发的理由</h2>
+                <p>过去一年，生活被工作和信息塞得满满当当。每天醒来第一件事是看手机，睡觉前最后一件事也是看手机。我发现自己越来越难专注，也越来越难听到内心的声音。</p>
+                <p>于是我订了一张去丽江的机票。没有攻略，没有计划，只是想去一个能让自己慢下来的地方。</p>
+                <h2>在古城里迷路</h2>
+                <p>丽江古城很小，但巷子很密。我故意关掉了手机导航，任由脚步把自己带到任何地方。我路过一家卖手工银饰的小店，老板娘在门口晒太阳；我坐在一座小桥上，看流水和柳树发呆；我在一个不知名的咖啡馆里写了一下午日记。</p>
+                <p><strong>迷路的意义，不是找到正确的路，而是享受走错路的过程。</strong></p>
+                <h2>雪山下的顿悟</h2>
+                <p>在玉龙雪山脚下，我遇到了一位独自旅行的老人。他告诉我，他已经连续十年每年都来丽江住一个月。"不是为了看风景，"他说，"是为了看自己。"</p>
+                <p>这句话让我想了很久。旅行真正的意义，或许不是去更多的地方，而是在每个地方都能安住当下，看清自己内心真正想要的是什么。</p>
+                <h2>回来之后</h2>
+                <p>回到城市后，我并没有 "焕然一新"。但我学会了每天留出 30 分钟给自己，不刷手机，不处理消息，只是安静地坐着或写点什么。</p>
+                <p>一个人旅行的意义，不在于走了多远，而在于有没有把 "自己" 带回来。</p>
+            `,
+            excerpt: '在雪山与古镇之间，找回内心的秩序',
+            category: 'life',
+            cover_image: 'https://picsum.photos/id/1018/800/400',
+            author_name: '窍某',
+            views: 89,
+            created_at: new Date('2026-07-06')
+        }, {
+            id: 'builtin-5',
+            title: '晨间习惯：咖啡与深度思考',
+            content: `
+                <p>每天清晨 6:00，一杯手冲咖啡，30 分钟无干扰的阅读或写作。这个习惯我已经坚持了 200 多天，它彻底改变了我的专注力和情绪状态。</p>
+                <h2>为什么是早晨？</h2>
+                <p>早晨是一天中最安静的时间。没有工作消息，没有会议通知，没有社交媒体的轰炸。这段时间是唯一完全属于你自己的窗口，可以用来做真正重要但不紧急的事情。</p>
+                <blockquote>"在别人还没醒来的时候，你已经赢了一天。"</blockquote>
+                <h2>手冲咖啡的仪式感</h2>
+                <p>我选择手冲咖啡，不仅仅是因为味道。称豆、研磨、注水、闷蒸、萃取——这个过程本身就像一种冥想。它需要专注，需要耐心，需要感知水温、水流和咖啡粉的状态。</p>
+                <p>当你把全部注意力都放在一杯咖啡上时，大脑会从 "被动接收信息" 切换到 "主动感知当下" 的模式。这种状态，恰好是深度思考的最佳前奏。</p>
+                <h2>30 分钟深度时间</h2>
+                <p>咖啡冲好之后，我会坐在窗边，打开一本书或一个笔记本。这 30 分钟里，手机是静音的，电脑是关机的，只有我和文字。</p>
+                <ul>
+                    <li><strong>周一、三、五：</strong> 阅读（纸质书）</li>
+                    <li><strong>周二、四：</strong> 写作（自由书写）</li>
+                    <li><strong>周末：</strong> 复盘一周，规划下周</li>
+                </ul>
+                <h2>200 天后的变化</h2>
+                <ul>
+                    <li>✅ 每天的第一件事不再是 "回消息"，而是 "为自己做事"</li>
+                    <li>✅ 焦虑感明显下降</li>
+                    <li>✅ 阅读量从每月 1 本增加到每月 4-5 本</li>
+                    <li>✅ 写作能力提升</li>
+                </ul>
+                <p>如果你也想试试，不需要从 6:00 开始。比平时早起 30 分钟，关掉手机，做一件让你专注的事情。坚持下去，你会感谢那个早起的自己。</p>
+            `,
+            excerpt: '高效早晨的仪式感，从一杯手冲开始',
+            category: 'life',
+            cover_image: 'https://picsum.photos/id/292/800/400',
+            author_name: '窍某',
+            views: 45,
+            created_at: new Date('2026-07-08')
+        }, {
+            id: 'builtin-6',
+            title: '前端开发者 2026 生存指南',
+            content: `
+                <p>2026 年的前端开发，已经和五年前完全不同。AI 正在改变前端开发的每一个环节：从代码生成到 UI 设计，从测试到部署。前端的 "护城河" 正在被 AI 填平，但新的机会也在涌现。</p>
+                <h2>AI 不会取代前端，但会用 AI 的前端会取代不用 AI 的</h2>
+                <p>GitHub Copilot 已经能生成 40% 以上的业务代码，Cursor 能理解整个项目的上下文并给出修改建议，V0 能根据自然语言生成 React 组件。前端的核心竞争力，正在从 "写代码的能力" 转向 "理解需求、设计系统、与 AI 协作的能力"。</p>
+                <h2>2026 年前端必学的 4 个方向</h2>
+                <ul>
+                    <li><strong>1. TypeScript 高级特性</strong> — 类型编程、泛型、条件类型</li>
+                    <li><strong>2. WebAssembly</strong> — 前端的高性能计算场景</li>
+                    <li><strong>3. AI 辅助开发工具</strong> — Cursor、Copilot、V0、Bolt</li>
+                    <li><strong>4. 用户体验设计思维</strong> — AI 无法替代对 "人的体验" 的理解</li>
+                </ul>
+                <h2>给前端人的建议</h2>
+                <ul>
+                    <li>不要只学框架，学底层原理</li>
+                    <li>培养产品思维，成为 "懂技术的产品人"</li>
+                    <li>建立个人知识库</li>
+                </ul>
+                <p>前端这个职业不会消失，但它正在进化。拥抱变化的人，永远有饭吃。</p>
+            `,
+            excerpt: 'AI 时代下，前端工程师的竞争力重塑',
+            category: 'tech',
+            cover_image: 'https://picsum.photos/id/133/800/400',
+            author_name: '窍某',
+            views: 178,
+            created_at: new Date('2026-07-07')
+        }, {
+            id: 'builtin-7',
+            title: '大模型时代的高效学习方法',
+            content: `
+                <p>大语言模型让知识获取变得前所未有的便捷。但真正的学习不仅仅是 "知道"，而是 "理解" 和 "应用"。本文分享一套基于 AI 的 "提问-探究-输出" 学习框架。</p>
+                <h2>传统学习的困境</h2>
+                <p>在 AI 时代之前，学习最大的障碍是 "信息获取"。但现在，新的困境是 <strong>信息过载和被动接受</strong>。我们可以让 AI 生成任何知识的摘要，但这种 "便捷" 反而让我们失去了深度思考的机会。</p>
+                <h2>提问：主动学习的起点</h2>
+                <p>好的问题，比好的答案更重要。在问 AI 之前，先问自己：我真正想理解的是什么？这个问题背后的核心概念是什么？我能否用自己的话重新表述这个问题？</p>
+                <h2>探究：人机协作的深度</h2>
+                <p>用 AI 生成初稿，用人类智慧进行批判性思考。不要直接把 AI 的回答当作 "答案"，而是当作 "材料"。</p>
+                <h2>输出：检验学习的唯一标准</h2>
+                <p>如果你不能清楚地解释一个概念，你就没有真正理解它。输出是检验学习成果的唯一标准。</p>
+                <blockquote>"教是最好的学。"——如果你能教别人，你就真的懂了。</blockquote>
+                <p>AI 是工具，不是老师。保持好奇心，保持批判性，把 AI 当作 "思维火花"，而非 "答案机器"。</p>
+            `,
+            excerpt: '用 AI 加速学习，而非被 AI 取代',
+            category: 'tech',
+            cover_image: 'https://picsum.photos/id/203/800/400',
+            author_name: '窍某',
+            views: 67,
+            created_at: new Date('2026-07-05')
+        }, {
+            id: 'builtin-8',
+            title: '远程工作的心得体会：自由与自律',
+            content: `
+                <p>从 2023 年开始全职远程工作，到现在已经三年了。这三年里，我踩过不少坑，也总结出一些真正有用的经验。远程工作不是 "在家办公"，而是一种全新的工作哲学。</p>
+                <h2>误区：远程 = 自由</h2>
+                <p>很多人以为远程工作就是 "想几点起就几点起，想去哪就去哪"。但现实是，<strong>远程工作的自由，是用超强的自律换来的</strong>。没有通勤的 "物理分隔"，工作和生活的边界会变得模糊。</p>
+                <h2>我的三条铁律</h2>
+                <ul>
+                    <li><strong>1. 固定工作区域，与生活空间物理隔离</strong></li>
+                    <li><strong>2. 每天 10:00 前完成最重要的一件任务</strong></li>
+                    <li><strong>3. 每周至少两次线下社交</strong></li>
+                </ul>
+                <h2>远程工作的工具推荐</h2>
+                <ul>
+                    <li><strong>通讯：</strong> Slack + Zoom</li>
+                    <li><strong>任务管理：</strong> Notion + Linear</li>
+                    <li><strong>专注：</strong> Forest / 番茄钟</li>
+                </ul>
+                <p>远程工作是一场关于 "自我管理" 的修行。它不会让你更轻松，但会让你更自由——只要你愿意为之付出相应的自律。</p>
+            `,
+            excerpt: '三年远程工作，我学到了什么',
+            category: 'career',
+            cover_image: 'https://picsum.photos/id/180/800/400',
+            author_name: '窍某',
+            views: 156,
+            created_at: new Date('2026-07-12')
+        }, {
+            id: 'builtin-9',
+            title: '阅读如何改变人生：一年阅读 50 本书',
+            content: `
+                <p>过去一年，我读了 50 本书，涵盖哲学、科技、历史、心理学。阅读让我学会了多角度思考，也让我在面对复杂问题时更加从容。</p>
+                <h2>为什么要读 50 本书？</h2>
+                <p>数量本身不是目的。50 本书意味着：平均每周读 1 本。真正重要的不是 "读了 50 本"，而是 "通过 50 本书，建立了属于自己的知识体系"。</p>
+                <h2>我的阅读方法：主题阅读 + 输出倒逼输入</h2>
+                <h3>1. 主题阅读</h3>
+                <p>把书按照主题分类，集中阅读同一主题的多本书。不同作者的观点相互印证或冲突，能让你对一个问题形成立体的理解。</p>
+                <h3>2. 输出倒逼输入</h3>
+                <p>每读完一本书，写一篇 500 字以上的书评或思考笔记。写完之后，这本书的内容就真正 "属于" 你了。</p>
+                <h2>改变，从每天 10 分钟开始</h2>
+                <p>从每天 10 分钟开始，固定一个时间，选一本你真正感兴趣的书，坚持 30 天。30 天后，你会发现阅读不再是 "需要坚持的事"。</p>
+                <blockquote>"读书不是为了比别人知道得多，而是为了比别人想得深。"</blockquote>
+            `,
+            excerpt: '从每天 10 分钟开始，重塑认知体系',
+            category: 'life',
+            cover_image: 'https://picsum.photos/id/204/800/400',
+            author_name: '窍某',
+            views: 92,
+            created_at: new Date('2026-07-13')
+        }, {
+            id: 'builtin-10',
+            title: 'AGI 到来前的准备：未来 5 年趋势',
+            content: `
+                <p>越来越多的专家认为，AGI（通用人工智能）将在 2028-2030 年间实现。这不仅是技术革命，更是社会、经济、伦理层面的巨大挑战。</p>
+                <h2>什么是 AGI？</h2>
+                <p>AGI 指的是 "能够像人类一样理解和解决各种问题的 AI"。与当前的 "窄 AI" 不同，AGI 拥有跨领域的通用智能。</p>
+                <h2>我们应该做的 4 件事</h2>
+                <h3>1. 保持终身学习的习惯</h3>
+                <p>在 AGI 时代，知识的半衰期会进一步缩短。唯一的安全感，来自于 "快速学习新事物" 的能力。</p>
+                <h3>2. 培养跨学科思维</h3>
+                <p>AGI 擅长的是 "单一领域的深度"，而人类的优势在于 "跨领域的连接"。</p>
+                <h3>3. 学会与 AI 协作</h3>
+                <p>把 AI 当作你的团队成员，而不是工具。</p>
+                <h3>4. 关注 AI 伦理和社会公平</h3>
+                <p>如何让技术进步惠及更多人？如何防止 AI 被滥用？</p>
+                <h2>结论：保持乐观，保持警惕</h2>
+                <p>AGI 可能是人类历史上最重要的事件之一。我们能做的，是保持学习、保持思考、保持对话。</p>
+            `,
+            excerpt: '2028-2030 年 AGI 可能实现，我们该如何应对',
+            category: 'tech',
+            cover_image: 'https://picsum.photos/id/205/800/400',
+            author_name: '窍某',
+            views: 210,
+            created_at: new Date('2026-07-14')
+        }, {
+            id: 'builtin-11',
+            title: '每周 VPN 节点更新（GitHub 订阅）',
+            content: `
+                <p>每周一更新一批免费 VPN 节点，所有节点均经过连通性和速度测试。推荐使用 V2rayN 或 Clash 客户端导入订阅链接。</p>
+                <h2>🔗 订阅链接</h2>
+                <p><a href="https://yaoxwei.ccwu.cc/sub?token=9280aa5bace0235bb8d5c4afc92943d1" target="_blank">https://yaoxwei.ccwu.cc/sub?token=9280aa5bace0235bb8d5c4afc92943d1</a></p>
+                <h2>使用方法</h2>
+                <ul>
+                    <li><strong>V2rayN 用户：</strong> 点击「订阅」→「订阅设置」→ 粘贴链接 →「更新订阅」</li>
+                    <li><strong>Clash 用户：</strong> 在配置文件中替换订阅链接</li>
+                </ul>
+                <h2>更新说明</h2>
+                <ul>
+                    <li>📅 每周一 10:00 更新</li>
+                    <li>🌍 节点覆盖：香港、日本、新加坡、美国、欧洲</li>
+                    <li>⚡ 所有节点均经过连通性和延迟测试</li>
+                </ul>
+                <blockquote>⚠️ 免费节点仅供学习用途，请勿用于敏感操作。</blockquote>
+            `,
+            excerpt: '免费节点分享，持续更新中',
+            category: 'tech',
+            cover_image: 'https://picsum.photos/id/866/800/400',
+            author_name: '窍某',
+            views: 432,
+            created_at: new Date('2026-07-09')
+        }, {
+            id: 'builtin-12',
+            title: '工作与生活平衡之道：避免 burnout',
+            content: `
+                <p>Burnout（职业倦怠）已经成为现代职场人的普遍困境。本文从时间管理、心理调节、社交支持三个维度，分享了一套可操作的 "防 burnout 工具箱"。</p>
+                <h2>Burnout 的早期信号</h2>
+                <ul>
+                    <li>😩 早晨醒来没有任何动力</li>
+                    <li>😤 对同事和客户失去耐心</li>
+                    <li>😵 注意力难以集中</li>
+                    <li>😴 睡眠质量差</li>
+                    <li>😔 对曾经热爱的事情失去兴趣</li>
+                </ul>
+                <h2>我的 5 个防 burnout 方法</h2>
+                <h3>1. 每天留出 1 小时 "无工作时间"</h3>
+                <h3>2. 每周至少一天完全脱离屏幕</h3>
+                <h3>3. 学会说 "不"</h3>
+                <h3>4. 建立社交支持系统</h3>
+                <h3>5. 重新定义 "成功"</h3>
+                <h2>写在最后</h2>
+                <p>工作是为了更好地生活，而不是反过来。如果你发现自己已经在 burnout 的边缘，请停下来，给自己一个喘息的机会。</p>
+            `,
+            excerpt: '设定清晰边界，找回生活的掌控感',
+            category: 'career',
+            cover_image: 'https://picsum.photos/id/206/800/400',
+            author_name: '窍某',
+            views: 67,
+            created_at: new Date('2026-07-15')
+        }, {
+            id: 'builtin-13',
+            title: 'AI 编程助手深度体验：Cursor 与 Copilot 对比',
+            content: `
+                <p>过去三个月，我同时使用了 Cursor 和 GitHub Copilot 两款 AI 编程助手，分别完成了三个中型项目。本文从代码质量、上下文理解、交互体验、学习曲线四个维度进行了深度对比。</p>
+                <h2>概览：两款工具的区别</h2>
+                <ul>
+                    <li><strong>GitHub Copilot：</strong> 主打 "代码自动补全"，轻量、快速</li>
+                    <li><strong>Cursor：</strong> 增加了 AI 对话、代码库理解等功能，更像 "AI 原生编辑器"</li>
+                </ul>
+                <h2>1. 代码质量</h2>
+                <p>Copilot 在单行补全上非常精准，Cursor 在复杂重构上更胜一筹。</p>
+                <h2>2. 上下文理解</h2>
+                <p>Cursor 可以索引整个代码库，理解模块之间的依赖关系。</p>
+                <h2>3. 交互体验</h2>
+                <p>Copilot 几乎无感，Cursor 需要主动交互。</p>
+                <h2>4. 学习曲线</h2>
+                <p>Copilot 零门槛，Cursor 需要花时间熟悉。</p>
+                <h2>总结：怎么选？</h2>
+                <ul>
+                    <li>日常编码 → Copilot</li>
+                    <li>大型重构 → Cursor</li>
+                    <li>最佳方案：两者结合使用</li>
+                </ul>
+            `,
+            excerpt: '实测两款主流 AI 编程工具，谁更懂开发者？',
+            category: 'tech',
+            cover_image: 'https://picsum.photos/id/106/800/400',
+            author_name: '窍某',
+            views: 203,
+            created_at: new Date('2026-07-16')
+        }, {
+            id: 'builtin-14',
+            title: 'Web3.0 与去中心化互联网：入门指南',
+            content: `
+                <p>Web3.0 不仅仅是区块链和加密货币，它代表了一种 "用户拥有数据" 的互联网新范式。</p>
+                <h2>Web1 → Web2 → Web3</h2>
+                <ul>
+                    <li><strong>Web1（阅读）</strong>：静态网页</li>
+                    <li><strong>Web2（读写）</strong>：用户创造内容，平台拥有数据</li>
+                    <li><strong>Web3（读写 + 拥有）</strong>：用户拥有数据和价值</li>
+                </ul>
+                <h2>核心概念</h2>
+                <h3>1. 去中心化身份（DID）</h3>
+                <p>你的身份由你自己控制，而不是由 Facebook 或 Google 控制。</p>
+                <h3>2. 智能合约</h3>
+                <p>部署在区块链上的自动执行程序。</p>
+                <h3>3. DAO（去中心化自治组织）</h3>
+                <p>通过代币投票实现决策的组织。</p>
+                <h2>落地场景</h2>
+                <ul>
+                    <li>供应链溯源</li>
+                    <li>数字艺术品（NFT）</li>
+                    <li>去中心化社交</li>
+                    <li>DeFi（去中心化金融）</li>
+                </ul>
+                <p>无论 Web3 最终以什么形态落地，它都在提醒我们：<strong>互联网可以有不同的样子。</strong></p>
+            `,
+            excerpt: '从区块链到 DAO，Web3 的核心概念与落地场景',
+            category: 'tech',
+            cover_image: 'https://picsum.photos/id/145/800/400',
+            author_name: '窍某',
+            views: 134,
+            created_at: new Date('2026-07-17')
+        }, {
+            id: 'builtin-15',
+            title: '极简主义生活实践：少即是多的哲学',
+            content: `
+                <p>一年前，我开始了 "极简实验"：扔掉不需要的物品、取消不必要的订阅、简化社交关系。结果出乎意料——我并没有失去什么，反而获得了更多的时间、精力和内心的平静。</p>
+                <h2>极简 ≠ 贫穷</h2>
+                <p>真正的极简，不是 "买不起"，而是 "不想买"。不是 "不得不少"，而是 "主动选择少"。</p>
+                <blockquote>"极简的核心，不是拥有更少，而是为重要的事物腾出空间。"</blockquote>
+                <h2>我扔掉了什么</h2>
+                <ul>
+                    <li><strong>衣物：</strong> 从 80 件减少到 25 件</li>
+                    <li><strong>电子产品：</strong> 只留笔记本电脑和手机</li>
+                    <li><strong>社交关系：</strong> 退出 10 多个微信群</li>
+                    <li><strong>信息源：</strong> 只保留 5 个高质量信息源</li>
+                </ul>
+                <h2>我得到了什么</h2>
+                <ul>
+                    <li>🧠 更多注意力</li>
+                    <li>⏰ 更多时间</li>
+                    <li>😌 更少焦虑</li>
+                </ul>
+                <h2>如何开始极简？</h2>
+                <ul>
+                    <li>从 "30 天不买新东西" 挑战开始</li>
+                    <li>每天扔一件不再需要的东西</li>
+                    <li>问自己："这个东西是 '需要' 还是 '想要'？"</li>
+                </ul>
+            `,
+            excerpt: '一年极简实验，我扔掉了 80% 的物品，收获了 200% 的快乐',
+            category: 'life',
+            cover_image: 'https://picsum.photos/id/104/800/400',
+            author_name: '窍某',
+            views: 78,
+            created_at: new Date('2026-07-18')
+        }, {
+            id: 'builtin-16',
+            title: '城市漫步指南：在熟悉的街道上发现诗意',
+            content: `
+                <p>我们总是渴望远方，却忽略了身边的美好。过去半年，我每周都会选择一个周末早晨，用 2-3 小时漫步在城市的街巷中，不带目的，只是观察。</p>
+                <p>我看到了清晨菜市场的烟火气、老建筑墙上的藤蔓、咖啡馆里专注阅读的陌生人……这些微小的瞬间，构成了我对这座城市的深层连接。</p>
+                <h2>漫步的技巧</h2>
+                <ul>
+                    <li><strong>关掉手机地图：</strong> 凭直觉转弯，让迷路成为一种发现</li>
+                    <li><strong>带上小本子：</strong> 记录下触动你的画面、声音、气味</li>
+                    <li><strong>尝试新路线：</strong> 哪怕只是换一条巷子走，也会有不同的风景</li>
+                </ul>
+                <h2>为什么要漫步？</h2>
+                <p>在快节奏的生活中，我们习惯了 "到达目的地"，却很少 "在路上"。漫步是一种 "无目的" 的行走，它让我们重新与城市建立连接，也让我们重新与自己建立连接。</p>
+                <blockquote>"慢下来，不是为了看到更多，而是为了看到更深。"</blockquote>
+            `,
+            excerpt: '不必远行，身边就有风景 —— 用脚步重新认识你的城市',
+            category: 'life',
+            cover_image: 'https://picsum.photos/id/108/800/400',
+            author_name: '窍某',
+            views: 56,
+            created_at: new Date('2026-07-19')
+        }, {
+            id: 'builtin-17',
+            title: '高效会议的秘密：从「时间黑洞」到「决策加速器」',
+            content: `
+                <p>会议是职场中最大的「时间黑洞」之一。据调查，中层管理者每周平均花费 15 小时在会议上，其中近一半时间被低效讨论浪费。</p>
+                <p>本文分享了我实践多年的 5 个会议增效方法：</p>
+                <h3>1. 会前 3 分钟「沉默阅读」</h3>
+                <p>确保所有人都在同一信息层面上。</p>
+                <h3>2. 明确「决策型」与「分享型」会议</h3>
+                <p>决策型会议必须有结论，分享型会议控制在 20 分钟内。</p>
+                <h3>3. 设置「时间守卫」</h3>
+                <p>每个议题设定时间上限，超时即停。</p>
+                <h3>4. 会后 2 分钟「行动总结」</h3>
+                <p>明确谁、做什么、什么时候完成。</p>
+                <h3>5. 每周「无会议日」</h3>
+                <p>让大家有整块时间专注于深度工作。</p>
+                <p>这些方法帮助我的团队将周均会议时间从 12 小时压缩到 6 小时，决策速度和满意度显著提升。</p>
+            `,
+            excerpt: '用这 5 个方法，把会议时间缩短 50%，决策质量提升 2 倍',
+            category: 'career',
+            cover_image: 'https://picsum.photos/id/102/800/400',
+            author_name: '窍某',
+            views: 189,
+            created_at: new Date('2026-07-20')
+        }, {
+            id: 'builtin-18',
+            title: 'AI 与人类创造力：合作还是替代？',
+            content: `
+                <p>当 AI 能够写诗、作画、编曲，人类引以为傲的"创造力"是否正在被解构？本文从认知科学、艺术史与技术演进三个维度，重新审视 AI 与人类创造力的关系。</p>
+                <h2>创造力的本质：组合与突破</h2>
+                <p>哲学家大卫·休谟曾言："创造力不过是记忆的重新组合。" AI 擅长从海量数据中学习模式并进行高维组合，这正是"组合式创造力"的极致体现。但人类的"突破式创造力"——那些范式转移式的创新——往往源于直觉、偶然与对规则的颠覆，这仍是 AI 的盲区。</p>
+                <h2>AI 作为"灵感催化剂"</h2>
+                <p>AI 更像是一个永不疲倦的"灵感催化剂"。设计师用 Midjourney 生成数百个概念草图，再从中筛选、修改；作家用 ChatGPT 拓展情节分支。AI 提供了前所未有的"可能性空间"，而人类的判断力与审美则成为最终的过滤器。</p>
+                <h2>风险与伦理：谁的创作？</h2>
+                <p>版权归属与原创性界定面临挑战。当所有人都用同样的模型生成内容，多样性的消失值得警惕。</p>
+                <h2>未来：共生而非取代</h2>
+                <p>就像相机没有杀死绘画，反而催生了印象派。AI 不会让艺术家失业，但会让不懂 AI 的艺术家落伍。</p>
+                <blockquote>"创造力不是人类的专利，但人性是。AI 可以生成完美的旋律，却无法体会失去至亲的悲伤。"</blockquote>
+            `,
+            excerpt: '深入探讨 AI 生成内容对创意产业的影响与未来',
+            category: 'tech',
+            cover_image: 'https://picsum.photos/id/207/800/400',
+            author_name: '窍某',
+            views: 312,
+            created_at: new Date('2026-07-25')
+        }, {
+            id: 'builtin-19',
+            title: '大模型时代的隐私博弈：数据、权力与选择',
+            content: `
+                <p>当大语言模型吞噬了互联网上的公开数据，我们是否正在用隐私换取便利？本文深入分析 AI 开发中的数据采集、用户交互中的隐私泄露风险，以及监管与技术的赛跑。</p>
+                <h2>训练数据的"灰色地带"</h2>
+                <p>当前主流大模型的训练数据来源包括公开网页、书籍、社交媒体等，用户往往并未明确同意其被用于模型训练。</p>
+                <h2>交互中的隐私泄露</h2>
+                <p>用户在与 AI 对话时，经常不自觉输入敏感信息。即使 AI 公司承诺匿名化，但研究表明，通过上下文关联仍可能重新识别个人身份。</p>
+                <h2>监管困境：GDPR 与 AI 的不兼容</h2>
+                <p>GDPR 赋予用户"被遗忘权"，但 AI 模型难以"遗忘"特定数据。这导致法律与技术之间存在巨大鸿沟。</p>
+                <h2>个人应对策略</h2>
+                <ul>
+                    <li><strong>信息最小化：</strong> 避免提供不必要的个人细节</li>
+                    <li><strong>使用本地模型：</strong> 优先选择可在本地运行的开源模型</li>
+                    <li><strong>关注隐私政策：</strong> 选择透明度高的平台</li>
+                </ul>
+                <p>隐私不是零和一的选择，而是在便利与安全之间的动态平衡。</p>
+            `,
+            excerpt: '从训练数据到用户交互，AI 如何重塑我们的隐私边界',
+            category: 'tech',
+            cover_image: 'https://picsum.photos/id/208/800/400',
+            author_name: '窍某',
+            views: 145,
+            created_at: new Date('2026-07-26')
+        }, {
+            id: 'builtin-20',
+            title: '开源 AI 的崛起：民主化与商业化的角力',
+            content: `
+                <p>2026 年，开源大模型在性能上已逼近闭源商业模型，且成本更低、可定制性更强。本文分析开源 AI 如何降低技术门槛，推动创新民主化。</p>
+                <h2>性能追赶：从"可用"到"好用"</h2>
+                <p>Llama 4、DeepSeek-V3、Qwen2.5 等模型在多项基准测试中与 GPT-4o 持平甚至超越。</p>
+                <h2>成本优势与可定制性</h2>
+                <p>开源模型允许企业在自有数据上微调，推理成本远低于 API 调用。</p>
+                <h2>生态繁荣：工具链与应用爆发</h2>
+                <p>围绕开源模型，出现了大量工具（LangChain、Dify、Ollama）、微调框架和部署方案。</p>
+                <h2>商业化的挑战</h2>
+                <p>如何平衡开放与盈利，避免被巨头"白嫖"，是开源社区持续探索的课题。</p>
+                <h2>未来：开源与闭源共存</h2>
+                <p>开源 AI 不会消灭商业模型，但会迫使商业模型提供更高的附加值。最终受益的是用户。</p>
+            `,
+            excerpt: 'Llama、Qwen、DeepSeek 等开源模型如何改变 AI 产业格局',
+            category: 'tech',
+            cover_image: 'https://picsum.photos/id/209/800/400',
+            author_name: '窍某',
+            views: 98,
+            created_at: new Date('2026-07-27')
+        }, {
+            id: 'builtin-21',
+            title: 'AI 代理（Agent）的现状与未来：从工具到同事',
+            content: `
+                <p>AI 代理（Agent）正从"回答问题"转向"完成任务"。本文梳理 Agent 的核心架构、多智能体协作模式，以及迈向通用智能的路径与挑战。</p>
+                <h2>Agent 的构成：规划、记忆、工具</h2>
+                <p>一个完整的 AI Agent 通常包含：<strong>规划模块</strong>（分解复杂任务）、<strong>记忆模块</strong>（短期与长期上下文）、<strong>工具调用</strong>（访问外部 API、数据库）。</p>
+                <h2>多智能体协作：群智涌现</h2>
+                <p>多个 Agent 分工协作可以解决更复杂的问题，在软件开发、科学研究、商业分析等领域展现出巨大潜力。</p>
+                <h2>落地场景与真实案例</h2>
+                <ul>
+                    <li><strong>软件开发：</strong> Devin 可自主修复 Bug</li>
+                    <li><strong>金融分析：</strong> Agent 自动收集财报、撰写投资报告</li>
+                    <li><strong>个人助手：</strong> 管理日程、回复邮件</li>
+                </ul>
+                <h2>未来：从工具到同事</h2>
+                <p>Agent 将逐渐从"执行指令"进化到"理解意图"，我们与 Agent 的关系将从"使用工具"转向"与同事协作"。</p>
+            `,
+            excerpt: '自主决策、多智能体协作与通用智能的黎明',
+            category: 'tech',
+            cover_image: 'https://picsum.photos/id/210/800/400',
+            author_name: '窍某',
+            views: 267,
+            created_at: new Date('2026-07-28')
+        }, {
+            id: 'builtin-22',
+            title: 'AI 时代的批判性思维：如何不被算法驯化',
+            content: `
+                <p>算法推荐、生成式 AI 正在重塑我们的信息环境。我们享受便利的同时，也在不知不觉中交出了思考的主导权。本文提供 10 条原则，帮助你在 AI 时代保持批判性思维。</p>
+                <h2>1. 识别"信息茧房"</h2>
+                <p>算法根据你的偏好推送内容，主动搜索反方观点是打破茧房的第一步。</p>
+                <h2>2. 质疑 AI 生成的"权威感"</h2>
+                <p>AI 输出往往语气自信，但并不意味着正确。追问：它的依据是什么？是否存在偏见？</p>
+                <h2>3. 保持"逆向思考"习惯</h2>
+                <p>对于任何结论，尝试寻找反例或替代解释。</p>
+                <h2>4. 区分"事实"与"观点"</h2>
+                <p>学会辨识哪些是客观数据，哪些是推断或倾向性表达。</p>
+                <h2>5. 主动拓展信息渠道</h2>
+                <p>不要依赖单一平台或模型，交叉验证不同来源。</p>
+                <h2>6. 警惕"情绪化"内容</h2>
+                <p>保持情绪稳定，理性分析内容实质。</p>
+                <h2>7. 训练自己的"元认知"</h2>
+                <p>思考自己的思考过程，定期反思认知偏差。</p>
+                <h2>8. 善用 AI，但不依赖 AI</h2>
+                <p>用 AI 收集信息，用大脑进行判断。</p>
+                <h2>9. 参与线下讨论与辩论</h2>
+                <p>面对面的思想碰撞能激发更深层次的思考。</p>
+                <h2>10. 保持终身学习的态度</h2>
+                <p>技术日新月异，但人性、逻辑与伦理的底层智慧恒久不变。</p>
+                <blockquote>"在 AI 能回答一切的时代，提出正确的问题比得到答案更重要。"</blockquote>
+            `,
+            excerpt: '在信息茧房与算法推荐中，保持独立思考的10条原则',
+            category: 'tech',
+            cover_image: 'https://picsum.photos/id/211/800/400',
+            author_name: '窍某',
+            views: 189,
+            created_at: new Date('2026-07-29')
+        }];
 
         // =============================================================
-        // 加载文章（优化：先显示内置文章，后台异步获取最新）
+        // 文章缓存与加载
         // =============================================================
         let postsCache = [...builtInPosts];
         let isLoading = false;
 
         async function loadPosts(category = 'all', keyword = '') {
-            // 立即显示缓存（内置文章）
             renderPostList(filterPosts(postsCache, category, keyword));
 
-            // 如果已经在加载中，不重复请求
             if (isLoading) return;
             isLoading = true;
 
@@ -138,26 +1592,23 @@
                     query = query.where('category', '==', category);
                 }
                 const snapshot = await query.get();
-                const firebasePosts = [];
+                const fbPosts = [];
                 snapshot.forEach(doc => {
                     const data = doc.data();
                     data.id = doc.id;
                     if (data.created_at && data.created_at.toDate) {
                         data.created_at = data.created_at.toDate();
                     }
-                    firebasePosts.push(data);
+                    fbPosts.push(data);
                 });
-
-                if (firebasePosts.length > 0) {
-                    postsCache = firebasePosts;
+                if (fbPosts.length > 0) {
+                    postsCache = fbPosts;
                 } else {
-                    // 如果 Firebase 为空，保留内置文章
                     postsCache = [...builtInPosts];
                 }
-                // 重新渲染（应用当前筛选）
                 renderPostList(filterPosts(postsCache, category, keyword));
             } catch (err) {
-                console.warn('Firebase 读取失败，使用缓存:', err);
+                // 保持缓存
             } finally {
                 isLoading = false;
             }
@@ -179,9 +1630,193 @@
             return filtered;
         }
 
+        function renderPostList(posts) {
+            const list = document.getElementById('post-list');
+            if (!posts.length) {
+                list.innerHTML = '<div class="no-result">😕 暂无文章</div>';
+                return;
+            }
+            const catMap = { tech: '科技', life: '生活', career: '职场' };
+            list.innerHTML = posts.map(post => {
+                const dateStr = post.created_at instanceof Date ?
+                    post.created_at.toLocaleDateString() :
+                    (post.created_at ? new Date(post.created_at).toLocaleDateString() : '');
+                return `
+                    <div class="post-card">
+                        <img src="${post.cover_image || 'https://picsum.photos/seed/'+post.id+'/800/400'}" alt="${post.title}" loading="lazy" />
+                        <div class="post-info">
+                            <h3>${post.title}</h3>
+                            <div class="meta">
+                                <span>${dateStr}</span>
+                                <span class="badge ${post.category}">${catMap[post.category] || post.category}</span>
+                            </div>
+                            <p>${post.excerpt || (post.content ? post.content.replace(/<[^>]+>/g, '').slice(0,80)+'...' : '')}</p>
+                            <button class="btn-read" onclick="showPost('${post.id}')">阅读全文 →</button>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
         // =============================================================
-        // 社交登录（Google & GitHub）
+        // 显示文章详情
         // =============================================================
+        async function showPost(postId) {
+            let post = postsCache.find(p => p.id === postId);
+            if (!post) {
+                try {
+                    const doc = await db.collection('posts').doc(postId).get();
+                    if (doc.exists) {
+                        const data = doc.data();
+                        data.id = doc.id;
+                        if (data.created_at && data.created_at.toDate) {
+                            data.created_at = data.created_at.toDate();
+                        }
+                        post = data;
+                    }
+                } catch (e) {}
+            }
+            if (!post) { alert('文章不存在'); return; }
+
+            document.getElementById('home').style.display = 'none';
+            const container = document.getElementById('post-container');
+            const dateStr = post.created_at instanceof Date ?
+                post.created_at.toLocaleDateString() :
+                (post.created_at ? new Date(post.created_at).toLocaleDateString() : '');
+
+            container.innerHTML = `
+                <div class="post-content active">
+                    <button class="back-btn" onclick="backToHome()">← 返回首页</button>
+                    <h1>${post.title}</h1>
+                    <p class="read-time">${dateStr} · 作者：${post.author_name || '匿名'} · 阅读 ${post.views || 0}</p>
+                    ${post.cover_image ? `<img src="${post.cover_image}" style="max-width:100%;border-radius:12px;margin:1rem 0;" />` : ''}
+                    <div>${post.content}</div>
+                    <hr />
+                    <h3>💬 评论</h3>
+                    <div id="comments-area"></div>
+                    ${auth.currentUser ? `
+                        <textarea id="commentInput" placeholder="写下你的评论..." rows="3" style="width:100%;padding:12px;border-radius:8px;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.1);color:#e8edf5;"></textarea>
+                        <button onclick="publishComment('${postId}')" style="margin-top:8px;background:linear-gradient(135deg,#6d5bff,#8b5cf6);color:#fff;border:none;padding:8px 20px;border-radius:30px;cursor:pointer;">发表评论</button>
+                    ` : '<p style="color:rgba(255,255,255,0.4);">登录后即可评论</p>'}
+                </div>
+            `;
+
+            try {
+                const snapshot = await db.collection('comments')
+                    .where('post_id', '==', postId)
+                    .orderBy('created_at', 'asc')
+                    .get();
+                const comments = [];
+                snapshot.forEach(doc => {
+                    const data = doc.data();
+                    data.id = doc.id;
+                    comments.push(data);
+                });
+                const area = document.getElementById('comments-area');
+                if (!comments.length) {
+                    area.innerHTML = '<p style="color:rgba(255,255,255,0.4);">暂无评论，来抢沙发吧！</p>';
+                } else {
+                    area.innerHTML = comments.map(c => {
+                        const date = c.created_at && c.created_at.toDate ? c.created_at.toDate().toLocaleString() :
+                        '';
+                        return `
+                            <div style="border-bottom:1px solid rgba(255,255,255,0.06);padding:0.8rem 0;">
+                                <strong>${c.username || '用户'}</strong> <span style="color:rgba(255,255,255,0.3);font-size:0.8rem;">${date}</span>
+                                <p style="margin:0.2rem 0;">${c.content}</p>
+                            </div>
+                        `;
+                    }).join('');
+                }
+            } catch (e) {}
+
+            if (!post.id.startsWith('builtin-')) {
+                try {
+                    await db.collection('posts').doc(postId).update({ views: firebase.firestore.FieldValue.increment(1) });
+                } catch (e) {}
+            }
+            window.scrollTo({ top: 0 });
+        }
+
+        // =============================================================
+        // 评论功能
+        // =============================================================
+        async function publishComment(postId) {
+            const content = document.getElementById('commentInput').value.trim();
+            if (!content) return alert('请输入评论内容');
+            try {
+                await db.collection('comments').add({
+                    post_id: postId,
+                    user_id: auth.currentUser.uid,
+                    username: auth.currentUser.displayName || auth.currentUser.email,
+                    avatar_url: auth.currentUser.photoURL || null,
+                    content: content,
+                    created_at: firebase.firestore.FieldValue.serverTimestamp()
+                });
+                document.getElementById('commentInput').value = '';
+                showPost(postId);
+            } catch (err) {
+                alert('评论失败：' + err.message);
+            }
+        }
+
+        function backToHome() {
+            document.getElementById('home').style.display = 'block';
+            document.getElementById('post-container').innerHTML = '';
+            loadPosts();
+        }
+
+        // =============================================================
+        // 搜索和分类
+        // =============================================================
+        function searchPosts() {
+            const keyword = document.getElementById('searchInput').value.trim();
+            const activeCat = document.querySelector('.cat-btn.active');
+            const cat = activeCat ? activeCat.dataset.cat : 'all';
+            loadPosts(cat, keyword);
+        }
+
+        document.querySelectorAll('.cat-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                document.querySelectorAll('.cat-btn').forEach(b => b.classList.remove('active'));
+                this.classList.add('active');
+                const cat = this.dataset.cat;
+                const keyword = document.getElementById('searchInput').value.trim();
+                loadPosts(cat, keyword);
+            });
+        });
+
+        // =============================================================
+        // 认证功能
+        // =============================================================
+        async function registerUser(username, email, password) {
+            try {
+                const cred = await auth.createUserWithEmailAndPassword(email, password);
+                await cred.user.updateProfile({ displayName: username });
+                await db.collection('users').doc(cred.user.uid).set({
+                    username,
+                    email,
+                    avatar_url: null,
+                    created_at: firebase.firestore.FieldValue.serverTimestamp()
+                });
+                return { success: true, user: cred.user };
+            } catch (err) {
+                return { success: false, error: err.message };
+            }
+        }
+
+        async function loginUser(email, password) {
+            try {
+                const cred = await auth.signInWithEmailAndPassword(email, password);
+                return { success: true, user: cred.user };
+            } catch (err) {
+                return { success: false, error: err.message };
+            }
+        }
+
+        async function logoutUser() {
+            await auth.signOut();
+        }
+
         async function handleSocialLogin(providerName) {
             let provider;
             if (providerName === 'google') {
@@ -191,11 +1826,9 @@
             } else {
                 return;
             }
-
             try {
                 const result = await auth.signInWithPopup(provider);
                 const user = result.user;
-                // 检查用户是否已在 Firestore 中存在，不存在则创建
                 const userRef = db.collection('users').doc(user.uid);
                 const doc = await userRef.get();
                 if (!doc.exists) {
@@ -206,18 +1839,140 @@
                         created_at: firebase.firestore.FieldValue.serverTimestamp()
                     });
                 }
-                // 关闭模态框
                 closeModal();
-                // 刷新文章列表（显示作者名）
                 loadPosts();
             } catch (error) {
                 alert('登录失败：' + error.message);
             }
         }
 
+        auth.onAuthStateChanged(user => {
+            if (user) {
+                localStorage.setItem('user', JSON.stringify({
+                    id: user.uid,
+                    username: user.displayName || user.email,
+                    email: user.email,
+                    avatar_url: user.photoURL || null
+                }));
+            } else {
+                localStorage.removeItem('user');
+            }
+            updateUI();
+            loadPosts();
+        });
+
+        function updateUI() {
+            const user = JSON.parse(localStorage.getItem('user') || 'null');
+            const loginBtn = document.getElementById('loginBtn');
+            const avatar = document.getElementById('userAvatar');
+            const nameEl = document.getElementById('userName');
+            const logoutBtn = document.getElementById('logoutBtn');
+
+            if (user) {
+                loginBtn.style.display = 'none';
+                avatar.style.display = 'inline-block';
+                avatar.src = user.avatar_url || 'https://ui-avatars.com/api/?name=' + encodeURIComponent(user.username) +
+                    '&background=6d5bff&color=fff&size=36';
+                nameEl.style.display = 'inline-block';
+                nameEl.textContent = user.username;
+                logoutBtn.style.display = 'inline-block';
+            } else {
+                loginBtn.style.display = 'inline-block';
+                avatar.style.display = 'none';
+                nameEl.style.display = 'none';
+                logoutBtn.style.display = 'none';
+            }
+        }
+
         // =============================================================
-        // 发布新文章
+        // 模态框
         // =============================================================
+        function openModal() {
+            document.getElementById('authModal').classList.add('active');
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeModal() {
+            document.getElementById('authModal').classList.remove('active');
+            document.body.style.overflow = '';
+        }
+
+        document.getElementById('authModal').addEventListener('click', function(e) {
+            if (e.target === this) closeModal();
+        });
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') closeModal();
+        });
+
+        function switchTab(tab) {
+            document.querySelectorAll('.modal-tabs button').forEach(btn => {
+                btn.classList.toggle('active', btn.dataset.tab === tab);
+            });
+            document.getElementById('loginForm').classList.toggle('active', tab === 'login');
+            document.getElementById('registerForm').classList.toggle('active', tab === 'register');
+            const title = document.getElementById('modalTitle');
+            const sub = document.getElementById('modalSub');
+            if (tab === 'login') {
+                title.textContent = '欢迎回来';
+                sub.textContent = '登录你的账号，解锁更多互动';
+            } else {
+                title.textContent = '创建账号';
+                sub.textContent = '加入窍某博客网社区';
+            }
+        }
+
+        async function handleLogin(e) {
+            e.preventDefault();
+            const email = document.getElementById('loginEmail').value.trim();
+            const password = document.getElementById('loginPassword').value.trim();
+            if (!email || !password) {
+                alert('请填写完整信息');
+                return;
+            }
+            const result = await loginUser(email, password);
+            if (result.success) {
+                closeModal();
+                loadPosts();
+            } else {
+                alert(result.error);
+            }
+        }
+
+        async function handleRegister(e) {
+            e.preventDefault();
+            const username = document.getElementById('regName').value.trim();
+            const email = document.getElementById('regEmail').value.trim();
+            const password = document.getElementById('regPassword').value;
+            const confirm = document.getElementById('regConfirm').value;
+            if (!username || !email || !password || !confirm) {
+                alert('请填写完整信息');
+                return;
+            }
+            if (password !== confirm) {
+                alert('两次密码不一致');
+                return;
+            }
+            if (password.length < 6) {
+                alert('密码至少6位');
+                return;
+            }
+            const result = await registerUser(username, email, password);
+            if (result.success) {
+                closeModal();
+                loadPosts();
+            } else {
+                alert(result.error);
+            }
+        }
+
+        // =============================================================
+        // 发布文章
+        // =============================================================
+        function togglePublishForm() {
+            const form = document.getElementById('publishForm');
+            form.style.display = form.style.display === 'none' ? 'block' : 'none';
+        }
+
         async function publishNewPost() {
             const user = auth.currentUser;
             if (!user) {
@@ -247,32 +2002,29 @@
                     updated_at: firebase.firestore.FieldValue.serverTimestamp()
                 });
                 alert('文章发布成功！');
-                // 清空表单
                 document.getElementById('newTitle').value = '';
                 document.getElementById('newContent').value = '';
                 document.getElementById('newExcerpt').value = '';
-                // 刷新文章列表
                 loadPosts();
             } catch (err) {
                 alert('发布失败：' + err.message);
             }
         }
 
-        function togglePublishForm() {
-            const form = document.getElementById('publishForm');
-            form.style.display = form.style.display === 'none' ? 'block' : 'none';
+        // =============================================================
+        // 主题切换
+        // =============================================================
+        function toggleTheme() {
+            const body = document.body;
+            const btn = document.getElementById('themeToggle');
+            if (body.classList.contains('light')) {
+                body.classList.remove('light');
+                btn.textContent = '🌙';
+            } else {
+                body.classList.add('light');
+                btn.textContent = '☀️';
+            }
         }
-
-        // =============================================================
-        // 其他函数（登录、注册、评论、渲染等，保持与之前相同）
-        // 由于篇幅，这里不再重复，实际代码中需要完整包含
-        // =============================================================
-
-        // 暴露全局函数
-        window.handleSocialLogin = handleSocialLogin;
-        window.publishNewPost = publishNewPost;
-        window.togglePublishForm = togglePublishForm;
-        // ... 其他
 
         // =============================================================
         // 初始化
@@ -281,6 +2033,24 @@
             loadPosts();
             updateUI();
         };
+
+        // 暴露全局函数
+        window.searchPosts = searchPosts;
+        window.showPost = showPost;
+        window.backToHome = backToHome;
+        window.publishComment = publishComment;
+        window.toggleTheme = toggleTheme;
+        window.openModal = openModal;
+        window.closeModal = closeModal;
+        window.switchTab = switchTab;
+        window.handleLogin = handleLogin;
+        window.handleRegister = handleRegister;
+        window.logoutUser = logoutUser;
+        window.handleSocialLogin = handleSocialLogin;
+        window.togglePublishForm = togglePublishForm;
+        window.publishNewPost = publishNewPost;
+        window.loadPosts = loadPosts;
     </script>
+
 </body>
 </html>
