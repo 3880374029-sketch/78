@@ -5,13 +5,11 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>窍某博客网</title>
 
-    <!-- Firebase SDK -->
     <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
 
     <style>
-        /* 精简样式（完整功能） */
         * {
             margin: 0;
             padding: 0;
@@ -398,7 +396,6 @@
 </head>
 <body>
     <div class="container">
-        <!-- 头部 -->
         <header>
             <h1>✦ 窍某博客网</h1>
             <div class="nav-controls">
@@ -419,7 +416,6 @@
             </div>
         </header>
 
-        <!-- 发布文章 -->
         <button class="btn" onclick="togglePublish()">📝 发布新文章</button>
         <div class="publish-form" id="publishForm">
             <h3 style="margin-bottom:8px;">发布新文章</h3>
@@ -436,15 +432,12 @@
 
         <hr style="border-color:#333;margin:20px 0;" />
 
-        <!-- 文章列表 -->
         <h2>📖 最新文章</h2>
         <div id="postList"></div>
 
-        <!-- 文章详情 -->
         <div id="detailArea" class="hidden"></div>
     </div>
 
-    <!-- 页脚 -->
     <footer>
         <div class="social-links">
             <a href="https://qm.qq.com/q/3880374029">💬 QQ: 3880374029</a>
@@ -456,7 +449,6 @@
         <p>© 2026 窍某博客网 · 用思考对抗平庸</p>
     </footer>
 
-    <!-- 登录模态框 -->
     <div class="modal" id="authModal">
         <div class="modal-box">
             <span class="close" onclick="closeModal()">&times;</span>
@@ -466,7 +458,6 @@
                 <button class="active" data-tab="login" onclick="switchTab('login')">登录</button>
                 <button data-tab="register" onclick="switchTab('register')">注册</button>
             </div>
-            <!-- 登录 -->
             <form class="auth-form active" id="loginForm" onsubmit="handleLogin(event)">
                 <label for="loginEmail">邮箱地址</label>
                 <input type="email" id="loginEmail" placeholder="your@email.com" required />
@@ -478,7 +469,6 @@
                 <button type="button" class="social-btn github-btn" onclick="handleSocialLogin('github')">🐙 使用 GitHub 登录</button>
                 <div class="auth-switch">还没有账号？ <a onclick="switchTab('register')">立即注册</a></div>
             </form>
-            <!-- 注册 -->
             <form class="auth-form" id="registerForm" onsubmit="handleRegister(event)">
                 <label for="regName">昵称</label>
                 <input type="text" id="regName" placeholder="你的昵称" required />
@@ -497,11 +487,7 @@
         </div>
     </div>
 
-    <!-- ===== JavaScript ===== -->
     <script>
-        // =============================================================
-        // Firebase 配置（你的真实配置）
-        // =============================================================
         const firebaseConfig = {
             apiKey: "AIzaSyB8ZalWGiP8at0EUIfKN46CbwQ3eH4iM8E",
             authDomain: "project-170416828695178494.firebaseapp.com",
@@ -516,13 +502,10 @@
         const auth = firebase.auth();
         const db = firebase.firestore();
 
-        // =============================================================
-        // 22 篇内置文章（缩略版，保留全部）
-        // =============================================================
         const builtInPosts = [{
             id: 'builtin-1',
             title: '欢迎来到窍某博客网',
-            content: '<p>这里是我个人思考与成长的自留地。从技术到生活，从职场到内心，我希望能用文字和影像记录下每一个值得回味的瞬间。</p>',
+            content: '<p>这里是我个人思考与成长的自留地。</p>',
             excerpt: '开启分享之旅，记录思考点滴',
             category: 'life',
             cover_image: 'https://picsum.photos/id/1015/800/400',
@@ -542,7 +525,7 @@
         }, {
             id: 'builtin-3',
             title: 'V2rayN 使用教程：新手完整指南',
-            content: '<p>V2rayN 是 Windows 上最流行的 V2Ray 客户端，本文从下载到配置全程讲解。</p>',
+            content: '<p>V2rayN 是 Windows 上最流行的 V2Ray 客户端。</p>',
             excerpt: '从零开始配置，安全上网一步到位',
             category: 'tech',
             cover_image: 'https://picsum.photos/id/202/800/400',
@@ -562,7 +545,7 @@
         }, {
             id: 'builtin-5',
             title: '晨间习惯：咖啡与深度思考',
-            content: '<p>每天清晨一杯手冲咖啡，30分钟无干扰阅读，200天改变生活。</p>',
+            content: '<p>每天清晨一杯手冲咖啡，30分钟无干扰阅读。</p>',
             excerpt: '高效早晨的仪式感，从一杯手冲开始',
             category: 'life',
             cover_image: 'https://picsum.photos/id/292/800/400',
@@ -582,7 +565,7 @@
         }, {
             id: 'builtin-7',
             title: '大模型时代的高效学习方法',
-            content: '<p>用 AI 加速学习，提问、探究、输出，三阶循环。</p>',
+            content: '<p>用 AI 加速学习，提问、探究、输出三阶循环。</p>',
             excerpt: '用 AI 加速学习，而非被 AI 取代',
             category: 'tech',
             cover_image: 'https://picsum.photos/id/203/800/400',
@@ -592,7 +575,7 @@
         }, {
             id: 'builtin-8',
             title: '远程工作的心得体会：自由与自律',
-            content: '<p>三年远程工作，三条铁律：固定区域、10点前完成要事、每周社交。</p>',
+            content: '<p>三年远程工作，三条铁律。</p>',
             excerpt: '三年远程工作，我学到了什么',
             category: 'career',
             cover_image: 'https://picsum.photos/id/180/800/400',
@@ -602,7 +585,7 @@
         }, {
             id: 'builtin-9',
             title: '阅读如何改变人生：一年阅读 50 本书',
-            content: '<p>主题阅读 + 输出倒逼输入，每天10分钟开始。</p>',
+            content: '<p>主题阅读 + 输出倒逼输入。</p>',
             excerpt: '从每天 10 分钟开始，重塑认知体系',
             category: 'life',
             cover_image: 'https://picsum.photos/id/204/800/400',
@@ -612,7 +595,7 @@
         }, {
             id: 'builtin-10',
             title: 'AGI 到来前的准备：未来 5 年趋势',
-            content: '<p>AGI 将在 2028-2030 年实现，保持学习、跨学科思维、与 AI 协作。</p>',
+            content: '<p>AGI 将在 2028-2030 年实现。</p>',
             excerpt: '2028-2030 年 AGI 可能实现，我们该如何应对',
             category: 'tech',
             cover_image: 'https://picsum.photos/id/205/800/400',
@@ -622,7 +605,7 @@
         }, {
             id: 'builtin-11',
             title: '每周 VPN 节点更新（GitHub 订阅）',
-            content: '<p>免费节点分享，每周一更新，覆盖全球。</p>',
+            content: '<p>免费节点分享，每周一更新。</p>',
             excerpt: '免费节点分享，持续更新中',
             category: 'tech',
             cover_image: 'https://picsum.photos/id/866/800/400',
@@ -642,7 +625,7 @@
         }, {
             id: 'builtin-13',
             title: 'AI 编程助手深度体验：Cursor 与 Copilot 对比',
-            content: '<p>日常编码用 Copilot，大型重构用 Cursor，两者结合最佳。</p>',
+            content: '<p>日常编码用 Copilot，大型重构用 Cursor。</p>',
             excerpt: '实测两款主流 AI 编程工具，谁更懂开发者？',
             category: 'tech',
             cover_image: 'https://picsum.photos/id/106/800/400',
@@ -652,7 +635,7 @@
         }, {
             id: 'builtin-14',
             title: 'Web3.0 与去中心化互联网：入门指南',
-            content: '<p>从 DID、智能合约、DAO 理解 Web3 核心概念。</p>',
+            content: '<p>从 DID、智能合约、DAO 理解 Web3。</p>',
             excerpt: '从区块链到 DAO，Web3 的核心概念与落地场景',
             category: 'tech',
             cover_image: 'https://picsum.photos/id/145/800/400',
@@ -672,7 +655,7 @@
         }, {
             id: 'builtin-16',
             title: '城市漫步指南：在熟悉的街道上发现诗意',
-            content: '<p>关掉地图，带上本子，在熟悉的城市发现新风景。</p>',
+            content: '<p>关掉地图，在熟悉的城市发现新风景。</p>',
             excerpt: '不必远行，身边就有风景 —— 用脚步重新认识你的城市',
             category: 'life',
             cover_image: 'https://picsum.photos/id/108/800/400',
@@ -682,7 +665,7 @@
         }, {
             id: 'builtin-17',
             title: '高效会议的秘密：从「时间黑洞」到「决策加速器」',
-            content: '<p>5个方法：沉默阅读、区分会议类型、时间守卫、行动总结、无会议日。</p>',
+            content: '<p>5个方法让会议效率翻倍。</p>',
             excerpt: '用这 5 个方法，把会议时间缩短 50%，决策质量提升 2 倍',
             category: 'career',
             cover_image: 'https://picsum.photos/id/102/800/400',
@@ -692,7 +675,7 @@
         }, {
             id: 'builtin-18',
             title: 'AI 与人类创造力：合作还是替代？',
-            content: '<p>AI 是灵感催化剂，创造力不是人类的专利，但人性是。</p>',
+            content: '<p>AI 是灵感催化剂，但人性不可替代。</p>',
             excerpt: '深入探讨 AI 生成内容对创意产业的影响与未来',
             category: 'tech',
             cover_image: 'https://picsum.photos/id/207/800/400',
@@ -702,7 +685,7 @@
         }, {
             id: 'builtin-19',
             title: '大模型时代的隐私博弈：数据、权力与选择',
-            content: '<p>训练数据的灰色地带，交互中的隐私泄露，个人应对策略。</p>',
+            content: '<p>训练数据的灰色地带，隐私泄露与应对策略。</p>',
             excerpt: '从训练数据到用户交互，AI 如何重塑我们的隐私边界',
             category: 'tech',
             cover_image: 'https://picsum.photos/id/208/800/400',
@@ -712,7 +695,7 @@
         }, {
             id: 'builtin-20',
             title: '开源 AI 的崛起：民主化与商业化的角力',
-            content: '<p>开源模型性能逼近闭源，成本更低，未来开源与闭源共存。</p>',
+            content: '<p>开源模型性能逼近闭源，未来开源与闭源共存。</p>',
             excerpt: 'Llama、Qwen、DeepSeek 等开源模型如何改变 AI 产业格局',
             category: 'tech',
             cover_image: 'https://picsum.photos/id/209/800/400',
@@ -722,7 +705,7 @@
         }, {
             id: 'builtin-21',
             title: 'AI 代理（Agent）的现状与未来：从工具到同事',
-            content: '<p>Agent 构成：规划、记忆、工具；多智能体协作，未来成为数字同事。</p>',
+            content: '<p>Agent 构成：规划、记忆、工具。</p>',
             excerpt: '自主决策、多智能体协作与通用智能的黎明',
             category: 'tech',
             cover_image: 'https://picsum.photos/id/210/800/400',
@@ -741,21 +724,15 @@
             created_at: new Date('2026-07-29')
         }];
 
-        // =============================================================
-        // 状态
-        // =============================================================
         let postsCache = [...builtInPosts];
         let currentCategory = 'all';
         let currentUser = null;
         let isPopupOpen = false;
 
-        // =============================================================
-        // 文章列表渲染
-        // =============================================================
         function renderPosts(posts) {
             const list = document.getElementById('postList');
             if (!posts || !posts.length) {
-                list.innerHTML = '<p style="color:var(--text-muted);">暂无文章</p>';
+                list.innerHTML = '<p style="color:rgba(255,255,255,0.4);">暂无文章</p>';
                 return;
             }
             const catMap = { tech: '科技', life: '生活', career: '职场' };
@@ -773,13 +750,8 @@
             }).join('');
         }
 
-        // =============================================================
-        // 加载文章（先缓存，后 Firebase）
-        // =============================================================
         async function loadPosts() {
-            // 先显示缓存
             renderPosts(postsCache);
-
             try {
                 const snapshot = await db.collection('posts').orderBy('created_at', 'desc').get();
                 if (!snapshot.empty) {
@@ -793,7 +765,6 @@
                         fbPosts.push(data);
                     });
                     postsCache = fbPosts;
-                    // 如果当前有分类筛选，应用筛选
                     filterAndRender();
                 }
             } catch (e) {
@@ -823,7 +794,7 @@
         }
 
         // =============================================================
-        // 文章详情 + 评论（修复版）
+        // ✅ 关键修复：评论加载不需要索引（去掉了 .orderBy）
         // =============================================================
         async function showDetail(postId) {
             const post = postsCache.find(p => p.id === postId) || builtInPosts.find(p => p.id === postId);
@@ -854,10 +825,8 @@
                 </div>
             `;
 
-            // 加载评论（增强版）
+            // ✅ 关键修复：去掉了 .orderBy('created_at', 'asc')
             await loadComments(postId);
-
-            // 增加浏览量（非内置文章）
             if (!post.id.startsWith('builtin-')) {
                 try {
                     await db.collection('posts').doc(postId).update({ views: firebase.firestore.FieldValue.increment(1) });
@@ -866,9 +835,7 @@
             window.scrollTo({ top: 0 });
         }
 
-        // =============================================================
-        // 加载评论（修复版）
-        // =============================================================
+        // ✅ 关键修复：去掉了 .orderBy('created_at', 'asc')
         async function loadComments(postId) {
             const area = document.getElementById('commentsArea');
             if (!area) return;
@@ -876,7 +843,6 @@
             try {
                 const snapshot = await db.collection('comments')
                     .where('post_id', '==', postId)
-                    .orderBy('created_at', 'asc')
                     .get();
 
                 if (snapshot.empty) {
@@ -906,9 +872,6 @@
             }
         }
 
-        // =============================================================
-        // 发表评论
-        // =============================================================
         async function postComment(postId) {
             const input = document.getElementById('commentInput');
             const content = input.value.trim();
@@ -944,9 +907,6 @@
             filterAndRender();
         }
 
-        // =============================================================
-        // 发布文章
-        // =============================================================
         function togglePublish() {
             const form = document.getElementById('publishForm');
             form.style.display = form.style.display === 'none' ? 'block' : 'none';
@@ -988,9 +948,7 @@
             }
         }
 
-        // =============================================================
         // 分类切换
-        // =============================================================
         document.querySelectorAll('.cat-btn').forEach(btn => {
             btn.addEventListener('click', function() {
                 document.querySelectorAll('.cat-btn').forEach(b => b.classList.remove('active'));
@@ -1000,9 +958,7 @@
             });
         });
 
-        // =============================================================
         // 认证
-        // =============================================================
         function openModal() {
             document.getElementById('authModal').classList.add('active');
         }
@@ -1106,9 +1062,6 @@
             }
         });
 
-        // =============================================================
-        // 主题切换
-        // =============================================================
         function toggleTheme() {
             const body = document.body;
             const btn = document.getElementById('themeToggle');
@@ -1122,16 +1075,12 @@
                 body.style.color = '#1a1a2e';
                 btn.textContent = '☀️';
             }
-            // 简单处理卡片颜色
             document.querySelectorAll('.post-card, .publish-form, .post-content, .modal-box').forEach(el => {
                 el.style.background = isLight ? 'rgba(255,255,255,0.04)' : 'rgba(255,255,255,0.7)';
                 el.style.color = isLight ? '#e8edf5' : '#1a1a2e';
             });
         }
 
-        // =============================================================
-        // 初始化
-        // =============================================================
         window.onload = function() {
             loadPosts();
         };
