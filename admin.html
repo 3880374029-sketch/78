@@ -41,7 +41,7 @@
             padding: 16px 24px;
             border-radius: 12px;
             border: 1px solid rgba(255, 255, 255, 0.06);
-            flex: 1 1 150px;
+            flex: 1 1 140px;
         }
         .stat-card .num {
             font-size: 2rem;
@@ -265,6 +265,7 @@
             <div class="stats" id="statsArea">
                 <div class="stat-card"><div class="num" id="postCount">0</div><div class="label">📄 文章</div></div>
                 <div class="stat-card"><div class="num" id="commentCount">0</div><div class="label">💬 评论</div></div>
+                <div class="stat-card"><div class="num" id="topicCount">0</div><div class="label">🏷️ 话题</div></div>
                 <div class="stat-card"><div class="num" id="userCount">0</div><div class="label">👤 用户</div></div>
                 <div class="stat-card"><div class="num" id="likeCount">0</div><div class="label">❤️ 总点赞</div></div>
             </div>
@@ -272,6 +273,7 @@
             <div class="tab-bar">
                 <button class="tab-btn active" onclick="switchTab('posts')">📄 文章管理</button>
                 <button class="tab-btn" onclick="switchTab('comments')">💬 评论管理</button>
+                <button class="tab-btn" onclick="switchTab('topics')">🏷️ 话题管理</button>
                 <button class="tab-btn" onclick="switchTab('users')">👤 用户管理</button>
             </div>
 
@@ -290,6 +292,10 @@
                 <div id="commentsList"><p class="empty-state">加载中...</p></div>
             </div>
 
+            <div id="tabTopics" class="panel" style="display:none;">
+                <div id="topicsList"><p class="empty-state">加载中...</p></div>
+            </div>
+
             <div id="tabUsers" class="panel" style="display:none;">
                 <div id="usersList"><p class="empty-state">加载中...</p></div>
             </div>
@@ -298,7 +304,7 @@
 
     <script>
         // =============================================================
-        // ⚠️ 管理员 UID（替换成你自己的）
+        // ⚠️ 管理员 UID（已填入你的 UID）
         // =============================================================
         const ADMIN_UID = "FEQmE2qlzwQqmIgKqU3VFuaYh602";
 
@@ -319,6 +325,7 @@
         let currentUser = null;
         let postsCache = [];
         let commentsCache = [];
+        let topicsCache = [];
         let usersCache = [];
         let currentCategory = 'all';
         let totalLikes = 0;
@@ -365,6 +372,7 @@
         async function loadAllData() {
             await loadPosts();
             await loadComments();
+            await loadTopics();
             await loadUsers();
             updateStats();
         }
@@ -397,6 +405,19 @@
             } catch (e) { console.error(e); }
         }
 
+        async function loadTopics() {
+            try {
+                const snapshot = await db.collection('topics').orderBy('name').get();
+                topicsCache = [];
+                snapshot.forEach(doc => {
+                    const data = doc.data();
+                    data.id = doc.id;
+                    topicsCache.push(data);
+                });
+                renderTopics();
+            } catch (e) { console.error(e); }
+        }
+
         async function loadUsers() {
             try {
                 const snapshot = await db.collection('users').get();
@@ -413,6 +434,7 @@
         function updateStats() {
             document.getElementById('postCount').textContent = postsCache.length;
             document.getElementById('commentCount').textContent = commentsCache.length;
+            document.getElementById('topicCount').textContent = topicsCache.length;
             document.getElementById('userCount').textContent = usersCache.length;
             document.getElementById('likeCount').textContent = totalLikes;
         }
@@ -508,7 +530,6 @@
             `;
             commentsCache.forEach(c => {
                 const dateStr = c.created_at ? new Date(c.created_at.seconds * 1000).toLocaleString('zh-CN') : '';
-                // 尝试找到对应的文章标题
                 const post = postsCache.find(p => p.id === c.post_id);
                 const postTitle = post ? post.title : c.post_id || '已删除';
                 html += `
@@ -531,6 +552,47 @@
             if (!confirm('确定要删除这条评论吗？')) return;
             try {
                 await db.collection('comments').doc(commentId).delete();
+                alert('删除成功！');
+                loadAllData();
+            } catch (err) {
+                alert('删除失败：' + err.message);
+            }
+        }
+
+        // =============================================================
+        // 话题管理（新增）
+        // =============================================================
+        function renderTopics() {
+            const list = document.getElementById('topicsList');
+            if (!topicsCache.length) {
+                list.innerHTML = '<p class="empty-state">🏷️ 暂无话题</p>';
+                return;
+            }
+            let html = `
+                <table>
+                    <thead><tr><th>话题名称</th><th>创建时间</th><th>操作</th></tr></thead>
+                    <tbody>
+            `;
+            topicsCache.forEach(t => {
+                const dateStr = t.created_at ? new Date(t.created_at.seconds * 1000).toLocaleDateString('zh-CN') : '';
+                html += `
+                    <tr>
+                        <td data-label="话题名称">🏷️ ${t.name}</td>
+                        <td data-label="创建时间">${dateStr}</td>
+                        <td data-label="操作">
+                            <button class="btn-danger" onclick="deleteTopic('${t.id}')">🗑️</button>
+                        </td>
+                    </tr>
+                `;
+            });
+            html += `</tbody></table>`;
+            list.innerHTML = html;
+        }
+
+        async function deleteTopic(topicId) {
+            if (!confirm('确定要删除这个话题吗？')) return;
+            try {
+                await db.collection('topics').doc(topicId).delete();
                 alert('删除成功！');
                 loadAllData();
             } catch (err) {
@@ -574,13 +636,12 @@
                 alert('不能删除管理员自己');
                 return;
             }
-            if (!confirm('确定要删除这个用户吗？这会同时删除该用户的所有评论。')) return;
+            if (!confirm('确定要删除这个用户吗？这会同时删除该用户的所有评论和文章。')) return;
             try {
+                const batch = db.batch();
                 // 删除该用户的所有评论
                 const commentsSnap = await db.collection('comments').where('user_id', '==', userId).get();
-                const batch = db.batch();
                 commentsSnap.forEach(doc => batch.delete(doc.ref));
-                await batch.commit();
                 // 删除该用户的所有文章
                 const postsSnap = await db.collection('posts').where('author_id', '==', userId).get();
                 postsSnap.forEach(doc => batch.delete(doc.ref));
@@ -601,6 +662,7 @@
         window.filterPosts = filterPosts;
         window.deletePost = deletePost;
         window.deleteComment = deleteComment;
+        window.deleteTopic = deleteTopic;
         window.deleteUser = deleteUser;
     </script>
 </body>
