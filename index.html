@@ -8,63 +8,274 @@
     <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
     <style>
-        *{margin:0;padding:0;box-sizing:border-box;}
-        body{background:#0b0e1a;color:#e8edf5;font-family:'Segoe UI',sans-serif;padding:20px;line-height:1.6;}
-        .container{max-width:1000px;margin:0 auto;}
-        header{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;margin-bottom:20px;}
-        h1{background:linear-gradient(135deg,#c4b5fd,#818cf8);-webkit-background-clip:text;-webkit-text-fill-color:transparent;font-size:1.8rem;margin:0;}
-        .nav-controls{display:flex;align-items:center;gap:12px;flex-wrap:wrap;}
-        .search-box{padding:8px 16px;border-radius:30px;border:1px solid #444;background:rgba(255,255,255,0.05);color:#fff;width:200px;}
-        .btn{background:linear-gradient(135deg,#6d5bff,#8b5cf6);color:#fff;border:none;padding:6px 18px;border-radius:30px;cursor:pointer;font-size:0.9rem;}
-        .btn-outline{background:transparent;border:1px solid #444;}
-        .btn-outline:hover{background:rgba(255,255,255,0.05);}
-        .auth-section{display:flex;align-items:center;gap:8px;}
-        .user-avatar{width:36px;height:36px;border-radius:50%;border:2px solid rgba(255,255,255,0.15);}
-        .user-name{color:rgba(255,255,255,0.6);}
-        .logout-btn{background:transparent;border:1px solid #444;color:rgba(255,255,255,0.4);padding:4px 12px;border-radius:20px;cursor:pointer;font-size:0.75rem;}
-        .logout-btn:hover{border-color:#ef4444;color:#ef4444;}
-        .hidden{display:none!important;}
-        #adminLink{color:rgba(255,255,255,0.5);text-decoration:none;font-size:0.85rem;border:1px solid rgba(255,255,255,0.1);padding:4px 12px;border-radius:20px;display:none;}
-        #adminLink:hover{color:#fff;border-color:rgba(255,255,255,0.3);}
-        .post-card{background:rgba(255,255,255,0.04);border-radius:16px;padding:16px 20px;margin-bottom:16px;border:1px solid rgba(255,255,255,0.06);}
-        .post-card h3{margin:0 0 4px;}
-        .post-card .meta{color:rgba(255,255,255,0.4);font-size:0.8rem;}
-        .post-card .badge{padding:2px 12px;border-radius:30px;font-size:0.7rem;}
-        .post-card .badge.tech{background:rgba(96,165,250,0.15);color:#93bbfc;}
-        .post-card .badge.life{background:rgba(52,211,153,0.12);color:#6ee7b7;}
-        .post-card .badge.career{background:rgba(251,191,36,0.12);color:#fcd34d;}
-        .post-card p{color:rgba(255,255,255,0.6);}
-        .btn-read{background:transparent;border:1px solid #6d5bff;color:#6d5bff;padding:4px 16px;border-radius:20px;cursor:pointer;}
-        .btn-read:hover{background:#6d5bff;color:#fff;}
-        .post-content{background:rgba(255,255,255,0.04);padding:24px;border-radius:20px;border:1px solid rgba(255,255,255,0.06);margin-top:20px;}
-        .post-content .back-btn{background:rgba(255,255,255,0.06);border:1px solid #444;color:#e8edf5;padding:6px 16px;border-radius:30px;cursor:pointer;margin-bottom:16px;}
-        textarea,input,select{width:100%;padding:10px 14px;border-radius:12px;border:1px solid #444;background:rgba(255,255,255,0.05);color:#e8edf5;font-size:0.95rem;margin-top:6px;}
-        .publish-form{display:none;background:rgba(255,255,255,0.04);padding:20px;border-radius:16px;margin-top:12px;}
-        .comment-item{border-bottom:1px solid rgba(255,255,255,0.06);padding:12px 0;}
-        .comment-item strong{color:#a5b4fc;}
-        .comment-item .c-time{color:rgba(255,255,255,0.3);font-size:0.8rem;margin-left:8px;}
-        .modal{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.7);backdrop-filter:blur(8px);justify-content:center;align-items:center;z-index:999;}
-        .modal.active{display:flex;}
-        .modal-box{background:#1a1a2e;padding:30px;border-radius:20px;max-width:420px;width:100%;max-height:90vh;overflow-y:auto;position:relative;}
-        .modal-box .close{position:absolute;top:12px;right:20px;font-size:1.8rem;cursor:pointer;color:rgba(255,255,255,0.4);}
-        .modal-box .close:hover{color:#fff;}
-        .modal-tabs{display:flex;gap:8px;border-bottom:1px solid #333;padding-bottom:12px;margin-bottom:20px;}
-        .modal-tabs button{flex:1;background:transparent;border:none;color:rgba(255,255,255,0.4);padding:8px 0;font-weight:600;cursor:pointer;border-bottom:2px solid transparent;}
-        .modal-tabs button.active{color:#fff;border-bottom-color:#6d5bff;}
-        .auth-form{display:none;flex-direction:column;gap:12px;}
-        .auth-form.active{display:flex;}
-        .social-btn{padding:10px;border-radius:12px;border:none;font-weight:600;cursor:pointer;text-align:center;}
-        .google-btn{background:#fff;color:#333;}
-        .github-btn{background:#24292e;color:#fff;}
-        .divider{display:flex;align-items:center;gap:16px;color:rgba(255,255,255,0.3);}
-        .divider::before,.divider::after{content:'';flex:1;height:1px;background:#333;}
-        .auth-switch{text-align:center;color:rgba(255,255,255,0.4);}
-        .auth-switch a{color:#6d5bff;cursor:pointer;}
-        footer{text-align:center;margin-top:40px;padding:20px;border-top:1px solid rgba(255,255,255,0.04);color:rgba(255,255,255,0.2);font-size:0.85rem;}
-        .social-links{display:flex;justify-content:center;gap:20px;flex-wrap:wrap;margin-bottom:8px;}
-        .social-links a{color:rgba(255,255,255,0.3);text-decoration:none;}
-        .social-links a:hover{color:rgba(255,255,255,0.7);}
-        .no-result{text-align:center;padding:20px;color:rgba(255,255,255,0.3);}
+        body {
+            background: #0b0e1a;
+            color: #e8edf5;
+            font-family: 'Segoe UI', sans-serif;
+            padding: 20px;
+            line-height: 1.6;
+        }
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+        h1 {
+            background: linear-gradient(135deg, #c4b5fd, #818cf8);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            font-size: 1.8rem;
+            margin: 0;
+        }
+        .nav-controls {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+        .search-box {
+            padding: 8px 16px;
+            border-radius: 30px;
+            border: 1px solid #444;
+            background: rgba(255,255,255,0.05);
+            color: #fff;
+            width: 200px;
+        }
+        .btn {
+            background: linear-gradient(135deg, #6d5bff, #8b5cf6);
+            color: #fff;
+            border: none;
+            padding: 6px 18px;
+            border-radius: 30px;
+            cursor: pointer;
+            font-size: 0.9rem;
+        }
+        .btn-outline {
+            background: transparent;
+            border: 1px solid #444;
+        }
+        .btn-outline:hover {
+            background: rgba(255,255,255,0.05);
+        }
+        .auth-section {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .user-avatar {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            border: 2px solid rgba(255,255,255,0.15);
+        }
+        .user-name {
+            color: rgba(255,255,255,0.6);
+        }
+        .logout-btn {
+            background: transparent;
+            border: 1px solid #444;
+            color: rgba(255,255,255,0.4);
+            padding: 4px 12px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 0.75rem;
+        }
+        .logout-btn:hover {
+            border-color: #ef4444;
+            color: #ef4444;
+        }
+        .hidden {
+            display: none !important;
+        }
+        #adminLink {
+            color: rgba(255,255,255,0.5);
+            text-decoration: none;
+            font-size: 0.85rem;
+            border: 1px solid rgba(255,255,255,0.1);
+            padding: 4px 12px;
+            border-radius: 20px;
+            display: none;
+        }
+        #adminLink:hover {
+            color: #fff;
+            border-color: rgba(255,255,255,0.3);
+        }
+        .post-card {
+            background: rgba(255,255,255,0.04);
+            border-radius: 16px;
+            padding: 16px 20px;
+            margin-bottom: 16px;
+            border: 1px solid rgba(255,255,255,0.06);
+        }
+        .post-card h3 {
+            margin: 0 0 4px;
+        }
+        .post-card .meta {
+            color: rgba(255,255,255,0.4);
+            font-size: 0.8rem;
+        }
+        .post-card .badge {
+            padding: 2px 12px;
+            border-radius: 30px;
+            font-size: 0.7rem;
+        }
+        .post-card .badge.tech { background: rgba(96,165,250,0.15); color: #93bbfc; }
+        .post-card .badge.life { background: rgba(52,211,153,0.12); color: #6ee7b7; }
+        .post-card .badge.career { background: rgba(251,191,36,0.12); color: #fcd34d; }
+        .post-card p { color: rgba(255,255,255,0.6); }
+        .btn-read {
+            background: transparent;
+            border: 1px solid #6d5bff;
+            color: #6d5bff;
+            padding: 4px 16px;
+            border-radius: 20px;
+            cursor: pointer;
+        }
+        .btn-read:hover {
+            background: #6d5bff;
+            color: #fff;
+        }
+        .post-content {
+            background: rgba(255,255,255,0.04);
+            padding: 24px;
+            border-radius: 20px;
+            border: 1px solid rgba(255,255,255,0.06);
+            margin-top: 20px;
+        }
+        .post-content .back-btn {
+            background: rgba(255,255,255,0.06);
+            border: 1px solid #444;
+            color: #e8edf5;
+            padding: 6px 16px;
+            border-radius: 30px;
+            cursor: pointer;
+            margin-bottom: 16px;
+        }
+        textarea, input, select {
+            width: 100%;
+            padding: 10px 14px;
+            border-radius: 12px;
+            border: 1px solid #444;
+            background: rgba(255,255,255,0.05);
+            color: #e8edf5;
+            font-size: 0.95rem;
+            margin-top: 6px;
+        }
+        .publish-form {
+            display: none;
+            background: rgba(255,255,255,0.04);
+            padding: 20px;
+            border-radius: 16px;
+            margin-top: 12px;
+        }
+        .comment-item {
+            border-bottom: 1px solid rgba(255,255,255,0.06);
+            padding: 12px 0;
+        }
+        .comment-item strong { color: #a5b4fc; }
+        .comment-item .c-time { color: rgba(255,255,255,0.3); font-size: 0.8rem; margin-left: 8px; }
+        .modal {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.7);
+            backdrop-filter: blur(8px);
+            justify-content: center;
+            align-items: center;
+            z-index: 999;
+        }
+        .modal.active { display: flex; }
+        .modal-box {
+            background: #1a1a2e;
+            padding: 30px;
+            border-radius: 20px;
+            max-width: 420px;
+            width: 100%;
+            max-height: 90vh;
+            overflow-y: auto;
+            position: relative;
+        }
+        .modal-box .close {
+            position: absolute;
+            top: 12px;
+            right: 20px;
+            font-size: 1.8rem;
+            cursor: pointer;
+            color: rgba(255,255,255,0.4);
+        }
+        .modal-box .close:hover { color: #fff; }
+        .modal-tabs {
+            display: flex;
+            gap: 8px;
+            border-bottom: 1px solid #333;
+            padding-bottom: 12px;
+            margin-bottom: 20px;
+        }
+        .modal-tabs button {
+            flex: 1;
+            background: transparent;
+            border: none;
+            color: rgba(255,255,255,0.4);
+            padding: 8px 0;
+            font-weight: 600;
+            cursor: pointer;
+            border-bottom: 2px solid transparent;
+        }
+        .modal-tabs button.active {
+            color: #fff;
+            border-bottom-color: #6d5bff;
+        }
+        .auth-form { display: none; flex-direction: column; gap: 12px; }
+        .auth-form.active { display: flex; }
+        .social-btn {
+            padding: 10px;
+            border-radius: 12px;
+            border: none;
+            font-weight: 600;
+            cursor: pointer;
+            text-align: center;
+        }
+        .google-btn { background: #fff; color: #333; }
+        .github-btn { background: #24292e; color: #fff; }
+        .divider {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            color: rgba(255,255,255,0.3);
+        }
+        .divider::before, .divider::after {
+            content: '';
+            flex: 1;
+            height: 1px;
+            background: #333;
+        }
+        .auth-switch { text-align: center; color: rgba(255,255,255,0.4); }
+        .auth-switch a { color: #6d5bff; cursor: pointer; }
+        footer {
+            text-align: center;
+            margin-top: 40px;
+            padding: 20px;
+            border-top: 1px solid rgba(255,255,255,0.04);
+            color: rgba(255,255,255,0.2);
+            font-size: 0.85rem;
+        }
+        .social-links {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            flex-wrap: wrap;
+            margin-bottom: 8px;
+        }
+        .social-links a { color: rgba(255,255,255,0.3); text-decoration: none; }
+        .social-links a:hover { color: rgba(255,255,255,0.7); }
+        .no-result { text-align: center; padding: 20px; color: rgba(255,255,255,0.3); }
     </style>
 </head>
 <body>
@@ -161,141 +372,11 @@
 </div>
 
 <script>
-const ADMIN_UID = "你的_UID"; // 替换成你的 UID
-
+// Firebase 配置（直接用你的）
 const firebaseConfig = {
     apiKey: "AIzaSyB8ZalWGiP8at0EUIfKN46CbwQ3eH4iM8E",
     authDomain: "project-170416828695178494.firebaseapp.com",
     projectId: "project-170416828695178494",
     storageBucket: "project-170416828695178494.firebasestorage.app",
     messagingSenderId: "1096326612519",
-    appId: "1:1096326612519:web:8208916652738ce870f002",
-    measurementId: "G-3K0YDFV3J5"
-};
-
-firebase.initializeApp(firebaseConfig);
-const auth = firebase.auth();
-const db = firebase.firestore();
-
-// ========== 22篇内置文章 ==========
-const builtInPosts = [
-    {id:'builtin-1',title:'欢迎来到窍某博客网',content:'<p>这里是我个人思考与成长的自留地。</p>',excerpt:'开启分享之旅，记录思考点滴',category:'life',cover_image:'https://picsum.photos/id/1015/800/400',author_name:'窍某',views:128,created_at:new Date('2026-07-01')},
-    {id:'builtin-2',title:'2026 年前沿技术风向标',content:'<p>2026 年已经过半，AI Agent、WebAssembly、边缘计算成为焦点。</p>',excerpt:'AI Agent、WebAssembly 与边缘计算',category:'tech',cover_image:'https://picsum.photos/id/201/800/400',author_name:'窍某',views:256,created_at:new Date('2026-07-03')},
-    {id:'builtin-3',title:'V2rayN 使用教程：新手完整指南',content:'<p>V2rayN 是 Windows 上最流行的 V2Ray 客户端。</p>',excerpt:'从零开始配置，安全上网一步到位',category:'tech',cover_image:'https://picsum.photos/id/202/800/400',author_name:'窍某',views:345,created_at:new Date('2026-07-11')},
-    {id:'builtin-4',title:'一个人旅行的意义：丽江之行',content:'<p>在丽江的雪山与古镇之间，找回内心的秩序。</p>',excerpt:'在雪山与古镇之间，找回内心的秩序',category:'life',cover_image:'https://picsum.photos/id/1018/800/400',author_name:'窍某',views:89,created_at:new Date('2026-07-06')},
-    {id:'builtin-5',title:'晨间习惯：咖啡与深度思考',content:'<p>每天清晨一杯手冲咖啡，30分钟无干扰阅读。</p>',excerpt:'高效早晨的仪式感，从一杯手冲开始',category:'life',cover_image:'https://picsum.photos/id/292/800/400',author_name:'窍某',views:45,created_at:new Date('2026-07-08')},
-    {id:'builtin-6',title:'前端开发者 2026 生存指南',content:'<p>AI 正在改变前端开发，学会与 AI 协作是核心能力。</p>',excerpt:'AI 时代下，前端工程师的竞争力重塑',category:'tech',cover_image:'https://picsum.photos/id/133/800/400',author_name:'窍某',views:178,created_at:new Date('2026-07-07')},
-    {id:'builtin-7',title:'大模型时代的高效学习方法',content:'<p>用 AI 加速学习，提问、探究、输出三阶循环。</p>',excerpt:'用 AI 加速学习，而非被 AI 取代',category:'tech',cover_image:'https://picsum.photos/id/203/800/400',author_name:'窍某',views:67,created_at:new Date('2026-07-05')},
-    {id:'builtin-8',title:'远程工作的心得体会：自由与自律',content:'<p>三年远程工作，三条铁律。</p>',excerpt:'三年远程工作，我学到了什么',category:'career',cover_image:'https://picsum.photos/id/180/800/400',author_name:'窍某',views:156,created_at:new Date('2026-07-12')},
-    {id:'builtin-9',title:'阅读如何改变人生：一年阅读 50 本书',content:'<p>主题阅读 + 输出倒逼输入。</p>',excerpt:'从每天 10 分钟开始，重塑认知体系',category:'life',cover_image:'https://picsum.photos/id/204/800/400',author_name:'窍某',views:92,created_at:new Date('2026-07-13')},
-    {id:'builtin-10',title:'AGI 到来前的准备：未来 5 年趋势',content:'<p>AGI 将在 2028-2030 年实现。</p>',excerpt:'2028-2030 年 AGI 可能实现，我们该如何应对',category:'tech',cover_image:'https://picsum.photos/id/205/800/400',author_name:'窍某',views:210,created_at:new Date('2026-07-14')},
-    {id:'builtin-11',title:'每周 VPN 节点更新（GitHub 订阅）',content:'<p>免费节点分享，每周一更新。</p>',excerpt:'免费节点分享，持续更新中',category:'tech',cover_image:'https://picsum.photos/id/866/800/400',author_name:'窍某',views:432,created_at:new Date('2026-07-09')},
-    {id:'builtin-12',title:'工作与生活平衡之道：避免 burnout',content:'<p>职业倦怠的5个信号与5个应对方法。</p>',excerpt:'设定清晰边界，找回生活的掌控感',category:'career',cover_image:'https://picsum.photos/id/206/800/400',author_name:'窍某',views:67,created_at:new Date('2026-07-15')},
-    {id:'builtin-13',title:'AI 编程助手深度体验：Cursor 与 Copilot 对比',content:'<p>日常编码用 Copilot，大型重构用 Cursor。</p>',excerpt:'实测两款主流 AI 编程工具，谁更懂开发者？',category:'tech',cover_image:'https://picsum.photos/id/106/800/400',author_name:'窍某',views:203,created_at:new Date('2026-07-16')},
-    {id:'builtin-14',title:'Web3.0 与去中心化互联网：入门指南',content:'<p>从 DID、智能合约、DAO 理解 Web3。</p>',excerpt:'从区块链到 DAO，Web3 的核心概念与落地场景',category:'tech',cover_image:'https://picsum.photos/id/145/800/400',author_name:'窍某',views:134,created_at:new Date('2026-07-17')},
-    {id:'builtin-15',title:'极简主义生活实践：少即是多的哲学',content:'<p>扔掉80%的物品，收获200%的快乐。</p>',excerpt:'一年极简实验，我扔掉了 80% 的物品，收获了 200% 的快乐',category:'life',cover_image:'https://picsum.photos/id/104/800/400',author_name:'窍某',views:78,created_at:new Date('2026-07-18')},
-    {id:'builtin-16',title:'城市漫步指南：在熟悉的街道上发现诗意',content:'<p>关掉地图，在熟悉的城市发现新风景。</p>',excerpt:'不必远行，身边就有风景 —— 用脚步重新认识你的城市',category:'life',cover_image:'https://picsum.photos/id/108/800/400',author_name:'窍某',views:56,created_at:new Date('2026-07-19')},
-    {id:'builtin-17',title:'高效会议的秘密：从「时间黑洞」到「决策加速器」',content:'<p>5个方法让会议效率翻倍。</p>',excerpt:'用这 5 个方法，把会议时间缩短 50%，决策质量提升 2 倍',category:'career',cover_image:'https://picsum.photos/id/102/800/400',author_name:'窍某',views:189,created_at:new Date('2026-07-20')},
-    {id:'builtin-18',title:'AI 与人类创造力：合作还是替代？',content:'<p>AI 是灵感催化剂，但人性不可替代。</p>',excerpt:'深入探讨 AI 生成内容对创意产业的影响与未来',category:'tech',cover_image:'https://picsum.photos/id/207/800/400',author_name:'窍某',views:312,created_at:new Date('2026-07-25')},
-    {id:'builtin-19',title:'大模型时代的隐私博弈：数据、权力与选择',content:'<p>训练数据的灰色地带，隐私泄露与应对策略。</p>',excerpt:'从训练数据到用户交互，AI 如何重塑我们的隐私边界',category:'tech',cover_image:'https://picsum.photos/id/208/800/400',author_name:'窍某',views:145,created_at:new Date('2026-07-26')},
-    {id:'builtin-20',title:'开源 AI 的崛起：民主化与商业化的角力',content:'<p>开源模型性能逼近闭源，未来开源与闭源共存。</p>',excerpt:'Llama、Qwen、DeepSeek 等开源模型如何改变 AI 产业格局',category:'tech',cover_image:'https://picsum.photos/id/209/800/400',author_name:'窍某',views:98,created_at:new Date('2026-07-27')},
-    {id:'builtin-21',title:'AI 代理（Agent）的现状与未来：从工具到同事',content:'<p>Agent 构成：规划、记忆、工具。</p>',excerpt:'自主决策、多智能体协作与通用智能的黎明',category:'tech',cover_image:'https://picsum.photos/id/210/800/400',author_name:'窍某',views:267,created_at:new Date('2026-07-28')},
-    {id:'builtin-22',title:'AI 时代的批判性思维：如何不被算法驯化',content:'<p>10条原则，在信息茧房中保持独立思考。</p>',excerpt:'在信息茧房与算法推荐中，保持独立思考的10条原则',category:'tech',cover_image:'https://picsum.photos/id/211/800/400',author_name:'窍某',views:189,created_at:new Date('2026-07-29')}
-];
-
-let postsCache = [...builtInPosts];
-let currentCategory = 'all';
-let currentUser = null;
-let isPopupOpen = false;
-
-// ========== 关键修复：合并内置文章 + Firebase 文章 ==========
-async function loadPosts(category = 'all', keyword = '') {
-    try {
-        let query = db.collection('posts').orderBy('created_at', 'desc');
-        if (category !== 'all') {
-            query = query.where('category', '==', category);
-        }
-        const snapshot = await query.get();
-        const fbPosts = [];
-        snapshot.forEach(doc => {
-            const data = doc.data();
-            data.id = doc.id;
-            if (data.created_at && data.created_at.toDate) {
-                data.created_at = data.created_at.toDate();
-            }
-            fbPosts.push(data);
-        });
-
-        // 合并内置文章 + Firebase 文章
-        const allPosts = [...builtInPosts, ...fbPosts];
-        // 按时间排序（最新的在前）
-        allPosts.sort((a, b) => {
-            const dateA = a.created_at instanceof Date ? a.created_at : new Date(a.created_at);
-            const dateB = b.created_at instanceof Date ? b.created_at : new Date(b.created_at);
-            return dateB - dateA;
-        });
-        // 去重
-        const seen = new Set();
-        const uniquePosts = allPosts.filter(p => {
-            const key = p.id;
-            if (seen.has(key)) return false;
-            seen.add(key);
-            return true;
-        });
-
-        postsCache = uniquePosts;
-        renderPostList(filterPosts(postsCache, category, keyword));
-    } catch (err) {
-        postsCache = [...builtInPosts];
-        renderPostList(filterPosts(postsCache, category, keyword));
-    }
-}
-
-function filterPosts(posts, category, keyword) {
-    let filtered = posts;
-    if (category !== 'all') {
-        filtered = filtered.filter(p => p.category === category);
-    }
-    if (keyword) {
-        const kw = keyword.toLowerCase();
-        filtered = filtered.filter(p =>
-            p.title.toLowerCase().includes(kw) ||
-            (p.excerpt && p.excerpt.toLowerCase().includes(kw)) ||
-            (p.content && p.content.toLowerCase().includes(kw))
-        );
-    }
-    return filtered;
-}
-
-function renderPostList(posts) {
-    const list = document.getElementById('postList');
-    if (!posts.length) {
-        list.innerHTML = '<div class="no-result">😕 暂无文章</div>';
-        return;
-    }
-    const catMap = { tech: '科技', life: '生活', career: '职场' };
-    list.innerHTML = posts.map(post => {
-        const dateStr = post.created_at instanceof Date ?
-            post.created_at.toLocaleDateString() :
-            (post.created_at ? new Date(post.created_at).toLocaleDateString() : '');
-        return `
-            <div class="post-card">
-                <img src="${post.cover_image || 'https://picsum.photos/seed/'+post.id+'/800/400'}" alt="${post.title}" style="width:100%;height:200px;object-fit:cover;border-radius:12px;margin-bottom:12px;" />
-                <h3>${post.title}</h3>
-                <div class="meta">${dateStr} · <span class="badge ${post.category}">${catMap[post.category] || post.category}</span></div>
-                <p>${post.excerpt || (post.content ? post.content.replace(/<[^>]+>/g,'').slice(0,80)+'...' : '')}</p>
-                <button class="btn-read" onclick="showPost('${post.id}')">阅读全文 →</button>
-            </div>
-        `;
-    }).join('');
-}
-
-// ========== 其他函数（认证、评论、发布等） ==========
-// 为了节省篇幅，下面只包含关键函数骨架，实际请用你原来的完整版本
-// 但为了让你直接能用，我保留完整的核心功能
-
-// ... （此处省略，实际代码中包含完整功能）
-
-</script>
-</body>
-</html>
+    appId: "1:1096326612519:web:8208916652738ce870f002
