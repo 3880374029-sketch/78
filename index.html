@@ -3,14 +3,14 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>窍某论坛</title>
+    <title>窍某博客网</title>
     <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
     <style>
         *{margin:0;padding:0;box-sizing:border-box;}
         body{background:#0b0e1a;color:#e8edf5;font-family:'Segoe UI',sans-serif;padding:20px;line-height:1.6;}
-        .container{max-width:1000px;margin:0 auto;}
+        .container{max-width:1200px;margin:0 auto;}
         header{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;margin-bottom:20px;}
         h1{background:linear-gradient(135deg,#c4b5fd,#818cf8);-webkit-background-clip:text;-webkit-text-fill-color:transparent;font-size:1.8rem;margin:0;}
         .nav-controls{display:flex;align-items:center;gap:12px;flex-wrap:wrap;}
@@ -26,6 +26,21 @@
         .hidden{display:none!important;}
         #adminLink{color:rgba(255,255,255,0.5);text-decoration:none;font-size:0.85rem;border:1px solid rgba(255,255,255,0.1);padding:4px 12px;border-radius:20px;display:none;}
         #adminLink:hover{color:#fff;border-color:rgba(255,255,255,0.3);}
+
+        /* 布局：主区域 + 侧边栏 */
+        .main-layout{display:flex;gap:30px;align-items:flex-start;flex-wrap:wrap;}
+        .main-content{flex:2;min-width:0;}
+        .sidebar{flex:1;min-width:260px;}
+
+        /* 热门排行 */
+        .hot-list{background:rgba(255,255,255,0.04);border-radius:16px;padding:16px 20px;border:1px solid rgba(255,255,255,0.06);margin-bottom:20px;}
+        .hot-list h3{font-size:1.2rem;margin-bottom:12px;color:#fcd34d;}
+        .hot-item{padding:6px 0;border-bottom:1px solid rgba(255,255,255,0.06);}
+        .hot-item:last-child{border-bottom:none;}
+        .hot-item a{color:#a5b4fc;text-decoration:none;display:flex;justify-content:space-between;}
+        .hot-item a:hover{color:#fff;}
+        .hot-item .hot-num{color:#fcd34d;font-weight:700;margin-right:8px;}
+
         .post-card{background:rgba(255,255,255,0.04);border-radius:16px;padding:16px 20px;margin-bottom:16px;border:1px solid rgba(255,255,255,0.06);}
         .post-card h3{margin:0 0 4px;}
         .post-card .meta{color:rgba(255,255,255,0.4);font-size:0.8rem;}
@@ -72,12 +87,14 @@
         .no-result{text-align:center;padding:20px;color:rgba(255,255,255,0.3);}
         .empty-state{padding:40px 20px;text-align:center;border:2px dashed rgba(255,255,255,0.1);border-radius:16px;margin:20px 0;}
         .empty-state h3{color:rgba(255,255,255,0.5);margin-bottom:12px;}
+        .topic-tag{display:inline-block;background:rgba(251,191,36,0.1);padding:2px 12px;border-radius:20px;color:#fcd34d;font-size:0.75rem;margin-left:6px;}
+        .btn-sm{padding:4px 12px;font-size:0.8rem;}
     </style>
 </head>
 <body>
 <div class="container">
     <header>
-        <h1>✦ 窍某论坛</h1>
+        <h1>✦ 窍某博客网</h1>
         <div class="nav-controls">
             <input type="text" id="searchInput" class="search-box" placeholder="🔍 搜索文章..." onkeyup="searchPosts()" />
             <button class="btn btn-outline" onclick="toggleTheme()" id="themeToggle">🌙</button>
@@ -94,33 +111,47 @@
             <button class="btn btn-outline cat-btn" data-cat="tech">科技</button>
             <button class="btn btn-outline cat-btn" data-cat="life">生活</button>
             <button class="btn btn-outline cat-btn" data-cat="career">职场</button>
-            <button class="btn btn-outline cat-btn" data-cat="topic">💬 话题</button>
+            <!-- 动态话题分类将由JS生成 -->
+            <span id="topicCats"></span>
         </div>
     </header>
 
     <div style="display:flex;gap:12px;flex-wrap:wrap;margin-bottom:12px;">
         <button class="btn" onclick="togglePublish()">📝 发布新文章</button>
-        <button class="btn" onclick="openNewTopic()">💬 新建话题</button>
+        <button class="btn" onclick="openNewTopic()">🏷️ 新建话题</button>
     </div>
 
     <div class="publish-form" id="publishForm">
         <h3>发布新内容</h3>
-        <input type="text" id="newTitle" placeholder="标题" />
-        <input type="text" id="newExcerpt" placeholder="摘要（可选）" />
+        <input type="text" id="newTitle" maxlength="100" placeholder="标题（限100字符）" />
+        <input type="text" id="newExcerpt" maxlength="300" placeholder="摘要（可选）" />
         <select id="newCategory">
             <option value="tech">科技</option>
             <option value="life">生活</option>
             <option value="career">职场</option>
-            <option value="topic">💬 话题</option>
+            <!-- 动态话题将加入这里 -->
         </select>
-        <textarea id="newContent" rows="6" placeholder="正文内容"></textarea>
-        <button class="btn" onclick="publishPost()">提交</button>
+        <textarea id="newContent" rows="6" maxlength="50000" placeholder="正文内容（限50000字符）"></textarea>
+        <button class="btn" onclick="publishPost()" id="publishBtn">提交</button>
+        <p style="color:rgba(255,255,255,0.3);font-size:0.8rem;margin-top:4px;">已有内容请勿重复提交</p>
     </div>
 
     <hr style="border-color:#333;margin:20px 0;" />
-    <h2>📖 最新文章</h2>
-    <div id="postList"></div>
-    <div id="detailArea" class="hidden"></div>
+
+    <div class="main-layout">
+        <div class="main-content">
+            <h2>📖 最新文章</h2>
+            <div id="postList"></div>
+            <div id="detailArea" class="hidden"></div>
+        </div>
+        <div class="sidebar">
+            <!-- 热门排行 -->
+            <div class="hot-list" id="hotList">
+                <h3>🔥 热门排行</h3>
+                <div id="hotContent"><p style="color:rgba(255,255,255,0.3);">加载中...</p></div>
+            </div>
+        </div>
+    </div>
 </div>
 
 <footer>
@@ -131,7 +162,7 @@
         <a href="https://github.com/3880374029-sketch/78">🐙 GitHub</a>
     </div>
     <div>📧 投稿邮箱：<a href="mailto:3880374029@qq.com" style="color:rgba(255,255,255,0.3);">3880374029@qq.com</a></div>
-    <p>© 2026 窍某论坛</p>
+    <p>© 2026 窍某博客网</p>
 </footer>
 
 <!-- 登录模态框 -->
@@ -157,7 +188,7 @@
         </form>
         <form class="auth-form" id="registerForm" onsubmit="handleRegister(event)">
             <label for="regName">昵称</label>
-            <input type="text" id="regName" placeholder="你的昵称" required />
+            <input type="text" id="regName" maxlength="30" placeholder="你的昵称" required />
             <label for="regEmail">邮箱地址</label>
             <input type="email" id="regEmail" placeholder="your@email.com" required />
             <label for="regPassword">密码</label>
@@ -170,6 +201,18 @@
             <button type="button" class="social-btn github-btn" onclick="handleSocialLogin('github')">🐙 GitHub</button>
             <div class="auth-switch">已有账号？ <a onclick="switchTab('login')">去登录</a></div>
         </form>
+    </div>
+</div>
+
+<!-- 新建话题模态框 -->
+<div class="modal" id="topicModal">
+    <div class="modal-box">
+        <span class="close" onclick="closeTopicModal()">&times;</span>
+        <h2>🏷️ 新建话题</h2>
+        <p style="color:rgba(255,255,255,0.4);margin-bottom:16px;">输入新话题名称，创建后即可在发布文章时选择</p>
+        <input type="text" id="newTopicName" maxlength="30" placeholder="话题名称（限30字符）" />
+        <button class="btn" onclick="createTopic()" style="margin-top:12px;width:100%;">创建话题</button>
+        <div id="topicMsg" style="margin-top:8px;"></div>
     </div>
 </div>
 
@@ -197,9 +240,12 @@ let postsCache = [];
 let currentCategory = 'all';
 let currentUser = null;
 let isPopupOpen = false;
+let isSubmitting = false;
+let lastSubmitTime = 0;
+let topicsCache = []; // 存储话题列表
 
 // =============================================================
-// 日期格式化工具
+// 日期格式化
 // =============================================================
 function formatDate(date) {
     if (!date) return '';
@@ -220,7 +266,121 @@ function sortByDate(a, b) {
 }
 
 // =============================================================
-// 核心：从 Firebase 加载文章（无内置）
+// 话题管理
+// =============================================================
+async function loadTopics() {
+    try {
+        const snapshot = await db.collection('topics').orderBy('name').get();
+        topicsCache = [];
+        snapshot.forEach(doc => {
+            const data = doc.data();
+            data.id = doc.id;
+            topicsCache.push(data);
+        });
+        updateTopicUI();
+        updateCategorySelect();
+    } catch (e) {
+        console.warn('加载话题失败:', e);
+    }
+}
+
+function updateTopicUI() {
+    // 更新分类按钮中的话题
+    const container = document.getElementById('topicCats');
+    if (!container) return;
+    let html = '';
+    topicsCache.forEach(t => {
+        const name = t.name;
+        const safeName = name.replace(/"/g, '&quot;');
+        html += `<button class="btn btn-outline cat-btn" data-cat="${encodeURIComponent(name)}" onclick="setCategoryFromTopic('${encodeURIComponent(name)}')">🏷️ ${name}</button>`;
+    });
+    container.innerHTML = html;
+    // 重新绑定话题分类点击（因为动态生成，需要重新绑定事件）
+    document.querySelectorAll('#topicCats .cat-btn').forEach(btn => {
+        btn.addEventListener('click', function() {
+            const cat = decodeURIComponent(this.dataset.cat);
+            setCategory(cat);
+        });
+    });
+}
+
+function updateCategorySelect() {
+    const select = document.getElementById('newCategory');
+    // 保留原有的固定分类选项（tech, life, career）
+    const fixedOptions = ['tech', 'life', 'career'];
+    // 清除动态添加的话题选项（保留固定选项）
+    const currentOptions = select.querySelectorAll('option');
+    currentOptions.forEach(opt => {
+        if (!fixedOptions.includes(opt.value)) {
+            opt.remove();
+        }
+    });
+    // 添加话题
+    topicsCache.forEach(t => {
+        const opt = document.createElement('option');
+        opt.value = t.name;
+        opt.textContent = '🏷️ ' + t.name;
+        select.appendChild(opt);
+    });
+}
+
+function setCategoryFromTopic(encodedName) {
+    const name = decodeURIComponent(encodedName);
+    setCategory(name);
+}
+
+function openNewTopic() {
+    document.getElementById('topicModal').classList.add('active');
+    document.getElementById('newTopicName').value = '';
+    document.getElementById('topicMsg').innerHTML = '';
+}
+
+function closeTopicModal() {
+    document.getElementById('topicModal').classList.remove('active');
+}
+
+async function createTopic() {
+    const name = document.getElementById('newTopicName').value.trim();
+    const msg = document.getElementById('topicMsg');
+    if (!name) {
+        msg.innerHTML = '<p style="color:#ef4444;">请输入话题名称</p>';
+        return;
+    }
+    if (name.length > 30) {
+        msg.innerHTML = '<p style="color:#ef4444;">话题名称不能超过30字符</p>';
+        return;
+    }
+    // 检查是否已存在
+    if (topicsCache.some(t => t.name === name)) {
+        msg.innerHTML = '<p style="color:#ef4444;">该话题已存在</p>';
+        return;
+    }
+    try {
+        await db.collection('topics').add({
+            name: name,
+            created_at: firebase.firestore.FieldValue.serverTimestamp()
+        });
+        msg.innerHTML = '<p style="color:#6ee7b7;">✅ 话题创建成功！</p>';
+        await loadTopics(); // 刷新话题列表
+        document.getElementById('newTopicName').value = '';
+        setTimeout(closeTopicModal, 1000);
+    } catch (e) {
+        msg.innerHTML = '<p style="color:#ef4444;">创建失败：' + e.message + '</p>';
+    }
+}
+
+function setCategory(cat) {
+    currentCategory = cat;
+    // 更新所有分类按钮的高亮
+    document.querySelectorAll('.cat-btn').forEach(btn => {
+        btn.classList.toggle('active', btn.dataset.cat === cat);
+    });
+    const keyword = document.getElementById('searchInput').value.trim();
+    loadPosts(cat, keyword);
+}
+
+// =============================================================
+// 核心：加载文章（从 Firebase）
 // =============================================================
 async function loadPosts(category = 'all', keyword = '') {
     try {
@@ -235,14 +395,12 @@ async function loadPosts(category = 'all', keyword = '') {
             data.id = doc.id;
             fbPosts.push(data);
         });
-        // 直接使用 Firebase 数据，不做合并
         postsCache = fbPosts;
     } catch (err) {
         console.error('加载文章失败:', err);
         postsCache = [];
     }
 
-    // 应用分类和搜索
     let filtered = postsCache;
     if (category !== 'all') {
         filtered = filtered.filter(p => p.category === category);
@@ -256,8 +414,38 @@ async function loadPosts(category = 'all', keyword = '') {
         );
     }
     renderPostList(filtered);
-    // 更新点赞状态（等待 DOM 渲染）
     setTimeout(updateAllLikes, 100);
+    // 更新热门排行
+    renderHotList();
+}
+
+// =============================================================
+// 热门排行
+// =============================================================
+function renderHotList() {
+    const container = document.getElementById('hotContent');
+    if (!container) return;
+    // 按点赞数降序取前5
+    const sorted = [...postsCache].sort((a, b) => (b.likes || 0) - (a.likes || 0));
+    const top = sorted.slice(0, 5);
+    if (!top.length) {
+        container.innerHTML = '<p style="color:rgba(255,255,255,0.3);">暂无文章</p>';
+        return;
+    }
+    let html = '';
+    top.forEach((p, index) => {
+        const num = index + 1;
+        const emoji = num === 1 ? '🥇' : num === 2 ? '🥈' : num === 3 ? '🥉' : `#${num}`;
+        html += `
+            <div class="hot-item">
+                <a href="#" onclick="showPost('${p.id}');return false;">
+                    <span><span class="hot-num">${emoji}</span> ${p.title}</span>
+                    <span>❤️ ${p.likes || 0}</span>
+                </a>
+            </div>
+        `;
+    });
+    container.innerHTML = html;
 }
 
 // =============================================================
@@ -274,11 +462,11 @@ function renderPostList(posts) {
         `;
         return;
     }
-    const catMap = { tech: '科技', life: '生活', career: '职场', topic: '💬 话题' };
+    const catMap = { tech: '科技', life: '生活', career: '职场' };
     list.innerHTML = posts.map(p => {
         const dateStr = formatDate(p.created_at);
         const badgeText = catMap[p.category] || p.category;
-        const badgeClass = p.category === 'topic' ? 'badge topic' : `badge ${p.category}`;
+        const badgeClass = (p.category === 'tech' || p.category === 'life' || p.category === 'career') ? `badge ${p.category}` : 'badge topic';
         return `
             <div class="post-card">
                 <img src="${p.cover_image || 'https://picsum.photos/seed/'+p.id+'/800/400'}" alt="${p.title}" />
@@ -321,19 +509,17 @@ async function showPost(postId) {
             <h3>💬 评论</h3>
             <div id="commentsArea"><p style="color:rgba(255,255,255,0.3);">⏳ 加载中...</p></div>
             ${currentUser ? `
-                <textarea id="commentInput" rows="3" placeholder="写下你的评论..." style="margin-top:12px;"></textarea>
-                <button class="btn" onclick="publishComment('${postId}')" style="margin-top:6px;">发表评论</button>
+                <textarea id="commentInput" rows="3" maxlength="2000" placeholder="写下你的评论..."></textarea>
+                <button class="btn" onclick="publishComment('${postId}')" id="commentSubmitBtn">发表评论</button>
             ` : '<p style="color:rgba(255,255,255,0.3);margin-top:12px;">登录后即可评论</p>'}
         </div>
     `;
 
     await loadComments(postId);
-    // 增加浏览量
     try {
         await db.collection('posts').doc(postId).update({ views: firebase.firestore.FieldValue.increment(1) });
         post.views = (post.views || 0) + 1;
     } catch (e) {}
-    // 更新点赞UI
     await updateLikeUI(postId);
     window.scrollTo({ top: 0 });
 }
@@ -369,10 +555,27 @@ async function loadComments(postId) {
 }
 
 async function publishComment(postId) {
+    if (isSubmitting) {
+        alert('请勿重复提交，稍后再试');
+        return;
+    }
+    const now = Date.now();
+    if (now - lastSubmitTime < 5000) {
+        alert('操作过于频繁，请等待5秒后再试');
+        return;
+    }
     const input = document.getElementById('commentInput');
+    if (!input) return;
     const content = input.value.trim();
     if (!content) { alert('请输入评论内容'); return; }
+    if (content.length > 2000) { alert('评论内容不能超过2000字符'); return; }
     if (!currentUser) { alert('请先登录'); return; }
+
+    isSubmitting = true;
+    lastSubmitTime = now;
+    const btn = document.getElementById('commentSubmitBtn');
+    if (btn) btn.disabled = true;
+
     try {
         await db.collection('comments').add({
             post_id: postId,
@@ -384,7 +587,12 @@ async function publishComment(postId) {
         input.value = '';
         await loadComments(postId);
         alert('评论成功！');
-    } catch (e) { alert('评论失败：' + e.message); }
+    } catch (e) {
+        alert('评论失败：' + e.message);
+    } finally {
+        isSubmitting = false;
+        if (btn) btn.disabled = false;
+    }
 }
 
 function backToList() {
@@ -395,20 +603,18 @@ function backToList() {
 }
 
 // =============================================================
-// 搜索和分类
+// 搜索和分类（绑定事件）
 // =============================================================
 function searchPosts() {
     const keyword = document.getElementById('searchInput').value.trim();
-    const activeCat = document.querySelector('.cat-btn.active');
-    const cat = activeCat ? activeCat.dataset.cat : 'all';
-    loadPosts(cat, keyword);
+    loadPosts(currentCategory, keyword);
 }
 
-document.querySelectorAll('.cat-btn').forEach(btn => {
+// 初始分类按钮事件（固定分类 + 动态话题由 loadTopics 绑定）
+document.querySelectorAll('.cat-btn:not(#topicCats .cat-btn)').forEach(btn => {
     btn.addEventListener('click', function() {
-        document.querySelectorAll('.cat-btn').forEach(b => b.classList.remove('active'));
-        this.classList.add('active');
-        loadPosts(this.dataset.cat, document.getElementById('searchInput').value.trim());
+        const cat = this.dataset.cat;
+        setCategory(cat);
     });
 });
 
@@ -440,6 +646,7 @@ async function toggleLike(postId) {
             if (post) post.likes = (post.likes || 0) + 1;
         }
         await updateLikeUI(postId);
+        renderHotList(); // 更新热门排行
     } catch (err) {
         console.error('点赞操作失败:', err);
         alert('操作失败，请重试');
@@ -480,26 +687,40 @@ async function updateAllLikes() {
 }
 
 // =============================================================
-// 发布文章（支持话题）
+// 发布文章（含话题选择）
 // =============================================================
 function togglePublish() {
     const form = document.getElementById('publishForm');
     form.style.display = form.style.display === 'none' ? 'block' : 'none';
 }
 
-function openNewTopic() {
-    document.getElementById('newCategory').value = 'topic';
-    document.getElementById('publishForm').style.display = 'block';
-    document.getElementById('newTitle').focus();
-}
-
 async function publishPost() {
+    if (isSubmitting) {
+        alert('请勿重复提交，稍后再试');
+        return;
+    }
+    const now = Date.now();
+    if (now - lastSubmitTime < 10000) {
+        alert('操作过于频繁，请等待10秒后再试');
+        return;
+    }
     if (!currentUser) { alert('请先登录'); return; }
     const title = document.getElementById('newTitle').value.trim();
     const content = document.getElementById('newContent').value.trim();
     const excerpt = document.getElementById('newExcerpt').value.trim();
     const category = document.getElementById('newCategory').value;
-    if (!title || !content) { alert('标题和内容不能为空'); return; }
+
+    if (!title) { alert('请输入标题'); return; }
+    if (title.length > 100) { alert('标题不能超过100字符'); return; }
+    if (!content) { alert('请输入正文内容'); return; }
+    if (content.length > 50000) { alert('正文内容不能超过50000字符'); return; }
+    if (excerpt.length > 300) { alert('摘要不能超过300字符'); return; }
+
+    isSubmitting = true;
+    lastSubmitTime = now;
+    const btn = document.getElementById('publishBtn');
+    if (btn) btn.disabled = true;
+
     try {
         await db.collection('posts').add({
             title, content, excerpt, category,
@@ -514,7 +735,12 @@ async function publishPost() {
         document.getElementById('newContent').value = '';
         document.getElementById('newExcerpt').value = '';
         loadPosts(currentCategory);
-    } catch (e) { alert('发布失败：' + e.message); }
+    } catch (e) {
+        alert('发布失败：' + e.message);
+    } finally {
+        isSubmitting = false;
+        if (btn) btn.disabled = false;
+    }
 }
 
 // =============================================================
@@ -558,6 +784,7 @@ async function handleRegister(e) {
     if (!name || !email || !pass || !confirm) { alert('请填写完整'); return; }
     if (pass !== confirm) { alert('密码不一致'); return; }
     if (pass.length < 6) { alert('密码至少6位'); return; }
+    if (name.length > 30) { alert('昵称不能超过30字符'); return; }
     try {
         const cred = await auth.createUserWithEmailAndPassword(email, pass);
         await cred.user.updateProfile({ displayName: name });
@@ -604,7 +831,7 @@ async function logout() {
 // =============================================================
 // 登录状态监听 & 管理员入口
 // =============================================================
-const ADMIN_UID = "你的_UID";  // ⚠️ 替换为你的 UID
+const ADMIN_UID = "FEQmE2qlzwQqmIgKqU3VFuaYh602";
 
 auth.onAuthStateChanged(user => {
     currentUser = user;
@@ -630,12 +857,7 @@ auth.onAuthStateChanged(user => {
         logoutBtn.classList.add('hidden');
         adminLink.style.display = 'none';
     }
-    // 初次加载或登录状态变化时加载文章
-    if (user) loadPosts(currentCategory);
 });
-
-// 如果未登录，也加载文章（但可能无法点赞/评论）
-// 但初始加载是在 window.onload 中调用
 
 // =============================================================
 // 主题切换
@@ -664,7 +886,9 @@ function toggleTheme() {
 // 初始化
 // =============================================================
 window.onload = function() {
-    loadPosts('all', '');
+    loadTopics().then(() => {
+        loadPosts('all', '');
+    });
 };
 
 // 暴露全局函数
@@ -677,6 +901,8 @@ window.updateLikeUI = updateLikeUI;
 window.publishPost = publishPost;
 window.togglePublish = togglePublish;
 window.openNewTopic = openNewTopic;
+window.closeTopicModal = closeTopicModal;
+window.createTopic = createTopic;
 window.toggleTheme = toggleTheme;
 window.openModal = openModal;
 window.closeModal = closeModal;
@@ -686,6 +912,7 @@ window.handleRegister = handleRegister;
 window.handleSocialLogin = handleSocialLogin;
 window.logout = logout;
 window.loadPosts = loadPosts;
+window.setCategory = setCategory;
 </script>
 </body>
 </html>
