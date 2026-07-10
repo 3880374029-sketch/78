@@ -243,7 +243,7 @@
         // =============================================================
         // ⚠️ 重要：在这里填写你的管理员 UID
         // =============================================================
-        const ADMIN_UID = "你的_UID"; // 替换成第1步获取的 UID
+        const ADMIN_UID = "你的_UID"; // 替换成你自己的 UID
 
         const firebaseConfig = {
             apiKey: "AIzaSyB8ZalWGiP8at0EUIfKN46CbwQ3eH4iM8E",
@@ -316,6 +316,7 @@
             try {
                 const snapshot = await db.collection('posts').orderBy('created_at', 'desc').get();
                 postsCache = [];
+                totalLikes = 0;
                 snapshot.forEach(doc => {
                     const data = doc.data();
                     data.id = doc.id;
@@ -418,12 +419,12 @@
         }
 
         // =============================================================
-        // 操作函数
+        // 操作函数（带防误删确认）
         // =============================================================
         async function deletePost(postId) {
-            if (!confirm('确定要删除这篇文章吗？')) return;
+            if (!confirm('确定要删除这篇文章吗？（会同时删除所有评论）')) return;
             try {
-                // 同时删除该文章的所有评论（可选）
+                // 删除所有关联评论
                 const commentsSnap = await db.collection('comments').where('post_id', '==', postId).get();
                 const batch = db.batch();
                 commentsSnap.forEach(doc => batch.delete(doc.ref));
@@ -441,12 +442,7 @@
             window.location.href = `index.html?edit=${postId}`;
         }
 
-        // 删除评论（单独功能，供后续扩展）
-        // 这里未实现，但可以在评论管理页面添加
-
-        // =============================================================
         // 暴露到全局
-        // =============================================================
         window.filterPosts = filterPosts;
         window.deletePost = deletePost;
         window.editPost = editPost;
