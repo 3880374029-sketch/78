@@ -8,274 +8,64 @@
     <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
     <style>
-        body {
-            background: #0b0e1a;
-            color: #e8edf5;
-            font-family: 'Segoe UI', sans-serif;
-            padding: 20px;
-            line-height: 1.6;
-        }
-        .container {
-            max-width: 1000px;
-            margin: 0 auto;
-        }
-        header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            flex-wrap: wrap;
-            gap: 10px;
-            margin-bottom: 20px;
-        }
-        h1 {
-            background: linear-gradient(135deg, #c4b5fd, #818cf8);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            font-size: 1.8rem;
-            margin: 0;
-        }
-        .nav-controls {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            flex-wrap: wrap;
-        }
-        .search-box {
-            padding: 8px 16px;
-            border-radius: 30px;
-            border: 1px solid #444;
-            background: rgba(255,255,255,0.05);
-            color: #fff;
-            width: 200px;
-        }
-        .btn {
-            background: linear-gradient(135deg, #6d5bff, #8b5cf6);
-            color: #fff;
-            border: none;
-            padding: 6px 18px;
-            border-radius: 30px;
-            cursor: pointer;
-            font-size: 0.9rem;
-        }
-        .btn-outline {
-            background: transparent;
-            border: 1px solid #444;
-        }
-        .btn-outline:hover {
-            background: rgba(255,255,255,0.05);
-        }
-        .auth-section {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-        .user-avatar {
-            width: 36px;
-            height: 36px;
-            border-radius: 50%;
-            border: 2px solid rgba(255,255,255,0.15);
-        }
-        .user-name {
-            color: rgba(255,255,255,0.6);
-        }
-        .logout-btn {
-            background: transparent;
-            border: 1px solid #444;
-            color: rgba(255,255,255,0.4);
-            padding: 4px 12px;
-            border-radius: 20px;
-            cursor: pointer;
-            font-size: 0.75rem;
-        }
-        .logout-btn:hover {
-            border-color: #ef4444;
-            color: #ef4444;
-        }
-        .hidden {
-            display: none !important;
-        }
-        #adminLink {
-            color: rgba(255,255,255,0.5);
-            text-decoration: none;
-            font-size: 0.85rem;
-            border: 1px solid rgba(255,255,255,0.1);
-            padding: 4px 12px;
-            border-radius: 20px;
-            display: none;
-        }
-        #adminLink:hover {
-            color: #fff;
-            border-color: rgba(255,255,255,0.3);
-        }
-        .post-card {
-            background: rgba(255,255,255,0.04);
-            border-radius: 16px;
-            padding: 16px 20px;
-            margin-bottom: 16px;
-            border: 1px solid rgba(255,255,255,0.06);
-        }
-        .post-card h3 {
-            margin: 0 0 4px;
-        }
-        .post-card .meta {
-            color: rgba(255,255,255,0.4);
-            font-size: 0.8rem;
-        }
-        .post-card .badge {
-            padding: 2px 12px;
-            border-radius: 30px;
-            font-size: 0.7rem;
-        }
-        .post-card .badge.tech { background: rgba(96,165,250,0.15); color: #93bbfc; }
-        .post-card .badge.life { background: rgba(52,211,153,0.12); color: #6ee7b7; }
-        .post-card .badge.career { background: rgba(251,191,36,0.12); color: #fcd34d; }
-        .post-card p { color: rgba(255,255,255,0.6); }
-        .btn-read {
-            background: transparent;
-            border: 1px solid #6d5bff;
-            color: #6d5bff;
-            padding: 4px 16px;
-            border-radius: 20px;
-            cursor: pointer;
-        }
-        .btn-read:hover {
-            background: #6d5bff;
-            color: #fff;
-        }
-        .post-content {
-            background: rgba(255,255,255,0.04);
-            padding: 24px;
-            border-radius: 20px;
-            border: 1px solid rgba(255,255,255,0.06);
-            margin-top: 20px;
-        }
-        .post-content .back-btn {
-            background: rgba(255,255,255,0.06);
-            border: 1px solid #444;
-            color: #e8edf5;
-            padding: 6px 16px;
-            border-radius: 30px;
-            cursor: pointer;
-            margin-bottom: 16px;
-        }
-        textarea, input, select {
-            width: 100%;
-            padding: 10px 14px;
-            border-radius: 12px;
-            border: 1px solid #444;
-            background: rgba(255,255,255,0.05);
-            color: #e8edf5;
-            font-size: 0.95rem;
-            margin-top: 6px;
-        }
-        .publish-form {
-            display: none;
-            background: rgba(255,255,255,0.04);
-            padding: 20px;
-            border-radius: 16px;
-            margin-top: 12px;
-        }
-        .comment-item {
-            border-bottom: 1px solid rgba(255,255,255,0.06);
-            padding: 12px 0;
-        }
-        .comment-item strong { color: #a5b4fc; }
-        .comment-item .c-time { color: rgba(255,255,255,0.3); font-size: 0.8rem; margin-left: 8px; }
-        .modal {
-            display: none;
-            position: fixed;
-            inset: 0;
-            background: rgba(0,0,0,0.7);
-            backdrop-filter: blur(8px);
-            justify-content: center;
-            align-items: center;
-            z-index: 999;
-        }
-        .modal.active { display: flex; }
-        .modal-box {
-            background: #1a1a2e;
-            padding: 30px;
-            border-radius: 20px;
-            max-width: 420px;
-            width: 100%;
-            max-height: 90vh;
-            overflow-y: auto;
-            position: relative;
-        }
-        .modal-box .close {
-            position: absolute;
-            top: 12px;
-            right: 20px;
-            font-size: 1.8rem;
-            cursor: pointer;
-            color: rgba(255,255,255,0.4);
-        }
-        .modal-box .close:hover { color: #fff; }
-        .modal-tabs {
-            display: flex;
-            gap: 8px;
-            border-bottom: 1px solid #333;
-            padding-bottom: 12px;
-            margin-bottom: 20px;
-        }
-        .modal-tabs button {
-            flex: 1;
-            background: transparent;
-            border: none;
-            color: rgba(255,255,255,0.4);
-            padding: 8px 0;
-            font-weight: 600;
-            cursor: pointer;
-            border-bottom: 2px solid transparent;
-        }
-        .modal-tabs button.active {
-            color: #fff;
-            border-bottom-color: #6d5bff;
-        }
-        .auth-form { display: none; flex-direction: column; gap: 12px; }
-        .auth-form.active { display: flex; }
-        .social-btn {
-            padding: 10px;
-            border-radius: 12px;
-            border: none;
-            font-weight: 600;
-            cursor: pointer;
-            text-align: center;
-        }
-        .google-btn { background: #fff; color: #333; }
-        .github-btn { background: #24292e; color: #fff; }
-        .divider {
-            display: flex;
-            align-items: center;
-            gap: 16px;
-            color: rgba(255,255,255,0.3);
-        }
-        .divider::before, .divider::after {
-            content: '';
-            flex: 1;
-            height: 1px;
-            background: #333;
-        }
-        .auth-switch { text-align: center; color: rgba(255,255,255,0.4); }
-        .auth-switch a { color: #6d5bff; cursor: pointer; }
-        footer {
-            text-align: center;
-            margin-top: 40px;
-            padding: 20px;
-            border-top: 1px solid rgba(255,255,255,0.04);
-            color: rgba(255,255,255,0.2);
-            font-size: 0.85rem;
-        }
-        .social-links {
-            display: flex;
-            justify-content: center;
-            gap: 20px;
-            flex-wrap: wrap;
-            margin-bottom: 8px;
-        }
-        .social-links a { color: rgba(255,255,255,0.3); text-decoration: none; }
-        .social-links a:hover { color: rgba(255,255,255,0.7); }
-        .no-result { text-align: center; padding: 20px; color: rgba(255,255,255,0.3); }
+        *{margin:0;padding:0;box-sizing:border-box;}
+        body{background:#0b0e1a;color:#e8edf5;font-family:'Segoe UI',sans-serif;padding:20px;line-height:1.6;}
+        .container{max-width:1000px;margin:0 auto;}
+        header{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;margin-bottom:20px;}
+        h1{background:linear-gradient(135deg,#c4b5fd,#818cf8);-webkit-background-clip:text;-webkit-text-fill-color:transparent;font-size:1.8rem;margin:0;}
+        .nav-controls{display:flex;align-items:center;gap:12px;flex-wrap:wrap;}
+        .search-box{padding:8px 16px;border-radius:30px;border:1px solid #444;background:rgba(255,255,255,0.05);color:#fff;width:200px;}
+        .btn{background:linear-gradient(135deg,#6d5bff,#8b5cf6);color:#fff;border:none;padding:6px 18px;border-radius:30px;cursor:pointer;font-size:0.9rem;}
+        .btn-outline{background:transparent;border:1px solid #444;}
+        .btn-outline:hover{background:rgba(255,255,255,0.05);}
+        .auth-section{display:flex;align-items:center;gap:8px;}
+        .user-avatar{width:36px;height:36px;border-radius:50%;border:2px solid rgba(255,255,255,0.15);}
+        .user-name{color:rgba(255,255,255,0.6);}
+        .logout-btn{background:transparent;border:1px solid #444;color:rgba(255,255,255,0.4);padding:4px 12px;border-radius:20px;cursor:pointer;font-size:0.75rem;}
+        .logout-btn:hover{border-color:#ef4444;color:#ef4444;}
+        .hidden{display:none!important;}
+        #adminLink{color:rgba(255,255,255,0.5);text-decoration:none;font-size:0.85rem;border:1px solid rgba(255,255,255,0.1);padding:4px 12px;border-radius:20px;display:none;}
+        #adminLink:hover{color:#fff;border-color:rgba(255,255,255,0.3);}
+        .post-card{background:rgba(255,255,255,0.04);border-radius:16px;padding:16px 20px;margin-bottom:16px;border:1px solid rgba(255,255,255,0.06);}
+        .post-card h3{margin:0 0 4px;}
+        .post-card .meta{color:rgba(255,255,255,0.4);font-size:0.8rem;}
+        .post-card .badge{padding:2px 12px;border-radius:30px;font-size:0.7rem;}
+        .post-card .badge.tech{background:rgba(96,165,250,0.15);color:#93bbfc;}
+        .post-card .badge.life{background:rgba(52,211,153,0.12);color:#6ee7b7;}
+        .post-card .badge.career{background:rgba(251,191,36,0.12);color:#fcd34d;}
+        .post-card p{color:rgba(255,255,255,0.6);}
+        .post-card img{width:100%;height:200px;object-fit:cover;border-radius:12px;margin-bottom:12px;}
+        .btn-read{background:transparent;border:1px solid #6d5bff;color:#6d5bff;padding:4px 16px;border-radius:20px;cursor:pointer;}
+        .btn-read:hover{background:#6d5bff;color:#fff;}
+        .post-content{background:rgba(255,255,255,0.04);padding:24px;border-radius:20px;border:1px solid rgba(255,255,255,0.06);margin-top:20px;}
+        .post-content .back-btn{background:rgba(255,255,255,0.06);border:1px solid #444;color:#e8edf5;padding:6px 16px;border-radius:30px;cursor:pointer;margin-bottom:16px;}
+        textarea,input,select{width:100%;padding:10px 14px;border-radius:12px;border:1px solid #444;background:rgba(255,255,255,0.05);color:#e8edf5;font-size:0.95rem;margin-top:6px;}
+        .publish-form{display:none;background:rgba(255,255,255,0.04);padding:20px;border-radius:16px;margin-top:12px;}
+        .comment-item{border-bottom:1px solid rgba(255,255,255,0.06);padding:12px 0;}
+        .comment-item strong{color:#a5b4fc;}
+        .comment-item .c-time{color:rgba(255,255,255,0.3);font-size:0.8rem;margin-left:8px;}
+        .modal{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.7);backdrop-filter:blur(8px);justify-content:center;align-items:center;z-index:999;}
+        .modal.active{display:flex;}
+        .modal-box{background:#1a1a2e;padding:30px;border-radius:20px;max-width:420px;width:100%;max-height:90vh;overflow-y:auto;position:relative;}
+        .modal-box .close{position:absolute;top:12px;right:20px;font-size:1.8rem;cursor:pointer;color:rgba(255,255,255,0.4);}
+        .modal-box .close:hover{color:#fff;}
+        .modal-tabs{display:flex;gap:8px;border-bottom:1px solid #333;padding-bottom:12px;margin-bottom:20px;}
+        .modal-tabs button{flex:1;background:transparent;border:none;color:rgba(255,255,255,0.4);padding:8px 0;font-weight:600;cursor:pointer;border-bottom:2px solid transparent;}
+        .modal-tabs button.active{color:#fff;border-bottom-color:#6d5bff;}
+        .auth-form{display:none;flex-direction:column;gap:12px;}
+        .auth-form.active{display:flex;}
+        .social-btn{padding:10px;border-radius:12px;border:none;font-weight:600;cursor:pointer;text-align:center;}
+        .google-btn{background:#fff;color:#333;}
+        .github-btn{background:#24292e;color:#fff;}
+        .divider{display:flex;align-items:center;gap:16px;color:rgba(255,255,255,0.3);}
+        .divider::before,.divider::after{content:'';flex:1;height:1px;background:#333;}
+        .auth-switch{text-align:center;color:rgba(255,255,255,0.4);}
+        .auth-switch a{color:#6d5bff;cursor:pointer;}
+        footer{text-align:center;margin-top:40px;padding:20px;border-top:1px solid rgba(255,255,255,0.04);color:rgba(255,255,255,0.2);font-size:0.85rem;}
+        .social-links{display:flex;justify-content:center;gap:20px;flex-wrap:wrap;margin-bottom:8px;}
+        .social-links a{color:rgba(255,255,255,0.3);text-decoration:none;}
+        .social-links a:hover{color:rgba(255,255,255,0.7);}
+        .no-result{text-align:center;padding:20px;color:rgba(255,255,255,0.3);}
     </style>
 </head>
 <body>
@@ -372,11 +162,386 @@
 </div>
 
 <script>
-// Firebase 配置（直接用你的）
+// ===== 配置 =====
+const ADMIN_UID = "你的_UID";  // 替换为你的UID
+
 const firebaseConfig = {
     apiKey: "AIzaSyB8ZalWGiP8at0EUIfKN46CbwQ3eH4iM8E",
     authDomain: "project-170416828695178494.firebaseapp.com",
     projectId: "project-170416828695178494",
     storageBucket: "project-170416828695178494.firebasestorage.app",
     messagingSenderId: "1096326612519",
-    appId: "1:1096326612519:web:8208916652738ce870f002
+    appId: "1:1096326612519:web:8208916652738ce870f002",
+    measurementId: "G-3K0YDFV3J5"
+};
+
+firebase.initializeApp(firebaseConfig);
+const auth = firebase.auth();
+const db = firebase.firestore();
+
+// ===== 内置文章（22篇，精简版，包含全部） =====
+const builtInPosts = [
+    {id:'builtin-1',title:'欢迎来到窍某博客网',content:'<p>这里是我个人思考与成长的自留地。</p>',excerpt:'开启分享之旅',category:'life',cover_image:'https://picsum.photos/id/1015/800/400',author_name:'窍某',views:128,created_at:new Date('2026-07-01')},
+    {id:'builtin-2',title:'2026 年前沿技术风向标',content:'<p>2026 年，AI Agent、WebAssembly、边缘计算成为焦点。</p>',excerpt:'AI Agent、WebAssembly 与边缘计算',category:'tech',cover_image:'https://picsum.photos/id/201/800/400',author_name:'窍某',views:256,created_at:new Date('2026-07-03')},
+    {id:'builtin-3',title:'V2rayN 使用教程',content:'<p>V2rayN 是 Windows 上最流行的 V2Ray 客户端。</p>',excerpt:'从零开始配置',category:'tech',cover_image:'https://picsum.photos/id/202/800/400',author_name:'窍某',views:345,created_at:new Date('2026-07-11')},
+    {id:'builtin-4',title:'一个人旅行的意义：丽江之行',content:'<p>在丽江的雪山与古镇之间，找回内心的秩序。</p>',excerpt:'在雪山与古镇之间',category:'life',cover_image:'https://picsum.photos/id/1018/800/400',author_name:'窍某',views:89,created_at:new Date('2026-07-06')},
+    {id:'builtin-5',title:'晨间习惯：咖啡与深度思考',content:'<p>每天清晨一杯手冲咖啡，30分钟无干扰阅读。</p>',excerpt:'高效早晨的仪式感',category:'life',cover_image:'https://picsum.photos/id/292/800/400',author_name:'窍某',views:45,created_at:new Date('2026-07-08')},
+    {id:'builtin-6',title:'前端开发者 2026 生存指南',content:'<p>AI 正在改变前端开发，学会与 AI 协作是核心能力。</p>',excerpt:'AI 时代竞争力重塑',category:'tech',cover_image:'https://picsum.photos/id/133/800/400',author_name:'窍某',views:178,created_at:new Date('2026-07-07')},
+    {id:'builtin-7',title:'大模型时代的高效学习方法',content:'<p>用 AI 加速学习，提问、探究、输出三阶循环。</p>',excerpt:'用 AI 加速学习',category:'tech',cover_image:'https://picsum.photos/id/203/800/400',author_name:'窍某',views:67,created_at:new Date('2026-07-05')},
+    {id:'builtin-8',title:'远程工作的心得体会',content:'<p>三年远程工作，三条铁律。</p>',excerpt:'三年远程工作的经验',category:'career',cover_image:'https://picsum.photos/id/180/800/400',author_name:'窍某',views:156,created_at:new Date('2026-07-12')},
+    {id:'builtin-9',title:'阅读如何改变人生',content:'<p>主题阅读 + 输出倒逼输入。</p>',excerpt:'一年读50本书的方法',category:'life',cover_image:'https://picsum.photos/id/204/800/400',author_name:'窍某',views:92,created_at:new Date('2026-07-13')},
+    {id:'builtin-10',title:'AGI 到来前的准备',content:'<p>AGI 将在 2028-2030 年实现。</p>',excerpt:'AGI 未来趋势',category:'tech',cover_image:'https://picsum.photos/id/205/800/400',author_name:'窍某',views:210,created_at:new Date('2026-07-14')},
+    {id:'builtin-11',title:'每周 VPN 节点更新',content:'<p>免费节点分享，每周一更新。</p>',excerpt:'免费节点分享',category:'tech',cover_image:'https://picsum.photos/id/866/800/400',author_name:'窍某',views:432,created_at:new Date('2026-07-09')},
+    {id:'builtin-12',title:'工作与生活平衡之道',content:'<p>职业倦怠的5个信号与5个应对方法。</p>',excerpt:'避免 burnout',category:'career',cover_image:'https://picsum.photos/id/206/800/400',author_name:'窍某',views:67,created_at:new Date('2026-07-15')},
+    {id:'builtin-13',title:'AI 编程助手深度体验',content:'<p>日常编码用 Copilot，大型重构用 Cursor。</p>',excerpt:'Cursor vs Copilot',category:'tech',cover_image:'https://picsum.photos/id/106/800/400',author_name:'窍某',views:203,created_at:new Date('2026-07-16')},
+    {id:'builtin-14',title:'Web3.0 入门指南',content:'<p>从 DID、智能合约、DAO 理解 Web3。</p>',excerpt:'Web3 核心概念',category:'tech',cover_image:'https://picsum.photos/id/145/800/400',author_name:'窍某',views:134,created_at:new Date('2026-07-17')},
+    {id:'builtin-15',title:'极简主义生活实践',content:'<p>扔掉80%的物品，收获200%的快乐。</p>',excerpt:'少即是多的哲学',category:'life',cover_image:'https://picsum.photos/id/104/800/400',author_name:'窍某',views:78,created_at:new Date('2026-07-18')},
+    {id:'builtin-16',title:'城市漫步指南',content:'<p>关掉地图，在熟悉的城市发现新风景。</p>',excerpt:'发现身边的美',category:'life',cover_image:'https://picsum.photos/id/108/800/400',author_name:'窍某',views:56,created_at:new Date('2026-07-19')},
+    {id:'builtin-17',title:'高效会议的秘密',content:'<p>5个方法让会议效率翻倍。</p>',excerpt:'缩短会议时间',category:'career',cover_image:'https://picsum.photos/id/102/800/400',author_name:'窍某',views:189,created_at:new Date('2026-07-20')},
+    {id:'builtin-18',title:'AI 与人类创造力',content:'<p>AI 是灵感催化剂，但人性不可替代。</p>',excerpt:'合作还是替代？',category:'tech',cover_image:'https://picsum.photos/id/207/800/400',author_name:'窍某',views:312,created_at:new Date('2026-07-25')},
+    {id:'builtin-19',title:'大模型时代的隐私博弈',content:'<p>训练数据的灰色地带，隐私泄露与应对策略。</p>',excerpt:'隐私与选择',category:'tech',cover_image:'https://picsum.photos/id/208/800/400',author_name:'窍某',views:145,created_at:new Date('2026-07-26')},
+    {id:'builtin-20',title:'开源 AI 的崛起',content:'<p>开源模型性能逼近闭源，未来开源与闭源共存。</p>',excerpt:'开源与商业化',category:'tech',cover_image:'https://picsum.photos/id/209/800/400',author_name:'窍某',views:98,created_at:new Date('2026-07-27')},
+    {id:'builtin-21',title:'AI 代理的现状与未来',content:'<p>Agent 构成：规划、记忆、工具。</p>',excerpt:'AI 代理的未来',category:'tech',cover_image:'https://picsum.photos/id/210/800/400',author_name:'窍某',views:267,created_at:new Date('2026-07-28')},
+    {id:'builtin-22',title:'AI 时代的批判性思维',content:'<p>10条原则，在信息茧房中保持独立思考。</p>',excerpt:'不被算法驯化',category:'tech',cover_image:'https://picsum.photos/id/211/800/400',author_name:'窍某',views:189,created_at:new Date('2026-07-29')}
+];
+
+// ===== 状态 =====
+let postsCache = [...builtInPosts];
+let currentCategory = 'all';
+let currentUser = null;
+let isPopupOpen = false;
+
+// ===== 核心：合并内置 + Firebase 文章 =====
+async function loadPosts(category = 'all', keyword = '') {
+    try {
+        let query = db.collection('posts').orderBy('created_at', 'desc');
+        if (category !== 'all') query = query.where('category', '==', category);
+        const snapshot = await query.get();
+        const fbPosts = [];
+        snapshot.forEach(doc => {
+            const data = doc.data();
+            data.id = doc.id;
+            if (data.created_at && data.created_at.toDate) data.created_at = data.created_at.toDate();
+            fbPosts.push(data);
+        });
+
+        const allPosts = [...builtInPosts, ...fbPosts];
+        allPosts.sort((a, b) => {
+            const da = a.created_at instanceof Date ? a.created_at : new Date(a.created_at);
+            const db = b.created_at instanceof Date ? b.created_at : new Date(b.created_at);
+            return db - da;
+        });
+        const seen = new Set();
+        const unique = allPosts.filter(p => { const key = p.id; if (seen.has(key)) return false; seen.add(key); return true; });
+        postsCache = unique;
+        renderPostList(filterPosts(postsCache, category, keyword));
+    } catch (e) {
+        postsCache = [...builtInPosts];
+        renderPostList(filterPosts(postsCache, category, keyword));
+    }
+}
+
+function filterPosts(posts, category, keyword) {
+    let filtered = posts;
+    if (category !== 'all') filtered = filtered.filter(p => p.category === category);
+    if (keyword) {
+        const kw = keyword.toLowerCase();
+        filtered = filtered.filter(p =>
+            p.title.toLowerCase().includes(kw) ||
+            (p.excerpt && p.excerpt.toLowerCase().includes(kw)) ||
+            (p.content && p.content.toLowerCase().includes(kw))
+        );
+    }
+    return filtered;
+}
+
+function renderPostList(posts) {
+    const list = document.getElementById('postList');
+    if (!posts.length) { list.innerHTML = '<div class="no-result">😕 暂无文章</div>'; return; }
+    const catMap = { tech: '科技', life: '生活', career: '职场' };
+    list.innerHTML = posts.map(p => {
+        const dateStr = p.created_at instanceof Date ? p.created_at.toLocaleDateString() : (p.created_at ? new Date(p.created_at).toLocaleDateString() : '');
+        return `
+            <div class="post-card">
+                <img src="${p.cover_image || 'https://picsum.photos/seed/'+p.id+'/800/400'}" alt="${p.title}" />
+                <h3>${p.title}</h3>
+                <div class="meta">${dateStr} · <span class="badge ${p.category}">${catMap[p.category] || p.category}</span></div>
+                <p>${p.excerpt || (p.content ? p.content.replace(/<[^>]+>/g,'').slice(0,80)+'...' : '')}</p>
+                <button class="btn-read" onclick="showPost('${p.id}')">阅读全文 →</button>
+            </div>
+        `;
+    }).join('');
+}
+
+// ===== 显示文章详情 + 评论 =====
+async function showPost(postId) {
+    let post = postsCache.find(p => p.id === postId) || builtInPosts.find(p => p.id === postId);
+    if (!post) { alert('文章不存在'); return; }
+
+    document.getElementById('postList').style.display = 'none';
+    const area = document.getElementById('detailArea');
+    area.classList.remove('hidden');
+    const dateStr = post.created_at instanceof Date ? post.created_at.toLocaleDateString() : (post.created_at ? new Date(post.created_at).toLocaleDateString() : '');
+
+    area.innerHTML = `
+        <div class="post-content">
+            <button class="back-btn" onclick="backToList()">← 返回列表</button>
+            <h1>${post.title}</h1>
+            <p style="color:rgba(255,255,255,0.4);font-size:0.9rem;">${dateStr} · 作者：${post.author_name || '匿名'} · 阅读 ${post.views || 0}</p>
+            <div>${post.content}</div>
+            <hr style="border-color:#333;margin:20px 0;" />
+            <h3>💬 评论</h3>
+            <div id="commentsArea"><p style="color:rgba(255,255,255,0.3);">⏳ 加载中...</p></div>
+            ${currentUser ? `
+                <textarea id="commentInput" rows="3" placeholder="写下你的评论..." style="margin-top:12px;"></textarea>
+                <button class="btn" onclick="publishComment('${postId}')" style="margin-top:6px;">发表评论</button>
+            ` : '<p style="color:rgba(255,255,255,0.3);margin-top:12px;">登录后即可评论</p>'}
+        </div>
+    `;
+
+    await loadComments(postId);
+    if (!post.id.startsWith('builtin-')) {
+        try { await db.collection('posts').doc(postId).update({ views: firebase.firestore.FieldValue.increment(1) }); } catch(e) {}
+    }
+    window.scrollTo({ top: 0 });
+}
+
+// ===== 加载评论 =====
+async function loadComments(postId) {
+    const area = document.getElementById('commentsArea');
+    if (!area) return;
+    try {
+        const snapshot = await db.collection('comments').where('post_id', '==', postId).get();
+        if (snapshot.empty) {
+            area.innerHTML = '<p style="color:rgba(255,255,255,0.3);">💬 暂无评论，来抢沙发吧！</p>';
+            return;
+        }
+        let html = '';
+        snapshot.forEach(doc => {
+            const data = doc.data();
+            const date = data.created_at && data.created_at.toDate ? data.created_at.toDate().toLocaleString() : '';
+            html += `<div class="comment-item"><strong>${data.username || '用户'}</strong><span class="c-time">${date}</span><p>${data.content}</p></div>`;
+        });
+        area.innerHTML = html;
+    } catch (e) {
+        area.innerHTML = `<p style="color:#ef4444;">❌ 加载评论失败</p>`;
+    }
+}
+
+// ===== 发表评论 =====
+async function publishComment(postId) {
+    const input = document.getElementById('commentInput');
+    const content = input.value.trim();
+    if (!content) { alert('请输入评论内容'); return; }
+    if (!currentUser) { alert('请先登录'); return; }
+    try {
+        await db.collection('comments').add({
+            post_id: postId,
+            user_id: currentUser.uid,
+            username: currentUser.displayName || currentUser.email,
+            content: content,
+            created_at: firebase.firestore.FieldValue.serverTimestamp()
+        });
+        input.value = '';
+        await loadComments(postId);
+        alert('评论成功！');
+    } catch (e) { alert('评论失败：' + e.message); }
+}
+
+function backToList() {
+    document.getElementById('postList').style.display = 'block';
+    document.getElementById('detailArea').classList.add('hidden');
+    document.getElementById('detailArea').innerHTML = '';
+    loadPosts();
+}
+
+// ===== 搜索和分类 =====
+function searchPosts() {
+    const keyword = document.getElementById('searchInput').value.trim();
+    const activeCat = document.querySelector('.cat-btn.active');
+    const cat = activeCat ? activeCat.dataset.cat : 'all';
+    loadPosts(cat, keyword);
+}
+
+document.querySelectorAll('.cat-btn').forEach(btn => {
+    btn.addEventListener('click', function() {
+        document.querySelectorAll('.cat-btn').forEach(b => b.classList.remove('active'));
+        this.classList.add('active');
+        loadPosts(this.dataset.cat, document.getElementById('searchInput').value.trim());
+    });
+});
+
+// ===== 发布文章 =====
+function togglePublish() {
+    const form = document.getElementById('publishForm');
+    form.style.display = form.style.display === 'none' ? 'block' : 'none';
+}
+
+async function publishPost() {
+    if (!currentUser) { alert('请先登录'); return; }
+    const title = document.getElementById('newTitle').value.trim();
+    const content = document.getElementById('newContent').value.trim();
+    const excerpt = document.getElementById('newExcerpt').value.trim();
+    const category = document.getElementById('newCategory').value;
+    if (!title || !content) { alert('标题和内容不能为空'); return; }
+    try {
+        await db.collection('posts').add({
+            title, content, excerpt, category,
+            cover_image: 'https://picsum.photos/seed/' + Date.now() + '/800/400',
+            author_name: currentUser.displayName || currentUser.email,
+            views: 0,
+            created_at: firebase.firestore.FieldValue.serverTimestamp()
+        });
+        alert('发布成功！🎉');
+        document.getElementById('newTitle').value = '';
+        document.getElementById('newContent').value = '';
+        document.getElementById('newExcerpt').value = '';
+        loadPosts();
+    } catch (e) { alert('发布失败：' + e.message); }
+}
+
+// ===== 认证 =====
+function openModal() { document.getElementById('authModal').classList.add('active'); }
+function closeModal() { document.getElementById('authModal').classList.remove('active'); }
+
+function switchTab(tab) {
+    document.querySelectorAll('.modal-tabs button').forEach(b => b.classList.toggle('active', b.dataset.tab === tab));
+    document.getElementById('loginForm').classList.toggle('active', tab === 'login');
+    document.getElementById('registerForm').classList.toggle('active', tab === 'register');
+    document.getElementById('modalTitle').textContent = tab === 'login' ? '欢迎回来' : '创建账号';
+    document.getElementById('modalSub').textContent = tab === 'login' ? '登录你的账号' : '加入窍某博客网社区';
+}
+
+async function handleLogin(e) {
+    e.preventDefault();
+    const email = document.getElementById('loginEmail').value.trim();
+    const pass = document.getElementById('loginPassword').value.trim();
+    if (!email || !pass) { alert('请填写完整'); return; }
+    try {
+        await auth.signInWithEmailAndPassword(email, pass);
+        closeModal();
+    } catch (err) { alert(err.message); }
+}
+
+async function handleRegister(e) {
+    e.preventDefault();
+    const name = document.getElementById('regName').value.trim();
+    const email = document.getElementById('regEmail').value.trim();
+    const pass = document.getElementById('regPassword').value;
+    const confirm = document.getElementById('regConfirm').value;
+    if (!name || !email || !pass || !confirm) { alert('请填写完整'); return; }
+    if (pass !== confirm) { alert('密码不一致'); return; }
+    if (pass.length < 6) { alert('密码至少6位'); return; }
+    try {
+        const cred = await auth.createUserWithEmailAndPassword(email, pass);
+        await cred.user.updateProfile({ displayName: name });
+        closeModal();
+        alert('注册成功！');
+    } catch (err) { alert(err.message); }
+}
+
+async function handleSocialLogin(provider) {
+    if (isPopupOpen) return;
+    isPopupOpen = true;
+    let prov;
+    if (provider === 'google') prov = new firebase.auth.GoogleAuthProvider();
+    else if (provider === 'github') prov = new firebase.auth.GithubAuthProvider();
+    else return;
+    try {
+        const result = await auth.signInWithPopup(prov);
+        const user = result.user;
+        const userRef = db.collection('users').doc(user.uid);
+        const doc = await userRef.get();
+        if (!doc.exists) {
+            await userRef.set({
+                username: user.displayName || (provider === 'google' ? 'Google用户' : 'GitHub用户'),
+                email: user.email,
+                avatar_url: user.photoURL || null,
+                created_at: firebase.firestore.FieldValue.serverTimestamp()
+            });
+        }
+        closeModal();
+    } catch (err) {
+        if (err.code !== 'auth/cancelled-popup-request') alert('登录失败：' + err.message);
+    } finally { isPopupOpen = false; }
+}
+
+async function logout() { await auth.signOut(); }
+
+// ===== 登录状态监听 =====
+auth.onAuthStateChanged(user => {
+    currentUser = user;
+    const loginBtn = document.getElementById('loginBtn');
+    const avatar = document.getElementById('userAvatar');
+    const nameEl = document.getElementById('userName');
+    const logoutBtn = document.getElementById('logoutBtn');
+    const adminLink = document.getElementById('adminLink');
+
+    if (user) {
+        loginBtn.style.display = 'none';
+        avatar.classList.remove('hidden');
+        avatar.src = user.photoURL || 'https://ui-avatars.com/api/?name=' + encodeURIComponent(user.displayName || user.email) + '&background=6d5bff&color=fff&size=36';
+        nameEl.classList.remove('hidden');
+        nameEl.textContent = user.displayName || user.email;
+        logoutBtn.classList.remove('hidden');
+        if (user.uid === ADMIN_UID) {
+            adminLink.style.display = 'inline-block';
+        } else {
+            adminLink.style.display = 'none';
+        }
+    } else {
+        loginBtn.style.display = 'inline-block';
+        avatar.classList.add('hidden');
+        nameEl.classList.add('hidden');
+        logoutBtn.classList.add('hidden');
+        adminLink.style.display = 'none';
+    }
+    // 刷新文章列表
+    loadPosts();
+});
+
+// ===== 主题切换 =====
+function toggleTheme() {
+    const body = document.body;
+    const btn = document.getElementById('themeToggle');
+    const isLight = body.style.background === '#f0f2f8';
+    if (isLight) {
+        body.style.background = '#0b0e1a';
+        body.style.color = '#e8edf5';
+        btn.textContent = '🌙';
+    } else {
+        body.style.background = '#f0f2f8';
+        body.style.color = '#1a1a2e';
+        btn.textContent = '☀️';
+    }
+    // 简单调整卡片背景
+    document.querySelectorAll('.post-card, .publish-form, .post-content, .modal-box').forEach(el => {
+        el.style.background = isLight ? 'rgba(255,255,255,0.04)' : 'rgba(255,255,255,0.7)';
+        el.style.color = isLight ? '#e8edf5' : '#1a1a2e';
+    });
+}
+
+// ===== 初始化 =====
+window.onload = function() {
+    loadPosts();
+};
+
+// 暴露全局
+window.searchPosts = searchPosts;
+window.showPost = showPost;
+window.backToList = backToList;
+window.publishComment = publishComment;
+window.publishPost = publishPost;
+window.togglePublish = togglePublish;
+window.toggleTheme = toggleTheme;
+window.openModal = openModal;
+window.closeModal = closeModal;
+window.switchTab = switchTab;
+window.handleLogin = handleLogin;
+window.handleRegister = handleRegister;
+window.handleSocialLogin = handleSocialLogin;
+window.logout = logout;
+window.loadPosts = loadPosts;
+</script>
+</body>
+</html>
