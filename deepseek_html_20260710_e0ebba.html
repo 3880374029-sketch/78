@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>注册测试</title>
+    <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
+    <style>
+        *{margin:0;padding:0;box-sizing:border-box;}
+        body{background:#0b0e1a;color:#e8edf5;font-family:system-ui,-apple-system,sans-serif;padding:20px;display:flex;justify-content:center;align-items:center;min-height:100vh;}
+        .box{background:rgba(255,255,255,0.05);padding:30px 24px;border-radius:20px;max-width:400px;width:100%;border:1px solid rgba(255,255,255,0.06);}
+        h1{font-size:1.8rem;margin-bottom:8px;text-align:center;}
+        .sub{text-align:center;color:rgba(255,255,255,0.4);margin-bottom:24px;}
+        input{width:100%;padding:14px;border-radius:12px;border:1px solid rgba(255,255,255,0.1);background:rgba(255,255,255,0.05);color:#fff;font-size:1rem;margin-bottom:12px;}
+        button{width:100%;padding:14px;border-radius:12px;border:none;background:linear-gradient(135deg,#6d5bff,#8b5cf6);color:#fff;font-size:1rem;font-weight:600;cursor:pointer;}
+        .error{color:#ef4444;margin-top:8px;font-size:0.9rem;text-align:center;}
+        .success{color:#6ee7b7;margin-top:8px;text-align:center;}
+        a{color:#818cf8;text-align:center;display:block;margin-top:12px;}
+    </style>
+</head>
+<body>
+    <div class="box">
+        <h1>📝 注册测试</h1>
+        <p class="sub">用邮箱创建账号</p>
+        <input type="text" id="name" placeholder="昵称" />
+        <input type="email" id="email" placeholder="邮箱地址" />
+        <input type="password" id="pass" placeholder="密码（至少6位）" />
+        <input type="password" id="confirm" placeholder="确认密码" />
+        <button onclick="register()">注册</button>
+        <div id="msg"></div>
+        <a href="index.html">返回首页</a>
+    </div>
+
+    <script>
+        const firebaseConfig = {
+            apiKey: "AIzaSyB8ZalWGiP8at0EUIfKN46CbwQ3eH4iM8E",
+            authDomain: "project-170416828695178494.firebaseapp.com",
+            projectId: "project-170416828695178494",
+            storageBucket: "project-170416828695178494.firebasestorage.app",
+            messagingSenderId: "1096326612519",
+            appId: "1:1096326612519:web:8208916652738ce870f002",
+            measurementId: "G-3K0YDFV3J5"
+        };
+        firebase.initializeApp(firebaseConfig);
+        const auth = firebase.auth();
+
+        async function register() {
+            const name = document.getElementById('name').value.trim();
+            const email = document.getElementById('email').value.trim();
+            const pass = document.getElementById('pass').value;
+            const confirm = document.getElementById('confirm').value;
+            const msg = document.getElementById('msg');
+
+            if (!name || !email || !pass || !confirm) {
+                msg.innerHTML = '<p class="error">⚠️ 请填写所有字段</p>';
+                return;
+            }
+            if (pass !== confirm) {
+                msg.innerHTML = '<p class="error">⚠️ 两次密码不一致</p>';
+                return;
+            }
+            if (pass.length < 6) {
+                msg.innerHTML = '<p class="error">⚠️ 密码至少6位</p>';
+                return;
+            }
+
+            msg.innerHTML = '<p style="color:rgba(255,255,255,0.5);">⏳ 注册中...</p>';
+
+            try {
+                const cred = await auth.createUserWithEmailAndPassword(email, pass);
+                await cred.user.updateProfile({ displayName: name });
+                msg.innerHTML = '<p class="success">✅ 注册成功！正在跳转...</p>';
+                setTimeout(() => { window.location.href = 'index.html'; }, 1500);
+            } catch (err) {
+                msg.innerHTML = `<p class="error">❌ ${err.message}</p>`;
+            }
+        }
+    </script>
+</body>
+</html>
