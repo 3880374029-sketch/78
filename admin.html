@@ -52,6 +52,29 @@
             color: rgba(255, 255, 255, 0.4);
             font-size: 0.9rem;
         }
+        .tab-bar {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+        .tab-btn {
+            background: rgba(255, 255, 255, 0.04);
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            color: rgba(255, 255, 255, 0.5);
+            padding: 8px 20px;
+            border-radius: 30px;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+        .tab-btn.active {
+            background: #6d5bff;
+            color: #fff;
+            border-color: #6d5bff;
+        }
+        .tab-btn:hover {
+            background: rgba(255, 255, 255, 0.08);
+        }
         .filter-bar {
             display: flex;
             gap: 8px;
@@ -148,6 +171,22 @@
         .btn-edit:hover {
             transform: scale(1.04);
         }
+        .btn-view {
+            background: #3b82f6;
+            color: #fff;
+            border: none;
+            padding: 4px 12px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 0.75rem;
+            transition: 0.3s;
+            margin-right: 6px;
+            text-decoration: none;
+            display: inline-block;
+        }
+        .btn-view:hover {
+            transform: scale(1.04);
+        }
         .login-required {
             text-align: center;
             padding: 60px 20px;
@@ -174,6 +213,11 @@
         .btn:hover {
             transform: scale(1.04);
             box-shadow: 0 4px 16px rgba(109, 91, 255, 0.3);
+        }
+        .empty-state {
+            text-align: center;
+            padding: 30px;
+            color: rgba(255, 255, 255, 0.3);
         }
         @media (max-width: 640px) {
             table,
@@ -221,29 +265,42 @@
             <div class="stats" id="statsArea">
                 <div class="stat-card"><div class="num" id="postCount">0</div><div class="label">📄 文章</div></div>
                 <div class="stat-card"><div class="num" id="commentCount">0</div><div class="label">💬 评论</div></div>
-                <div class="stat-card"><div class="num" id="likeCount">0</div><div class="label">❤️ 总点赞</div></div>
                 <div class="stat-card"><div class="num" id="userCount">0</div><div class="label">👤 用户</div></div>
+                <div class="stat-card"><div class="num" id="likeCount">0</div><div class="label">❤️ 总点赞</div></div>
             </div>
 
-            <div class="filter-bar">
-                <button class="filter-btn active" data-cat="all" onclick="filterPosts('all')">📋 全部</button>
-                <button class="filter-btn" data-cat="tech" onclick="filterPosts('tech')">💻 科技</button>
-                <button class="filter-btn" data-cat="life" onclick="filterPosts('life')">🌿 生活</button>
-                <button class="filter-btn" data-cat="career" onclick="filterPosts('career')">💼 职场</button>
-                <button class="filter-btn" data-cat="topic" onclick="filterPosts('topic')">💬 话题</button>
+            <div class="tab-bar">
+                <button class="tab-btn active" onclick="switchTab('posts')">📄 文章管理</button>
+                <button class="tab-btn" onclick="switchTab('comments')">💬 评论管理</button>
+                <button class="tab-btn" onclick="switchTab('users')">👤 用户管理</button>
             </div>
 
-            <div id="postsList">
-                <p style="color:rgba(255,255,255,0.3);">加载中...</p>
+            <div id="tabPosts" class="panel">
+                <div class="filter-bar">
+                    <button class="filter-btn active" data-cat="all" onclick="filterPosts('all')">📋 全部</button>
+                    <button class="filter-btn" data-cat="tech" onclick="filterPosts('tech')">💻 科技</button>
+                    <button class="filter-btn" data-cat="life" onclick="filterPosts('life')">🌿 生活</button>
+                    <button class="filter-btn" data-cat="career" onclick="filterPosts('career')">💼 职场</button>
+                    <button class="filter-btn" data-cat="topic" onclick="filterPosts('topic')">💬 话题</button>
+                </div>
+                <div id="postsList"><p class="empty-state">加载中...</p></div>
+            </div>
+
+            <div id="tabComments" class="panel" style="display:none;">
+                <div id="commentsList"><p class="empty-state">加载中...</p></div>
+            </div>
+
+            <div id="tabUsers" class="panel" style="display:none;">
+                <div id="usersList"><p class="empty-state">加载中...</p></div>
             </div>
         </div>
     </div>
 
     <script>
         // =============================================================
-        // ⚠️ 重要：在这里填写你的管理员 UID
+        // ⚠️ 管理员 UID（替换成你自己的）
         // =============================================================
-        const ADMIN_UID = "FEQmE2qlzwQqmIgKqU3VFuaYh602"; // 替换成你自己的 UID
+        const ADMIN_UID = "FEQmE2qlzwQqmIgKqU3VFuaYh602";
 
         const firebaseConfig = {
             apiKey: "AIzaSyB8ZalWGiP8at0EUIfKN46CbwQ3eH4iM8E",
@@ -329,13 +386,14 @@
 
         async function loadComments() {
             try {
-                const snapshot = await db.collection('comments').get();
+                const snapshot = await db.collection('comments').orderBy('created_at', 'desc').get();
                 commentsCache = [];
                 snapshot.forEach(doc => {
                     const data = doc.data();
                     data.id = doc.id;
                     commentsCache.push(data);
                 });
+                renderComments();
             } catch (e) { console.error(e); }
         }
 
@@ -348,22 +406,33 @@
                     data.id = doc.id;
                     usersCache.push(data);
                 });
+                renderUsers();
             } catch (e) { console.error(e); }
         }
 
         function updateStats() {
             document.getElementById('postCount').textContent = postsCache.length;
             document.getElementById('commentCount').textContent = commentsCache.length;
-            document.getElementById('likeCount').textContent = totalLikes;
             document.getElementById('userCount').textContent = usersCache.length;
+            document.getElementById('likeCount').textContent = totalLikes;
         }
 
         // =============================================================
-        // 筛选与渲染
+        // 切换 Tab
+        // =============================================================
+        function switchTab(tab) {
+            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+            document.querySelector(`.tab-btn[onclick*="${tab}"]`)?.classList.add('active');
+            document.querySelectorAll('.panel').forEach(p => p.style.display = 'none');
+            document.getElementById('tab' + tab.charAt(0).toUpperCase() + tab.slice(1)).style.display = 'block';
+        }
+
+        // =============================================================
+        // 文章管理
         // =============================================================
         function filterPosts(category) {
             currentCategory = category;
-            document.querySelectorAll('.filter-btn').forEach(btn => {
+            document.querySelectorAll('#tabPosts .filter-btn').forEach(btn => {
                 btn.classList.toggle('active', btn.dataset.cat === category);
             });
             renderPosts(category);
@@ -376,23 +445,13 @@
                 filtered = filtered.filter(p => p.category === category);
             }
             if (!filtered.length) {
-                list.innerHTML = '<p style="color:rgba(255,255,255,0.3);">暂无文章</p>';
+                list.innerHTML = '<p class="empty-state">📭 暂无文章</p>';
                 return;
             }
             const catMap = { tech: '科技', life: '生活', career: '职场', topic: '💬 话题' };
             let html = `
                 <table>
-                    <thead>
-                        <tr>
-                            <th>标题</th>
-                            <th>分类</th>
-                            <th>作者</th>
-                            <th>日期</th>
-                            <th>❤️</th>
-                            <th>👁️</th>
-                            <th>操作</th>
-                        </tr>
-                    </thead>
+                    <thead><tr><th>标题</th><th>分类</th><th>作者</th><th>日期</th><th>❤️</th><th>👁️</th><th>操作</th></tr></thead>
                     <tbody>
             `;
             filtered.forEach(p => {
@@ -408,7 +467,7 @@
                         <td data-label="❤️">${p.likes || 0}</td>
                         <td data-label="👁️">${p.views || 0}</td>
                         <td data-label="操作">
-                            <button class="btn-edit" onclick="editPost('${p.id}')">✏️</button>
+                            <a href="index.html" class="btn-view" target="_blank">🔗</a>
                             <button class="btn-danger" onclick="deletePost('${p.id}')">🗑️</button>
                         </td>
                     </tr>
@@ -418,18 +477,13 @@
             list.innerHTML = html;
         }
 
-        // =============================================================
-        // 操作函数（带防误删确认）
-        // =============================================================
         async function deletePost(postId) {
             if (!confirm('确定要删除这篇文章吗？（会同时删除所有评论）')) return;
             try {
-                // 删除所有关联评论
                 const commentsSnap = await db.collection('comments').where('post_id', '==', postId).get();
                 const batch = db.batch();
                 commentsSnap.forEach(doc => batch.delete(doc.ref));
                 await batch.commit();
-                // 删除文章
                 await db.collection('posts').doc(postId).delete();
                 alert('删除成功！');
                 loadAllData();
@@ -438,14 +492,116 @@
             }
         }
 
-        function editPost(postId) {
-            window.location.href = `index.html?edit=${postId}`;
+        // =============================================================
+        // 评论管理
+        // =============================================================
+        function renderComments() {
+            const list = document.getElementById('commentsList');
+            if (!commentsCache.length) {
+                list.innerHTML = '<p class="empty-state">💬 暂无评论</p>';
+                return;
+            }
+            let html = `
+                <table>
+                    <thead><tr><th>评论内容</th><th>用户</th><th>文章</th><th>时间</th><th>操作</th></tr></thead>
+                    <tbody>
+            `;
+            commentsCache.forEach(c => {
+                const dateStr = c.created_at ? new Date(c.created_at.seconds * 1000).toLocaleString('zh-CN') : '';
+                // 尝试找到对应的文章标题
+                const post = postsCache.find(p => p.id === c.post_id);
+                const postTitle = post ? post.title : c.post_id || '已删除';
+                html += `
+                    <tr>
+                        <td data-label="评论">${c.content.length > 50 ? c.content.slice(0,50)+'...' : c.content}</td>
+                        <td data-label="用户">${c.username || '匿名'}</td>
+                        <td data-label="文章">${postTitle}</td>
+                        <td data-label="时间">${dateStr}</td>
+                        <td data-label="操作">
+                            <button class="btn-danger" onclick="deleteComment('${c.id}')">🗑️</button>
+                        </td>
+                    </tr>
+                `;
+            });
+            html += `</tbody></table>`;
+            list.innerHTML = html;
         }
 
-        // 暴露到全局
+        async function deleteComment(commentId) {
+            if (!confirm('确定要删除这条评论吗？')) return;
+            try {
+                await db.collection('comments').doc(commentId).delete();
+                alert('删除成功！');
+                loadAllData();
+            } catch (err) {
+                alert('删除失败：' + err.message);
+            }
+        }
+
+        // =============================================================
+        // 用户管理
+        // =============================================================
+        function renderUsers() {
+            const list = document.getElementById('usersList');
+            if (!usersCache.length) {
+                list.innerHTML = '<p class="empty-state">👤 暂无用户</p>';
+                return;
+            }
+            let html = `
+                <table>
+                    <thead><tr><th>昵称</th><th>邮箱</th><th>注册时间</th><th>操作</th></tr></thead>
+                    <tbody>
+            `;
+            usersCache.forEach(u => {
+                const dateStr = u.created_at ? new Date(u.created_at.seconds * 1000).toLocaleDateString('zh-CN') : '';
+                html += `
+                    <tr>
+                        <td data-label="昵称">${u.username || '用户'}</td>
+                        <td data-label="邮箱">${u.email || '未提供'}</td>
+                        <td data-label="注册时间">${dateStr}</td>
+                        <td data-label="操作">
+                            ${u.id !== ADMIN_UID ? `<button class="btn-danger" onclick="deleteUser('${u.id}')">🗑️</button>` : '<span style="color:#6d5bff;">管理员</span>'}
+                        </td>
+                    </tr>
+                `;
+            });
+            html += `</tbody></table>`;
+            list.innerHTML = html;
+        }
+
+        async function deleteUser(userId) {
+            if (userId === ADMIN_UID) {
+                alert('不能删除管理员自己');
+                return;
+            }
+            if (!confirm('确定要删除这个用户吗？这会同时删除该用户的所有评论。')) return;
+            try {
+                // 删除该用户的所有评论
+                const commentsSnap = await db.collection('comments').where('user_id', '==', userId).get();
+                const batch = db.batch();
+                commentsSnap.forEach(doc => batch.delete(doc.ref));
+                await batch.commit();
+                // 删除该用户的所有文章
+                const postsSnap = await db.collection('posts').where('author_id', '==', userId).get();
+                postsSnap.forEach(doc => batch.delete(doc.ref));
+                await batch.commit();
+                // 删除用户资料
+                await db.collection('users').doc(userId).delete();
+                alert('删除成功！');
+                loadAllData();
+            } catch (err) {
+                alert('删除失败：' + err.message);
+            }
+        }
+
+        // =============================================================
+        // 暴露全局函数
+        // =============================================================
+        window.switchTab = switchTab;
         window.filterPosts = filterPosts;
         window.deletePost = deletePost;
-        window.editPost = editPost;
+        window.deleteComment = deleteComment;
+        window.deleteUser = deleteUser;
     </script>
 </body>
 </html>
