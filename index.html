@@ -24,9 +24,7 @@
     </script>
 
     <style>
-        /* ============================================================
-                   全部样式（包含所有你之前的功能）
-                   ============================================================ */
+        /* ===== 完整样式（保持不变） ===== */
         * {
             margin: 0;
             padding: 0;
@@ -41,8 +39,6 @@
             overflow-x: hidden;
             transition: background 0.3s, color 0.3s;
         }
-
-        /* 背景层 */
         .bg-layer {
             position: fixed;
             inset: 0;
@@ -63,14 +59,11 @@
             background-size: 60px 60px;
             pointer-events: none;
         }
-
         .container {
             max-width: 1280px;
             margin: 0 auto;
             padding: 0 24px;
         }
-
-        /* 头部 */
         header {
             position: sticky;
             top: 0;
@@ -99,7 +92,6 @@
             -webkit-text-fill-color: transparent;
             background-clip: text;
         }
-
         .nav-controls {
             display: flex;
             align-items: center;
@@ -124,7 +116,6 @@
             border-color: rgba(130, 100, 255, 0.5);
             background: rgba(255, 255, 255, 0.10);
         }
-
         #google_translate_element .goog-te-combo {
             background: rgba(255, 255, 255, 0.06);
             border: 1px solid rgba(255, 255, 255, 0.10);
@@ -145,7 +136,6 @@
         .skiptranslate {
             display: none !important;
         }
-
         .theme-toggle {
             background: rgba(255, 255, 255, 0.06);
             border: 1px solid rgba(255, 255, 255, 0.10);
@@ -159,8 +149,6 @@
         .theme-toggle:hover {
             background: rgba(255, 255, 255, 0.12);
         }
-
-        /* 登录控件 */
         .auth-section {
             display: flex;
             align-items: center;
@@ -217,7 +205,6 @@
             border-color: rgba(255, 0, 0, 0.3);
             color: #ef4444;
         }
-
         .categories {
             display: flex;
             gap: 8px;
@@ -244,8 +231,6 @@
             border-color: transparent;
             box-shadow: 0 4px 20px rgba(109, 91, 255, 0.30);
         }
-
-        /* Hero */
         #hero {
             text-align: center;
             padding: 4.5rem 1.5rem 3.5rem;
@@ -265,7 +250,6 @@
             max-width: 580px;
             margin: 0 auto;
         }
-
         .section-title {
             text-align: center;
             font-size: 1.8rem;
@@ -282,13 +266,11 @@
             background: linear-gradient(90deg, #6d5bff, #8b5cf6);
             border-radius: 10px;
         }
-
         .post-list {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
             gap: 2rem;
         }
-
         .post-card {
             background: rgba(255, 255, 255, 0.04);
             backdrop-filter: blur(16px);
@@ -387,8 +369,6 @@
             transform: scale(1.04);
             box-shadow: 0 8px 30px rgba(109, 91, 255, 0.35);
         }
-
-        /* 文章详情 */
         #post-container {
             max-width: 1000px;
             margin: 2rem auto;
@@ -489,8 +469,6 @@
             color: rgba(255, 255, 255, 0.3);
             margin: 0 0 1rem 0;
         }
-
-        /* 模态框 */
         .modal-overlay {
             display: none;
             position: fixed;
@@ -650,8 +628,6 @@
         .auth-switch a:hover {
             text-decoration: underline;
         }
-
-        /* 页脚 */
         footer {
             text-align: center;
             padding: 2.2rem 1rem 1.8rem;
@@ -693,7 +669,6 @@
         footer p {
             margin: 0.3rem 0;
         }
-
         .no-result {
             text-align: center;
             padding: 3rem 0;
@@ -858,15 +833,16 @@
     <!-- ============================================================ -->
     <script>
         // =============================================================
-        // ★★★ 在这里粘贴你的 firebaseConfig ★★★
+        // ★★★ Firebase 配置（已填入你的真实配置）★★★
         // =============================================================
         const firebaseConfig = {
-            apiKey: "你的 apiKey",
-            authDomain: "你的 authDomain",
-            projectId: "你的 projectId",
-            storageBucket: "你的 storageBucket",
-            messagingSenderId: "你的 messagingSenderId",
-            appId: "你的 appId"
+            apiKey: "AIzaSyB8ZalWGiP8at0EUIfKN46CbwQ3eH4iM8E",
+            authDomain: "project-170416828695178494.firebaseapp.com",
+            projectId: "project-170416828695178494",
+            storageBucket: "project-170416828695178494.firebasestorage.app",
+            messagingSenderId: "1096326612519",
+            appId: "1:1096326612519:web:8208916652738ce870f002",
+            measurementId: "G-3K0YDFV3J5"
         };
 
         // 初始化 Firebase
@@ -875,10 +851,139 @@
         const db = firebase.firestore();
 
         // =============================================================
+        // 📝 内置示例文章（硬编码在 HTML 中，即使数据库为空也能显示）
+        // =============================================================
+        const builtInPosts = [{
+            id: 'builtin-1',
+            title: '欢迎来到窍某博客网',
+            content: `
+                <p>这里是我个人思考与成长的自留地。从技术到生活，从职场到内心，我希望能用文字和影像记录下每一个值得回味的瞬间。</p>
+                <p>博客的初衷很简单：<strong>分享所知，启发他人，也梳理自己</strong>。无论你是偶然路过，还是常驻读者，都希望这里的某篇文章能为你带来一点光亮。</p>
+                <h2>为什么开始写博客？</h2>
+                <p>写作是一种深度思考的方式。当我们把想法转化为文字时，那些模糊的概念会变得清晰，零散的灵感会连成线。我始终相信，<strong>输出是最好的输入</strong>——只有当你能够清晰地表达一个观点时，你才算真正理解了它。</p>
+                <h2>我会写什么？</h2>
+                <ul>
+                    <li><strong>💻 科技</strong> — AI、编程、Web3、前沿技术趋势</li>
+                    <li><strong>🌿 生活</strong> — 旅行、阅读、极简主义、晨间习惯</li>
+                    <li><strong>💼 职场</strong> — 远程工作、效率提升、职业成长</li>
+                </ul>
+                <p>我不会追求热点，只写自己真正思考过、实践过的话题。每篇文章可能不长，但一定真诚。</p>
+                <h2>致读者</h2>
+                <p>如果你在这里找到了共鸣，欢迎留言交流。如果觉得某篇文章对你有帮助，也请分享给更多人。愿我们都能在信息洪流中，保持清醒，持续成长。</p>
+                <p>—— 窍某，于 2026 年夏</p>
+            `,
+            excerpt: '开启分享之旅，记录思考点滴',
+            category: 'life',
+            cover_image: 'https://picsum.photos/id/1015/800/400',
+            author_name: '窍某',
+            views: 128,
+            created_at: new Date('2026-07-01')
+        }, {
+            id: 'builtin-2',
+            title: '2026 年前沿技术风向标',
+            content: `
+                <p>2026 年已经过半，技术领域的变革比我们想象的更快。本文梳理了今年最值得关注的几个技术方向，以及它们背后的逻辑。</p>
+                <h2>1. AI Agent：从概念到落地</h2>
+                <p>2025 年我们还在讨论 "AI Agent 是什么"，2026 年它已经大规模进入生产环境。从自动写代码的 Devin，到能自主完成研究任务的科研 Agent，AI 不再是被动的工具，而是主动的协作者。</p>
+                <p><strong>关键趋势：</strong> 多 Agent 协作系统正在成为主流。不同 Agent 分别负责规划、执行、验证，形成一个完整的数字工作流。这意味着，未来的软件工程将更像是一个 "Agent 团队管理" 的工作。</p>
+                <h2>2. WebAssembly 的黄金时代</h2>
+                <p>WebAssembly（WASM）不再只是浏览器的技术。2026 年，WASM 在边缘计算、服务端、区块链等领域全面开花。它的轻量、高效和跨平台特性，使其成为云原生时代的理想运行时。</p>
+                <p>值得关注的是 <strong>WASI（WebAssembly System Interface）</strong> 的成熟，让 WASM 可以安全地访问操作系统资源，真正实现了 "一次编译，到处运行" 的梦想。</p>
+                <h2>3. 边缘计算 + 5G 的化学反应</h2>
+                <p>随着 5G 网络的普及，边缘计算的算力正在从云端下沉到网络边缘。自动驾驶、工业物联网、AR/VR 等场景对低延迟的要求，让边缘计算成为刚需。</p>
+                <p>2026 年，我们已经看到 <strong>云-边-端</strong> 三位一体的架构成为标准范式。开发者需要重新思考应用的部署策略：哪些计算在云端？哪些在边缘？哪些在终端设备？</p>
+                <h2>给开发者的建议</h2>
+                <ul>
+                    <li>学习 Rust 和 WebAssembly，它们正在成为系统级开发的主流</li>
+                    <li>理解 AI Agent 的原理，学会 "与 AI 协作" 而非 "被 AI 替代"</li>
+                    <li>关注边缘计算，它可能是下一个云原生级别的机会</li>
+                </ul>
+                <p>技术的浪潮永远不会停止，但真正的竞争力，来自于持续学习和深度思考的能力。</p>
+            `,
+            excerpt: 'AI Agent、WebAssembly 与边缘计算',
+            category: 'tech',
+            cover_image: 'https://picsum.photos/id/201/800/400',
+            author_name: '窍某',
+            views: 256,
+            created_at: new Date('2026-07-03')
+        }, {
+            id: 'builtin-3',
+            title: '一个人旅行的意义：丽江之行',
+            content: `
+                <p>一个人旅行，不是孤独，而是一种深度的自我对话。2026 年春天，我独自去了丽江，在雪山与古镇之间，找回了一种久违的内心秩序。</p>
+                <h2>出发的理由</h2>
+                <p>过去一年，生活被工作和信息塞得满满当当。每天醒来第一件事是看手机，睡觉前最后一件事也是看手机。我发现自己越来越难专注，也越来越难听到内心的声音。</p>
+                <p>于是我订了一张去丽江的机票。没有攻略，没有计划，只是想去一个能让自己慢下来的地方。</p>
+                <h2>在古城里迷路</h2>
+                <p>丽江古城很小，但巷子很密。我故意关掉了手机导航，任由脚步把自己带到任何地方。我路过一家卖手工银饰的小店，老板娘在门口晒太阳；我坐在一座小桥上，看流水和柳树发呆；我在一个不知名的咖啡馆里写了一下午日记。</p>
+                <p><strong>迷路的意义，不是找到正确的路，而是享受走错路的过程。</strong></p>
+                <h2>雪山下的顿悟</h2>
+                <p>在玉龙雪山脚下，我遇到了一位独自旅行的老人。他告诉我，他已经连续十年每年都来丽江住一个月。"不是为了看风景，"他说，"是为了看自己。"</p>
+                <p>这句话让我想了很久。旅行真正的意义，或许不是去更多的地方，而是在每个地方都能安住当下，看清自己内心真正想要的是什么。</p>
+                <h2>回来之后</h2>
+                <p>回到城市后，我并没有 "焕然一新"。但我学会了每天留出 30 分钟给自己，不刷手机，不处理消息，只是安静地坐着或写点什么。</p>
+                <p>一个人旅行的意义，不在于走了多远，而在于有没有把 "自己" 带回来。</p>
+            `,
+            excerpt: '在雪山与古镇之间，找回内心的秩序',
+            category: 'life',
+            cover_image: 'https://picsum.photos/id/1018/800/400',
+            author_name: '窍某',
+            views: 89,
+            created_at: new Date('2026-07-06')
+        }, {
+            id: 'builtin-4',
+            title: '大模型时代的高效学习方法',
+            content: `
+                <p>大语言模型让知识获取变得前所未有的便捷。但真正的学习不仅仅是 "知道"，而是 "理解" 和 "应用"。本文分享一套基于 AI 的 "提问-探究-输出" 学习框架。</p>
+                <h2>传统学习的困境</h2>
+                <p>在 AI 时代之前，学习最大的障碍是 "信息获取"——找不到合适的资料，看不懂复杂的概念。但现在，这些问题已经不复存在。</p>
+                <p>新的困境是 <strong>信息过载和被动接受</strong>。我们可以让 AI 生成任何知识的摘要，但这种 "便捷" 反而让我们失去了深度思考的机会。</p>
+                <h2>提问：主动学习的起点</h2>
+                <p>好的问题，比好的答案更重要。在问 AI 之前，先问自己：我真正想理解的是什么？这个问题背后的核心概念是什么？我能否用自己的话重新表述这个问题？</p>
+                <p>把问题写下来，然后再用 AI 去寻找答案。这个过程本身就是一种深度思考。</p>
+                <h2>输出：检验学习的唯一标准</h2>
+                <p>如果你不能清楚地解释一个概念，你就没有真正理解它。输出是检验学习成果的唯一标准。</p>
+                <blockquote>"教是最好的学。"——如果你能教别人，你就真的懂了。</blockquote>
+                <p>AI 是工具，不是老师。保持好奇心，保持批判性，把 AI 当作 "思维火花"，而非 "答案机器"。</p>
+            `,
+            excerpt: '用 AI 加速学习，而非被 AI 取代',
+            category: 'tech',
+            cover_image: 'https://picsum.photos/id/201/800/400',
+            author_name: '窍某',
+            views: 67,
+            created_at: new Date('2026-07-05')
+        }, {
+            id: 'builtin-5',
+            title: '晨间习惯：咖啡与深度思考',
+            content: `
+                <p>每天清晨 6:00，一杯手冲咖啡，30 分钟无干扰的阅读或写作。这个习惯我已经坚持了 200 多天，它彻底改变了我的专注力和情绪状态。</p>
+                <h2>为什么是早晨？</h2>
+                <p>早晨是一天中最安静的时间。没有工作消息，没有会议通知，没有社交媒体的轰炸。这段时间是唯一完全属于你自己的窗口，可以用来做真正重要但不紧急的事情。</p>
+                <blockquote>"在别人还没醒来的时候，你已经赢了一天。"</blockquote>
+                <h2>手冲咖啡的仪式感</h2>
+                <p>我选择手冲咖啡，不仅仅是因为味道。称豆、研磨、注水、闷蒸、萃取——这个过程本身就像一种冥想。它需要专注，需要耐心，需要感知水温、水流和咖啡粉的状态。</p>
+                <p>当你把全部注意力都放在一杯咖啡上时，大脑会从 "被动接收信息" 切换到 "主动感知当下" 的模式。这种状态，恰好是深度思考的最佳前奏。</p>
+                <h2>200 天后的变化</h2>
+                <ul>
+                    <li>✅ 每天的第一件事不再是 "回消息"，而是 "为自己做事"</li>
+                    <li>✅ 焦虑感明显下降，因为有了确定的 "自我时间"</li>
+                    <li>✅ 阅读量从每月 1 本增加到每月 4-5 本</li>
+                    <li>✅ 写作能力提升，表达更加清晰有条理</li>
+                </ul>
+                <p>如果你也想试试，不需要从 6:00 开始。比平时早起 30 分钟，关掉手机，做一件让你专注的事情。坚持下去，你会感谢那个早起的自己。</p>
+            `,
+            excerpt: '高效早晨的仪式感，从一杯手冲开始',
+            category: 'life',
+            cover_image: 'https://picsum.photos/id/292/800/400',
+            author_name: '窍某',
+            views: 45,
+            created_at: new Date('2026-07-08')
+        }];
+
+        // =============================================================
         //  认证函数
         // =============================================================
 
-        // 注册
         async function registerUser(username, email, password) {
             try {
                 const cred = await auth.createUserWithEmailAndPassword(email, password);
@@ -895,7 +1000,6 @@
             }
         }
 
-        // 登录
         async function loginUser(email, password) {
             try {
                 const cred = await auth.signInWithEmailAndPassword(email, password);
@@ -905,7 +1009,6 @@
             }
         }
 
-        // Google 登录
         async function loginWithGoogle() {
             const provider = new firebase.auth.GoogleAuthProvider();
             try {
@@ -926,12 +1029,10 @@
             }
         }
 
-        // 退出
         async function logoutUser() {
             await auth.signOut();
         }
 
-        // 监听登录状态
         auth.onAuthStateChanged(user => {
             if (user) {
                 localStorage.setItem('user', JSON.stringify({
@@ -944,7 +1045,6 @@
                 localStorage.removeItem('user');
             }
             updateUI();
-            // 刷新文章列表（显示作者名）
             loadPosts();
         });
 
@@ -952,51 +1052,95 @@
         //  文章与评论操作
         // =============================================================
 
-        // 获取文章列表
+        // 获取文章列表（优先从 Firebase 读取，如果为空则用内置文章）
         async function loadPosts(category = 'all', keyword = '') {
-            let query = db.collection('posts').orderBy('created_at', 'desc');
-            if (category !== 'all') {
-                query = query.where('category', '==', category);
-            }
-            const snapshot = await query.get();
             let posts = [];
-            snapshot.forEach(doc => {
-                const data = doc.data();
-                data.id = doc.id;
-                posts.push(data);
-            });
+
+            try {
+                // 先从 Firebase 读取
+                let query = db.collection('posts').orderBy('created_at', 'desc');
+                if (category !== 'all') {
+                    query = query.where('category', '==', category);
+                }
+                const snapshot = await query.get();
+
+                if (!snapshot.empty) {
+                    snapshot.forEach(doc => {
+                        const data = doc.data();
+                        data.id = doc.id;
+                        // 转换时间戳
+                        if (data.created_at && data.created_at.toDate) {
+                            data.created_at = data.created_at.toDate();
+                        }
+                        posts.push(data);
+                    });
+                } else {
+                    // Firebase 为空，使用内置文章
+                    posts = [...builtInPosts];
+                    // 如果 Firebase 为空，且用户已登录，可选：同步内置文章到数据库
+                    // 这里暂时不同步
+                }
+            } catch (err) {
+                console.warn('读取 Firebase 失败，使用内置文章:', err);
+                posts = [...builtInPosts];
+            }
+
+            // 按分类筛选
+            if (category !== 'all') {
+                posts = posts.filter(p => p.category === category);
+            }
+
+            // 按关键词搜索
             if (keyword) {
+                const kw = keyword.toLowerCase();
                 posts = posts.filter(p =>
-                    p.title.includes(keyword) ||
-                    (p.excerpt && p.excerpt.includes(keyword)) ||
-                    (p.content && p.content.includes(keyword))
+                    p.title.toLowerCase().includes(kw) ||
+                    (p.excerpt && p.excerpt.toLowerCase().includes(kw)) ||
+                    (p.content && p.content.toLowerCase().includes(kw))
                 );
             }
+
             renderPostList(posts);
         }
 
         // 获取单篇文章
         async function getPost(postId) {
-            const doc = await db.collection('posts').doc(postId).get();
-            if (!doc.exists) return null;
-            const data = doc.data();
-            data.id = doc.id;
-            return data;
+            // 先检查是否内置文章
+            const builtIn = builtInPosts.find(p => p.id === postId);
+            if (builtIn) return builtIn;
+
+            // 再从 Firebase 读取
+            try {
+                const doc = await db.collection('posts').doc(postId).get();
+                if (!doc.exists) return null;
+                const data = doc.data();
+                data.id = doc.id;
+                if (data.created_at && data.created_at.toDate) {
+                    data.created_at = data.created_at.toDate();
+                }
+                return data;
+            } catch (err) {
+                return null;
+            }
         }
 
         // 获取评论
         async function loadComments(postId) {
-            const snapshot = await db.collection('comments')
-                .where('post_id', '==', postId)
-                .orderBy('created_at', 'asc')
-                .get();
-            const comments = [];
-            snapshot.forEach(doc => {
-                const data = doc.data();
-                data.id = doc.id;
-                comments.push(data);
-            });
-            return comments;
+            try {
+                const snapshot = await db.collection('comments')
+                    .where('post_id', '==', postId)
+                    .orderBy('created_at', 'asc')
+                    .get();
+                const comments = [];
+                snapshot.forEach(doc => {
+                    const data = doc.data();
+                    data.id = doc.id;
+                    comments.push(data);
+                });
+                return comments;
+            } catch (err) {
+                return [];
+            }
         }
 
         // 发表评论
@@ -1029,20 +1173,25 @@
                 return;
             }
             const catMap = { tech: '科技', life: '生活', career: '职场' };
-            list.innerHTML = posts.map(post => `
-                <div class="post-card">
-                    <img src="${post.cover_image || 'https://picsum.photos/seed/'+post.id+'/800/400'}" alt="${post.title}" loading="lazy" />
-                    <div class="post-info">
-                        <h3>${post.title}</h3>
-                        <div class="meta">
-                            <span>${post.created_at ? post.created_at.toDate().toLocaleDateString() : ''}</span>
-                            <span class="badge ${post.category}">${catMap[post.category] || post.category}</span>
+            list.innerHTML = posts.map(post => {
+                const dateStr = post.created_at instanceof Date ?
+                    post.created_at.toLocaleDateString() :
+                    (post.created_at ? new Date(post.created_at).toLocaleDateString() : '');
+                return `
+                    <div class="post-card">
+                        <img src="${post.cover_image || 'https://picsum.photos/seed/'+post.id+'/800/400'}" alt="${post.title}" loading="lazy" />
+                        <div class="post-info">
+                            <h3>${post.title}</h3>
+                            <div class="meta">
+                                <span>${dateStr}</span>
+                                <span class="badge ${post.category}">${catMap[post.category] || post.category}</span>
+                            </div>
+                            <p>${post.excerpt || (post.content ? post.content.replace(/<[^>]+>/g, '').slice(0,80)+'...' : '')}</p>
+                            <button class="btn-read" onclick="showPost('${post.id}')">阅读全文 →</button>
                         </div>
-                        <p>${post.excerpt || post.content.slice(0,80)+'...'}</p>
-                        <button class="btn-read" onclick="showPost('${post.id}')">阅读全文 →</button>
                     </div>
-                </div>
-            `).join('');
+                `;
+            }).join('');
         }
 
         async function showPost(postId) {
@@ -1050,11 +1199,16 @@
             if (!post) { alert('文章不存在'); return; }
             document.getElementById('home').style.display = 'none';
             const container = document.getElementById('post-container');
+
+            const dateStr = post.created_at instanceof Date ?
+                post.created_at.toLocaleDateString() :
+                (post.created_at ? new Date(post.created_at).toLocaleDateString() : '');
+
             container.innerHTML = `
                 <div class="post-content active">
                     <button class="back-btn" onclick="backToHome()">← 返回首页</button>
                     <h1>${post.title}</h1>
-                    <p class="read-time">${post.created_at ? post.created_at.toDate().toLocaleDateString() : ''} · 作者：${post.author_name || '匿名'} · 阅读 ${post.views || 0}</p>
+                    <p class="read-time">${dateStr} · 作者：${post.author_name || '匿名'} · 阅读 ${post.views || 0}</p>
                     ${post.cover_image ? `<img src="${post.cover_image}" style="max-width:100%;border-radius:12px;margin:1rem 0;" />` : ''}
                     <div>${post.content}</div>
                     <hr />
@@ -1066,21 +1220,30 @@
                     ` : '<p style="color:rgba(255,255,255,0.4);">登录后即可评论</p>'}
                 </div>
             `;
+
             // 加载评论
             const comments = await loadComments(postId);
             const area = document.getElementById('comments-area');
             if (!comments.length) {
                 area.innerHTML = '<p style="color:rgba(255,255,255,0.4);">暂无评论，来抢沙发吧！</p>';
             } else {
-                area.innerHTML = comments.map(c => `
-                    <div style="border-bottom:1px solid rgba(255,255,255,0.06);padding:0.8rem 0;">
-                        <strong>${c.username || '用户'}</strong> <span style="color:rgba(255,255,255,0.3);font-size:0.8rem;">${c.created_at ? c.created_at.toDate().toLocaleString() : ''}</span>
-                        <p style="margin:0.2rem 0;">${c.content}</p>
-                    </div>
-                `).join('');
+                area.innerHTML = comments.map(c => {
+                    const date = c.created_at && c.created_at.toDate ? c.created_at.toDate().toLocaleString() : '';
+                    return `
+                        <div style="border-bottom:1px solid rgba(255,255,255,0.06);padding:0.8rem 0;">
+                            <strong>${c.username || '用户'}</strong> <span style="color:rgba(255,255,255,0.3);font-size:0.8rem;">${date}</span>
+                            <p style="margin:0.2rem 0;">${c.content}</p>
+                        </div>
+                    `;
+                }).join('');
             }
-            // 增加浏览量
-            await db.collection('posts').doc(postId).update({ views: firebase.firestore.FieldValue.increment(1) });
+
+            // 增加浏览量（仅对 Firebase 文章）
+            if (!post.id.startsWith('builtin-')) {
+                try {
+                    await db.collection('posts').doc(postId).update({ views: firebase.firestore.FieldValue.increment(1) });
+                } catch (e) {}
+            }
             window.scrollTo({ top: 0 });
         }
 
@@ -1102,7 +1265,6 @@
             loadPosts();
         }
 
-        // 搜索
         function searchPosts() {
             const keyword = document.getElementById('searchInput').value.trim();
             const activeCat = document.querySelector('.cat-btn.active');
@@ -1149,12 +1311,9 @@
             document.body.style.overflow = '';
         }
 
-        // 点击背景关闭
         document.getElementById('authModal').addEventListener('click', function(e) {
             if (e.target === this) closeModal();
         });
-
-        // ESC 关闭
         document.addEventListener('keydown', function(e) {
             if (e.key === 'Escape') closeModal();
         });
@@ -1176,7 +1335,6 @@
             }
         }
 
-        // 登录提交
         async function handleLogin(e) {
             e.preventDefault();
             const email = document.getElementById('loginEmail').value.trim();
@@ -1194,7 +1352,6 @@
             }
         }
 
-        // 注册提交
         async function handleRegister(e) {
             e.preventDefault();
             const username = document.getElementById('regName').value.trim();
@@ -1232,15 +1389,11 @@
             if (body.classList.contains('light')) {
                 body.classList.remove('light');
                 btn.textContent = '🌙';
-                // 重置背景变量（实际 CSS 已通过 class 控制）
             } else {
                 body.classList.add('light');
                 btn.textContent = '☀️';
             }
         }
-
-        // 动态添加 light 样式（通过 CSS 变量）
-        // 在 <style> 中已定义了 body.light 的变量，无需额外操作
 
         // =============================================================
         //  分类点击
@@ -1259,40 +1412,7 @@
         //  初始化
         // =============================================================
         window.onload = function() {
-            // 添加默认演示文章（如果数据库为空）
-            const demoPosts = [{
-                title: '欢迎来到窍某博客网',
-                content: '这里是我个人思考与成长的自留地。从技术到生活，从职场到内心，我希望能用文字和影像记录下每一个值得回味的瞬间。',
-                excerpt: '开启分享之旅，记录思考点滴',
-                category: 'life',
-                cover_image: 'https://picsum.photos/id/1015/800/400',
-                author_name: '窍某',
-                views: 0
-            }, {
-                title: '2026 年前沿技术风向标',
-                content: '2026 年已经过半，技术领域的变革比我们想象的更快。本文梳理了今年最值得关注的几个技术方向，以及它们背后的逻辑。',
-                excerpt: 'AI Agent、WebAssembly 与边缘计算',
-                category: 'tech',
-                cover_image: 'https://picsum.photos/id/201/800/400',
-                author_name: '窍某',
-                views: 0
-            }];
-            // 检查文章数量，如果为0则插入示例
-            db.collection('posts').get().then(snapshot => {
-                if (snapshot.empty) {
-                    demoPosts.forEach(p => {
-                        db.collection('posts').add({
-                            ...p,
-                            created_at: firebase.firestore.FieldValue.serverTimestamp(),
-                            updated_at: firebase.firestore.FieldValue.serverTimestamp()
-                        });
-                    });
-                }
-            }).then(() => {
-                loadPosts();
-            });
-
-            // 初始化 UI
+            loadPosts();
             updateUI();
         };
 
