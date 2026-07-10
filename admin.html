@@ -3,10 +3,11 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>管理后台 - 窍某博客网</title>
+    <title>管理后台 - 窍某论坛</title>
     <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-storage-compat.js"></script>
     <style>
         * {
             margin: 0;
@@ -187,6 +188,20 @@
         .btn-view:hover {
             transform: scale(1.04);
         }
+        .btn-success {
+            background: #22c55e;
+            color: #fff;
+            border: none;
+            padding: 4px 12px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 0.75rem;
+            transition: 0.3s;
+        }
+        .btn-success:hover {
+            background: #16a34a;
+            transform: scale(1.04);
+        }
         .login-required {
             text-align: center;
             padding: 60px 20px;
@@ -218,6 +233,32 @@
             text-align: center;
             padding: 30px;
             color: rgba(255, 255, 255, 0.3);
+        }
+        /* 用户头像 */
+        .avatar-sm {
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        .user-cell {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .edit-input {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid #444;
+            color: #e8edf5;
+            padding: 2px 8px;
+            border-radius: 6px;
+            font-size: 0.85rem;
+            width: 120px;
+        }
+        .edit-input:focus {
+            outline: none;
+            border-color: #6d5bff;
         }
         @media (max-width: 640px) {
             table,
@@ -253,6 +294,9 @@
             .stats {
                 flex-direction: column;
             }
+            .edit-input {
+                width: 80px;
+            }
         }
     </style>
 </head>
@@ -263,17 +307,17 @@
 
         <div id="adminContent" style="display:none;">
             <div class="stats" id="statsArea">
-                <div class="stat-card"><div class="num" id="postCount">0</div><div class="label">📄 文章</div></div>
-                <div class="stat-card"><div class="num" id="commentCount">0</div><div class="label">💬 评论</div></div>
-                <div class="stat-card"><div class="num" id="topicCount">0</div><div class="label">🏷️ 话题</div></div>
+                <div class="stat-card"><div class="num" id="postCount">0</div><div class="label">📄 帖子</div></div>
+                <div class="stat-card"><div class="num" id="commentCount">0</div><div class="label">💬 回复</div></div>
+                <div class="stat-card"><div class="num" id="topicCount">0</div><div class="label">🏷️ 版块</div></div>
                 <div class="stat-card"><div class="num" id="userCount">0</div><div class="label">👤 用户</div></div>
                 <div class="stat-card"><div class="num" id="likeCount">0</div><div class="label">❤️ 总点赞</div></div>
             </div>
 
             <div class="tab-bar">
-                <button class="tab-btn active" onclick="switchTab('posts')">📄 文章管理</button>
-                <button class="tab-btn" onclick="switchTab('comments')">💬 评论管理</button>
-                <button class="tab-btn" onclick="switchTab('topics')">🏷️ 话题管理</button>
+                <button class="tab-btn active" onclick="switchTab('posts')">📄 帖子管理</button>
+                <button class="tab-btn" onclick="switchTab('comments')">💬 回复管理</button>
+                <button class="tab-btn" onclick="switchTab('topics')">🏷️ 版块管理</button>
                 <button class="tab-btn" onclick="switchTab('users')">👤 用户管理</button>
             </div>
 
@@ -302,9 +346,23 @@
         </div>
     </div>
 
+    <!-- 编辑昵称模态框 -->
+    <div class="modal" id="editUserModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.7);backdrop-filter:blur(8px);justify-content:center;align-items:center;z-index:999;">
+        <div style="background:#1a1a2e;padding:30px;border-radius:20px;max-width:400px;width:100%;position:relative;">
+            <span onclick="closeEditUserModal()" style="position:absolute;top:12px;right:20px;font-size:1.8rem;cursor:pointer;color:rgba(255,255,255,0.4);">&times;</span>
+            <h2>✏️ 编辑用户</h2>
+            <div style="margin:16px 0;">
+                <label style="color:rgba(255,255,255,0.6);display:block;margin-bottom:4px;">昵称</label>
+                <input type="text" id="editUserName" style="width:100%;padding:10px 14px;border-radius:12px;border:1px solid #444;background:rgba(255,255,255,0.05);color:#e8edf5;font-size:0.95rem;" />
+            </div>
+            <button class="btn" onclick="saveUserEdit()" style="width:100%;">保存</button>
+            <div id="editUserMsg" style="margin-top:8px;"></div>
+        </div>
+    </div>
+
     <script>
         // =============================================================
-        // ⚠️ 管理员 UID（已填入你的 UID）
+        // 管理员 UID
         // =============================================================
         const ADMIN_UID = "FEQmE2qlzwQqmIgKqU3VFuaYh602";
 
@@ -312,7 +370,7 @@
             apiKey: "AIzaSyB8ZalWGiP8at0EUIfKN46CbwQ3eH4iM8E",
             authDomain: "project-170416828695178494.firebaseapp.com",
             projectId: "project-170416828695178494",
-            storageBucket: "project-170416828695178494.firebasestorage.app",
+            storageBucket: "project-170416828695178494.appspot.com",
             messagingSenderId: "1096326612519",
             appId: "1:1096326612519:web:8208916652738ce870f002",
             measurementId: "G-3K0YDFV3J5"
@@ -329,9 +387,10 @@
         let usersCache = [];
         let currentCategory = 'all';
         let totalLikes = 0;
+        let editingUserId = null;
 
         // =============================================================
-        // 认证 + 权限检查
+        // 认证 + 权限
         // =============================================================
         auth.onAuthStateChanged(user => {
             currentUser = user;
@@ -358,13 +417,22 @@
                 checkDiv.innerHTML = `
                     <div class="login-required">
                         <h2>🔐 请先登录</h2>
-                        <p>你需要登录后才能管理博客内容</p>
+                        <p>你需要登录后才能管理</p>
                         <a href="index.html" class="btn" style="display:inline-block;margin-top:16px;text-decoration:none;">返回首页登录</a>
                     </div>
                 `;
                 content.style.display = 'none';
             }
         });
+
+        // =============================================================
+        // 工具函数：获取用户头像
+        // =============================================================
+        function getAvatarUrl(userData) {
+            if (userData && userData.avatarUrl) return userData.avatarUrl;
+            const name = userData?.username || userData?.displayName || 'User';
+            return `https://ui-avatars.com/api/?name=${encodeURIComponent(name)}&background=6d5bff&color=fff&size=40`;
+        }
 
         // =============================================================
         // 加载数据
@@ -440,7 +508,7 @@
         }
 
         // =============================================================
-        // 切换 Tab
+        // Tab 切换
         // =============================================================
         function switchTab(tab) {
             document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
@@ -450,7 +518,7 @@
         }
 
         // =============================================================
-        // 文章管理
+        // 帖子管理
         // =============================================================
         function filterPosts(category) {
             currentCategory = category;
@@ -467,7 +535,7 @@
                 filtered = filtered.filter(p => p.category === category);
             }
             if (!filtered.length) {
-                list.innerHTML = '<p class="empty-state">📭 暂无文章</p>';
+                list.innerHTML = '<p class="empty-state">📭 暂无帖子</p>';
                 return;
             }
             const catMap = { tech: '科技', life: '生活', career: '职场', topic: '💬 话题' };
@@ -500,7 +568,7 @@
         }
 
         async function deletePost(postId) {
-            if (!confirm('确定要删除这篇文章吗？（会同时删除所有评论）')) return;
+            if (!confirm('确定要删除这篇帖子吗？（会同时删除所有回复）')) return;
             try {
                 const commentsSnap = await db.collection('comments').where('post_id', '==', postId).get();
                 const batch = db.batch();
@@ -515,17 +583,17 @@
         }
 
         // =============================================================
-        // 评论管理
+        // 回复管理
         // =============================================================
         function renderComments() {
             const list = document.getElementById('commentsList');
             if (!commentsCache.length) {
-                list.innerHTML = '<p class="empty-state">💬 暂无评论</p>';
+                list.innerHTML = '<p class="empty-state">💬 暂无回复</p>';
                 return;
             }
             let html = `
                 <table>
-                    <thead><tr><th>评论内容</th><th>用户</th><th>文章</th><th>时间</th><th>操作</th></tr></thead>
+                    <thead><tr><th>回复内容</th><th>用户</th><th>帖子</th><th>时间</th><th>操作</th></tr></thead>
                     <tbody>
             `;
             commentsCache.forEach(c => {
@@ -534,9 +602,9 @@
                 const postTitle = post ? post.title : c.post_id || '已删除';
                 html += `
                     <tr>
-                        <td data-label="评论">${c.content.length > 50 ? c.content.slice(0,50)+'...' : c.content}</td>
+                        <td data-label="回复">${c.content.length > 50 ? c.content.slice(0,50)+'...' : c.content}</td>
                         <td data-label="用户">${c.username || '匿名'}</td>
-                        <td data-label="文章">${postTitle}</td>
+                        <td data-label="帖子">${postTitle}</td>
                         <td data-label="时间">${dateStr}</td>
                         <td data-label="操作">
                             <button class="btn-danger" onclick="deleteComment('${c.id}')">🗑️</button>
@@ -549,7 +617,7 @@
         }
 
         async function deleteComment(commentId) {
-            if (!confirm('确定要删除这条评论吗？')) return;
+            if (!confirm('确定要删除这条回复吗？')) return;
             try {
                 await db.collection('comments').doc(commentId).delete();
                 alert('删除成功！');
@@ -560,24 +628,24 @@
         }
 
         // =============================================================
-        // 话题管理（新增）
+        // 版块管理
         // =============================================================
         function renderTopics() {
             const list = document.getElementById('topicsList');
             if (!topicsCache.length) {
-                list.innerHTML = '<p class="empty-state">🏷️ 暂无话题</p>';
+                list.innerHTML = '<p class="empty-state">🏷️ 暂无版块</p>';
                 return;
             }
             let html = `
                 <table>
-                    <thead><tr><th>话题名称</th><th>创建时间</th><th>操作</th></tr></thead>
+                    <thead><tr><th>版块名称</th><th>创建时间</th><th>操作</th></tr></thead>
                     <tbody>
             `;
             topicsCache.forEach(t => {
                 const dateStr = t.created_at ? new Date(t.created_at.seconds * 1000).toLocaleDateString('zh-CN') : '';
                 html += `
                     <tr>
-                        <td data-label="话题名称">🏷️ ${t.name}</td>
+                        <td data-label="版块名称">🏷️ ${t.name}</td>
                         <td data-label="创建时间">${dateStr}</td>
                         <td data-label="操作">
                             <button class="btn-danger" onclick="deleteTopic('${t.id}')">🗑️</button>
@@ -590,7 +658,7 @@
         }
 
         async function deleteTopic(topicId) {
-            if (!confirm('确定要删除这个话题吗？')) return;
+            if (!confirm('确定要删除这个版块吗？')) return;
             try {
                 await db.collection('topics').doc(topicId).delete();
                 alert('删除成功！');
@@ -601,7 +669,7 @@
         }
 
         // =============================================================
-        // 用户管理
+        // 用户管理（含头像和编辑昵称）
         // =============================================================
         function renderUsers() {
             const list = document.getElementById('usersList');
@@ -611,18 +679,28 @@
             }
             let html = `
                 <table>
-                    <thead><tr><th>昵称</th><th>邮箱</th><th>注册时间</th><th>操作</th></tr></thead>
+                    <thead><tr><th>用户</th><th>昵称</th><th>邮箱</th><th>注册时间</th><th>操作</th></tr></thead>
                     <tbody>
             `;
             usersCache.forEach(u => {
+                const avatarUrl = getAvatarUrl(u);
                 const dateStr = u.created_at ? new Date(u.created_at.seconds * 1000).toLocaleDateString('zh-CN') : '';
+                const isAdmin = u.id === ADMIN_UID;
                 html += `
                     <tr>
+                        <td data-label="用户">
+                            <div class="user-cell">
+                                <img class="avatar-sm" src="${avatarUrl}" alt="${u.username || '用户'}" />
+                            </div>
+                        </td>
                         <td data-label="昵称">${u.username || '用户'}</td>
                         <td data-label="邮箱">${u.email || '未提供'}</td>
                         <td data-label="注册时间">${dateStr}</td>
                         <td data-label="操作">
-                            ${u.id !== ADMIN_UID ? `<button class="btn-danger" onclick="deleteUser('${u.id}')">🗑️</button>` : '<span style="color:#6d5bff;">管理员</span>'}
+                            ${isAdmin ? '<span style="color:#6d5bff;">管理员</span>' : `
+                                <button class="btn-edit" onclick="openEditUser('${u.id}')">✏️</button>
+                                <button class="btn-danger" onclick="deleteUser('${u.id}')">🗑️</button>
+                            `}
                         </td>
                     </tr>
                 `;
@@ -631,18 +709,71 @@
             list.innerHTML = html;
         }
 
+        // =============================================================
+        // 编辑用户（昵称）
+        // =============================================================
+        function openEditUser(userId) {
+            const user = usersCache.find(u => u.id === userId);
+            if (!user) return;
+            editingUserId = userId;
+            document.getElementById('editUserName').value = user.username || '';
+            document.getElementById('editUserModal').style.display = 'flex';
+            document.getElementById('editUserMsg').innerHTML = '';
+        }
+
+        function closeEditUserModal() {
+            document.getElementById('editUserModal').style.display = 'none';
+            editingUserId = null;
+        }
+
+        // 点击背景关闭
+        document.getElementById('editUserModal').addEventListener('click', function(e) {
+            if (e.target === this) closeEditUserModal();
+        });
+
+        async function saveUserEdit() {
+            const newName = document.getElementById('editUserName').value.trim();
+            const msg = document.getElementById('editUserMsg');
+            if (!newName) {
+                msg.innerHTML = '<p style="color:#ef4444;">昵称不能为空</p>';
+                return;
+            }
+            if (newName.length > 30) {
+                msg.innerHTML = '<p style="color:#ef4444;">昵称不能超过30字符</p>';
+                return;
+            }
+            if (!editingUserId) return;
+
+            try {
+                await db.collection('users').doc(editingUserId).set({
+                    username: newName
+                }, { merge: true });
+                msg.innerHTML = '<p style="color:#6ee7b7;">✅ 昵称修改成功！</p>';
+                // 延迟关闭并刷新
+                setTimeout(() => {
+                    closeEditUserModal();
+                    loadAllData();
+                }, 1000);
+            } catch (err) {
+                msg.innerHTML = '<p style="color:#ef4444;">修改失败：' + err.message + '</p>';
+            }
+        }
+
+        // =============================================================
+        // 删除用户
+        // =============================================================
         async function deleteUser(userId) {
             if (userId === ADMIN_UID) {
                 alert('不能删除管理员自己');
                 return;
             }
-            if (!confirm('确定要删除这个用户吗？这会同时删除该用户的所有评论和文章。')) return;
+            if (!confirm('确定要删除这个用户吗？这会同时删除该用户的所有回复和帖子。')) return;
             try {
                 const batch = db.batch();
-                // 删除该用户的所有评论
+                // 删除该用户的所有回复
                 const commentsSnap = await db.collection('comments').where('user_id', '==', userId).get();
                 commentsSnap.forEach(doc => batch.delete(doc.ref));
-                // 删除该用户的所有文章
+                // 删除该用户的所有帖子
                 const postsSnap = await db.collection('posts').where('author_id', '==', userId).get();
                 postsSnap.forEach(doc => batch.delete(doc.ref));
                 await batch.commit();
@@ -664,6 +795,9 @@
         window.deleteComment = deleteComment;
         window.deleteTopic = deleteTopic;
         window.deleteUser = deleteUser;
+        window.openEditUser = openEditUser;
+        window.closeEditUserModal = closeEditUserModal;
+        window.saveUserEdit = saveUserEdit;
     </script>
 </body>
 </html>
