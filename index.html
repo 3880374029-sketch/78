@@ -6,7 +6,7 @@
     <title>窍某论坛</title>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
-        /* ===== 完整样式（保持你之前的所有样式） ===== */
+        /* ===== 你的完整样式（保持不变） ===== */
         *{margin:0;padding:0;box-sizing:border-box;}
         body{background:#0b0e1a;color:#e8edf5;font-family:'Segoe UI',sans-serif;padding:20px;line-height:1.6;}
         .container{max-width:1200px;margin:0 auto;}
@@ -124,6 +124,7 @@
     </style>
 </head>
 <body>
+<!-- ==================== HTML 结构 ==================== -->
 <div class="container">
     <header>
         <h1>✦ 窍某论坛</h1>
@@ -202,7 +203,7 @@
     <p>© 2026 窍某论坛</p>
 </footer>
 
-<!-- 登录模态框 -->
+<!-- ==================== 模态框 ==================== -->
 <div class="modal" id="authModal">
     <div class="modal-box">
         <span class="close" onclick="closeModal()">&times;</span>
@@ -241,7 +242,6 @@
     </div>
 </div>
 
-<!-- 新建版块模态框 -->
 <div class="modal" id="topicModal">
     <div class="modal-box">
         <span class="close" onclick="closeTopicModal()">&times;</span>
@@ -253,7 +253,6 @@
     </div>
 </div>
 
-<!-- 个人中心模态框 -->
 <div class="modal" id="profileModal">
     <div class="modal-box">
         <span class="close" onclick="closeProfile()">&times;</span>
@@ -276,645 +275,616 @@
     </div>
 </div>
 
+<!-- ========================================================== -->
+<!--                     JavaScript 主脚本                        -->
+<!-- ========================================================== -->
 <script>
-// =============================================================
-// Supabase 配置
-// =============================================================
-const SUPABASE_URL = 'https://bkvsceiezbyexzqpvblj.supabase.co';
-const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJrdnNjZWllemJ5ZXh6cXB2YmxqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODM3MDk1MzIsImV4cCI6MjA5OTI4NTUzMn0.1h4Yp8YaJdMMOQW8N2zqvJi6QrxHPncBFMK9LjdmZ6E';
+(function() {
+    "use strict";
 
-// 使用 sb 避免全局冲突
-const sb = supabaseJs.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    // ========== 配置 ==========
+    const SUPABASE_URL = 'https://bkvsceiezbyexzqpvblj.supabase.co';
+    const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJrdnNjZWllemJ5ZXh6cXB2YmxqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODM3MDk1MzIsImV4cCI6MjA5OTI4NTUzMn0.1h4Yp8YaJdMMOQW8N2zqvJi6QrxHPncBFMK9LjdmZ6E';
 
-// =============================================================
-// 状态
-// =============================================================
-let postsCache = [];
-let currentCategory = 'all';
-let currentUser = null;
-let userProfile = null;
-let topicsCache = [];
-let isSubmitting = false;
-let lastSubmitTime = 0;
-let isAdmin = false;
+    // ========== 客户端（立即初始化） ==========
+    const sb = supabaseJs.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-// =============================================================
-// 工具函数
-// =============================================================
-function formatDate(date) {
-    if (!date) return '';
-    const d = new Date(date);
-    return d.toLocaleDateString('zh-CN');
-}
-function formatTime(date) {
-    if (!date) return '';
-    const d = new Date(date);
-    return d.toLocaleString('zh-CN');
-}
-function getAvatarUrl(user) {
-    if (user && user.avatar_url) return user.avatar_url;
-    const name = user?.username || user?.email || 'U';
-    return `https://ui-avatars.com/api/?name=${encodeURIComponent(name)}&background=6d5bff&color=fff&size=100`;
-}
+    // ========== 状态 ==========
+    let currentUser = null;
+    let userProfile = null;
+    let postsCache = [];
+    let topicsCache = [];
+    let currentCategory = 'all';
+    let isSubmitting = false;
+    let lastSubmitTime = 0;
+    let isAdmin = false;
 
-// =============================================================
-// 模态框
-// =============================================================
-function openModal() {
-    document.getElementById('authModal').classList.add('active');
-}
-function closeModal() {
-    document.getElementById('authModal').classList.remove('active');
-}
-document.getElementById('authModal').addEventListener('click', function(e) {
-    if (e.target === this) closeModal();
-});
-document.addEventListener('keydown', function(e) {
-    if (e.key === 'Escape') {
-        closeModal();
-        closeTopicModal();
-        closeProfile();
+    // ========== 工具函数 ==========
+    function formatDate(date) {
+        if (!date) return '';
+        const d = new Date(date);
+        return d.toLocaleDateString('zh-CN');
     }
-});
-
-function switchTab(tab) {
-    document.querySelectorAll('.modal-tabs button').forEach(b => b.classList.toggle('active', b.dataset.tab === tab));
-    document.getElementById('loginForm').classList.toggle('active', tab === 'login');
-    document.getElementById('registerForm').classList.toggle('active', tab === 'register');
-    document.getElementById('modalTitle').textContent = tab === 'login' ? '欢迎回来' : '创建账号';
-    document.getElementById('modalSub').textContent = tab === 'login' ? '登录你的账号' : '加入窍某论坛';
-}
-
-// =============================================================
-// 认证
-// =============================================================
-async function handleLogin(e) {
-    e.preventDefault();
-    const email = document.getElementById('loginEmail').value.trim();
-    const pass = document.getElementById('loginPassword').value.trim();
-    if (!email || !pass) { alert('请填写完整'); return; }
-    try {
-        const { data, error } = await sb.auth.signInWithPassword({ email, password: pass });
-        if (error) throw error;
-        closeModal();
-        document.getElementById('loginEmail').value = '';
-        document.getElementById('loginPassword').value = '';
-    } catch(err) {
-        alert('登录失败：' + err.message);
+    function formatTime(date) {
+        if (!date) return '';
+        const d = new Date(date);
+        return d.toLocaleString('zh-CN');
     }
-}
+    function getAvatarUrl(user) {
+        if (user && user.avatar_url) return user.avatar_url;
+        const name = user?.username || user?.email || 'U';
+        return `https://ui-avatars.com/api/?name=${encodeURIComponent(name)}&background=6d5bff&color=fff&size=100`;
+    }
 
-async function handleRegister(e) {
-    e.preventDefault();
-    const name = document.getElementById('regName').value.trim();
-    const email = document.getElementById('regEmail').value.trim();
-    const pass = document.getElementById('regPassword').value;
-    const confirm = document.getElementById('regConfirm').value;
-    if (!name || !email || !pass || !confirm) { alert('请填写完整'); return; }
-    if (pass !== confirm) { alert('密码不一致'); return; }
-    if (pass.length < 6) { alert('密码至少6位'); return; }
-    if (name.length > 30) { alert('昵称过长'); return; }
-    try {
-        const { data, error } = await sb.auth.signUp({
-            email,
-            password: pass,
-            options: { data: { username: name } }
-        });
-        if (error) throw error;
-        if (data.user) {
-            await sb.from('profiles').upsert({
-                id: data.user.id,
-                username: name,
-                email: email,
-                is_admin: false
-            });
+    // ========== 模态框 ==========
+    window.openModal = function() {
+        document.getElementById('authModal').classList.add('active');
+    };
+    window.closeModal = function() {
+        document.getElementById('authModal').classList.remove('active');
+    };
+    document.getElementById('authModal').addEventListener('click', function(e) {
+        if (e.target === this) window.closeModal();
+    });
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape') {
+            window.closeModal();
+            window.closeTopicModal();
+            window.closeProfile();
         }
-        alert('注册成功！请验证邮箱（如有要求）或直接登录');
-        switchTab('login');
-        document.getElementById('regName').value = '';
-        document.getElementById('regEmail').value = '';
-        document.getElementById('regPassword').value = '';
-        document.getElementById('regConfirm').value = '';
-        closeModal();
-    } catch(err) {
-        alert('注册失败：' + err.message);
+    });
+
+    window.switchTab = function(tab) {
+        document.querySelectorAll('.modal-tabs button').forEach(b => b.classList.toggle('active', b.dataset.tab === tab));
+        document.getElementById('loginForm').classList.toggle('active', tab === 'login');
+        document.getElementById('registerForm').classList.toggle('active', tab === 'register');
+        document.getElementById('modalTitle').textContent = tab === 'login' ? '欢迎回来' : '创建账号';
+        document.getElementById('modalSub').textContent = tab === 'login' ? '登录你的账号' : '加入窍某论坛';
+    };
+
+    // ========== 认证 ==========
+    window.handleLogin = async function(e) {
+        e.preventDefault();
+        const email = document.getElementById('loginEmail').value.trim();
+        const pass = document.getElementById('loginPassword').value.trim();
+        if (!email || !pass) { alert('请填写完整'); return; }
+        try {
+            const { data, error } = await sb.auth.signInWithPassword({ email, password: pass });
+            if (error) throw error;
+            window.closeModal();
+            document.getElementById('loginEmail').value = '';
+            document.getElementById('loginPassword').value = '';
+        } catch(err) {
+            alert('登录失败：' + err.message);
+        }
+    };
+
+    window.handleRegister = async function(e) {
+        e.preventDefault();
+        const name = document.getElementById('regName').value.trim();
+        const email = document.getElementById('regEmail').value.trim();
+        const pass = document.getElementById('regPassword').value;
+        const confirm = document.getElementById('regConfirm').value;
+        if (!name || !email || !pass || !confirm) { alert('请填写完整'); return; }
+        if (pass !== confirm) { alert('密码不一致'); return; }
+        if (pass.length < 6) { alert('密码至少6位'); return; }
+        if (name.length > 30) { alert('昵称过长'); return; }
+        try {
+            const { data, error } = await sb.auth.signUp({
+                email,
+                password: pass,
+                options: { data: { username: name } }
+            });
+            if (error) throw error;
+            if (data.user) {
+                await sb.from('profiles').upsert({
+                    id: data.user.id,
+                    username: name,
+                    email: email,
+                    is_admin: false
+                });
+            }
+            alert('注册成功！请验证邮箱（如有要求）或直接登录');
+            window.switchTab('login');
+            document.getElementById('regName').value = '';
+            document.getElementById('regEmail').value = '';
+            document.getElementById('regPassword').value = '';
+            document.getElementById('regConfirm').value = '';
+            window.closeModal();
+        } catch(err) {
+            alert('注册失败：' + err.message);
+        }
+    };
+
+    window.handleSocialLogin = async function(provider) {
+        const { data, error } = await sb.auth.signInWithOAuth({ provider });
+        if (error) alert('登录失败：' + error.message);
+    };
+
+    window.logout = async function() {
+        await sb.auth.signOut();
+    };
+
+    // ========== 数据操作 ==========
+    async function loadPosts(category = 'all', keyword = '') {
+        let query = sb.from('posts').select('*')
+            .order('created_at', { ascending: false });
+
+        if (category !== 'all') {
+            query = query.eq('category', category);
+        }
+
+        const { data, error } = await query;
+        if (error) {
+            console.error('加载帖子失败:', error);
+            postsCache = [];
+        } else {
+            postsCache = data || [];
+        }
+
+        let filtered = postsCache;
+        if (keyword) {
+            const kw = keyword.toLowerCase();
+            filtered = filtered.filter(p =>
+                p.title.toLowerCase().includes(kw) ||
+                (p.excerpt && p.excerpt.toLowerCase().includes(kw)) ||
+                (p.content && p.content.toLowerCase().includes(kw))
+            );
+        }
+        renderPostList(filtered);
+        renderHotList(filtered);
+        updateStats();
     }
-}
 
-async function handleSocialLogin(provider) {
-    const { data, error } = await sb.auth.signInWithOAuth({ provider });
-    if (error) alert('登录失败：' + error.message);
-}
-
-async function logout() {
-    await sb.auth.signOut();
-}
-
-// =============================================================
-// 数据操作
-// =============================================================
-async function loadPosts(category = 'all', keyword = '') {
-    let query = sb.from('posts').select('*')
-        .order('created_at', { ascending: false });
-
-    if (category !== 'all') {
-        query = query.eq('category', category);
+    async function loadTopics() {
+        const { data, error } = await sb.from('topics').select('*').order('name', { ascending: true });
+        if (error) {
+            console.error('加载版块失败:', error);
+            topicsCache = [];
+        } else {
+            topicsCache = data || [];
+        }
+        updateBoardNav();
+        updateCategorySelect();
+        document.getElementById('statTopics').textContent = topicsCache.length;
     }
 
-    const { data, error } = await query;
-    if (error) {
-        console.error('加载帖子失败:', error);
-        postsCache = [];
-    } else {
-        postsCache = data || [];
+    async function createTopic(name) {
+        const { error } = await sb.from('topics').insert({ name });
+        if (error) throw error;
+        await loadTopics();
     }
 
-    let filtered = postsCache;
-    if (keyword) {
-        const kw = keyword.toLowerCase();
-        filtered = filtered.filter(p =>
-            p.title.toLowerCase().includes(kw) ||
-            (p.excerpt && p.excerpt.toLowerCase().includes(kw)) ||
-            (p.content && p.content.toLowerCase().includes(kw))
-        );
-    }
-    renderPostList(filtered);
-    renderHotList(filtered);
-    updateStats();
-}
-
-async function loadTopics() {
-    const { data, error } = await sb.from('topics').select('*').order('name', { ascending: true });
-    if (error) {
-        console.error('加载版块失败:', error);
-        topicsCache = [];
-    } else {
-        topicsCache = data || [];
-    }
-    updateBoardNav();
-    updateCategorySelect();
-    document.getElementById('statTopics').textContent = topicsCache.length;
-}
-
-async function createTopic(name) {
-    const { error } = await sb.from('topics').insert({ name });
-    if (error) throw error;
-    await loadTopics();
-}
-
-// =============================================================
-// UI 渲染
-// =============================================================
-function renderPostList(posts) {
-    const list = document.getElementById('postList');
-    if (!posts || posts.length === 0) {
-        list.innerHTML = `<div class="empty-state"><h3>📭 还没有帖子</h3><p style="color:rgba(255,255,255,0.3);">登录后点击「发帖」开始讨论！</p></div>`;
-        return;
-    }
-    const catMap = { tech: '科技', life: '生活', career: '职场' };
-    list.innerHTML = posts.map(p => {
-        const badgeClass = ['tech','life','career'].includes(p.category) ? `badge ${p.category}` : 'badge topic';
-        const badgeText = catMap[p.category] || p.category;
-        const avatar = p.author_avatar || `https://ui-avatars.com/api/?name=${encodeURIComponent(p.author_name||'U')}&background=6d5bff&color=fff&size=30`;
-        return `
-            <div class="post-card">
-                <div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;">
-                    <span class="post-title" onclick="showPost('${p.id}')">${p.title}</span>
-                    <span class="badge ${badgeClass}" style="flex-shrink:0;margin-top:2px;">${badgeText}</span>
+    // ========== UI 渲染 ==========
+    function renderPostList(posts) {
+        const list = document.getElementById('postList');
+        if (!posts || posts.length === 0) {
+            list.innerHTML = `<div class="empty-state"><h3>📭 还没有帖子</h3><p style="color:rgba(255,255,255,0.3);">登录后点击「发帖」开始讨论！</p></div>`;
+            return;
+        }
+        const catMap = { tech: '科技', life: '生活', career: '职场' };
+        list.innerHTML = posts.map(p => {
+            const badgeClass = ['tech','life','career'].includes(p.category) ? `badge ${p.category}` : 'badge topic';
+            const badgeText = catMap[p.category] || p.category;
+            const avatar = p.author_avatar || `https://ui-avatars.com/api/?name=${encodeURIComponent(p.author_name||'U')}&background=6d5bff&color=fff&size=30`;
+            return `
+                <div class="post-card">
+                    <div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;">
+                        <span class="post-title" onclick="window.showPost('${p.id}')">${p.title}</span>
+                        <span class="badge ${badgeClass}" style="flex-shrink:0;margin-top:2px;">${badgeText}</span>
+                    </div>
+                    <div class="post-meta">
+                        <img class="author-avatar" src="${avatar}" alt="${p.author_name||'用户'}" />
+                        <span class="author">${p.author_name || '匿名'}</span>
+                        <span>· ${formatDate(p.created_at)}</span>
+                    </div>
+                    <div class="post-excerpt">${p.excerpt || (p.content ? p.content.replace(/<[^>]+>/g,'').slice(0,80)+'...' : '')}</div>
+                    <div class="post-footer">
+                        <span class="like-btn" onclick="window.toggleLike('${p.id}')" id="like-btn-${p.id}">❤️ <span id="like-count-${p.id}">${p.likes || 0}</span></span>
+                        <span>💬 ${p.comment_count || 0}</span>
+                        <span>👁️ ${p.views || 0}</span>
+                    </div>
                 </div>
-                <div class="post-meta">
-                    <img class="author-avatar" src="${avatar}" alt="${p.author_name||'用户'}" />
-                    <span class="author">${p.author_name || '匿名'}</span>
-                    <span>· ${formatDate(p.created_at)}</span>
+            `;
+        }).join('');
+        updateLikesUI();
+    }
+
+    function renderHotList(posts) {
+        const container = document.getElementById('hotContent');
+        if (!container) return;
+        const sorted = [...posts].sort((a,b) => (b.likes||0) - (a.likes||0));
+        const top = sorted.slice(0,5);
+        if (!top.length) {
+            container.innerHTML = '<p style="color:rgba(255,255,255,0.2);font-size:0.9rem;">暂无帖子</p>';
+            return;
+        }
+        let html = '';
+        top.forEach((p, i) => {
+            const emoji = i===0?'🥇':i===1?'🥈':i===2?'🥉':`#${i+1}`;
+            html += `<div class="hot-item"><a href="#" onclick="window.showPost('${p.id}');return false;"><span><span class="hot-num">${emoji}</span> ${p.title}</span><span>❤️ ${p.likes||0}</span></a></div>`;
+        });
+        container.innerHTML = html;
+    }
+
+    async function updateStats() {
+        document.getElementById('statPosts').textContent = postsCache.length;
+        const { count: commentCount, error: ce } = await sb.from('comments').select('*', { count: 'exact', head: true });
+        if (!ce) document.getElementById('statComments').textContent = commentCount;
+        const { count: userCount, error: ue } = await sb.from('profiles').select('*', { count: 'exact', head: true });
+        if (!ue) document.getElementById('statUsers').textContent = userCount;
+    }
+
+    async function updateLikesUI() {
+        if (!currentUser) {
+            document.querySelectorAll('.like-btn').forEach(el => el.style.color = '');
+            return;
+        }
+        const { data, error } = await sb
+            .from('likes')
+            .select('post_id')
+            .eq('user_id', currentUser.id);
+        if (error) return;
+        const likedIds = new Set(data.map(d => d.post_id));
+        document.querySelectorAll('.like-btn').forEach(el => {
+            const postId = el.id.replace('like-btn-', '').replace('-detail', '');
+            el.style.color = likedIds.has(postId) ? '#ef4444' : '';
+        });
+    }
+
+    function updateBoardNav() {
+        const container = document.getElementById('dynamicBoards');
+        if (!container) return;
+        let html = '';
+        topicsCache.forEach(t => {
+            html += `<button class="board-btn" data-cat="${encodeURIComponent(t.name)}" onclick="window.setCategory('${encodeURIComponent(t.name)}')">🏷️ ${t.name}</button>`;
+        });
+        container.innerHTML = html;
+    }
+
+    function updateCategorySelect() {
+        const select = document.getElementById('newCategory');
+        const fixed = ['tech','life','career'];
+        const opts = select.querySelectorAll('option');
+        opts.forEach(o => { if(!fixed.includes(o.value)) o.remove(); });
+        topicsCache.forEach(t => {
+            const opt = document.createElement('option');
+            opt.value = t.name;
+            opt.textContent = '🏷️ ' + t.name;
+            select.appendChild(opt);
+        });
+    }
+
+    // ========== 交互逻辑 ==========
+    window.setCategory = function(cat) {
+        currentCategory = cat;
+        document.querySelectorAll('.board-btn').forEach(b => {
+            b.classList.toggle('active', b.dataset.cat === cat || b.dataset.cat === decodeURIComponent(cat));
+        });
+        const keyword = document.getElementById('searchInput').value.trim();
+        loadPosts(cat, keyword);
+    };
+
+    window.searchPosts = function() {
+        const keyword = document.getElementById('searchInput').value.trim();
+        loadPosts(currentCategory, keyword);
+    };
+
+    window.showPost = async function(postId) {
+        const post = postsCache.find(p => p.id === postId);
+        if (!post) { alert('帖子不存在'); return; }
+
+        document.getElementById('postList').style.display = 'none';
+        const area = document.getElementById('detailArea');
+        area.classList.remove('hidden');
+
+        const avatar = post.author_avatar || `https://ui-avatars.com/api/?name=${encodeURIComponent(post.author_name||'U')}&background=6d5bff&color=fff&size=40`;
+
+        area.innerHTML = `
+            <div class="post-content">
+                <button class="back-btn" onclick="window.backToList()">← 返回列表</button>
+                <h1 style="font-size:1.6rem;">${post.title}</h1>
+                <div class="post-author-info">
+                    <img src="${avatar}" alt="${post.author_name||'用户'}" />
+                    <span class="author-name">${post.author_name || '匿名'}</span>
+                    <span class="post-time">${formatTime(post.created_at)}</span>
+                    <span style="margin-left:12px;">👁️ ${post.views || 0}</span>
                 </div>
-                <div class="post-excerpt">${p.excerpt || (p.content ? p.content.replace(/<[^>]+>/g,'').slice(0,80)+'...' : '')}</div>
-                <div class="post-footer">
-                    <span class="like-btn" onclick="toggleLike('${p.id}')" id="like-btn-${p.id}">❤️ <span id="like-count-${p.id}">${p.likes || 0}</span></span>
-                    <span>💬 ${p.comment_count || 0}</span>
-                    <span>👁️ ${p.views || 0}</span>
+                <div class="post-body">${post.content}</div>
+                <div class="post-actions">
+                    <span class="like-btn" onclick="window.toggleLike('${postId}')" id="like-btn-detail-${postId}">❤️ <span id="like-count-detail-${postId}">${post.likes || 0}</span></span>
+                    <span>💬 回复 <span id="reply-count">0</span></span>
                 </div>
+                <hr style="border-color:#333;margin:16px 0;" />
+                <h3 style="margin-bottom:12px;">💬 全部回复</h3>
+                <div id="commentsArea"><p style="color:rgba(255,255,255,0.3);">加载中...</p></div>
+                ${currentUser ? `
+                    <div style="margin-top:16px;">
+                        <textarea id="commentInput" rows="3" maxlength="2000" placeholder="写下你的回复..."></textarea>
+                        <button class="btn" onclick="window.publishComment('${postId}')" id="commentSubmitBtn" style="margin-top:8px;">发表回复</button>
+                    </div>
+                ` : '<p style="color:rgba(255,255,255,0.3);margin-top:12px;">登录后即可回复</p>'}
             </div>
         `;
-    }).join('');
-    updateLikesUI();
-}
 
-function renderHotList(posts) {
-    const container = document.getElementById('hotContent');
-    if (!container) return;
-    const sorted = [...posts].sort((a,b) => (b.likes||0) - (a.likes||0));
-    const top = sorted.slice(0,5);
-    if (!top.length) {
-        container.innerHTML = '<p style="color:rgba(255,255,255,0.2);font-size:0.9rem;">暂无帖子</p>';
-        return;
-    }
-    let html = '';
-    top.forEach((p, i) => {
-        const emoji = i===0?'🥇':i===1?'🥈':i===2?'🥉':`#${i+1}`;
-        html += `<div class="hot-item"><a href="#" onclick="showPost('${p.id}');return false;"><span><span class="hot-num">${emoji}</span> ${p.title}</span><span>❤️ ${p.likes||0}</span></a></div>`;
-    });
-    container.innerHTML = html;
-}
-
-async function updateStats() {
-    document.getElementById('statPosts').textContent = postsCache.length;
-    const { count: commentCount, error: ce } = await sb.from('comments').select('*', { count: 'exact', head: true });
-    if (!ce) document.getElementById('statComments').textContent = commentCount;
-    const { count: userCount, error: ue } = await sb.from('profiles').select('*', { count: 'exact', head: true });
-    if (!ue) document.getElementById('statUsers').textContent = userCount;
-}
-
-async function updateLikesUI() {
-    if (!currentUser) {
-        document.querySelectorAll('.like-btn').forEach(el => el.style.color = '');
-        return;
-    }
-    const { data, error } = await sb
-        .from('likes')
-        .select('post_id')
-        .eq('user_id', currentUser.id);
-    if (error) return;
-    const likedIds = new Set(data.map(d => d.post_id));
-    document.querySelectorAll('.like-btn').forEach(el => {
-        const postId = el.id.replace('like-btn-', '').replace('-detail', '');
-        el.style.color = likedIds.has(postId) ? '#ef4444' : '';
-    });
-}
-
-function updateBoardNav() {
-    const container = document.getElementById('dynamicBoards');
-    if (!container) return;
-    let html = '';
-    topicsCache.forEach(t => {
-        html += `<button class="board-btn" data-cat="${encodeURIComponent(t.name)}" onclick="setCategory('${encodeURIComponent(t.name)}')">🏷️ ${t.name}</button>`;
-    });
-    container.innerHTML = html;
-}
-
-function updateCategorySelect() {
-    const select = document.getElementById('newCategory');
-    const fixed = ['tech','life','career'];
-    const opts = select.querySelectorAll('option');
-    opts.forEach(o => { if(!fixed.includes(o.value)) o.remove(); });
-    topicsCache.forEach(t => {
-        const opt = document.createElement('option');
-        opt.value = t.name;
-        opt.textContent = '🏷️ ' + t.name;
-        select.appendChild(opt);
-    });
-}
-
-// =============================================================
-// 交互逻辑
-// =============================================================
-function setCategory(cat) {
-    currentCategory = cat;
-    document.querySelectorAll('.board-btn').forEach(b => {
-        b.classList.toggle('active', b.dataset.cat === cat || b.dataset.cat === decodeURIComponent(cat));
-    });
-    const keyword = document.getElementById('searchInput').value.trim();
-    loadPosts(cat, keyword);
-}
-
-function searchPosts() {
-    const keyword = document.getElementById('searchInput').value.trim();
-    loadPosts(currentCategory, keyword);
-}
-
-async function showPost(postId) {
-    const post = postsCache.find(p => p.id === postId);
-    if (!post) { alert('帖子不存在'); return; }
-
-    document.getElementById('postList').style.display = 'none';
-    const area = document.getElementById('detailArea');
-    area.classList.remove('hidden');
-
-    const avatar = post.author_avatar || `https://ui-avatars.com/api/?name=${encodeURIComponent(post.author_name||'U')}&background=6d5bff&color=fff&size=40`;
-
-    area.innerHTML = `
-        <div class="post-content">
-            <button class="back-btn" onclick="backToList()">← 返回列表</button>
-            <h1 style="font-size:1.6rem;">${post.title}</h1>
-            <div class="post-author-info">
-                <img src="${avatar}" alt="${post.author_name||'用户'}" />
-                <span class="author-name">${post.author_name || '匿名'}</span>
-                <span class="post-time">${formatTime(post.created_at)}</span>
-                <span style="margin-left:12px;">👁️ ${post.views || 0}</span>
-            </div>
-            <div class="post-body">${post.content}</div>
-            <div class="post-actions">
-                <span class="like-btn" onclick="toggleLike('${postId}')" id="like-btn-detail-${postId}">❤️ <span id="like-count-detail-${postId}">${post.likes || 0}</span></span>
-                <span>💬 回复 <span id="reply-count">0</span></span>
-            </div>
-            <hr style="border-color:#333;margin:16px 0;" />
-            <h3 style="margin-bottom:12px;">💬 全部回复</h3>
-            <div id="commentsArea"><p style="color:rgba(255,255,255,0.3);">加载中...</p></div>
-            ${currentUser ? `
-                <div style="margin-top:16px;">
-                    <textarea id="commentInput" rows="3" maxlength="2000" placeholder="写下你的回复..."></textarea>
-                    <button class="btn" onclick="publishComment('${postId}')" id="commentSubmitBtn" style="margin-top:8px;">发表回复</button>
-                </div>
-            ` : '<p style="color:rgba(255,255,255,0.3);margin-top:12px;">登录后即可回复</p>'}
-        </div>
-    `;
-
-    const comments = await loadComments(postId);
-    const areaC = document.getElementById('commentsArea');
-    const replyCount = document.getElementById('reply-count');
-    if (!comments.length) {
-        areaC.innerHTML = '<p style="color:rgba(255,255,255,0.3);">还没有回复，来抢沙发！</p>';
-        if (replyCount) replyCount.textContent = '0';
-    } else {
-        let html = '';
-        for (const c of comments) {
-            const ava = c.user_avatar || `https://ui-avatars.com/api/?name=${encodeURIComponent(c.username||'U')}&background=6d5bff&color=fff&size=28`;
-            html += `<div class="reply-item">
-                        <div class="reply-author-info">
-                            <img src="${ava}" alt="${c.username||'用户'}" />
-                            <span class="reply-author">${c.username || '用户'}</span>
-                            <span class="reply-time">${formatTime(c.created_at)}</span>
-                        </div>
-                        <div class="reply-content">${c.content}</div>
-                    </div>`;
+        const comments = await loadComments(postId);
+        const areaC = document.getElementById('commentsArea');
+        const replyCount = document.getElementById('reply-count');
+        if (!comments.length) {
+            areaC.innerHTML = '<p style="color:rgba(255,255,255,0.3);">还没有回复，来抢沙发！</p>';
+            if (replyCount) replyCount.textContent = '0';
+        } else {
+            let html = '';
+            for (const c of comments) {
+                const ava = c.user_avatar || `https://ui-avatars.com/api/?name=${encodeURIComponent(c.username||'U')}&background=6d5bff&color=fff&size=28`;
+                html += `<div class="reply-item">
+                            <div class="reply-author-info">
+                                <img src="${ava}" alt="${c.username||'用户'}" />
+                                <span class="reply-author">${c.username || '用户'}</span>
+                                <span class="reply-time">${formatTime(c.created_at)}</span>
+                            </div>
+                            <div class="reply-content">${c.content}</div>
+                        </div>`;
+            }
+            areaC.innerHTML = html;
+            if (replyCount) replyCount.textContent = comments.length;
         }
-        areaC.innerHTML = html;
-        if (replyCount) replyCount.textContent = comments.length;
-    }
-    updateLikesUI();
-    window.scrollTo({ top: 0 });
-}
+        updateLikesUI();
+        window.scrollTo({ top: 0 });
+    };
 
-function backToList() {
-    document.getElementById('postList').style.display = 'block';
-    document.getElementById('detailArea').classList.add('hidden');
-    document.getElementById('detailArea').innerHTML = '';
-    loadPosts(currentCategory);
-}
-
-function togglePublish() {
-    const form = document.getElementById('publishForm');
-    form.style.display = form.style.display === 'none' ? 'block' : 'none';
-}
-
-async function publishPost() {
-    if (isSubmitting) { alert('请勿重复提交'); return; }
-    const now = Date.now();
-    if (now - lastSubmitTime < 10000) { alert('操作频繁，请等待10秒'); return; }
-    if (!currentUser) { alert('请先登录'); return; }
-    const title = document.getElementById('newTitle').value.trim();
-    const content = document.getElementById('newContent').value.trim();
-    const excerpt = document.getElementById('newExcerpt').value.trim();
-    const category = document.getElementById('newCategory').value;
-    if (!title) { alert('请输入标题'); return; }
-    if (title.length > 100) { alert('标题不能超过100字符'); return; }
-    if (!content) { alert('请输入正文'); return; }
-    if (content.length > 50000) { alert('正文过长'); return; }
-
-    isSubmitting = true; lastSubmitTime = now;
-    const btn = document.getElementById('publishBtn');
-    if (btn) btn.disabled = true;
-
-    try {
-        const avatar = userProfile?.avatar_url || `https://ui-avatars.com/api/?name=${encodeURIComponent(currentUser.email)}&background=6d5bff&color=fff&size=100`;
-        const { error } = await sb.from('posts').insert({
-            title,
-            content,
-            excerpt,
-            category,
-            author_id: currentUser.id,
-            author_name: currentUser.email,
-            author_avatar: avatar,
-            views: 0,
-            likes: 0
-        });
-        if (error) throw error;
-        alert('发帖成功！🎉');
-        document.getElementById('newTitle').value = '';
-        document.getElementById('newContent').value = '';
-        document.getElementById('newExcerpt').value = '';
-        document.getElementById('publishForm').style.display = 'none';
+    window.backToList = function() {
+        document.getElementById('postList').style.display = 'block';
+        document.getElementById('detailArea').classList.add('hidden');
+        document.getElementById('detailArea').innerHTML = '';
         loadPosts(currentCategory);
-    } catch(e) {
-        alert('发帖失败：' + e.message);
-    } finally {
-        isSubmitting = false;
-        if (btn) btn.disabled = false;
-    }
-}
+    };
 
-async function publishComment(postId) {
-    if (isSubmitting) { alert('请勿重复提交'); return; }
-    const now = Date.now();
-    if (now - lastSubmitTime < 5000) { alert('操作频繁，请等待5秒'); return; }
-    const input = document.getElementById('commentInput');
-    if (!input) return;
-    const content = input.value.trim();
-    if (!content) { alert('请输入回复内容'); return; }
-    if (content.length > 2000) { alert('回复不能超过2000字符'); return; }
-    if (!currentUser) { alert('请先登录'); return; }
+    window.togglePublish = function() {
+        const form = document.getElementById('publishForm');
+        form.style.display = form.style.display === 'none' ? 'block' : 'none';
+    };
 
-    isSubmitting = true; lastSubmitTime = now;
-    const btn = document.getElementById('commentSubmitBtn');
-    if (btn) btn.disabled = true;
+    window.publishPost = async function() {
+        if (isSubmitting) { alert('请勿重复提交'); return; }
+        const now = Date.now();
+        if (now - lastSubmitTime < 10000) { alert('操作频繁，请等待10秒'); return; }
+        if (!currentUser) { alert('请先登录'); return; }
+        const title = document.getElementById('newTitle').value.trim();
+        const content = document.getElementById('newContent').value.trim();
+        const excerpt = document.getElementById('newExcerpt').value.trim();
+        const category = document.getElementById('newCategory').value;
+        if (!title) { alert('请输入标题'); return; }
+        if (title.length > 100) { alert('标题不能超过100字符'); return; }
+        if (!content) { alert('请输入正文'); return; }
+        if (content.length > 50000) { alert('正文过长'); return; }
 
-    try {
-        await sb.from('comments').insert({
-            post_id: postId,
-            user_id: currentUser.id,
-            username: currentUser.email,
-            user_avatar: userProfile?.avatar_url || null,
-            content
-        });
-        input.value = '';
-        showPost(postId);
-        alert('回复成功！');
-    } catch(e) {
-        alert('回复失败：' + e.message);
-    } finally {
-        isSubmitting = false;
-        if (btn) btn.disabled = false;
-    }
-}
+        isSubmitting = true; lastSubmitTime = now;
+        const btn = document.getElementById('publishBtn');
+        if (btn) btn.disabled = true;
 
-async function loadComments(postId) {
-    const { data, error } = await sb.from('comments')
-        .select('*')
-        .eq('post_id', postId)
-        .order('created_at', { ascending: true });
-    if (error) {
-        console.error('加载评论失败:', error);
-        return [];
-    }
-    return data || [];
-}
-
-async function toggleLike(postId) {
-    if (!currentUser) { alert('请先登录'); return; }
-    const { data: existing, error: checkError } = await sb
-        .from('likes')
-        .select('id')
-        .eq('user_id', currentUser.id)
-        .eq('post_id', postId)
-        .maybeSingle();
-    if (checkError) throw checkError;
-
-    if (existing) {
-        const { error } = await sb.from('likes').delete().eq('id', existing.id);
-        if (error) throw error;
-        const post = postsCache.find(p => p.id === postId);
-        if (post) {
-            post.likes = Math.max((post.likes || 0) - 1, 0);
-            await sb.from('posts').update({ likes: post.likes }).eq('id', postId);
+        try {
+            const avatar = userProfile?.avatar_url || `https://ui-avatars.com/api/?name=${encodeURIComponent(currentUser.email)}&background=6d5bff&color=fff&size=100`;
+            const { error } = await sb.from('posts').insert({
+                title,
+                content,
+                excerpt,
+                category,
+                author_id: currentUser.id,
+                author_name: currentUser.email,
+                author_avatar: avatar,
+                views: 0,
+                likes: 0
+            });
+            if (error) throw error;
+            alert('发帖成功！🎉');
+            document.getElementById('newTitle').value = '';
+            document.getElementById('newContent').value = '';
+            document.getElementById('newExcerpt').value = '';
+            document.getElementById('publishForm').style.display = 'none';
+            loadPosts(currentCategory);
+        } catch(e) {
+            alert('发帖失败：' + e.message);
+        } finally {
+            isSubmitting = false;
+            if (btn) btn.disabled = false;
         }
-    } else {
-        const { error } = await sb.from('likes').insert({
-            user_id: currentUser.id,
-            post_id: postId
-        });
-        if (error) throw error;
-        const post = postsCache.find(p => p.id === postId);
-        if (post) {
-            post.likes = (post.likes || 0) + 1;
-            await sb.from('posts').update({ likes: post.likes }).eq('id', postId);
+    };
+
+    window.publishComment = async function(postId) {
+        if (isSubmitting) { alert('请勿重复提交'); return; }
+        const now = Date.now();
+        if (now - lastSubmitTime < 5000) { alert('操作频繁，请等待5秒'); return; }
+        const input = document.getElementById('commentInput');
+        if (!input) return;
+        const content = input.value.trim();
+        if (!content) { alert('请输入回复内容'); return; }
+        if (content.length > 2000) { alert('回复不能超过2000字符'); return; }
+        if (!currentUser) { alert('请先登录'); return; }
+
+        isSubmitting = true; lastSubmitTime = now;
+        const btn = document.getElementById('commentSubmitBtn');
+        if (btn) btn.disabled = true;
+
+        try {
+            await sb.from('comments').insert({
+                post_id: postId,
+                user_id: currentUser.id,
+                username: currentUser.email,
+                user_avatar: userProfile?.avatar_url || null,
+                content
+            });
+            input.value = '';
+            window.showPost(postId);
+            alert('回复成功！');
+        } catch(e) {
+            alert('回复失败：' + e.message);
+        } finally {
+            isSubmitting = false;
+            if (btn) btn.disabled = false;
         }
+    };
+
+    async function loadComments(postId) {
+        const { data, error } = await sb.from('comments')
+            .select('*')
+            .eq('post_id', postId)
+            .order('created_at', { ascending: true });
+        if (error) {
+            console.error('加载评论失败:', error);
+            return [];
+        }
+        return data || [];
     }
-    await updateLikesUI();
-    renderHotList(postsCache);
-}
 
-// =============================================================
-// 个人中心
-// =============================================================
-function openProfile() {
-    if (!currentUser) { alert('请先登录'); return; }
-    document.getElementById('profileModal').classList.add('active');
-    document.getElementById('profileNameInput').value = userProfile?.username || '';
-    document.getElementById('profileAvatarPreview').src = getAvatarUrl(userProfile || currentUser);
-    document.getElementById('profileMsg').innerHTML = '';
-}
-function closeProfile() { document.getElementById('profileModal').classList.remove('active'); }
+    window.toggleLike = async function(postId) {
+        if (!currentUser) { alert('请先登录'); return; }
+        const { data: existing, error: checkError } = await sb
+            .from('likes')
+            .select('id')
+            .eq('user_id', currentUser.id)
+            .eq('post_id', postId)
+            .maybeSingle();
+        if (checkError) throw checkError;
 
-async function uploadAvatar(event) {
-    const file = event.target.files[0];
-    if (!file) return;
-    if (!currentUser) { alert('请先登录'); return; }
-    if (file.size > 2 * 1024 * 1024) { alert('图片大小不能超过2MB'); return; }
+        if (existing) {
+            const { error } = await sb.from('likes').delete().eq('id', existing.id);
+            if (error) throw error;
+            const post = postsCache.find(p => p.id === postId);
+            if (post) {
+                post.likes = Math.max((post.likes || 0) - 1, 0);
+                await sb.from('posts').update({ likes: post.likes }).eq('id', postId);
+            }
+        } else {
+            const { error } = await sb.from('likes').insert({
+                user_id: currentUser.id,
+                post_id: postId
+            });
+            if (error) throw error;
+            const post = postsCache.find(p => p.id === postId);
+            if (post) {
+                post.likes = (post.likes || 0) + 1;
+                await sb.from('posts').update({ likes: post.likes }).eq('id', postId);
+            }
+        }
+        await updateLikesUI();
+        renderHotList(postsCache);
+    };
 
-    const msg = document.getElementById('profileMsg');
-    msg.innerHTML = '<p style="color:rgba(255,255,255,0.5);">上传中...</p>';
+    // ========== 个人中心 ==========
+    window.openProfile = function() {
+        if (!currentUser) { alert('请先登录'); return; }
+        document.getElementById('profileModal').classList.add('active');
+        document.getElementById('profileNameInput').value = userProfile?.username || '';
+        document.getElementById('profileAvatarPreview').src = getAvatarUrl(userProfile || currentUser);
+        document.getElementById('profileMsg').innerHTML = '';
+    };
+    window.closeProfile = function() {
+        document.getElementById('profileModal').classList.remove('active');
+    };
 
-    const fileExt = file.name.split('.').pop();
-    const fileName = `${currentUser.id}.${fileExt}`;
-    const { data, error: uploadError } = await sb.storage
-        .from('avatars')
-        .upload(fileName, file, { upsert: true });
-    if (uploadError) {
-        msg.innerHTML = '<p style="color:#ef4444;">上传失败：' + uploadError.message + '</p>';
-        return;
-    }
-    const { data: urlData } = sb.storage.from('avatars').getPublicUrl(fileName);
-    const avatarUrl = urlData.publicUrl;
+    window.uploadAvatar = async function(event) {
+        const file = event.target.files[0];
+        if (!file) return;
+        if (!currentUser) { alert('请先登录'); return; }
+        if (file.size > 2 * 1024 * 1024) { alert('图片大小不能超过2MB'); return; }
 
-    const { error: updateError } = await sb
-        .from('profiles')
-        .update({ avatar_url: avatarUrl })
-        .eq('id', currentUser.id);
-    if (updateError) {
-        msg.innerHTML = '<p style="color:#ef4444;">更新失败：' + updateError.message + '</p>';
-        return;
-    }
-    userProfile.avatar_url = avatarUrl;
-    document.getElementById('profileAvatarPreview').src = avatarUrl;
-    document.getElementById('userAvatar').src = avatarUrl;
-    msg.innerHTML = '<p style="color:#6ee7b7;">✅ 头像上传成功！</p>';
-}
+        const msg = document.getElementById('profileMsg');
+        msg.innerHTML = '<p style="color:rgba(255,255,255,0.5);">上传中...</p>';
 
-async function saveProfile() {
-    const newName = document.getElementById('profileNameInput').value.trim();
-    const msg = document.getElementById('profileMsg');
-    if (!newName) { msg.innerHTML = '<p style="color:#ef4444;">昵称不能为空</p>'; return; }
-    if (newName.length > 30) { msg.innerHTML = '<p style="color:#ef4444;">昵称不能超过30字符</p>'; return; }
-    try {
-        const { error } = await sb
+        const fileExt = file.name.split('.').pop();
+        const fileName = `${currentUser.id}.${fileExt}`;
+        const { data, error: uploadError } = await sb.storage
+            .from('avatars')
+            .upload(fileName, file, { upsert: true });
+        if (uploadError) {
+            msg.innerHTML = '<p style="color:#ef4444;">上传失败：' + uploadError.message + '</p>';
+            return;
+        }
+        const { data: urlData } = sb.storage.from('avatars').getPublicUrl(fileName);
+        const avatarUrl = urlData.publicUrl;
+
+        const { error: updateError } = await sb
             .from('profiles')
-            .update({ username: newName })
+            .update({ avatar_url: avatarUrl })
             .eq('id', currentUser.id);
-        if (error) throw error;
-        userProfile.username = newName;
-        document.getElementById('userName').textContent = newName;
-        msg.innerHTML = '<p style="color:#6ee7b7;">✅ 昵称修改成功！</p>';
-        loadPosts(currentCategory);
-    } catch(e) {
-        msg.innerHTML = '<p style="color:#ef4444;">修改失败：' + e.message + '</p>';
-    }
-}
+        if (updateError) {
+            msg.innerHTML = '<p style="color:#ef4444;">更新失败：' + updateError.message + '</p>';
+            return;
+        }
+        userProfile.avatar_url = avatarUrl;
+        document.getElementById('profileAvatarPreview').src = avatarUrl;
+        document.getElementById('userAvatar').src = avatarUrl;
+        msg.innerHTML = '<p style="color:#6ee7b7;">✅ 头像上传成功！</p>';
+    };
 
-// =============================================================
-// 版块管理
-// =============================================================
-function openNewTopic() {
-    document.getElementById('topicModal').classList.add('active');
-    document.getElementById('newTopicName').value = '';
-    document.getElementById('topicMsg').innerHTML = '';
-}
-function closeTopicModal() { document.getElementById('topicModal').classList.remove('active'); }
+    window.saveProfile = async function() {
+        const newName = document.getElementById('profileNameInput').value.trim();
+        const msg = document.getElementById('profileMsg');
+        if (!newName) { msg.innerHTML = '<p style="color:#ef4444;">昵称不能为空</p>'; return; }
+        if (newName.length > 30) { msg.innerHTML = '<p style="color:#ef4444;">昵称不能超过30字符</p>'; return; }
+        try {
+            const { error } = await sb
+                .from('profiles')
+                .update({ username: newName })
+                .eq('id', currentUser.id);
+            if (error) throw error;
+            userProfile.username = newName;
+            document.getElementById('userName').textContent = newName;
+            msg.innerHTML = '<p style="color:#6ee7b7;">✅ 昵称修改成功！</p>';
+            loadPosts(currentCategory);
+        } catch(e) {
+            msg.innerHTML = '<p style="color:#ef4444;">修改失败：' + e.message + '</p>';
+        }
+    };
 
-async function createTopic() {
-    const name = document.getElementById('newTopicName').value.trim();
-    const msg = document.getElementById('topicMsg');
-    if (!name) { msg.innerHTML = '<p style="color:#ef4444;">请输入版块名称</p>'; return; }
-    if (name.length > 30) { msg.innerHTML = '<p style="color:#ef4444;">名称不能超过30字符</p>'; return; }
-    if (topicsCache.some(t => t.name === name)) { msg.innerHTML = '<p style="color:#ef4444;">该版块已存在</p>'; return; }
-    try {
-        await createTopic(name);
-        msg.innerHTML = '<p style="color:#6ee7b7;">✅ 版块创建成功！</p>';
+    // ========== 版块管理 ==========
+    window.openNewTopic = function() {
+        document.getElementById('topicModal').classList.add('active');
         document.getElementById('newTopicName').value = '';
-        setTimeout(closeTopicModal, 1000);
-    } catch(e) { msg.innerHTML = '<p style="color:#ef4444;">创建失败：'+e.message+'</p>'; }
-}
+        document.getElementById('topicMsg').innerHTML = '';
+    };
+    window.closeTopicModal = function() {
+        document.getElementById('topicModal').classList.remove('active');
+    };
 
-// =============================================================
-// 主题切换
-// =============================================================
-function toggleTheme() {
-    const body = document.body;
-    const btn = document.getElementById('themeToggle');
-    const isLight = body.style.background === '#f0f2f8';
-    if (isLight) {
-        body.style.background = '#0b0e1a';
-        body.style.color = '#e8edf5';
-        btn.textContent = '🌙';
-        document.querySelectorAll('.post-card, .publish-form, .post-content, .modal-box').forEach(el => {
-            el.style.background = 'rgba(255,255,255,0.04)';
-        });
-    } else {
-        body.style.background = '#f0f2f8';
-        body.style.color = '#1a1a2e';
-        btn.textContent = '☀️';
-        document.querySelectorAll('.post-card, .publish-form, .post-content, .modal-box').forEach(el => {
-            el.style.background = 'rgba(255,255,255,0.7)';
-        });
-    }
-}
+    window.createTopic = async function() {
+        const name = document.getElementById('newTopicName').value.trim();
+        const msg = document.getElementById('topicMsg');
+        if (!name) { msg.innerHTML = '<p style="color:#ef4444;">请输入版块名称</p>'; return; }
+        if (name.length > 30) { msg.innerHTML = '<p style="color:#ef4444;">名称不能超过30字符</p>'; return; }
+        if (topicsCache.some(t => t.name === name)) { msg.innerHTML = '<p style="color:#ef4444;">该版块已存在</p>'; return; }
+        try {
+            await createTopic(name);
+            msg.innerHTML = '<p style="color:#6ee7b7;">✅ 版块创建成功！</p>';
+            document.getElementById('newTopicName').value = '';
+            setTimeout(window.closeTopicModal, 1000);
+        } catch(e) { msg.innerHTML = '<p style="color:#ef4444;">创建失败：'+e.message+'</p>'; }
+    };
 
-// =============================================================
-// 管理员判断
-// =============================================================
-async function checkAdmin(userId) {
-    if (!userId) return false;
-    const { data, error } = await sb
-        .from('profiles')
-        .select('is_admin')
-        .eq('id', userId)
-        .single();
-    if (error) return false;
-    return data?.is_admin === true;
-}
+    // ========== 主题切换 ==========
+    window.toggleTheme = function() {
+        const body = document.body;
+        const btn = document.getElementById('themeToggle');
+        const isLight = body.style.background === '#f0f2f8';
+        if (isLight) {
+            body.style.background = '#0b0e1a';
+            body.style.color = '#e8edf5';
+            btn.textContent = '🌙';
+            document.querySelectorAll('.post-card, .publish-form, .post-content, .modal-box').forEach(el => {
+                el.style.background = 'rgba(255,255,255,0.04)';
+            });
+        } else {
+            body.style.background = '#f0f2f8';
+            body.style.color = '#1a1a2e';
+            btn.textContent = '☀️';
+            document.querySelectorAll('.post-card, .publish-form, .post-content, .modal-box').forEach(el => {
+                el.style.background = 'rgba(255,255,255,0.7)';
+            });
+        }
+    };
 
-// =============================================================
-// 初始化
-// =============================================================
-window.onload = async function() {
+    // ========== 认证状态监听 ==========
     sb.auth.onAuthStateChange(async (event, session) => {
         currentUser = session?.user || null;
         const loginBtn = document.getElementById('loginBtn');
@@ -964,36 +934,13 @@ window.onload = async function() {
         loadPosts(currentCategory);
     });
 
-    await loadTopics();
-    loadPosts('all', '');
-};
+    // ========== 初始化 ==========
+    document.addEventListener('DOMContentLoaded', async function() {
+        await loadTopics();
+        loadPosts('all', '');
+    });
 
-// =============================================================
-// 暴露全局（让 onclick 能调用）
-// =============================================================
-window.openModal = openModal;
-window.closeModal = closeModal;
-window.switchTab = switchTab;
-window.handleLogin = handleLogin;
-window.handleRegister = handleRegister;
-window.handleSocialLogin = handleSocialLogin;
-window.logout = logout;
-window.setCategory = setCategory;
-window.searchPosts = searchPosts;
-window.showPost = showPost;
-window.backToList = backToList;
-window.togglePublish = togglePublish;
-window.publishPost = publishPost;
-window.publishComment = publishComment;
-window.toggleLike = toggleLike;
-window.openNewTopic = openNewTopic;
-window.closeTopicModal = closeTopicModal;
-window.createTopic = createTopic;
-window.toggleTheme = toggleTheme;
-window.openProfile = openProfile;
-window.closeProfile = closeProfile;
-window.uploadAvatar = uploadAvatar;
-window.saveProfile = saveProfile;
+})(); // 结束 IIFE
 </script>
 </body>
 </html>
