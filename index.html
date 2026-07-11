@@ -10,8 +10,8 @@
         .container { max-width: 900px; margin: 0 auto; }
         header { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; margin-bottom: 20px; }
         h1 { background: linear-gradient(135deg, #c4b5fd, #818cf8); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
-        .btn { background: linear-gradient(135deg, #6d5bff, #8b5cf6); color: #fff; border: none; padding: 6px 18px; border-radius: 30px; cursor: pointer; }
-        .btn-outline { background: transparent; border: 1px solid #444; }
+        .btn { background: linear-gradient(135deg, #6d5bff, #8b5cf6); color: #fff; border: none; padding: 6px 18px; border-radius: 30px; cursor: pointer; font-size: 0.9rem; }
+        .btn:hover { transform: scale(1.04); }
         .auth-section { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
         .hidden { display: none !important; }
         .post-card { background: rgba(255,255,255,0.04); border-radius: 12px; padding: 16px; margin-bottom: 12px; border: 1px solid rgba(255,255,255,0.06); }
@@ -21,28 +21,34 @@
         .post-card .excerpt { color: rgba(255,255,255,0.5); }
         .post-card .footer { display: flex; gap: 16px; margin-top: 8px; font-size: 0.8rem; color: rgba(255,255,255,0.3); }
         .publish-form { display: none; background: rgba(255,255,255,0.04); padding: 16px; border-radius: 12px; margin: 12px 0; }
-        .publish-form input, .publish-form textarea, .publish-form select { width: 100%; padding: 8px; border-radius: 8px; border: 1px solid #444; background: rgba(255,255,255,0.05); color: #fff; margin: 4px 0; font-family: inherit; }
+        .publish-form input, .publish-form textarea, .publish-form select { width: 100%; padding: 8px 12px; border-radius: 8px; border: 1px solid #444; background: rgba(255,255,255,0.05); color: #fff; margin: 4px 0; font-family: inherit; font-size: 0.95rem; }
+        .publish-form input:focus, .publish-form textarea:focus { outline: none; border-color: #6d5bff; }
         .modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.7); backdrop-filter: blur(4px); justify-content: center; align-items: center; z-index: 999; }
         .modal.active { display: flex; }
-        .modal-box { background: #1a1a2e; padding: 30px; border-radius: 16px; max-width: 400px; width: 100%; }
+        .modal-box { background: #1a1a2e; padding: 30px; border-radius: 16px; max-width: 400px; width: 90%; }
         .modal-box .close { float: right; font-size: 24px; cursor: pointer; color: #888; }
-        .modal-box input { width: 100%; padding: 8px; border-radius: 8px; border: 1px solid #444; background: rgba(255,255,255,0.05); color: #fff; margin: 6px 0; }
+        .modal-box .close:hover { color: #fff; }
+        .modal-box input { width: 100%; padding: 8px 12px; border-radius: 8px; border: 1px solid #444; background: rgba(255,255,255,0.05); color: #fff; margin: 6px 0; font-size: 0.95rem; }
+        .modal-box input:focus { outline: none; border-color: #6d5bff; }
         .modal-tabs { display: flex; gap: 8px; border-bottom: 1px solid #333; margin-bottom: 16px; }
-        .modal-tabs button { flex: 1; background: none; border: none; color: rgba(255,255,255,0.4); padding: 8px; cursor: pointer; border-bottom: 2px solid transparent; }
+        .modal-tabs button { flex: 1; background: none; border: none; color: rgba(255,255,255,0.4); padding: 8px; cursor: pointer; border-bottom: 2px solid transparent; font-size: 0.95rem; }
         .modal-tabs button.active { color: #fff; border-bottom-color: #6d5bff; }
         .auth-form { display: none; flex-direction: column; gap: 12px; }
         .auth-form.active { display: flex; }
         .empty-state { text-align: center; padding: 40px; color: rgba(255,255,255,0.3); }
+        .empty-state .btn { margin-top: 12px; }
         footer { margin-top: 30px; padding: 16px; text-align: center; border-top: 1px solid rgba(255,255,255,0.04); color: rgba(255,255,255,0.2); font-size: 0.8rem; }
         .user-avatar { width: 32px; height: 32px; border-radius: 50%; border: 2px solid rgba(255,255,255,0.1); object-fit: cover; }
-        .badge { padding: 2px 10px; border-radius: 30px; font-size: 0.7rem; background: rgba(255,255,255,0.06); }
+        .badge { padding: 2px 10px; border-radius: 30px; font-size: 0.65rem; background: rgba(255,255,255,0.06); }
         .badge.tech { background: rgba(96,165,250,0.15); color: #93bbfc; }
         .badge.life { background: rgba(52,211,153,0.12); color: #6ee7b7; }
         .badge.career { background: rgba(251,191,36,0.12); color: #fcd34d; }
         .badge.topic { background: rgba(251,191,36,0.15); color: #fcd34d; }
         .toast { position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); background: #1a1a2e; padding: 12px 24px; border-radius: 8px; border: 1px solid #444; z-index: 1000; display: none; max-width: 90%; }
         .toast.show { display: block; animation: fadeIn 0.3s; }
+        .toast.error { border-color: #ef4444; }
         @keyframes fadeIn { from { opacity: 0; transform: translateX(-50%) translateY(20px); } to { opacity: 1; transform: translateX(-50%) translateY(0); } }
+        @media (max-width: 640px) { .container { padding: 0; } header { flex-direction: column; align-items: stretch; } .auth-section { justify-content: center; } }
     </style>
 </head>
 <body>
@@ -98,15 +104,13 @@
         </div>
     </div>
 
-    <!-- Toast 通知 -->
     <div class="toast" id="toast"></div>
-
     <footer>© 2026 窍某论坛</footer>
 </div>
 
 <script>
 // =============================================================
-// 配置（与之前相同）
+// 配置
 // =============================================================
 const SUPABASE_URL = 'https://bkvsceiezbyexzqpvblj.supabase.co';
 const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJrdnNjZWllemJ5ZXh6cXB2YmxqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODM3MDk1MzIsImV4cCI6MjA5OTI4NTUzMn0.1h4Yp8YaJdMMOQW8N2zqvJi6QrxHPncBFMK9LjdmZ6E';
@@ -136,17 +140,11 @@ function getAvatarUrl(user) {
 function showToast(msg, isError = false) {
     const t = document.getElementById('toast');
     t.textContent = msg;
-    t.style.borderColor = isError ? '#ef4444' : '#444';
-    t.style.display = 'block';
+    t.className = 'toast show' + (isError ? ' error' : '');
     clearTimeout(t._hide);
-    t._hide = setTimeout(() => { t.style.display = 'none'; }, 4000);
+    t._hide = setTimeout(() => { t.className = 'toast'; }, 4000);
 }
 
-// =============================================================
-// 核心 API 封装（直接用 fetch）
-// =============================================================
-
-// 获取 headers
 function getHeaders(includeAuth = true) {
     const headers = {
         'apikey': SUPABASE_ANON_KEY,
@@ -158,7 +156,9 @@ function getHeaders(includeAuth = true) {
     return headers;
 }
 
-// 登录 API
+// =============================================================
+// API
+// =============================================================
 async function signIn(email, password) {
     const resp = await fetch(SUPABASE_URL + '/auth/v1/token?grant_type=password', {
         method: 'POST',
@@ -170,7 +170,6 @@ async function signIn(email, password) {
     return data;
 }
 
-// 注册 API
 async function signUp(email, password, username) {
     const resp = await fetch(SUPABASE_URL + '/auth/v1/signup', {
         method: 'POST',
@@ -182,17 +181,6 @@ async function signUp(email, password, username) {
     return data;
 }
 
-// 获取用户信息
-async function getUser() {
-    if (!accessToken) return null;
-    const resp = await fetch(SUPABASE_URL + '/auth/v1/user', {
-        headers: getHeaders(true)
-    });
-    if (!resp.ok) return null;
-    return await resp.json();
-}
-
-// 获取 profiles
 async function getProfile(userId) {
     const resp = await fetch(SUPABASE_URL + '/rest/v1/profiles?id=eq.' + userId, {
         headers: getHeaders(true)
@@ -202,18 +190,6 @@ async function getProfile(userId) {
     return data && data.length > 0 ? data[0] : null;
 }
 
-// 更新 profiles
-async function updateProfile(userId, updates) {
-    const resp = await fetch(SUPABASE_URL + '/rest/v1/profiles?id=eq.' + userId, {
-        method: 'PATCH',
-        headers: getHeaders(true),
-        body: JSON.stringify(updates)
-    });
-    if (!resp.ok) throw new Error('更新资料失败');
-    return await resp.json();
-}
-
-// 插入 profiles
 async function insertProfile(data) {
     const resp = await fetch(SUPABASE_URL + '/rest/v1/profiles', {
         method: 'POST',
@@ -224,16 +200,14 @@ async function insertProfile(data) {
     return await resp.json();
 }
 
-// 获取帖子列表
 async function fetchPosts() {
     const resp = await fetch(SUPABASE_URL + '/rest/v1/posts?order=created_at.desc', {
-        headers: getHeaders(false)  // 帖子读取不需要登录
+        headers: getHeaders(false)
     });
     if (!resp.ok) throw new Error('加载帖子失败');
     return await resp.json();
 }
 
-// 发布帖子
 async function createPost(data) {
     const resp = await fetch(SUPABASE_URL + '/rest/v1/posts', {
         method: 'POST',
@@ -244,7 +218,6 @@ async function createPost(data) {
     return await resp.json();
 }
 
-// 登出
 async function signOut() {
     if (!accessToken) return;
     try {
@@ -261,7 +234,7 @@ async function signOut() {
 }
 
 // =============================================================
-// 认证函数
+// 认证
 // =============================================================
 async function handleLogin(e) {
     e.preventDefault();
@@ -274,7 +247,6 @@ async function handleLogin(e) {
         currentUser = data.user;
         localStorage.setItem('sb_token', accessToken);
         localStorage.setItem('sb_user', JSON.stringify(currentUser));
-        // 获取 profile
         userProfile = await getProfile(currentUser.id);
         closeModal();
         document.getElementById('loginEmail').value = '';
@@ -296,12 +268,10 @@ async function handleRegister(e) {
     if (pass.length < 6) { showToast('密码至少6位', true); return; }
     try {
         const data = await signUp(email, pass, name);
-        // 注册成功后自动登录
         accessToken = data.access_token;
         currentUser = data.user;
         localStorage.setItem('sb_token', accessToken);
         localStorage.setItem('sb_user', JSON.stringify(currentUser));
-        // 创建 profile
         await insertProfile({
             id: currentUser.id,
             username: name,
@@ -326,7 +296,7 @@ async function logout() {
 }
 
 // =============================================================
-// UI 更新
+// UI
 // =============================================================
 function updateUI() {
     const loginBtn = document.getElementById('loginBtn');
@@ -335,16 +305,11 @@ function updateUI() {
     const logoutBtn = document.getElementById('logoutBtn');
     const adminLink = document.getElementById('adminLink');
 
-    // 从 localStorage 恢复会话
     if (!currentUser && localStorage.getItem('sb_token')) {
-        const token = localStorage.getItem('sb_token');
-        const userStr = localStorage.getItem('sb_user');
-        if (token && userStr) {
-            accessToken = token;
-            try {
-                currentUser = JSON.parse(userStr);
-            } catch(e) {}
-        }
+        accessToken = localStorage.getItem('sb_token');
+        try {
+            currentUser = JSON.parse(localStorage.getItem('sb_user'));
+        } catch(e) {}
     }
 
     if (currentUser && accessToken) {
@@ -354,11 +319,7 @@ function updateUI() {
         logoutBtn.style.display = 'inline-block';
         avatar.src = getAvatarUrl(userProfile || currentUser);
         nameEl.textContent = userProfile?.username || currentUser.email;
-        if (userProfile?.is_admin) {
-            adminLink.style.display = 'inline-block';
-        } else {
-            adminLink.style.display = 'none';
-        }
+        adminLink.style.display = userProfile?.is_admin ? 'inline-block' : 'none';
     } else {
         loginBtn.style.display = 'inline-block';
         avatar.classList.add('hidden');
@@ -369,7 +330,7 @@ function updateUI() {
 }
 
 // =============================================================
-// 帖子操作
+// 帖子
 // =============================================================
 async function loadPosts() {
     const list = document.getElementById('postList');
@@ -379,11 +340,7 @@ async function loadPosts() {
         postsCache = data || [];
         renderPosts(postsCache);
     } catch(err) {
-        list.innerHTML = '<div class="empty-state">❌ ' + err.message + '</div>';
-        // 如果是网络错误，显示重试按钮
-        if (err.message.includes('fetch')) {
-            list.innerHTML += '<button class="btn" onclick="loadPosts()" style="margin-top:12px;">🔄 重试</button>';
-        }
+        list.innerHTML = '<div class="empty-state">❌ ' + err.message + '<br><button class="btn" onclick="loadPosts()">🔄 重试</button></div>';
     }
 }
 
@@ -436,18 +393,14 @@ async function publishPost() {
     const content = document.getElementById('newContent').value.trim();
     const category = document.getElementById('newCategory').value;
     if (!title || !content) { showToast('请填写标题和内容', true); return; }
-
     try {
         const avatar = userProfile?.avatar_url || `https://ui-avatars.com/api/?name=${encodeURIComponent(currentUser.email)}&background=6d5bff&color=fff&size=100`;
         await createPost({
-            title,
-            content,
-            category,
+            title, content, category,
             author_id: currentUser.id,
             author_name: currentUser.email,
             author_avatar: avatar,
-            likes: 0,
-            views: 0
+            likes: 0, views: 0
         });
         showToast('发帖成功！🎉');
         document.getElementById('newTitle').value = '';
@@ -486,26 +439,18 @@ function switchTab(tab) {
 // 初始化
 // =============================================================
 function init() {
-    // 从 localStorage 恢复会话
     const token = localStorage.getItem('sb_token');
     const userStr = localStorage.getItem('sb_user');
     if (token && userStr) {
         accessToken = token;
-        try {
-            currentUser = JSON.parse(userStr);
-        } catch(e) {}
+        try { currentUser = JSON.parse(userStr); } catch(e) {}
     }
-
-    // 如果有用户，获取 profile
     if (currentUser && accessToken) {
         getProfile(currentUser.id).then(profile => {
             userProfile = profile;
             updateUI();
             loadPosts();
-        }).catch(() => {
-            updateUI();
-            loadPosts();
-        });
+        }).catch(() => { updateUI(); loadPosts(); });
     } else {
         updateUI();
         loadPosts();
@@ -524,7 +469,6 @@ window.publishPost = publishPost;
 window.viewPost = viewPost;
 window.loadPosts = loadPosts;
 
-// 启动
 init();
 </script>
 </body>
