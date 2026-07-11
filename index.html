@@ -2,64 +2,325 @@
 <html>
 <head>
     <meta charset="UTF-8">
-    <title>测试</title>
+    <title>窍某论坛</title>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <style>
+        *{margin:0;padding:0;box-sizing:border-box;}
+        body{background:#0b0e1a;color:#e8edf5;font-family:sans-serif;padding:20px;max-width:900px;margin:0 auto;}
+        header{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;margin-bottom:20px;}
+        h1{background:linear-gradient(135deg,#c4b5fd,#818cf8);-webkit-background-clip:text;-webkit-text-fill-color:transparent;}
+        .btn{background:#6d5bff;color:#fff;border:none;padding:6px 18px;border-radius:30px;cursor:pointer;}
+        .btn:hover{transform:scale(1.04);}
+        .post-card{background:rgba(255,255,255,0.04);border-radius:12px;padding:16px;margin-bottom:12px;border:1px solid rgba(255,255,255,0.06);}
+        .post-card .title{font-size:1.2rem;font-weight:600;}
+        .post-card .meta{color:rgba(255,255,255,0.4);font-size:0.8rem;margin:4px 0;}
+        .post-card .content{color:rgba(255,255,255,0.6);}
+        .post-card .actions{display:flex;gap:12px;margin-top:8px;font-size:0.8rem;color:rgba(255,255,255,0.3);}
+        .modal{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.7);backdrop-filter:blur(4px);justify-content:center;align-items:center;z-index:999;}
+        .modal.active{display:flex;}
+        .modal-box{background:#1a1a2e;padding:30px;border-radius:16px;max-width:400px;width:100%;}
+        .modal-box .close{float:right;font-size:24px;cursor:pointer;color:#888;}
+        .modal-box input,.modal-box textarea{width:100%;padding:8px 12px;border-radius:8px;border:1px solid #444;background:rgba(255,255,255,0.05);color:#fff;margin:6px 0;font-family:inherit;}
+        .modal-box textarea{min-height:80px;}
+        .hidden{display:none!important;}
+        .publish-form{background:rgba(255,255,255,0.03);padding:16px;border-radius:12px;margin:12px 0;}
+        .publish-form input,.publish-form textarea{width:100%;padding:8px;border-radius:8px;border:1px solid #444;background:rgba(255,255,255,0.05);color:#fff;margin:4px 0;}
+        .auth-section{display:flex;align-items:center;gap:8px;flex-wrap:wrap;}
+        .user-avatar{width:32px;height:32px;border-radius:50%;border:2px solid rgba(255,255,255,0.1);}
+        .badge{padding:2px 10px;border-radius:30px;font-size:0.7rem;background:rgba(255,255,255,0.06);color:rgba(255,255,255,0.5);}
+        .badge.tech{background:rgba(96,165,250,0.15);color:#93bbfc;}
+        .badge.life{background:rgba(52,211,153,0.12);color:#6ee7b7;}
+        .badge.career{background:rgba(251,191,36,0.12);color:#fcd34d;}
+        .empty{text-align:center;padding:40px;color:rgba(255,255,255,0.3);}
+        footer{margin-top:30px;padding:16px;text-align:center;border-top:1px solid rgba(255,255,255,0.04);color:rgba(255,255,255,0.2);font-size:0.8rem;}
+    </style>
 </head>
 <body>
-    <button onclick="login()">登录</button>
-    <button onclick="load()">加载帖子</button>
-    <div id="result"></div>
 
-    <script>
-        const SUPABASE_URL = 'https://bkvsceiezbyexzqpvblj.supabase.co';
-        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJrdnNjZWllemJ5ZXh6cXB2YmxqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODM3MDk1MzIsImV4cCI6MjA5OTI4NTUzMn0.1h4Yp8YaJdMMOQW8N2zqvJi6QrxHPncBFMK9LjdmZ6E';
-        const sb = supabaseJs.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+<header>
+    <h1>✦ 窍某论坛</h1>
+    <div class="auth-section">
+        <button class="btn" id="loginBtn" onclick="openModal()">登录</button>
+        <img id="userAvatar" class="user-avatar hidden" />
+        <span id="userName" class="hidden" style="color:rgba(255,255,255,0.6);"></span>
+        <button class="btn" id="logoutBtn" onclick="logout()" style="background:#444;display:none;">退出</button>
+        <a id="adminLink" href="admin.html" style="color:rgba(255,255,255,0.5);text-decoration:none;display:none;">⚙️ 管理</a>
+    </div>
+</header>
 
-        async function login() {
-            const email = prompt('邮箱:');
-            const pass = prompt('密码:');
-            const { data, error } = await sb.auth.signInWithPassword({ email, password: pass });
-            if (error) alert('登录失败: ' + error.message);
-            else alert('登录成功: ' + data.user.email);
+<div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:12px;">
+    <button class="btn" onclick="togglePublish()">📝 发帖</button>
+</div>
+
+<div id="publishForm" class="publish-form hidden">
+    <input type="text" id="newTitle" maxlength="100" placeholder="标题" />
+    <select id="newCategory">
+        <option value="tech">💻 科技</option>
+        <option value="life">🌿 生活</option>
+        <option value="career">💼 职场</option>
+    </select>
+    <textarea id="newContent" rows="4" placeholder="正文内容（支持HTML）"></textarea>
+    <button class="btn" onclick="publishPost()">提交</button>
+</div>
+
+<div id="postList"></div>
+
+<!-- 登录模态框 -->
+<div class="modal" id="authModal">
+    <div class="modal-box">
+        <span class="close" onclick="closeModal()">&times;</span>
+        <h2 id="modalTitle">欢迎回来</h2>
+        <div style="display:flex;gap:8px;border-bottom:1px solid #333;margin-bottom:16px;">
+            <button style="flex:1;background:none;border:none;color:#fff;padding:8px;cursor:pointer;border-bottom:2px solid #6d5bff;" onclick="switchTab('login')">登录</button>
+            <button style="flex:1;background:none;border:none;color:rgba(255,255,255,0.4);padding:8px;cursor:pointer;" onclick="switchTab('register')">注册</button>
+        </div>
+        <form id="loginForm" onsubmit="handleLogin(event)">
+            <input type="email" id="loginEmail" placeholder="邮箱" required />
+            <input type="password" id="loginPassword" placeholder="密码" required />
+            <button type="submit" class="btn" style="width:100%;">登录</button>
+        </form>
+        <form id="registerForm" style="display:none;" onsubmit="handleRegister(event)">
+            <input type="text" id="regName" placeholder="昵称" maxlength="30" required />
+            <input type="email" id="regEmail" placeholder="邮箱" required />
+            <input type="password" id="regPassword" placeholder="密码（至少6位）" minlength="6" required />
+            <button type="submit" class="btn" style="width:100%;">注册</button>
+        </form>
+    </div>
+</div>
+
+<footer>
+    <p>© 2026 窍某论坛 · 交流分享</p>
+</footer>
+
+<script>
+// =============================================================
+// Supabase 配置
+// =============================================================
+const SUPABASE_URL = 'https://bkvsceiezbyexzqpvblj.supabase.co';
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJrdnNjZWllemJ5ZXh6cXB2YmxqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODM3MDk1MzIsImV4cCI6MjA5OTI4NTUzMn0.1h4Yp8YaJdMMOQW8N2zqvJi6QrxHPncBFMK9LjdmZ6E';
+
+const supabase = supabaseJs.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+// =============================================================
+// 状态
+// =============================================================
+let currentUser = null;
+let userProfile = null;
+
+// =============================================================
+// 模态框
+// =============================================================
+function openModal() {
+    document.getElementById('authModal').classList.add('active');
+}
+function closeModal() {
+    document.getElementById('authModal').classList.remove('active');
+}
+// 点击外部关闭
+document.getElementById('authModal').addEventListener('click', function(e) {
+    if (e.target === this) closeModal();
+});
+
+function switchTab(tab) {
+    const loginForm = document.getElementById('loginForm');
+    const registerForm = document.getElementById('registerForm');
+    const title = document.getElementById('modalTitle');
+    if (tab === 'login') {
+        loginForm.style.display = 'block';
+        registerForm.style.display = 'none';
+        title.textContent = '欢迎回来';
+    } else {
+        loginForm.style.display = 'none';
+        registerForm.style.display = 'block';
+        title.textContent = '创建账号';
+    }
+    // 切换底部按钮样式
+    const btns = document.querySelectorAll('.modal-box > div > button');
+    btns.forEach(b => b.style.borderBottomColor = 'transparent');
+    if (tab === 'login') btns[0].style.borderBottomColor = '#6d5bff';
+    else btns[1].style.borderBottomColor = '#6d5bff';
+}
+
+// =============================================================
+// 认证
+// =============================================================
+async function handleLogin(e) {
+    e.preventDefault();
+    const email = document.getElementById('loginEmail').value.trim();
+    const pass = document.getElementById('loginPassword').value.trim();
+    if (!email || !pass) { alert('请填写完整'); return; }
+    try {
+        const { data, error } = await supabase.auth.signInWithPassword({ email, password: pass });
+        if (error) throw error;
+        closeModal();
+        // 清空输入
+        document.getElementById('loginEmail').value = '';
+        document.getElementById('loginPassword').value = '';
+    } catch(err) {
+        alert('登录失败：' + err.message);
+    }
+}
+
+async function handleRegister(e) {
+    e.preventDefault();
+    const name = document.getElementById('regName').value.trim();
+    const email = document.getElementById('regEmail').value.trim();
+    const pass = document.getElementById('regPassword').value;
+    if (!name || !email || !pass) { alert('请填写完整'); return; }
+    if (pass.length < 6) { alert('密码至少6位'); return; }
+    try {
+        const { data, error } = await supabase.auth.signUp({
+            email,
+            password: pass,
+            options: { data: { username: name } }
+        });
+        if (error) throw error;
+        alert('注册成功！请验证邮箱（如有要求）或直接登录');
+        switchTab('login');
+        // 清空注册表单
+        document.getElementById('regName').value = '';
+        document.getElementById('regEmail').value = '';
+        document.getElementById('regPassword').value = '';
+        closeModal();
+    } catch(err) {
+        alert('注册失败：' + err.message);
+    }
+}
+
+async function logout() {
+    await supabase.auth.signOut();
+}
+
+// =============================================================
+// 帖子操作
+// =============================================================
+async function loadPosts() {
+    const list = document.getElementById('postList');
+    list.innerHTML = '⏳ 加载中...';
+    try {
+        const { data, error } = await supabase
+            .from('posts')
+            .select('*')
+            .order('created_at', { ascending: false });
+        if (error) throw error;
+        if (!data || data.length === 0) {
+            list.innerHTML = `<div class="empty">📭 还没有帖子，快来发第一篇吧！</div>`;
+            return;
         }
+        const catMap = { tech: '科技', life: '生活', career: '职场' };
+        list.innerHTML = data.map(p => {
+            const badgeClass = ['tech','life','career'].includes(p.category) ? `badge ${p.category}` : 'badge';
+            const badgeText = catMap[p.category] || p.category || '闲聊';
+            return `
+                <div class="post-card">
+                    <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;">
+                        <span class="title">${p.title}</span>
+                        <span class="${badgeClass}">${badgeText}</span>
+                    </div>
+                    <div class="meta">👤 ${p.author_name || '匿名'} · ${new Date(p.created_at).toLocaleString()}</div>
+                    <div class="content">${p.content || ''}</div>
+                    <div class="actions">
+                        <span>❤️ ${p.likes || 0}</span>
+                        <span>💬 ${p.comment_count || 0}</span>
+                        <span>👁️ ${p.views || 0}</span>
+                    </div>
+                </div>
+            `;
+        }).join('');
+    } catch(err) {
+        list.innerHTML = `❌ 加载失败：${err.message}`;
+    }
+}
 
-        async function load() {
-            const { data, error } = await sb.from('posts').select('*');
-            if (error) alert('加载失败: ' + error.message);
-            else document.getElementById('result').textContent = JSON.stringify(data, null, 2);
+function togglePublish() {
+    const form = document.getElementById('publishForm');
+    form.classList.toggle('hidden');
+}
+
+async function publishPost() {
+    if (!currentUser) { alert('请先登录'); return; }
+    const title = document.getElementById('newTitle').value.trim();
+    const content = document.getElementById('newContent').value.trim();
+    const category = document.getElementById('newCategory').value;
+    if (!title || !content) { alert('请填写标题和内容'); return; }
+    try {
+        const { error } = await supabase.from('posts').insert({
+            title,
+            content,
+            category,
+            author_id: currentUser.id,
+            author_name: currentUser.email,
+            likes: 0,
+            views: 0
+        });
+        if (error) throw error;
+        alert('发帖成功！🎉');
+        document.getElementById('newTitle').value = '';
+        document.getElementById('newContent').value = '';
+        document.getElementById('publishForm').classList.add('hidden');
+        loadPosts();
+    } catch(err) {
+        alert('发帖失败：' + err.message);
+    }
+}
+
+// =============================================================
+// 用户状态监听
+// =============================================================
+supabase.auth.onAuthStateChange(async (event, session) => {
+    currentUser = session?.user || null;
+    const loginBtn = document.getElementById('loginBtn');
+    const avatar = document.getElementById('userAvatar');
+    const userName = document.getElementById('userName');
+    const logoutBtn = document.getElementById('logoutBtn');
+    const adminLink = document.getElementById('adminLink');
+
+    if (currentUser) {
+        loginBtn.style.display = 'none';
+        avatar.classList.remove('hidden');
+        userName.classList.remove('hidden');
+        logoutBtn.style.display = 'inline-block';
+        // 获取用户资料
+        const { data, error } = await supabase
+            .from('profiles')
+            .select('username, avatar_url, is_admin')
+            .eq('id', currentUser.id)
+            .single();
+        if (!error && data) {
+            userProfile = data;
+            avatar.src = data.avatar_url || `https://ui-avatars.com/api/?name=${encodeURIComponent(data.username || currentUser.email)}&background=6d5bff&color=fff&size=32`;
+            userName.textContent = data.username || currentUser.email;
+            if (data.is_admin) adminLink.style.display = 'inline-block';
+        } else {
+            avatar.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(currentUser.email)}&background=6d5bff&color=fff&size=32`;
+            userName.textContent = currentUser.email;
         }
-    </script>
-</body>
-</html><!DOCTYPE html>
-<html>
-<head>
-    <meta charset="UTF-8">
-    <title>测试</title>
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-</head>
-<body>
-    <button onclick="login()">登录</button>
-    <button onclick="load()">加载帖子</button>
-    <div id="result"></div>
+    } else {
+        loginBtn.style.display = 'inline-block';
+        avatar.classList.add('hidden');
+        userName.classList.add('hidden');
+        logoutBtn.style.display = 'none';
+        adminLink.style.display = 'none';
+        userProfile = null;
+    }
+});
 
-    <script>
-        const SUPABASE_URL = 'https://bkvsceiezbyexzqpvblj.supabase.co';
-        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJrdnNjZWllemJ5ZXh6cXB2YmxqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODM3MDk1MzIsImV4cCI6MjA5OTI4NTUzMn0.1h4Yp8YaJdMMOQW8N2zqvJi6QrxHPncBFMK9LjdmZ6E';
-        const sb = supabaseJs.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+// =============================================================
+// 启动
+// =============================================================
+loadPosts();
 
-        async function login() {
-            const email = prompt('邮箱:');
-            const pass = prompt('密码:');
-            const { data, error } = await sb.auth.signInWithPassword({ email, password: pass });
-            if (error) alert('登录失败: ' + error.message);
-            else alert('登录成功: ' + data.user.email);
-        }
-
-        async function load() {
-            const { data, error } = await sb.from('posts').select('*');
-            if (error) alert('加载失败: ' + error.message);
-            else document.getElementById('result').textContent = JSON.stringify(data, null, 2);
-        }
-    </script>
+// =============================================================
+// 暴露全局（供HTML onclick调用）
+// =============================================================
+window.openModal = openModal;
+window.closeModal = closeModal;
+window.switchTab = switchTab;
+window.handleLogin = handleLogin;
+window.handleRegister = handleRegister;
+window.logout = logout;
+window.togglePublish = togglePublish;
+window.publishPost = publishPost;
+</script>
 </body>
 </html>
