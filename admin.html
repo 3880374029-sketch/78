@@ -36,25 +36,34 @@
         .btn-edit:hover{transform:scale(1.04);}
         .btn-view{background:#3b82f6;color:#fff;border:none;padding:4px 12px;border-radius:20px;cursor:pointer;font-size:0.75rem;margin-right:6px;text-decoration:none;display:inline-block;}
         .btn-view:hover{transform:scale(1.04);}
+        .btn-success{background:#22c55e;color:#fff;border:none;padding:4px 12px;border-radius:20px;cursor:pointer;font-size:0.75rem;transition:0.3s;margin-right:6px;}
+        .btn-success:hover{background:#16a34a;transform:scale(1.04);}
         .login-required{text-align:center;padding:60px 20px;}
         .login-required h2{font-size:2rem;margin-bottom:12px;}
         .login-required p{color:rgba(255,255,255,0.4);}
         .btn{background:#6d5bff;color:#fff;border:none;padding:8px 24px;border-radius:30px;cursor:pointer;font-size:0.9rem;transition:0.3s;text-decoration:none;display:inline-block;}
         .btn:hover{transform:scale(1.04);box-shadow:0 4px 16px rgba(109,91,255,0.3);}
+        .btn-sm{background:#6d5bff;color:#fff;border:none;padding:4px 12px;border-radius:20px;cursor:pointer;font-size:0.75rem;transition:0.3s;margin-right:6px;}
+        .btn-sm:hover{transform:scale(1.04);}
         .empty-state{text-align:center;padding:30px;color:rgba(255,255,255,0.3);}
         .avatar-sm{width:30px;height:30px;border-radius:50%;object-fit:cover;border:1px solid rgba(255,255,255,0.1);}
         .modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.7);backdrop-filter:blur(8px);justify-content:center;align-items:center;z-index:999;}
         .modal-overlay.active{display:flex;}
-        .modal-box{background:#1a1a2e;padding:30px;border-radius:20px;max-width:400px;width:100%;position:relative;}
+        .modal-box{background:#1a1a2e;padding:30px;border-radius:20px;max-width:420px;width:100%;position:relative;}
         .modal-box .close{position:absolute;top:12px;right:20px;font-size:1.8rem;cursor:pointer;color:rgba(255,255,255,0.4);}
         .modal-box .close:hover{color:#fff;}
-        .modal-box input{width:100%;padding:10px 14px;border-radius:12px;border:1px solid #444;background:rgba(255,255,255,0.05);color:#e8edf5;font-size:0.95rem;margin:8px 0;}
-        .modal-box input:focus{outline:none;border-color:#6d5bff;}
-        @media (max-width:640px){table,thead,tbody,th,td,tr{display:block;}th{display:none;}tr{margin-bottom:16px;border:1px solid rgba(255,255,255,0.06);border-radius:12px;padding:12px;}td{border:none;padding:4px 0;display:flex;justify-content:space-between;align-items:center;}td::before{content:attr(data-label);font-weight:600;color:rgba(255,255,255,0.4);margin-right:12px;}.stats{flex-direction:column;}}
+        .modal-box input,.modal-box select{width:100%;padding:10px 14px;border-radius:12px;border:1px solid #444;background:rgba(255,255,255,0.05);color:#e8edf5;font-size:0.95rem;margin:8px 0;}
+        .modal-box input:focus,.modal-box select:focus{outline:none;border-color:#6d5bff;}
+        .modal-box label{color:rgba(255,255,255,0.6);display:block;margin-top:8px;}
+        .toolbar{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px;align-items:center;}
+        .toolbar .btn-sm{font-size:0.8rem;padding:6px 16px;}
+        .checkbox-col{width:36px;text-align:center;}
+        .checkbox-col input[type="checkbox"]{width:18px;height:18px;cursor:pointer;accent-color:#6d5bff;}
         .toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:#1a1a2e;padding:12px 24px;border-radius:8px;border:1px solid #444;z-index:1000;display:none;max-width:90%;}
         .toast.show{display:block;animation:fadeIn 0.3s;}
         .toast.error{border-color:#ef4444;}
         @keyframes fadeIn{from{opacity:0;transform:translateX(-50%) translateY(20px);}to{opacity:1;transform:translateX(-50%) translateY(0);}}
+        @media (max-width:640px){table,thead,tbody,th,td,tr{display:block;}th{display:none;}tr{margin-bottom:16px;border:1px solid rgba(255,255,255,0.06);border-radius:12px;padding:12px;}td{border:none;padding:4px 0;display:flex;justify-content:space-between;align-items:center;}td::before{content:attr(data-label);font-weight:600;color:rgba(255,255,255,0.4);margin-right:12px;}.stats{flex-direction:column;}}
     </style>
 </head>
 <body>
@@ -103,8 +112,37 @@
 
         <!-- 用户管理面板 -->
         <div id="tabUsers" class="panel" style="display:none;">
+            <!-- 工具栏 -->
+            <div class="toolbar">
+                <button class="btn-sm" onclick="openAddUserModal()">➕ 添加用户</button>
+                <button class="btn-sm" onclick="selectAllUsers(true)">☑ 全选</button>
+                <button class="btn-sm" onclick="selectAllUsers(false)">☐ 取消全选</button>
+                <button class="btn-sm btn-success" onclick="batchSetAdmin(true)">⬆ 设为管理员</button>
+                <button class="btn-sm btn-edit" onclick="batchSetAdmin(false)">⬇ 取消管理员</button>
+                <button class="btn-sm btn-danger" onclick="batchDeleteUsers()">🗑️ 批量删除</button>
+                <span style="color:rgba(255,255,255,0.3);font-size:0.8rem;margin-left:8px;" id="selectedCount">已选 0 人</span>
+            </div>
             <div id="usersList"><p class="empty-state">加载中...</p></div>
         </div>
+    </div>
+</div>
+
+<!-- 添加用户模态框 -->
+<div class="modal-overlay" id="addUserModal">
+    <div class="modal-box">
+        <span class="close" onclick="closeAddUserModal()">&times;</span>
+        <h2>➕ 添加用户</h2>
+        <label>邮箱</label>
+        <input type="email" id="addUserEmail" placeholder="user@example.com" />
+        <label>密码</label>
+        <input type="text" id="addUserPassword" placeholder="至少6位" />
+        <label>昵称</label>
+        <input type="text" id="addUserName" placeholder="用户昵称（可选）" />
+        <label style="display:flex;align-items:center;gap:8px;cursor:pointer;margin-top:12px;">
+            <input type="checkbox" id="addUserAdmin" style="width:18px;height:18px;margin:0;" /> 设为管理员
+        </label>
+        <button class="btn" onclick="addUser()" style="width:100%;margin-top:16px;">添加用户</button>
+        <div id="addUserMsg" style="margin-top:8px;"></div>
     </div>
 </div>
 
@@ -113,11 +151,9 @@
     <div class="modal-box">
         <span class="close" onclick="closeEditUserModal()">&times;</span>
         <h2>✏️ 编辑用户</h2>
-        <div style="margin:8px 0 16px;">
-            <label style="color:rgba(255,255,255,0.6);display:block;margin-bottom:4px;">昵称</label>
-            <input type="text" id="editUserName" placeholder="输入新昵称" maxlength="30" />
-        </div>
-        <button class="btn" onclick="saveUserEdit()" style="width:100%;">保存</button>
+        <label>昵称</label>
+        <input type="text" id="editUserName" placeholder="输入新昵称" maxlength="30" />
+        <button class="btn" onclick="saveUserEdit()" style="width:100%;margin-top:12px;">保存</button>
         <div id="editUserMsg" style="margin-top:8px;"></div>
     </div>
 </div>
@@ -127,7 +163,7 @@
 
 <script>
 // =============================================================
-// 配置（与前台一致）
+// 配置
 // =============================================================
 const SUPABASE_URL = 'https://bkvsceiezbyexzqpvblj.supabase.co';
 const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJrdnNjZWllemJ5ZXh6cXB2YmxqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODM3MDk1MzIsImV4cCI6MjA5OTI4NTUzMn0.1h4Yp8YaJdMMOQW8N2zqvJi6QrxHPncBFMK9LjdmZ6E';
@@ -146,6 +182,7 @@ let currentCategory = 'all';
 let totalLikes = 0;
 let editingUserId = null;
 let isAdmin = false;
+let selectedUsers = new Set();
 
 // =============================================================
 // 工具函数
@@ -255,7 +292,7 @@ async function updateUser(userId, updates) {
     return await handleResponse(resp);
 }
 
-async function deleteUser(userId) {
+async function deleteUserFromDb(userId) {
     const resp = await fetch(SUPABASE_URL + '/rest/v1/profiles?id=eq.' + userId, {
         method: 'DELETE',
         headers: getHeaders(true)
@@ -263,11 +300,26 @@ async function deleteUser(userId) {
     return await handleResponse(resp);
 }
 
+// 批量更新用户
+async function batchUpdateUsers(userIds, updates) {
+    if (userIds.length === 0) return;
+    // 逐个更新（Supabase 不支持批量 PATCH 多个不同 ID）
+    const promises = userIds.map(id => updateUser(id, updates));
+    await Promise.all(promises);
+}
+
+// 批量删除用户
+async function batchDeleteUsersFromDb(userIds) {
+    if (userIds.length === 0) return;
+    // 逐个删除
+    const promises = userIds.map(id => deleteUserFromDb(id).catch(e => console.warn('删除用户失败:', id, e)));
+    await Promise.all(promises);
+}
+
 // =============================================================
 // 认证与权限检查
 // =============================================================
 async function checkAuth() {
-    // 从 localStorage 恢复 token
     const token = localStorage.getItem('sb_token');
     const userStr = localStorage.getItem('sb_user');
     if (token && userStr) {
@@ -287,7 +339,6 @@ async function checkAuth() {
         return false;
     }
 
-    // 获取 profiles
     try {
         const profile = await getProfile(currentUser.id);
         if (profile && profile.is_admin === true) {
@@ -421,7 +472,6 @@ async function deletePostHandler(postId) {
     if (!confirm('确定要删除这篇帖子吗？（会同时删除所有回复）')) return;
     try {
         await deletePost(postId);
-        // 同时删除相关评论（本地清理）
         showToast('删除成功！');
         loadAllData();
     } catch (e) { showToast('删除失败：' + e.message, true); }
@@ -498,7 +548,7 @@ async function deleteTopicHandler(topicId) {
 }
 
 // =============================================================
-// 用户管理
+// 用户管理（含批量操作）
 // =============================================================
 function renderUsers() {
     const list = document.getElementById('usersList');
@@ -506,28 +556,106 @@ function renderUsers() {
         list.innerHTML = '<p class="empty-state">暂无用户</p>';
         return;
     }
-    let html = `<table><thead><tr><th>用户</th><th>昵称</th><th>邮箱</th><th>注册时间</th><th>操作</th></tr></thead><tbody>`;
+    // 清除选中状态（保留已选的）
+    let html = `<table><thead><tr>
+        <th class="checkbox-col"><input type="checkbox" onchange="toggleAllCheckbox(this.checked)" /></th>
+        <th>用户</th><th>昵称</th><th>邮箱</th><th>注册时间</th><th>角色</th><th>操作</th>
+    </tr></thead><tbody>`;
     usersCache.forEach(u => {
         const avatarUrl = u.avatar_url || `https://ui-avatars.com/api/?name=${encodeURIComponent(u.username||'U')}&background=6d5bff&color=fff&size=30`;
         const dateStr = u.created_at ? new Date(u.created_at).toLocaleDateString('zh-CN') : '';
         const isAdminUser = u.is_admin || false;
+        const checked = selectedUsers.has(u.id) ? 'checked' : '';
         html += `<tr>
+            <td class="checkbox-col" data-label="选择">
+                <input type="checkbox" class="user-checkbox" data-id="${u.id}" ${checked} onchange="updateSelectedCount()" />
+            </td>
             <td data-label="用户"><img class="avatar-sm" src="${avatarUrl}" alt="${u.username}" /></td>
             <td data-label="昵称">${u.username}</td>
             <td data-label="邮箱">${u.email || '未提供'}</td>
             <td data-label="注册时间">${dateStr}</td>
+            <td data-label="角色">${isAdminUser ? '<span style="color:#6d5bff;">管理员</span>' : '普通用户'}</td>
             <td data-label="操作">
-                ${isAdminUser ? '<span style="color:#6d5bff;">管理员</span>' : `
+                ${isAdminUser ? `<span style="color:#6d5bff;font-size:0.75rem;">管理员</span>` : `
                     <button class="btn-edit" onclick="openEditUser('${u.id}')">✏️</button>
+                    <button class="btn-success" onclick="setUserAdmin('${u.id}', true)">⬆</button>
                     <button class="btn-danger" onclick="deleteUserHandler('${u.id}')">🗑️</button>
                 `}
+                ${isAdminUser ? `<button class="btn-edit" onclick="setUserAdmin('${u.id}', false)" style="background:#fbbf24;">⬇</button>` : ''}
             </td>
         </tr>`;
     });
     html += `</tbody></table>`;
     list.innerHTML = html;
+    updateSelectedCount();
 }
 
+// =============================================================
+// 批量操作函数
+// =============================================================
+function selectAllUsers(select) {
+    document.querySelectorAll('.user-checkbox').forEach(cb => {
+        cb.checked = select;
+        const id = cb.dataset.id;
+        if (select) selectedUsers.add(id);
+        else selectedUsers.delete(id);
+    });
+    updateSelectedCount();
+}
+
+function toggleAllCheckbox(checked) {
+    document.querySelectorAll('.user-checkbox').forEach(cb => {
+        cb.checked = checked;
+        const id = cb.dataset.id;
+        if (checked) selectedUsers.add(id);
+        else selectedUsers.delete(id);
+    });
+    updateSelectedCount();
+}
+
+function updateSelectedCount() {
+    // 重新统计
+    selectedUsers.clear();
+    document.querySelectorAll('.user-checkbox:checked').forEach(cb => {
+        selectedUsers.add(cb.dataset.id);
+    });
+    document.getElementById('selectedCount').textContent = `已选 ${selectedUsers.size} 人`;
+}
+
+async function batchSetAdmin(makeAdmin) {
+    const ids = Array.from(selectedUsers);
+    if (ids.length === 0) { showToast('请先选择用户', true); return; }
+    if (!confirm(`确定要将选中的 ${ids.length} 位用户${makeAdmin ? '设为管理员' : '取消管理员'}吗？`)) return;
+    try {
+        await batchUpdateUsers(ids, { is_admin: makeAdmin });
+        showToast(`✅ 已${makeAdmin ? '设为管理员' : '取消管理员'} ${ids.length} 位用户`);
+        await loadAllData();
+        selectedUsers.clear();
+        updateSelectedCount();
+    } catch(e) { showToast('操作失败：' + e.message, true); }
+}
+
+async function batchDeleteUsers() {
+    const ids = Array.from(selectedUsers);
+    if (ids.length === 0) { showToast('请先选择用户', true); return; }
+    // 检查是否包含当前管理员自己
+    const selfId = currentUser?.id;
+    if (selfId && ids.includes(selfId)) {
+        if (!confirm('⚠️ 选中包含你自己！确定要删除当前登录的管理员账号吗？')) return;
+    }
+    if (!confirm(`确定要删除选中的 ${ids.length} 位用户吗？此操作不可恢复！`)) return;
+    try {
+        await batchDeleteUsersFromDb(ids);
+        showToast(`✅ 已删除 ${ids.length} 位用户`);
+        selectedUsers.clear();
+        updateSelectedCount();
+        await loadAllData();
+    } catch(e) { showToast('删除失败：' + e.message, true); }
+}
+
+// =============================================================
+// 单个用户操作
+// =============================================================
 function openEditUser(userId) {
     const user = usersCache.find(u => u.id === userId);
     if (!user) return;
@@ -557,15 +685,119 @@ async function saveUserEdit() {
     } catch(e) { msg.innerHTML = '<p style="color:#ef4444;">修改失败：' + e.message + '</p>'; }
 }
 
-async function deleteUserHandler(userId) {
-    if (!confirm('确定要删除这个用户吗？（会删除该用户所有回复和帖子）')) return;
+async function setUserAdmin(userId, makeAdmin) {
     try {
-        // 先删除该用户的评论和帖子（需要分别处理）
-        // 简化：仅删除 profiles，posts 和 comments 会因外键级联删除（如果设置了 ON DELETE CASCADE）
-        await deleteUser(userId);
-        showToast('删除成功！');
-        loadAllData();
+        await updateUser(userId, { is_admin: makeAdmin });
+        showToast(`✅ 用户${makeAdmin ? '已设为管理员' : '已取消管理员'}`);
+        await loadAllData();
+    } catch(e) { showToast('操作失败：' + e.message, true); }
+}
+
+async function deleteUserHandler(userId) {
+    if (!confirm('确定要删除这个用户吗？')) return;
+    if (userId === currentUser?.id) {
+        if (!confirm('⚠️ 你要删除自己的账号吗？')) return;
+    }
+    try {
+        await deleteUserFromDb(userId);
+        showToast('✅ 删除成功！');
+        selectedUsers.delete(userId);
+        await loadAllData();
     } catch(e) { showToast('删除失败：' + e.message, true); }
+}
+
+// =============================================================
+// 添加用户
+// =============================================================
+function openAddUserModal() {
+    document.getElementById('addUserModal').classList.add('active');
+    document.getElementById('addUserEmail').value = '';
+    document.getElementById('addUserPassword').value = '';
+    document.getElementById('addUserName').value = '';
+    document.getElementById('addUserAdmin').checked = false;
+    document.getElementById('addUserMsg').innerHTML = '';
+}
+
+function closeAddUserModal() {
+    document.getElementById('addUserModal').classList.remove('active');
+}
+document.getElementById('addUserModal').addEventListener('click', function(e) {
+    if (e.target === this) closeAddUserModal();
+});
+
+async function addUser() {
+    const email = document.getElementById('addUserEmail').value.trim();
+    const password = document.getElementById('addUserPassword').value.trim();
+    const username = document.getElementById('addUserName').value.trim() || email.split('@')[0];
+    const isAdmin = document.getElementById('addUserAdmin').checked;
+    const msg = document.getElementById('addUserMsg');
+
+    if (!email || !password) {
+        msg.innerHTML = '<p style="color:#ef4444;">请填写邮箱和密码</p>';
+        return;
+    }
+    if (password.length < 6) {
+        msg.innerHTML = '<p style="color:#ef4444;">密码至少6位</p>';
+        return;
+    }
+
+    msg.innerHTML = '<p style="color:rgba(255,255,255,0.5);">⏳ 创建中...</p>';
+
+    try {
+        const authRes = await fetch(SUPABASE_URL + '/auth/v1/signup', {
+            method: 'POST',
+            headers: {
+                'apikey': SUPABASE_ANON_KEY,
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                email: email,
+                password: password,
+                data: { username: username }
+            })
+        });
+        const authData = await authRes.json();
+
+        if (!authRes.ok) {
+            if (authRes.status === 429) {
+                msg.innerHTML = '<p style="color:#ef4444;">❌ 注册限流，请稍后重试或配置 SMTP</p>';
+            } else {
+                msg.innerHTML = '<p style="color:#ef4444;">❌ 创建失败：' + (authData.error_description || authData.message || '未知错误') + '</p>';
+            }
+            return;
+        }
+
+        const profileRes = await fetch(SUPABASE_URL + '/rest/v1/profiles', {
+            method: 'POST',
+            headers: {
+                'apikey': SUPABASE_ANON_KEY,
+                'Authorization': 'Bearer ' + accessToken,
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                id: authData.user.id,
+                username: username,
+                email: email,
+                is_admin: isAdmin
+            })
+        });
+
+        if (!profileRes.ok) {
+            const profileErr = await profileRes.text();
+            console.warn('创建 profiles 失败:', profileErr);
+            msg.innerHTML = '<p style="color:#ef4444;">⚠️ 用户已创建，但 profiles 同步失败</p>';
+            return;
+        }
+
+        msg.innerHTML = '<p style="color:#6ee7b7;">✅ 用户创建成功！</p>';
+        setTimeout(() => {
+            closeAddUserModal();
+            loadAllData();
+        }, 1500);
+
+    } catch (err) {
+        msg.innerHTML = '<p style="color:#ef4444;">❌ 添加失败：' + err.message + '</p>';
+    }
 }
 
 // =============================================================
@@ -588,6 +820,15 @@ window.deleteUserHandler = deleteUserHandler;
 window.openEditUser = openEditUser;
 window.closeEditUserModal = closeEditUserModal;
 window.saveUserEdit = saveUserEdit;
+window.openAddUserModal = openAddUserModal;
+window.closeAddUserModal = closeAddUserModal;
+window.addUser = addUser;
+window.selectAllUsers = selectAllUsers;
+window.toggleAllCheckbox = toggleAllCheckbox;
+window.updateSelectedCount = updateSelectedCount;
+window.batchSetAdmin = batchSetAdmin;
+window.batchDeleteUsers = batchDeleteUsers;
+window.setUserAdmin = setUserAdmin;
 
 init();
 </script>
