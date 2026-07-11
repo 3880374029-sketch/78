@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>管理后台 - 窍某论坛</title>
     <style>
+        /* 完整后台样式（与之前相同，略作整理） */
         *{margin:0;padding:0;box-sizing:border-box;}
         body{background:#0b0e1a;color:#e8edf5;font-family:'Segoe UI',sans-serif;padding:20px;line-height:1.6;}
         .container{max-width:1200px;margin:0 auto;}
@@ -20,7 +21,6 @@
         .filter-bar{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:20px;}
         .filter-btn{background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.06);color:rgba(255,255,255,0.5);padding:6px 18px;border-radius:30px;cursor:pointer;transition:0.3s;}
         .filter-btn.active{background:#6d5bff;color:#fff;border-color:#6d5bff;}
-        .filter-btn:hover{background:rgba(255,255,255,0.08);}
         table{width:100%;border-collapse:collapse;font-size:0.9rem;}
         th,td{padding:10px 12px;text-align:left;border-bottom:1px solid rgba(255,255,255,0.06);}
         th{color:rgba(255,255,255,0.4);font-weight:500;font-size:0.8rem;text-transform:uppercase;}
@@ -43,26 +43,25 @@
         .login-required p{color:rgba(255,255,255,0.4);}
         .btn{background:#6d5bff;color:#fff;border:none;padding:8px 24px;border-radius:30px;cursor:pointer;font-size:0.9rem;transition:0.3s;text-decoration:none;display:inline-block;}
         .btn:hover{transform:scale(1.04);box-shadow:0 4px 16px rgba(109,91,255,0.3);}
-        .btn-sm{background:#6d5bff;color:#fff;border:none;padding:4px 12px;border-radius:20px;cursor:pointer;font-size:0.75rem;transition:0.3s;margin-right:6px;}
-        .btn-sm:hover{transform:scale(1.04);}
         .empty-state{text-align:center;padding:30px;color:rgba(255,255,255,0.3);}
         .avatar-sm{width:30px;height:30px;border-radius:50%;object-fit:cover;border:1px solid rgba(255,255,255,0.1);}
         .modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.7);backdrop-filter:blur(8px);justify-content:center;align-items:center;z-index:999;}
         .modal-overlay.active{display:flex;}
-        .modal-box{background:#1a1a2e;padding:30px;border-radius:20px;max-width:420px;width:100%;position:relative;}
+        .modal-box{background:#1a1a2e;padding:30px;border-radius:20px;max-width:400px;width:100%;position:relative;}
         .modal-box .close{position:absolute;top:12px;right:20px;font-size:1.8rem;cursor:pointer;color:rgba(255,255,255,0.4);}
         .modal-box .close:hover{color:#fff;}
-        .modal-box input,.modal-box select{width:100%;padding:10px 14px;border-radius:12px;border:1px solid #444;background:rgba(255,255,255,0.05);color:#e8edf5;font-size:0.95rem;margin:8px 0;}
-        .modal-box input:focus,.modal-box select:focus{outline:none;border-color:#6d5bff;}
+        .modal-box input{width:100%;padding:10px 14px;border-radius:12px;border:1px solid #444;background:rgba(255,255,255,0.05);color:#e8edf5;font-size:0.95rem;margin:8px 0;}
+        .modal-box input:focus{outline:none;border-color:#6d5bff;}
         .modal-box label{color:rgba(255,255,255,0.6);display:block;margin-top:8px;}
         .toolbar{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px;align-items:center;}
-        .toolbar .btn-sm{font-size:0.8rem;padding:6px 16px;}
-        .checkbox-col{width:36px;text-align:center;}
-        .checkbox-col input[type="checkbox"]{width:18px;height:18px;cursor:pointer;accent-color:#6d5bff;}
+        .btn-sm{background:#6d5bff;color:#fff;border:none;padding:4px 12px;border-radius:20px;cursor:pointer;font-size:0.75rem;transition:0.3s;margin-right:6px;}
+        .btn-sm:hover{transform:scale(1.04);}
         .toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:#1a1a2e;padding:12px 24px;border-radius:8px;border:1px solid #444;z-index:1000;display:none;max-width:90%;}
         .toast.show{display:block;animation:fadeIn 0.3s;}
         .toast.error{border-color:#ef4444;}
         @keyframes fadeIn{from{opacity:0;transform:translateX(-50%) translateY(20px);}to{opacity:1;transform:translateX(-50%) translateY(0);}}
+        .checkbox-col{width:36px;text-align:center;}
+        .checkbox-col input[type="checkbox"]{width:18px;height:18px;cursor:pointer;accent-color:#6d5bff;}
         @media (max-width:640px){table,thead,tbody,th,td,tr{display:block;}th{display:none;}tr{margin-bottom:16px;border:1px solid rgba(255,255,255,0.06);border-radius:12px;padding:12px;}td{border:none;padding:4px 0;display:flex;justify-content:space-between;align-items:center;}td::before{content:attr(data-label);font-weight:600;color:rgba(255,255,255,0.4);margin-right:12px;}.stats{flex-direction:column;}}
     </style>
 </head>
@@ -71,7 +70,7 @@
     <h1>📊 管理后台</h1>
     <div id="loginCheck"></div>
     <div id="adminContent" style="display:none;">
-        <!-- 统计卡片 -->
+        <!-- 统计 -->
         <div class="stats" id="statsArea">
             <div class="stat-card"><div class="num" id="postCount">0</div><div class="label">📄 帖子</div></div>
             <div class="stat-card"><div class="num" id="commentCount">0</div><div class="label">💬 回复</div></div>
@@ -80,7 +79,7 @@
             <div class="stat-card"><div class="num" id="likeCount">0</div><div class="label">❤️ 总点赞</div></div>
         </div>
 
-        <!-- Tab 导航 -->
+        <!-- Tab -->
         <div class="tab-bar">
             <button class="tab-btn active" onclick="switchTab('posts')">📄 帖子管理</button>
             <button class="tab-btn" onclick="switchTab('comments')">💬 回复管理</button>
@@ -88,7 +87,7 @@
             <button class="tab-btn" onclick="switchTab('users')">👤 用户管理</button>
         </div>
 
-        <!-- 帖子管理面板 -->
+        <!-- 帖子管理 -->
         <div id="tabPosts" class="panel">
             <div class="filter-bar">
                 <button class="filter-btn active" data-cat="all" onclick="filterPosts('all')">📋 全部</button>
@@ -100,19 +99,18 @@
             <div id="postsList"><p class="empty-state">加载中...</p></div>
         </div>
 
-        <!-- 回复管理面板 -->
+        <!-- 回复管理 -->
         <div id="tabComments" class="panel" style="display:none;">
             <div id="commentsList"><p class="empty-state">加载中...</p></div>
         </div>
 
-        <!-- 版块管理面板 -->
+        <!-- 版块管理 -->
         <div id="tabTopics" class="panel" style="display:none;">
             <div id="topicsList"><p class="empty-state">加载中...</p></div>
         </div>
 
-        <!-- 用户管理面板 -->
+        <!-- 用户管理 -->
         <div id="tabUsers" class="panel" style="display:none;">
-            <!-- 工具栏 -->
             <div class="toolbar">
                 <button class="btn-sm" onclick="openAddUserModal()">➕ 添加用户</button>
                 <button class="btn-sm" onclick="selectAllUsers(true)">☑ 全选</button>
@@ -158,12 +156,11 @@
     </div>
 </div>
 
-<!-- Toast 通知 -->
 <div class="toast" id="toast"></div>
 
 <script>
 // =============================================================
-// 配置
+// 配置（与 index.html 完全一致）
 // =============================================================
 const SUPABASE_URL = 'https://bkvsceiezbyexzqpvblj.supabase.co';
 const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJrdnNjZWllemJ5ZXh6cXB2YmxqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODM3MDk1MzIsImV4cCI6MjA5OTI4NTUzMn0.1h4Yp8YaJdMMOQW8N2zqvJi6QrxHPncBFMK9LjdmZ6E';
@@ -185,7 +182,7 @@ let isAdmin = false;
 let selectedUsers = new Set();
 
 // =============================================================
-// 工具函数
+// 工具函数（与 index.html 相同）
 // =============================================================
 function showToast(msg, isError = false) {
     const t = document.getElementById('toast');
@@ -292,7 +289,7 @@ async function updateUser(userId, updates) {
     return await handleResponse(resp);
 }
 
-async function deleteUserFromDb(userId) {
+async function deleteUser(userId) {
     const resp = await fetch(SUPABASE_URL + '/rest/v1/profiles?id=eq.' + userId, {
         method: 'DELETE',
         headers: getHeaders(true)
@@ -300,26 +297,11 @@ async function deleteUserFromDb(userId) {
     return await handleResponse(resp);
 }
 
-// 批量更新用户
-async function batchUpdateUsers(userIds, updates) {
-    if (userIds.length === 0) return;
-    // 逐个更新（Supabase 不支持批量 PATCH 多个不同 ID）
-    const promises = userIds.map(id => updateUser(id, updates));
-    await Promise.all(promises);
-}
-
-// 批量删除用户
-async function batchDeleteUsersFromDb(userIds) {
-    if (userIds.length === 0) return;
-    // 逐个删除
-    const promises = userIds.map(id => deleteUserFromDb(id).catch(e => console.warn('删除用户失败:', id, e)));
-    await Promise.all(promises);
-}
-
 // =============================================================
-// 认证与权限检查
+// 认证检查
 // =============================================================
 async function checkAuth() {
+    // 从 localStorage 恢复 token
     const token = localStorage.getItem('sb_token');
     const userStr = localStorage.getItem('sb_user');
     if (token && userStr) {
@@ -361,14 +343,14 @@ async function checkAuth() {
             return false;
         }
     } catch(err) {
-        console.error('检查权限失败:', err);
+        console.error('权限检查失败:', err);
         showToast('权限检查失败：' + err.message, true);
         return false;
     }
 }
 
 // =============================================================
-// 加载数据
+// 数据加载
 // =============================================================
 async function loadAllData() {
     if (!isAdmin) return;
@@ -423,7 +405,8 @@ function switchTab(tab) {
     document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
     document.querySelector(`.tab-btn[onclick*="${tab}"]`)?.classList.add('active');
     document.querySelectorAll('.panel').forEach(p => p.style.display = 'none');
-    document.getElementById('tab' + tab.charAt(0).toUpperCase() + tab.slice(1)).style.display = 'block';
+    const id = 'tab' + tab.charAt(0).toUpperCase() + tab.slice(1);
+    document.getElementById(id).style.display = 'block';
 }
 
 // =============================================================
@@ -556,7 +539,6 @@ function renderUsers() {
         list.innerHTML = '<p class="empty-state">暂无用户</p>';
         return;
     }
-    // 清除选中状态（保留已选的）
     let html = `<table><thead><tr>
         <th class="checkbox-col"><input type="checkbox" onchange="toggleAllCheckbox(this.checked)" /></th>
         <th>用户</th><th>昵称</th><th>邮箱</th><th>注册时间</th><th>角色</th><th>操作</th>
@@ -567,7 +549,7 @@ function renderUsers() {
         const isAdminUser = u.is_admin || false;
         const checked = selectedUsers.has(u.id) ? 'checked' : '';
         html += `<tr>
-            <td class="checkbox-col" data-label="选择">
+            <td data-label="选择">
                 <input type="checkbox" class="user-checkbox" data-id="${u.id}" ${checked} onchange="updateSelectedCount()" />
             </td>
             <td data-label="用户"><img class="avatar-sm" src="${avatarUrl}" alt="${u.username}" /></td>
@@ -591,7 +573,7 @@ function renderUsers() {
 }
 
 // =============================================================
-// 批量操作函数
+// 批量操作
 // =============================================================
 function selectAllUsers(select) {
     document.querySelectorAll('.user-checkbox').forEach(cb => {
@@ -614,7 +596,6 @@ function toggleAllCheckbox(checked) {
 }
 
 function updateSelectedCount() {
-    // 重新统计
     selectedUsers.clear();
     document.querySelectorAll('.user-checkbox:checked').forEach(cb => {
         selectedUsers.add(cb.dataset.id);
@@ -627,7 +608,7 @@ async function batchSetAdmin(makeAdmin) {
     if (ids.length === 0) { showToast('请先选择用户', true); return; }
     if (!confirm(`确定要将选中的 ${ids.length} 位用户${makeAdmin ? '设为管理员' : '取消管理员'}吗？`)) return;
     try {
-        await batchUpdateUsers(ids, { is_admin: makeAdmin });
+        await Promise.all(ids.map(id => updateUser(id, { is_admin: makeAdmin })));
         showToast(`✅ 已${makeAdmin ? '设为管理员' : '取消管理员'} ${ids.length} 位用户`);
         await loadAllData();
         selectedUsers.clear();
@@ -638,14 +619,13 @@ async function batchSetAdmin(makeAdmin) {
 async function batchDeleteUsers() {
     const ids = Array.from(selectedUsers);
     if (ids.length === 0) { showToast('请先选择用户', true); return; }
-    // 检查是否包含当前管理员自己
     const selfId = currentUser?.id;
     if (selfId && ids.includes(selfId)) {
         if (!confirm('⚠️ 选中包含你自己！确定要删除当前登录的管理员账号吗？')) return;
     }
     if (!confirm(`确定要删除选中的 ${ids.length} 位用户吗？此操作不可恢复！`)) return;
     try {
-        await batchDeleteUsersFromDb(ids);
+        await Promise.all(ids.map(id => deleteUser(id).catch(e => console.warn('删除失败:', id, e))));
         showToast(`✅ 已删除 ${ids.length} 位用户`);
         selectedUsers.clear();
         updateSelectedCount();
@@ -699,7 +679,7 @@ async function deleteUserHandler(userId) {
         if (!confirm('⚠️ 你要删除自己的账号吗？')) return;
     }
     try {
-        await deleteUserFromDb(userId);
+        await deleteUser(userId);
         showToast('✅ 删除成功！');
         selectedUsers.delete(userId);
         await loadAllData();
@@ -717,7 +697,6 @@ function openAddUserModal() {
     document.getElementById('addUserAdmin').checked = false;
     document.getElementById('addUserMsg').innerHTML = '';
 }
-
 function closeAddUserModal() {
     document.getElementById('addUserModal').classList.remove('active');
 }
