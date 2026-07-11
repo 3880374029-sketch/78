@@ -1,803 +1,439 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>管理后台 - 窍某论坛</title>
-    <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-storage-compat.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-        body {
-            background: #0b0e1a;
-            color: #e8edf5;
-            font-family: 'Segoe UI', sans-serif;
-            padding: 20px;
-            line-height: 1.6;
-        }
-        .container {
-            max-width: 1200px;
-            margin: 0 auto;
-        }
-        h1 {
-            background: linear-gradient(135deg, #c4b5fd, #818cf8);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            margin-bottom: 20px;
-        }
-        .stats {
-            display: flex;
-            gap: 20px;
-            margin-bottom: 30px;
-            flex-wrap: wrap;
-        }
-        .stat-card {
-            background: rgba(255, 255, 255, 0.04);
-            padding: 16px 24px;
-            border-radius: 12px;
-            border: 1px solid rgba(255, 255, 255, 0.06);
-            flex: 1 1 140px;
-        }
-        .stat-card .num {
-            font-size: 2rem;
-            font-weight: 700;
-            color: #a5b4fc;
-        }
-        .stat-card .label {
-            color: rgba(255, 255, 255, 0.4);
-            font-size: 0.9rem;
-        }
-        .tab-bar {
-            display: flex;
-            gap: 8px;
-            margin-bottom: 20px;
-            flex-wrap: wrap;
-        }
-        .tab-btn {
-            background: rgba(255, 255, 255, 0.04);
-            border: 1px solid rgba(255, 255, 255, 0.06);
-            color: rgba(255, 255, 255, 0.5);
-            padding: 8px 20px;
-            border-radius: 30px;
-            cursor: pointer;
-            transition: 0.3s;
-        }
-        .tab-btn.active {
-            background: #6d5bff;
-            color: #fff;
-            border-color: #6d5bff;
-        }
-        .tab-btn:hover {
-            background: rgba(255, 255, 255, 0.08);
-        }
-        .filter-bar {
-            display: flex;
-            gap: 8px;
-            flex-wrap: wrap;
-            margin-bottom: 20px;
-        }
-        .filter-btn {
-            background: rgba(255, 255, 255, 0.04);
-            border: 1px solid rgba(255, 255, 255, 0.06);
-            color: rgba(255, 255, 255, 0.5);
-            padding: 6px 18px;
-            border-radius: 30px;
-            cursor: pointer;
-            transition: 0.3s;
-        }
-        .filter-btn.active {
-            background: #6d5bff;
-            color: #fff;
-            border-color: #6d5bff;
-        }
-        .filter-btn:hover {
-            background: rgba(255, 255, 255, 0.08);
-        }
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            font-size: 0.9rem;
-        }
-        th,
-        td {
-            padding: 10px 12px;
-            text-align: left;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.06);
-        }
-        th {
-            color: rgba(255, 255, 255, 0.4);
-            font-weight: 500;
-            font-size: 0.8rem;
-            text-transform: uppercase;
-        }
-        td {
-            color: rgba(255, 255, 255, 0.8);
-        }
-        .badge {
-            display: inline-block;
-            padding: 2px 10px;
-            border-radius: 30px;
-            font-size: 0.7rem;
-            font-weight: 600;
-            background: rgba(255, 255, 255, 0.06);
-            color: rgba(255, 255, 255, 0.5);
-        }
-        .badge.tech {
-            background: rgba(96, 165, 250, 0.15);
-            color: #93bbfc;
-        }
-        .badge.life {
-            background: rgba(52, 211, 153, 0.12);
-            color: #6ee7b7;
-        }
-        .badge.career {
-            background: rgba(251, 191, 36, 0.12);
-            color: #fcd34d;
-        }
-        .badge.topic {
-            background: rgba(251, 191, 36, 0.15);
-            color: #fcd34d;
-        }
-        .btn-danger {
-            background: #ef4444;
-            color: #fff;
-            border: none;
-            padding: 4px 12px;
-            border-radius: 20px;
-            cursor: pointer;
-            font-size: 0.75rem;
-            transition: 0.3s;
-        }
-        .btn-danger:hover {
-            background: #dc2626;
-            transform: scale(1.04);
-        }
-        .btn-edit {
-            background: #6d5bff;
-            color: #fff;
-            border: none;
-            padding: 4px 12px;
-            border-radius: 20px;
-            cursor: pointer;
-            font-size: 0.75rem;
-            transition: 0.3s;
-            margin-right: 6px;
-        }
-        .btn-edit:hover {
-            transform: scale(1.04);
-        }
-        .btn-view {
-            background: #3b82f6;
-            color: #fff;
-            border: none;
-            padding: 4px 12px;
-            border-radius: 20px;
-            cursor: pointer;
-            font-size: 0.75rem;
-            transition: 0.3s;
-            margin-right: 6px;
-            text-decoration: none;
-            display: inline-block;
-        }
-        .btn-view:hover {
-            transform: scale(1.04);
-        }
-        .btn-success {
-            background: #22c55e;
-            color: #fff;
-            border: none;
-            padding: 4px 12px;
-            border-radius: 20px;
-            cursor: pointer;
-            font-size: 0.75rem;
-            transition: 0.3s;
-        }
-        .btn-success:hover {
-            background: #16a34a;
-            transform: scale(1.04);
-        }
-        .login-required {
-            text-align: center;
-            padding: 60px 20px;
-        }
-        .login-required h2 {
-            font-size: 2rem;
-            margin-bottom: 12px;
-        }
-        .login-required p {
-            color: rgba(255, 255, 255, 0.4);
-        }
-        .btn {
-            background: #6d5bff;
-            color: #fff;
-            border: none;
-            padding: 8px 24px;
-            border-radius: 30px;
-            cursor: pointer;
-            font-size: 0.9rem;
-            transition: 0.3s;
-            text-decoration: none;
-            display: inline-block;
-        }
-        .btn:hover {
-            transform: scale(1.04);
-            box-shadow: 0 4px 16px rgba(109, 91, 255, 0.3);
-        }
-        .empty-state {
-            text-align: center;
-            padding: 30px;
-            color: rgba(255, 255, 255, 0.3);
-        }
-        /* 用户头像 */
-        .avatar-sm {
-            width: 30px;
-            height: 30px;
-            border-radius: 50%;
-            object-fit: cover;
-            border: 1px solid rgba(255, 255, 255, 0.1);
-        }
-        .user-cell {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-        .edit-input {
-            background: rgba(255, 255, 255, 0.05);
-            border: 1px solid #444;
-            color: #e8edf5;
-            padding: 2px 8px;
-            border-radius: 6px;
-            font-size: 0.85rem;
-            width: 120px;
-        }
-        .edit-input:focus {
-            outline: none;
-            border-color: #6d5bff;
-        }
-        @media (max-width: 640px) {
-            table,
-            thead,
-            tbody,
-            th,
-            td,
-            tr {
-                display: block;
-            }
-            th {
-                display: none;
-            }
-            tr {
-                margin-bottom: 16px;
-                border: 1px solid rgba(255, 255, 255, 0.06);
-                border-radius: 12px;
-                padding: 12px;
-            }
-            td {
-                border: none;
-                padding: 4px 0;
-                display: flex;
-                justify-content: space-between;
-                align-items: center;
-            }
-            td::before {
-                content: attr(data-label);
-                font-weight: 600;
-                color: rgba(255, 255, 255, 0.4);
-                margin-right: 12px;
-            }
-            .stats {
-                flex-direction: column;
-            }
-            .edit-input {
-                width: 80px;
-            }
-        }
+        *{margin:0;padding:0;box-sizing:border-box;}
+        body{background:#0b0e1a;color:#e8edf5;font-family:'Segoe UI',sans-serif;padding:20px;line-height:1.6;}
+        .container{max-width:1200px;margin:0 auto;}
+        h1{background:linear-gradient(135deg,#c4b5fd,#818cf8);-webkit-background-clip:text;-webkit-text-fill-color:transparent;margin-bottom:20px;}
+        .stats{display:flex;gap:20px;margin-bottom:30px;flex-wrap:wrap;}
+        .stat-card{background:rgba(255,255,255,0.04);padding:16px 24px;border-radius:12px;border:1px solid rgba(255,255,255,0.06);flex:1 1 140px;}
+        .stat-card .num{font-size:2rem;font-weight:700;color:#a5b4fc;}
+        .stat-card .label{color:rgba(255,255,255,0.4);font-size:0.9rem;}
+        .tab-bar{display:flex;gap:8px;margin-bottom:20px;flex-wrap:wrap;}
+        .tab-btn{background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.06);color:rgba(255,255,255,0.5);padding:8px 20px;border-radius:30px;cursor:pointer;transition:0.3s;}
+        .tab-btn.active{background:#6d5bff;color:#fff;border-color:#6d5bff;}
+        .tab-btn:hover{background:rgba(255,255,255,0.08);}
+        .filter-bar{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:20px;}
+        .filter-btn{background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.06);color:rgba(255,255,255,0.5);padding:6px 18px;border-radius:30px;cursor:pointer;transition:0.3s;}
+        .filter-btn.active{background:#6d5bff;color:#fff;border-color:#6d5bff;}
+        .filter-btn:hover{background:rgba(255,255,255,0.08);}
+        table{width:100%;border-collapse:collapse;font-size:0.9rem;}
+        th,td{padding:10px 12px;text-align:left;border-bottom:1px solid rgba(255,255,255,0.06);}
+        th{color:rgba(255,255,255,0.4);font-weight:500;font-size:0.8rem;text-transform:uppercase;}
+        td{color:rgba(255,255,255,0.8);}
+        .badge{display:inline-block;padding:2px 10px;border-radius:30px;font-size:0.7rem;font-weight:600;background:rgba(255,255,255,0.06);color:rgba(255,255,255,0.5);}
+        .badge.tech{background:rgba(96,165,250,0.15);color:#93bbfc;}
+        .badge.life{background:rgba(52,211,153,0.12);color:#6ee7b7;}
+        .badge.career{background:rgba(251,191,36,0.12);color:#fcd34d;}
+        .badge.topic{background:rgba(251,191,36,0.15);color:#fcd34d;}
+        .btn-danger{background:#ef4444;color:#fff;border:none;padding:4px 12px;border-radius:20px;cursor:pointer;font-size:0.75rem;transition:0.3s;}
+        .btn-danger:hover{background:#dc2626;transform:scale(1.04);}
+        .btn-edit{background:#6d5bff;color:#fff;border:none;padding:4px 12px;border-radius:20px;cursor:pointer;font-size:0.75rem;transition:0.3s;margin-right:6px;}
+        .btn-edit:hover{transform:scale(1.04);}
+        .btn-view{background:#3b82f6;color:#fff;border:none;padding:4px 12px;border-radius:20px;cursor:pointer;font-size:0.75rem;transition:0.3s;margin-right:6px;text-decoration:none;display:inline-block;}
+        .btn-view:hover{transform:scale(1.04);}
+        .login-required{text-align:center;padding:60px 20px;}
+        .login-required h2{font-size:2rem;margin-bottom:12px;}
+        .login-required p{color:rgba(255,255,255,0.4);}
+        .btn{background:#6d5bff;color:#fff;border:none;padding:8px 24px;border-radius:30px;cursor:pointer;font-size:0.9rem;transition:0.3s;text-decoration:none;display:inline-block;}
+        .btn:hover{transform:scale(1.04);box-shadow:0 4px 16px rgba(109,91,255,0.3);}
+        .empty-state{text-align:center;padding:30px;color:rgba(255,255,255,0.3);}
+        .avatar-sm{width:30px;height:30px;border-radius:50%;object-fit:cover;border:1px solid rgba(255,255,255,0.1);}
+        .user-cell{display:flex;align-items:center;gap:8px;}
+        .modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.7);backdrop-filter:blur(8px);justify-content:center;align-items:center;z-index:999;}
+        .modal-overlay.active{display:flex;}
+        .modal-box{background:#1a1a2e;padding:30px;border-radius:20px;max-width:400px;width:100%;position:relative;}
+        .modal-box .close{position:absolute;top:12px;right:20px;font-size:1.8rem;cursor:pointer;color:rgba(255,255,255,0.4);}
+        .modal-box .close:hover{color:#fff;}
+        .modal-box input{width:100%;padding:10px 14px;border-radius:12px;border:1px solid #444;background:rgba(255,255,255,0.05);color:#e8edf5;font-size:0.95rem;margin:8px 0;}
+        .modal-box input:focus{outline:none;border-color:#6d5bff;}
+        @media (max-width:640px){table,thead,tbody,th,td,tr{display:block;}th{display:none;}tr{margin-bottom:16px;border:1px solid rgba(255,255,255,0.06);border-radius:12px;padding:12px;}td{border:none;padding:4px 0;display:flex;justify-content:space-between;align-items:center;}td::before{content:attr(data-label);font-weight:600;color:rgba(255,255,255,0.4);margin-right:12px;}.stats{flex-direction:column;}}
     </style>
 </head>
 <body>
-    <div class="container">
-        <h1>📊 管理后台</h1>
-        <div id="loginCheck"></div>
-
-        <div id="adminContent" style="display:none;">
-            <div class="stats" id="statsArea">
-                <div class="stat-card"><div class="num" id="postCount">0</div><div class="label">📄 帖子</div></div>
-                <div class="stat-card"><div class="num" id="commentCount">0</div><div class="label">💬 回复</div></div>
-                <div class="stat-card"><div class="num" id="topicCount">0</div><div class="label">🏷️ 版块</div></div>
-                <div class="stat-card"><div class="num" id="userCount">0</div><div class="label">👤 用户</div></div>
-                <div class="stat-card"><div class="num" id="likeCount">0</div><div class="label">❤️ 总点赞</div></div>
+<div class="container">
+    <h1>📊 管理后台</h1>
+    <div id="loginCheck"></div>
+    <div id="adminContent" style="display:none;">
+        <div class="stats" id="statsArea">
+            <div class="stat-card"><div class="num" id="postCount">0</div><div class="label">📄 帖子</div></div>
+            <div class="stat-card"><div class="num" id="commentCount">0</div><div class="label">💬 回复</div></div>
+            <div class="stat-card"><div class="num" id="topicCount">0</div><div class="label">🏷️ 版块</div></div>
+            <div class="stat-card"><div class="num" id="userCount">0</div><div class="label">👤 用户</div></div>
+            <div class="stat-card"><div class="num" id="likeCount">0</div><div class="label">❤️ 总点赞</div></div>
+        </div>
+        <div class="tab-bar">
+            <button class="tab-btn active" onclick="switchTab('posts')">📄 帖子管理</button>
+            <button class="tab-btn" onclick="switchTab('comments')">💬 回复管理</button>
+            <button class="tab-btn" onclick="switchTab('topics')">🏷️ 版块管理</button>
+            <button class="tab-btn" onclick="switchTab('users')">👤 用户管理</button>
+        </div>
+        <div id="tabPosts" class="panel">
+            <div class="filter-bar">
+                <button class="filter-btn active" data-cat="all" onclick="filterPosts('all')">📋 全部</button>
+                <button class="filter-btn" data-cat="tech" onclick="filterPosts('tech')">💻 科技</button>
+                <button class="filter-btn" data-cat="life" onclick="filterPosts('life')">🌿 生活</button>
+                <button class="filter-btn" data-cat="career" onclick="filterPosts('career')">💼 职场</button>
+                <button class="filter-btn" data-cat="topic" onclick="filterPosts('topic')">💬 话题</button>
             </div>
+            <div id="postsList"><p class="empty-state">加载中...</p></div>
+        </div>
+        <div id="tabComments" class="panel" style="display:none;">
+            <div id="commentsList"><p class="empty-state">加载中...</p></div>
+        </div>
+        <div id="tabTopics" class="panel" style="display:none;">
+            <div id="topicsList"><p class="empty-state">加载中...</p></div>
+        </div>
+        <div id="tabUsers" class="panel" style="display:none;">
+            <div id="usersList"><p class="empty-state">加载中...</p></div>
+        </div>
+    </div>
+</div>
 
-            <div class="tab-bar">
-                <button class="tab-btn active" onclick="switchTab('posts')">📄 帖子管理</button>
-                <button class="tab-btn" onclick="switchTab('comments')">💬 回复管理</button>
-                <button class="tab-btn" onclick="switchTab('topics')">🏷️ 版块管理</button>
-                <button class="tab-btn" onclick="switchTab('users')">👤 用户管理</button>
-            </div>
+<!-- 编辑用户模态框 -->
+<div class="modal-overlay" id="editUserModal">
+    <div class="modal-box">
+        <span class="close" onclick="closeEditUserModal()">&times;</span>
+        <h2>✏️ 编辑用户</h2>
+        <div style="margin:8px 0 16px;">
+            <label style="color:rgba(255,255,255,0.6);display:block;margin-bottom:4px;">昵称</label>
+            <input type="text" id="editUserName" placeholder="输入新昵称" maxlength="30" />
+        </div>
+        <button class="btn" onclick="saveUserEdit()" style="width:100%;">保存</button>
+        <div id="editUserMsg" style="margin-top:8px;"></div>
+    </div>
+</div>
 
-            <div id="tabPosts" class="panel">
-                <div class="filter-bar">
-                    <button class="filter-btn active" data-cat="all" onclick="filterPosts('all')">📋 全部</button>
-                    <button class="filter-btn" data-cat="tech" onclick="filterPosts('tech')">💻 科技</button>
-                    <button class="filter-btn" data-cat="life" onclick="filterPosts('life')">🌿 生活</button>
-                    <button class="filter-btn" data-cat="career" onclick="filterPosts('career')">💼 职场</button>
-                    <button class="filter-btn" data-cat="topic" onclick="filterPosts('topic')">💬 话题</button>
+<script>
+// =============================================================
+// 🔥 Supabase 配置（与 index.html 相同）
+// =============================================================
+const SUPABASE_URL = 'https://bkvsceiezbyexzqpvblj.supabase.co';  // 你的 Project URL
+const SUPABASE_ANON_KEY = 'sb_publishable_7zn5_p-Iw0u5WTov1qqlTw_Cz5YSD4s';  // 你的可发布密钥
+
+const supabase = supabaseJs.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+let currentUser = null;
+let isAdmin = false;
+let postsCache = [];
+let commentsCache = [];
+let topicsCache = [];
+let usersCache = [];
+let currentCategory = 'all';
+let totalLikes = 0;
+let editingUserId = null;
+
+// =============================================================
+// 认证与权限检查
+// =============================================================
+supabase.auth.onAuthStateChange(async (event, session) => {
+    currentUser = session?.user || null;
+    const checkDiv = document.getElementById('loginCheck');
+    const content = document.getElementById('adminContent');
+
+    if (currentUser) {
+        const { data, error } = await supabase
+            .from('profiles')
+            .select('is_admin')
+            .eq('id', currentUser.id)
+            .single();
+        if (!error && data && data.is_admin === true) {
+            isAdmin = true;
+            checkDiv.innerHTML =
+                `<p style="color:rgba(255,255,255,0.5);">👤 管理员：<strong style="color:#a5b4fc;">${currentUser.email}</strong></p>`;
+            content.style.display = 'block';
+            loadAllData();
+        } else {
+            checkDiv.innerHTML = `
+                <div class="login-required">
+                    <h2>⛔ 权限不足</h2>
+                    <p>你没有管理权限</p>
+                    <a href="index.html" class="btn" style="display:inline-block;margin-top:16px;text-decoration:none;">返回首页</a>
                 </div>
-                <div id="postsList"><p class="empty-state">加载中...</p></div>
-            </div>
-
-            <div id="tabComments" class="panel" style="display:none;">
-                <div id="commentsList"><p class="empty-state">加载中...</p></div>
-            </div>
-
-            <div id="tabTopics" class="panel" style="display:none;">
-                <div id="topicsList"><p class="empty-state">加载中...</p></div>
-            </div>
-
-            <div id="tabUsers" class="panel" style="display:none;">
-                <div id="usersList"><p class="empty-state">加载中...</p></div>
-            </div>
-        </div>
-    </div>
-
-    <!-- 编辑昵称模态框 -->
-    <div class="modal" id="editUserModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.7);backdrop-filter:blur(8px);justify-content:center;align-items:center;z-index:999;">
-        <div style="background:#1a1a2e;padding:30px;border-radius:20px;max-width:400px;width:100%;position:relative;">
-            <span onclick="closeEditUserModal()" style="position:absolute;top:12px;right:20px;font-size:1.8rem;cursor:pointer;color:rgba(255,255,255,0.4);">&times;</span>
-            <h2>✏️ 编辑用户</h2>
-            <div style="margin:16px 0;">
-                <label style="color:rgba(255,255,255,0.6);display:block;margin-bottom:4px;">昵称</label>
-                <input type="text" id="editUserName" style="width:100%;padding:10px 14px;border-radius:12px;border:1px solid #444;background:rgba(255,255,255,0.05);color:#e8edf5;font-size:0.95rem;" />
-            </div>
-            <button class="btn" onclick="saveUserEdit()" style="width:100%;">保存</button>
-            <div id="editUserMsg" style="margin-top:8px;"></div>
-        </div>
-    </div>
-
-    <script>
-        // =============================================================
-        // 管理员 UID
-        // =============================================================
-        const ADMIN_UID = "FEQmE2qlzwQqmIgKqU3VFuaYh602";
-
-        const firebaseConfig = {
-            apiKey: "AIzaSyB8ZalWGiP8at0EUIfKN46CbwQ3eH4iM8E",
-            authDomain: "project-170416828695178494.firebaseapp.com",
-            projectId: "project-170416828695178494",
-            storageBucket: "project-170416828695178494.appspot.com",
-            messagingSenderId: "1096326612519",
-            appId: "1:1096326612519:web:8208916652738ce870f002",
-            measurementId: "G-3K0YDFV3J5"
-        };
-
-        firebase.initializeApp(firebaseConfig);
-        const auth = firebase.auth();
-        const db = firebase.firestore();
-
-        let currentUser = null;
-        let postsCache = [];
-        let commentsCache = [];
-        let topicsCache = [];
-        let usersCache = [];
-        let currentCategory = 'all';
-        let totalLikes = 0;
-        let editingUserId = null;
-
-        // =============================================================
-        // 认证 + 权限
-        // =============================================================
-        auth.onAuthStateChanged(user => {
-            currentUser = user;
-            const checkDiv = document.getElementById('loginCheck');
-            const content = document.getElementById('adminContent');
-
-            if (user) {
-                if (user.uid === ADMIN_UID) {
-                    checkDiv.innerHTML =
-                        `<p style="color:rgba(255,255,255,0.5);">👤 管理员：<strong style="color:#a5b4fc;">${user.displayName || user.email}</strong></p>`;
-                    content.style.display = 'block';
-                    loadAllData();
-                } else {
-                    checkDiv.innerHTML = `
-                        <div class="login-required">
-                            <h2>⛔ 权限不足</h2>
-                            <p>你没有管理权限，请联系站长</p>
-                            <a href="index.html" class="btn" style="display:inline-block;margin-top:16px;text-decoration:none;">返回首页</a>
-                        </div>
-                    `;
-                    content.style.display = 'none';
-                }
-            } else {
-                checkDiv.innerHTML = `
-                    <div class="login-required">
-                        <h2>🔐 请先登录</h2>
-                        <p>你需要登录后才能管理</p>
-                        <a href="index.html" class="btn" style="display:inline-block;margin-top:16px;text-decoration:none;">返回首页登录</a>
-                    </div>
-                `;
-                content.style.display = 'none';
-            }
-        });
-
-        // =============================================================
-        // 工具函数：获取用户头像
-        // =============================================================
-        function getAvatarUrl(userData) {
-            if (userData && userData.avatarUrl) return userData.avatarUrl;
-            const name = userData?.username || userData?.displayName || 'User';
-            return `https://ui-avatars.com/api/?name=${encodeURIComponent(name)}&background=6d5bff&color=fff&size=40`;
-        }
-
-        // =============================================================
-        // 加载数据
-        // =============================================================
-        async function loadAllData() {
-            await loadPosts();
-            await loadComments();
-            await loadTopics();
-            await loadUsers();
-            updateStats();
-        }
-
-        async function loadPosts() {
-            try {
-                const snapshot = await db.collection('posts').orderBy('created_at', 'desc').get();
-                postsCache = [];
-                totalLikes = 0;
-                snapshot.forEach(doc => {
-                    const data = doc.data();
-                    data.id = doc.id;
-                    postsCache.push(data);
-                    totalLikes += (data.likes || 0);
-                });
-                renderPosts(currentCategory);
-            } catch (e) { console.error(e); }
-        }
-
-        async function loadComments() {
-            try {
-                const snapshot = await db.collection('comments').orderBy('created_at', 'desc').get();
-                commentsCache = [];
-                snapshot.forEach(doc => {
-                    const data = doc.data();
-                    data.id = doc.id;
-                    commentsCache.push(data);
-                });
-                renderComments();
-            } catch (e) { console.error(e); }
-        }
-
-        async function loadTopics() {
-            try {
-                const snapshot = await db.collection('topics').orderBy('name').get();
-                topicsCache = [];
-                snapshot.forEach(doc => {
-                    const data = doc.data();
-                    data.id = doc.id;
-                    topicsCache.push(data);
-                });
-                renderTopics();
-            } catch (e) { console.error(e); }
-        }
-
-        async function loadUsers() {
-            try {
-                const snapshot = await db.collection('users').get();
-                usersCache = [];
-                snapshot.forEach(doc => {
-                    const data = doc.data();
-                    data.id = doc.id;
-                    usersCache.push(data);
-                });
-                renderUsers();
-            } catch (e) { console.error(e); }
-        }
-
-        function updateStats() {
-            document.getElementById('postCount').textContent = postsCache.length;
-            document.getElementById('commentCount').textContent = commentsCache.length;
-            document.getElementById('topicCount').textContent = topicsCache.length;
-            document.getElementById('userCount').textContent = usersCache.length;
-            document.getElementById('likeCount').textContent = totalLikes;
-        }
-
-        // =============================================================
-        // Tab 切换
-        // =============================================================
-        function switchTab(tab) {
-            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-            document.querySelector(`.tab-btn[onclick*="${tab}"]`)?.classList.add('active');
-            document.querySelectorAll('.panel').forEach(p => p.style.display = 'none');
-            document.getElementById('tab' + tab.charAt(0).toUpperCase() + tab.slice(1)).style.display = 'block';
-        }
-
-        // =============================================================
-        // 帖子管理
-        // =============================================================
-        function filterPosts(category) {
-            currentCategory = category;
-            document.querySelectorAll('#tabPosts .filter-btn').forEach(btn => {
-                btn.classList.toggle('active', btn.dataset.cat === category);
-            });
-            renderPosts(category);
-        }
-
-        function renderPosts(category) {
-            const list = document.getElementById('postsList');
-            let filtered = postsCache;
-            if (category !== 'all') {
-                filtered = filtered.filter(p => p.category === category);
-            }
-            if (!filtered.length) {
-                list.innerHTML = '<p class="empty-state">📭 暂无帖子</p>';
-                return;
-            }
-            const catMap = { tech: '科技', life: '生活', career: '职场', topic: '💬 话题' };
-            let html = `
-                <table>
-                    <thead><tr><th>标题</th><th>分类</th><th>作者</th><th>日期</th><th>❤️</th><th>👁️</th><th>操作</th></tr></thead>
-                    <tbody>
             `;
-            filtered.forEach(p => {
-                const badgeClass = p.category === 'topic' ? 'badge topic' : `badge ${p.category}`;
-                const badgeText = catMap[p.category] || p.category;
-                const dateStr = p.created_at ? new Date(p.created_at.seconds * 1000).toLocaleDateString('zh-CN') : '';
-                html += `
-                    <tr>
-                        <td data-label="标题">${p.title}</td>
-                        <td data-label="分类"><span class="${badgeClass}">${badgeText}</span></td>
-                        <td data-label="作者">${p.author_name || '匿名'}</td>
-                        <td data-label="日期">${dateStr}</td>
-                        <td data-label="❤️">${p.likes || 0}</td>
-                        <td data-label="👁️">${p.views || 0}</td>
-                        <td data-label="操作">
-                            <a href="index.html" class="btn-view" target="_blank">🔗</a>
-                            <button class="btn-danger" onclick="deletePost('${p.id}')">🗑️</button>
-                        </td>
-                    </tr>
-                `;
-            });
-            html += `</tbody></table>`;
-            list.innerHTML = html;
+            content.style.display = 'none';
+            isAdmin = false;
         }
+    } else {
+        checkDiv.innerHTML = `
+            <div class="login-required">
+                <h2>🔐 请先登录</h2>
+                <p>你需要登录后才能管理</p>
+                <a href="index.html" class="btn" style="display:inline-block;margin-top:16px;text-decoration:none;">返回首页登录</a>
+            </div>
+        `;
+        content.style.display = 'none';
+        isAdmin = false;
+    }
+});
 
-        async function deletePost(postId) {
-            if (!confirm('确定要删除这篇帖子吗？（会同时删除所有回复）')) return;
-            try {
-                const commentsSnap = await db.collection('comments').where('post_id', '==', postId).get();
-                const batch = db.batch();
-                commentsSnap.forEach(doc => batch.delete(doc.ref));
-                await batch.commit();
-                await db.collection('posts').doc(postId).delete();
-                alert('删除成功！');
-                loadAllData();
-            } catch (err) {
-                alert('删除失败：' + err.message);
-            }
-        }
+// =============================================================
+// 加载数据
+// =============================================================
+async function loadAllData() {
+    await loadPosts();
+    await loadComments();
+    await loadTopics();
+    await loadUsers();
+    updateStats();
+}
 
-        // =============================================================
-        // 回复管理
-        // =============================================================
-        function renderComments() {
-            const list = document.getElementById('commentsList');
-            if (!commentsCache.length) {
-                list.innerHTML = '<p class="empty-state">💬 暂无回复</p>';
-                return;
-            }
-            let html = `
-                <table>
-                    <thead><tr><th>回复内容</th><th>用户</th><th>帖子</th><th>时间</th><th>操作</th></tr></thead>
-                    <tbody>
-            `;
-            commentsCache.forEach(c => {
-                const dateStr = c.created_at ? new Date(c.created_at.seconds * 1000).toLocaleString('zh-CN') : '';
-                const post = postsCache.find(p => p.id === c.post_id);
-                const postTitle = post ? post.title : c.post_id || '已删除';
-                html += `
-                    <tr>
-                        <td data-label="回复">${c.content.length > 50 ? c.content.slice(0,50)+'...' : c.content}</td>
-                        <td data-label="用户">${c.username || '匿名'}</td>
-                        <td data-label="帖子">${postTitle}</td>
-                        <td data-label="时间">${dateStr}</td>
-                        <td data-label="操作">
-                            <button class="btn-danger" onclick="deleteComment('${c.id}')">🗑️</button>
-                        </td>
-                    </tr>
-                `;
-            });
-            html += `</tbody></table>`;
-            list.innerHTML = html;
-        }
+async function loadPosts() {
+    const { data, error } = await supabase.from('posts').order('created_at', { ascending: false });
+    if (!error) {
+        postsCache = data || [];
+        totalLikes = postsCache.reduce((sum, p) => sum + (p.likes || 0), 0);
+        renderPosts(currentCategory);
+    }
+}
 
-        async function deleteComment(commentId) {
-            if (!confirm('确定要删除这条回复吗？')) return;
-            try {
-                await db.collection('comments').doc(commentId).delete();
-                alert('删除成功！');
-                loadAllData();
-            } catch (err) {
-                alert('删除失败：' + err.message);
-            }
-        }
+async function loadComments() {
+    const { data, error } = await supabase.from('comments').order('created_at', { ascending: false });
+    if (!error) commentsCache = data || [];
+    renderComments();
+}
 
-        // =============================================================
-        // 版块管理
-        // =============================================================
-        function renderTopics() {
-            const list = document.getElementById('topicsList');
-            if (!topicsCache.length) {
-                list.innerHTML = '<p class="empty-state">🏷️ 暂无版块</p>';
-                return;
-            }
-            let html = `
-                <table>
-                    <thead><tr><th>版块名称</th><th>创建时间</th><th>操作</th></tr></thead>
-                    <tbody>
-            `;
-            topicsCache.forEach(t => {
-                const dateStr = t.created_at ? new Date(t.created_at.seconds * 1000).toLocaleDateString('zh-CN') : '';
-                html += `
-                    <tr>
-                        <td data-label="版块名称">🏷️ ${t.name}</td>
-                        <td data-label="创建时间">${dateStr}</td>
-                        <td data-label="操作">
-                            <button class="btn-danger" onclick="deleteTopic('${t.id}')">🗑️</button>
-                        </td>
-                    </tr>
-                `;
-            });
-            html += `</tbody></table>`;
-            list.innerHTML = html;
-        }
+async function loadTopics() {
+    const { data, error } = await supabase.from('topics').order('name', { ascending: true });
+    if (!error) topicsCache = data || [];
+    renderTopics();
+}
 
-        async function deleteTopic(topicId) {
-            if (!confirm('确定要删除这个版块吗？')) return;
-            try {
-                await db.collection('topics').doc(topicId).delete();
-                alert('删除成功！');
-                loadAllData();
-            } catch (err) {
-                alert('删除失败：' + err.message);
-            }
-        }
+async function loadUsers() {
+    const { data, error } = await supabase.from('profiles').select('*').order('created_at', { ascending: false });
+    if (!error) usersCache = data || [];
+    renderUsers();
+}
 
-        // =============================================================
-        // 用户管理（含头像和编辑昵称）
-        // =============================================================
-        function renderUsers() {
-            const list = document.getElementById('usersList');
-            if (!usersCache.length) {
-                list.innerHTML = '<p class="empty-state">👤 暂无用户</p>';
-                return;
-            }
-            let html = `
-                <table>
-                    <thead><tr><th>用户</th><th>昵称</th><th>邮箱</th><th>注册时间</th><th>操作</th></tr></thead>
-                    <tbody>
-            `;
-            usersCache.forEach(u => {
-                const avatarUrl = getAvatarUrl(u);
-                const dateStr = u.created_at ? new Date(u.created_at.seconds * 1000).toLocaleDateString('zh-CN') : '';
-                const isAdmin = u.id === ADMIN_UID;
-                html += `
-                    <tr>
-                        <td data-label="用户">
-                            <div class="user-cell">
-                                <img class="avatar-sm" src="${avatarUrl}" alt="${u.username || '用户'}" />
-                            </div>
-                        </td>
-                        <td data-label="昵称">${u.username || '用户'}</td>
-                        <td data-label="邮箱">${u.email || '未提供'}</td>
-                        <td data-label="注册时间">${dateStr}</td>
-                        <td data-label="操作">
-                            ${isAdmin ? '<span style="color:#6d5bff;">管理员</span>' : `
-                                <button class="btn-edit" onclick="openEditUser('${u.id}')">✏️</button>
-                                <button class="btn-danger" onclick="deleteUser('${u.id}')">🗑️</button>
-                            `}
-                        </td>
-                    </tr>
-                `;
-            });
-            html += `</tbody></table>`;
-            list.innerHTML = html;
-        }
+function updateStats() {
+    document.getElementById('postCount').textContent = postsCache.length;
+    document.getElementById('commentCount').textContent = commentsCache.length;
+    document.getElementById('topicCount').textContent = topicsCache.length;
+    document.getElementById('userCount').textContent = usersCache.length;
+    document.getElementById('likeCount').textContent = totalLikes;
+}
 
-        // =============================================================
-        // 编辑用户（昵称）
-        // =============================================================
-        function openEditUser(userId) {
-            const user = usersCache.find(u => u.id === userId);
-            if (!user) return;
-            editingUserId = userId;
-            document.getElementById('editUserName').value = user.username || '';
-            document.getElementById('editUserModal').style.display = 'flex';
-            document.getElementById('editUserMsg').innerHTML = '';
-        }
+// =============================================================
+// Tab 切换
+// =============================================================
+function switchTab(tab) {
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+    document.querySelector(`.tab-btn[onclick*="${tab}"]`)?.classList.add('active');
+    document.querySelectorAll('.panel').forEach(p => p.style.display = 'none');
+    document.getElementById('tab' + tab.charAt(0).toUpperCase() + tab.slice(1)).style.display = 'block';
+}
 
-        function closeEditUserModal() {
-            document.getElementById('editUserModal').style.display = 'none';
-            editingUserId = null;
-        }
+// =============================================================
+// 帖子管理
+// =============================================================
+function filterPosts(category) {
+    currentCategory = category;
+    document.querySelectorAll('#tabPosts .filter-btn').forEach(btn => {
+        btn.classList.toggle('active', btn.dataset.cat === category);
+    });
+    renderPosts(category);
+}
 
-        // 点击背景关闭
-        document.getElementById('editUserModal').addEventListener('click', function(e) {
-            if (e.target === this) closeEditUserModal();
-        });
+function renderPosts(category) {
+    const list = document.getElementById('postsList');
+    let filtered = postsCache;
+    if (category !== 'all') filtered = filtered.filter(p => p.category === category);
+    if (!filtered.length) {
+        list.innerHTML = '<p class="empty-state">暂无帖子</p>';
+        return;
+    }
+    const catMap = { tech: '科技', life: '生活', career: '职场', topic: '💬 话题' };
+    let html = `<table><thead><tr><th>标题</th><th>分类</th><th>作者</th><th>日期</th><th>❤️</th><th>👁️</th><th>操作</th></tr></thead><tbody>`;
+    filtered.forEach(p => {
+        const badgeClass = p.category === 'topic' ? 'badge topic' : `badge ${p.category}`;
+        const badgeText = catMap[p.category] || p.category;
+        const dateStr = p.created_at ? new Date(p.created_at).toLocaleDateString('zh-CN') : '';
+        html += `<tr>
+            <td data-label="标题">${p.title}</td>
+            <td data-label="分类"><span class="${badgeClass}">${badgeText}</span></td>
+            <td data-label="作者">${p.author_name || '匿名'}</td>
+            <td data-label="日期">${dateStr}</td>
+            <td data-label="❤️">${p.likes || 0}</td>
+            <td data-label="👁️">${p.views || 0}</td>
+            <td data-label="操作">
+                <a href="index.html" class="btn-view" target="_blank">🔗</a>
+                <button class="btn-danger" onclick="deletePost('${p.id}')">🗑️</button>
+            </td>
+        </tr>`;
+    });
+    html += `</tbody></table>`;
+    list.innerHTML = html;
+}
 
-        async function saveUserEdit() {
-            const newName = document.getElementById('editUserName').value.trim();
-            const msg = document.getElementById('editUserMsg');
-            if (!newName) {
-                msg.innerHTML = '<p style="color:#ef4444;">昵称不能为空</p>';
-                return;
-            }
-            if (newName.length > 30) {
-                msg.innerHTML = '<p style="color:#ef4444;">昵称不能超过30字符</p>';
-                return;
-            }
-            if (!editingUserId) return;
+async function deletePost(postId) {
+    if (!confirm('确定要删除这篇帖子吗？（会同时删除所有回复）')) return;
+    try {
+        await supabase.from('comments').delete().eq('post_id', postId);
+        await supabase.from('posts').delete().eq('id', postId);
+        alert('删除成功！');
+        loadAllData();
+    } catch (e) { alert('删除失败：' + e.message); }
+}
 
-            try {
-                await db.collection('users').doc(editingUserId).set({
-                    username: newName
-                }, { merge: true });
-                msg.innerHTML = '<p style="color:#6ee7b7;">✅ 昵称修改成功！</p>';
-                // 延迟关闭并刷新
-                setTimeout(() => {
-                    closeEditUserModal();
-                    loadAllData();
-                }, 1000);
-            } catch (err) {
-                msg.innerHTML = '<p style="color:#ef4444;">修改失败：' + err.message + '</p>';
-            }
-        }
+// =============================================================
+// 回复管理
+// =============================================================
+function renderComments() {
+    const list = document.getElementById('commentsList');
+    if (!commentsCache.length) {
+        list.innerHTML = '<p class="empty-state">暂无回复</p>';
+        return;
+    }
+    let html = `<table><thead><tr><th>回复</th><th>用户</th><th>帖子</th><th>时间</th><th>操作</th></tr></thead><tbody>`;
+    commentsCache.forEach(c => {
+        const dateStr = c.created_at ? new Date(c.created_at).toLocaleString('zh-CN') : '';
+        const post = postsCache.find(p => p.id === c.post_id);
+        const postTitle = post ? post.title : '已删除';
+        html += `<tr>
+            <td data-label="回复">${c.content.length > 50 ? c.content.slice(0,50)+'...' : c.content}</td>
+            <td data-label="用户">${c.username || '匿名'}</td>
+            <td data-label="帖子">${postTitle}</td>
+            <td data-label="时间">${dateStr}</td>
+            <td data-label="操作">
+                <button class="btn-danger" onclick="deleteComment('${c.id}')">🗑️</button>
+            </td>
+        </tr>`;
+    });
+    html += `</tbody></table>`;
+    list.innerHTML = html;
+}
 
-        // =============================================================
-        // 删除用户
-        // =============================================================
-        async function deleteUser(userId) {
-            if (userId === ADMIN_UID) {
-                alert('不能删除管理员自己');
-                return;
-            }
-            if (!confirm('确定要删除这个用户吗？这会同时删除该用户的所有回复和帖子。')) return;
-            try {
-                const batch = db.batch();
-                // 删除该用户的所有回复
-                const commentsSnap = await db.collection('comments').where('user_id', '==', userId).get();
-                commentsSnap.forEach(doc => batch.delete(doc.ref));
-                // 删除该用户的所有帖子
-                const postsSnap = await db.collection('posts').where('author_id', '==', userId).get();
-                postsSnap.forEach(doc => batch.delete(doc.ref));
-                await batch.commit();
-                // 删除用户资料
-                await db.collection('users').doc(userId).delete();
-                alert('删除成功！');
-                loadAllData();
-            } catch (err) {
-                alert('删除失败：' + err.message);
-            }
-        }
+async function deleteComment(commentId) {
+    if (!confirm('确定要删除这条回复吗？')) return;
+    try {
+        await supabase.from('comments').delete().eq('id', commentId);
+        alert('删除成功！');
+        loadAllData();
+    } catch (e) { alert('删除失败：' + e.message); }
+}
 
-        // =============================================================
-        // 暴露全局函数
-        // =============================================================
-        window.switchTab = switchTab;
-        window.filterPosts = filterPosts;
-        window.deletePost = deletePost;
-        window.deleteComment = deleteComment;
-        window.deleteTopic = deleteTopic;
-        window.deleteUser = deleteUser;
-        window.openEditUser = openEditUser;
-        window.closeEditUserModal = closeEditUserModal;
-        window.saveUserEdit = saveUserEdit;
-    </script>
+// =============================================================
+// 版块管理
+// =============================================================
+function renderTopics() {
+    const list = document.getElementById('topicsList');
+    if (!topicsCache.length) {
+        list.innerHTML = '<p class="empty-state">暂无版块</p>';
+        return;
+    }
+    let html = `<table><thead><tr><th>版块名称</th><th>创建时间</th><th>操作</th></tr></thead><tbody>`;
+    topicsCache.forEach(t => {
+        const dateStr = t.created_at ? new Date(t.created_at).toLocaleDateString('zh-CN') : '';
+        html += `<tr>
+            <td data-label="版块名称">🏷️ ${t.name}</td>
+            <td data-label="创建时间">${dateStr}</td>
+            <td data-label="操作">
+                <button class="btn-danger" onclick="deleteTopic('${t.id}')">🗑️</button>
+            </td>
+        </tr>`;
+    });
+    html += `</tbody></table>`;
+    list.innerHTML = html;
+}
+
+async function deleteTopic(topicId) {
+    if (!confirm('确定要删除这个版块吗？')) return;
+    try {
+        await supabase.from('topics').delete().eq('id', topicId);
+        alert('删除成功！');
+        loadAllData();
+    } catch (e) { alert('删除失败：' + e.message); }
+}
+
+// =============================================================
+// 用户管理
+// =============================================================
+function renderUsers() {
+    const list = document.getElementById('usersList');
+    if (!usersCache.length) {
+        list.innerHTML = '<p class="empty-state">暂无用户</p>';
+        return;
+    }
+    let html = `<table><thead><tr><th>用户</th><th>昵称</th><th>邮箱</th><th>注册时间</th><th>操作</th></tr></thead><tbody>`;
+    usersCache.forEach(u => {
+        const avatarUrl = u.avatar_url || `https://ui-avatars.com/api/?name=${encodeURIComponent(u.username||'U')}&background=6d5bff&color=fff&size=30`;
+        const dateStr = u.created_at ? new Date(u.created_at).toLocaleDateString('zh-CN') : '';
+        const isAdminUser = u.is_admin || false;
+        html += `<tr>
+            <td data-label="用户"><img class="avatar-sm" src="${avatarUrl}" alt="${u.username}" /></td>
+            <td data-label="昵称">${u.username}</td>
+            <td data-label="邮箱">${u.email || '未提供'}</td>
+            <td data-label="注册时间">${dateStr}</td>
+            <td data-label="操作">
+                ${isAdminUser ? '<span style="color:#6d5bff;">管理员</span>' : `
+                    <button class="btn-edit" onclick="openEditUser('${u.id}')">✏️</button>
+                    <button class="btn-danger" onclick="deleteUser('${u.id}')">🗑️</button>
+                `}
+            </td>
+        </tr>`;
+    });
+    html += `</tbody></table>`;
+    list.innerHTML = html;
+}
+
+function openEditUser(userId) {
+    const user = usersCache.find(u => u.id === userId);
+    if (!user) return;
+    editingUserId = userId;
+    document.getElementById('editUserName').value = user.username || '';
+    document.getElementById('editUserModal').classList.add('active');
+    document.getElementById('editUserMsg').innerHTML = '';
+}
+
+function closeEditUserModal() {
+    document.getElementById('editUserModal').classList.remove('active');
+    editingUserId = null;
+}
+document.getElementById('editUserModal').addEventListener('click', function(e) {
+    if (e.target === this) closeEditUserModal();
+});
+
+async function saveUserEdit() {
+    const newName = document.getElementById('editUserName').value.trim();
+    const msg = document.getElementById('editUserMsg');
+    if (!newName) { msg.innerHTML = '<p style="color:#ef4444;">昵称不能为空</p>'; return; }
+    if (newName.length > 30) { msg.innerHTML = '<p style="color:#ef4444;">昵称不能超过30字符</p>'; return; }
+    if (!editingUserId) return;
+    try {
+        await supabase.from('profiles').update({ username: newName }).eq('id', editingUserId);
+        msg.innerHTML = '<p style="color:#6ee7b7;">✅ 昵称修改成功！</p>';
+        setTimeout(() => { closeEditUserModal(); loadAllData(); }, 1000);
+    } catch(e) { msg.innerHTML = '<p style="color:#ef4444;">修改失败：' + e.message + '</p>'; }
+}
+
+async function deleteUser(userId) {
+    if (!confirm('确定要删除这个用户吗？（会删除该用户所有回复和帖子）')) return;
+    try {
+        await supabase.from('comments').delete().eq('user_id', userId);
+        await supabase.from('posts').delete().eq('author_id', userId);
+        await supabase.from('profiles').delete().eq('id', userId);
+        alert('删除成功！');
+        loadAllData();
+    } catch(e) { alert('删除失败：' + e.message); }
+}
+
+// =============================================================
+// 暴露全局
+// =============================================================
+window.switchTab = switchTab;
+window.filterPosts = filterPosts;
+window.deletePost = deletePost;
+window.deleteComment = deleteComment;
+window.deleteTopic = deleteTopic;
+window.deleteUser = deleteUser;
+window.openEditUser = openEditUser;
+window.closeEditUserModal = closeEditUserModal;
+window.saveUserEdit = saveUserEdit;
+</script>
 </body>
 </html>
