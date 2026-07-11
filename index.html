@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>窍某论坛</title>
     <style>
-        /* 完整样式 */
         *{margin:0;padding:0;box-sizing:border-box;}
         body{background:#0b0e1a;color:#e8edf5;font-family:'Segoe UI',sans-serif;padding:20px;line-height:1.6;}
         .container{max-width:1200px;margin:0 auto;}
@@ -272,13 +271,13 @@
 
     <script>
         // =============================================================
-        // 1. 配置
+        // 配置
         // =============================================================
         const SUPABASE_URL = 'https://bkvsceiezbyexzqpvblj.supabase.co';
         const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJrdnNjZWllemJ5ZXh6cXB2YmxqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODM3MDk1MzIsImV4cCI6MjA5OTI4NTUzMn0.1h4Yp8YaJdMMOQW8N2zqvJi6QrxHPncBFMK9LjdmZ6E';
 
         // =============================================================
-        // 2. 全局状态
+        // 全局状态
         // =============================================================
         let currentUser = null;
         let userProfile = null;
@@ -290,7 +289,7 @@
         let isAdmin = false;
 
         // =============================================================
-        // 3. 工具函数
+        // 工具函数
         // =============================================================
         function formatDate(d) {
             if (!d) return '';
@@ -338,7 +337,7 @@
         }
 
         // =============================================================
-        // 4. API 调用
+        // API 调用
         // =============================================================
         async function signIn(email, password) {
             const resp = await fetch(SUPABASE_URL + '/auth/v1/token?grant_type=password', {
@@ -425,67 +424,77 @@
         }
 
         // =============================================================
-        // 5. 点赞核心（含 409 切换）
+        // 点赞核心（修复版：点赞后更新 posts.likes，刷新不消失）
         // =============================================================
         async function toggleLike(postId, userId) {
             const numericPostId = parseInt(postId);
             const userIdStr = String(userId);
 
+            // 1. 查询是否已点赞
+            const checkUrl = `${SUPABASE_URL}/rest/v1/likes?post_id=eq.${numericPostId}&user_id=eq.${userIdStr}`;
+            const checkResp = await fetch(checkUrl, { headers: getHeaders(true) });
+            let existing = [];
             try {
-                const checkUrl = `${SUPABASE_URL}/rest/v1/likes?post_id=eq.${numericPostId}&user_id=eq.${userIdStr}`;
-                const checkResp = await fetch(checkUrl, { headers: getHeaders(true) });
-                let existing = [];
-                try {
-                    existing = await checkResp.json();
-                } catch (e) {
-                    existing = [];
-                }
+                existing = await checkResp.json();
+            } catch (e) {
+                existing = [];
+            }
 
-                if (existing && existing.length > 0) {
-                    const deleteUrl = `${SUPABASE_URL}/rest/v1/likes?id=eq.${existing[0].id}`;
-                    const deleteResp = await fetch(deleteUrl, { method: 'DELETE', headers: getHeaders(true) });
-                    if (deleteResp.ok) {
-                        return 'unliked';
-                    } else {
-                        throw new Error(`取消点赞失败 (HTTP ${deleteResp.status})`);
-                    }
-                }
+            let action = ''; // 'liked' 或 'unliked'
 
+            if (existing && existing.length > 0) {
+                // 2. 取消点赞：删除 likes 记录
+                const deleteUrl = `${SUPABASE_URL}/rest/v1/likes?id=eq.${existing[0].id}`;
+                const deleteResp = await fetch(deleteUrl, { method: 'DELETE', headers: getHeaders(true) });
+                if (!deleteResp.ok) {
+                    throw new Error(`取消点赞失败 (HTTP ${deleteResp.status})`);
+                }
+                action = 'unliked';
+            } else {
+                // 3. 点赞：插入 likes 记录
                 const insertResp = await fetch(`${SUPABASE_URL}/rest/v1/likes`, {
                     method: 'POST',
                     headers: getHeaders(true),
                     body: JSON.stringify({ post_id: numericPostId, user_id: userIdStr })
                 });
                 if (insertResp.status === 201 || insertResp.status === 200) {
+                    action = 'liked';
+                } else if (insertResp.status === 409) {
+                    // 冲突视为已点赞
                     return 'liked';
+                } else {
+                    const text = await insertResp.text();
+                    throw new Error(`点赞失败: ${insertResp.status} - ${text}`);
                 }
-                if (insertResp.status === 409) {
-                    console.warn('检测到冲突，执行强制切换...');
-                    await fetch(`${SUPABASE_URL}/rest/v1/likes?post_id=eq.${numericPostId}&user_id=eq.${userIdStr}`, {
-                        method: 'DELETE',
-                        headers: getHeaders(true)
-                    });
-                    const retryResp = await fetch(`${SUPABASE_URL}/rest/v1/likes`, {
-                        method: 'POST',
-                        headers: getHeaders(true),
-                        body: JSON.stringify({ post_id: numericPostId, user_id: userIdStr })
-                    });
-                    if (retryResp.status === 201 || retryResp.status === 200) {
-                        return 'liked';
-                    } else {
-                        throw new Error(`强制切换失败 (HTTP ${retryResp.status})`);
-                    }
-                }
-                const text = await insertResp.text();
-                throw new Error(`点赞失败: ${insertResp.status} - ${text}`);
-            } catch (error) {
-                console.error('toggleLike 错误:', error);
-                throw error;
             }
+
+            // 4. 更新 posts 表中的 likes 计数（关键！）
+            // 先获取当前帖子数据
+            const postResp = await fetch(`${SUPABASE_URL}/rest/v1/posts?id=eq.${numericPostId}`, {
+                headers: getHeaders(true)
+            });
+            const postData = await handleResponse(postResp);
+            if (!postData || postData.length === 0) {
+                throw new Error('帖子不存在');
+            }
+            const currentLikes = postData[0].likes || 0;
+            const newLikes = action === 'liked' ? currentLikes + 1 : Math.max(currentLikes - 1, 0);
+
+            // 更新帖子点赞数
+            const updateResp = await fetch(`${SUPABASE_URL}/rest/v1/posts?id=eq.${numericPostId}`, {
+                method: 'PATCH',
+                headers: getHeaders(true),
+                body: JSON.stringify({ likes: newLikes })
+            });
+            if (!updateResp.ok) {
+                throw new Error(`更新帖子点赞数失败 (HTTP ${updateResp.status})`);
+            }
+
+            return action;
         }
 
         // =============================================================
-        // 6. 点赞处理函数（含热度榜刷新）
+        // 点赞处理函数
         // =============================================================
         async function handleLike(postId) {
             if (!currentUser) {
@@ -494,19 +503,10 @@
             }
             try {
                 const result = await toggleLike(postId, currentUser.id);
-                const numericId = parseInt(postId);
-                const post = postsCache.find(p => parseInt(p.id) === numericId);
-                if (post) {
-                    if (result === 'liked') {
-                        post.likes = (post.likes || 0) + 1;
-                    } else {
-                        post.likes = Math.max((post.likes || 0) - 1, 0);
-                    }
-                }
+                // 刷新帖子列表（重新从数据库加载，保证数据一致）
                 const keyword = document.getElementById('searchInput').value.trim();
-                const filtered = getFilteredPosts(currentCategory, keyword);
-                renderPosts(filtered);
-                renderHotList(postsCache);
+                await loadPosts(currentCategory, keyword);
+                // 如果当前在详情页，刷新详情
                 const detailArea = document.getElementById('detailArea');
                 if (!detailArea.classList.contains('hidden')) {
                     await showPost(postId);
@@ -519,7 +519,7 @@
         }
 
         // =============================================================
-        // 7. 帖子列表相关
+        // 帖子列表相关
         // =============================================================
         function getFilteredPosts(category, keyword = '') {
             let filtered = postsCache;
@@ -591,7 +591,7 @@
         }
 
         // =============================================================
-        // 8. 热度榜
+        // 热度榜
         // =============================================================
         function renderHotList(posts) {
             const container = document.getElementById('hotContent');
@@ -617,7 +617,7 @@
         }
 
         // =============================================================
-        // 9. 统计更新
+        // 统计更新
         // =============================================================
         async function updateStats() {
             document.getElementById('statPosts').textContent = postsCache.length;
@@ -635,7 +635,7 @@
         }
 
         // =============================================================
-        // 10. 帖子详情
+        // 帖子详情
         // =============================================================
         async function showPost(postId) {
             const post = postsCache.find(p => parseInt(p.id) === parseInt(postId));
@@ -709,7 +709,7 @@
         }
 
         // =============================================================
-        // 11. 发帖
+        // 发帖
         // =============================================================
         function togglePublish() {
             const form = document.getElementById('publishForm');
@@ -755,7 +755,7 @@
         }
 
         // =============================================================
-        // 12. 评论
+        // 评论
         // =============================================================
         async function publishComment(postId) {
             if (isSubmitting) { showToast('请勿重复提交', true); return; }
@@ -790,7 +790,7 @@
         }
 
         // =============================================================
-        // 13. 分类和搜索
+        // 分类和搜索
         // =============================================================
         function setCategory(cat) {
             currentCategory = cat;
@@ -807,7 +807,7 @@
         }
 
         // =============================================================
-        // 14. 版块管理
+        // 版块管理
         // =============================================================
         async function loadTopics() {
             try {
@@ -874,7 +874,7 @@
         }
 
         // =============================================================
-        // 15. 个人中心
+        // 个人中心
         // =============================================================
         function openProfile() {
             if (!currentUser) { showToast('请先登录', true); return; }
@@ -937,7 +937,7 @@
         }
 
         // =============================================================
-        // 16. 主题切换
+        // 主题切换
         // =============================================================
         function toggleTheme() {
             const body = document.body;
@@ -961,7 +961,7 @@
         }
 
         // =============================================================
-        // 17. 模态框
+        // 模态框
         // =============================================================
         function openModal() { document.getElementById('authModal').classList.add('active'); }
         function closeModal() { document.getElementById('authModal').classList.remove('active'); }
@@ -985,7 +985,7 @@
         }
 
         // =============================================================
-        // 18. 认证
+        // 认证
         // =============================================================
         async function handleLogin(e) {
             e.preventDefault();
@@ -1043,7 +1043,7 @@
         }
 
         // =============================================================
-        // 19. OAuth 登录（含回调处理）
+        // OAuth 登录（含回调处理）
         // =============================================================
         async function handleSocialLogin(provider) {
             try {
@@ -1140,7 +1140,7 @@
         }
 
         // =============================================================
-        // 20. UI 更新
+        // UI 更新
         // =============================================================
         function updateUI() {
             const loginBtn = document.getElementById('loginBtn');
@@ -1177,7 +1177,7 @@
         }
 
         // =============================================================
-        // 21. 暴露全局函数
+        // 暴露全局函数（确保 onclick 能找到）
         // =============================================================
         window.openModal = openModal;
         window.closeModal = closeModal;
@@ -1206,7 +1206,7 @@
         window.renderHotList = renderHotList;
 
         // =============================================================
-        // 22. 初始化
+        // 初始化（含 OAuth 回调检测）
         // =============================================================
         async function init() {
             // 处理 OAuth 回调
