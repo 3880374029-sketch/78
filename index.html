@@ -71,6 +71,7 @@
     <div class="publish-form" id="publishForm">
         <input type="text" id="newTitle" maxlength="100" placeholder="标题" />
         <select id="newCategory">
+            <option value="闲聊">💬 闲聊</option>
             <option value="tech">💻 科技</option>
             <option value="life">🌿 生活</option>
             <option value="career">💼 职场</option>
@@ -156,6 +157,19 @@ function getHeaders(includeAuth = true) {
     return headers;
 }
 
+async function handleResponse(res) {
+    const text = await res.text();
+    let json = null;
+    try { json = JSON.parse(text); } catch(e) {}
+    if (!res.ok) {
+        console.error('HTTP Error:', res.status, res.statusText);
+        console.error('Response body:', text);
+        const msg = json?.error_description || json?.message || json?.error || text || '请求失败';
+        throw new Error(msg);
+    }
+    return json || text;
+}
+
 // =============================================================
 // API
 // =============================================================
@@ -165,9 +179,7 @@ async function signIn(email, password) {
         headers: getHeaders(false),
         body: JSON.stringify({ email, password })
     });
-    const data = await resp.json();
-    if (!resp.ok) throw new Error(data.error_description || data.message || '登录失败');
-    return data;
+    return await handleResponse(resp);
 }
 
 async function signUp(email, password, username) {
@@ -176,36 +188,32 @@ async function signUp(email, password, username) {
         headers: getHeaders(false),
         body: JSON.stringify({ email, password, data: { username } })
     });
-    const data = await resp.json();
-    if (!resp.ok) throw new Error(data.error_description || data.message || '注册失败');
-    return data;
+    return await handleResponse(resp);
 }
 
 async function getProfile(userId) {
     const resp = await fetch(SUPABASE_URL + '/rest/v1/profiles?id=eq.' + userId, {
         headers: getHeaders(true)
     });
-    if (!resp.ok) return null;
-    const data = await resp.json();
+    if (resp.status === 404) return null;
+    const data = await handleResponse(resp);
     return data && data.length > 0 ? data[0] : null;
 }
 
-async function insertProfile(data) {
+async function upsertProfile(data) {
     const resp = await fetch(SUPABASE_URL + '/rest/v1/profiles', {
         method: 'POST',
         headers: getHeaders(true),
         body: JSON.stringify(data)
     });
-    if (!resp.ok) throw new Error('创建资料失败');
-    return await resp.json();
+    return await handleResponse(resp);
 }
 
 async function fetchPosts() {
     const resp = await fetch(SUPABASE_URL + '/rest/v1/posts?order=created_at.desc', {
         headers: getHeaders(false)
     });
-    if (!resp.ok) throw new Error('加载帖子失败');
-    return await resp.json();
+    return await handleResponse(resp);
 }
 
 async function createPost(data) {
@@ -214,8 +222,7 @@ async function createPost(data) {
         headers: getHeaders(true),
         body: JSON.stringify(data)
     });
-    if (!resp.ok) throw new Error('发帖失败');
-    return await resp.json();
+    return await handleResponse(resp);
 }
 
 async function signOut() {
@@ -256,6 +263,7 @@ async function handleLogin(e) {
         loadPosts();
     } catch(err) {
         showToast('登录失败：' + err.message, true);
+        console.error(err);
     }
 }
 
@@ -272,7 +280,7 @@ async function handleRegister(e) {
         currentUser = data.user;
         localStorage.setItem('sb_token', accessToken);
         localStorage.setItem('sb_user', JSON.stringify(currentUser));
-        await insertProfile({
+        await upsertProfile({
             id: currentUser.id,
             username: name,
             email: email,
@@ -285,6 +293,7 @@ async function handleRegister(e) {
         loadPosts();
     } catch(err) {
         showToast('注册失败：' + err.message, true);
+        console.error(err);
     }
 }
 
@@ -341,6 +350,7 @@ async function loadPosts() {
         renderPosts(postsCache);
     } catch(err) {
         list.innerHTML = '<div class="empty-state">❌ ' + err.message + '<br><button class="btn" onclick="loadPosts()">🔄 重试</button></div>';
+        console.error(err);
     }
 }
 
@@ -350,9 +360,9 @@ function renderPosts(posts) {
         list.innerHTML = '<div class="empty-state">📭 还没有帖子，来发第一篇吧！</div>';
         return;
     }
-    const catMap = { tech: '科技', life: '生活', career: '职场' };
+    const catMap = { tech: '科技', life: '生活', career: '职场', '闲聊': '闲聊' };
     list.innerHTML = posts.map(p => {
-        const badgeClass = ['tech','life','career'].includes(p.category) ? 'badge ' + p.category : 'badge topic';
+        const badgeClass = ['tech','life','career','闲聊'].includes(p.category) ? 'badge ' + p.category : 'badge topic';
         const badgeText = catMap[p.category] || p.category || '闲聊';
         const avatar = p.author_avatar || `https://ui-avatars.com/api/?name=${encodeURIComponent(p.author_name||'U')}&background=6d5bff&color=fff&size=30`;
         return `
@@ -409,6 +419,7 @@ async function publishPost() {
         loadPosts();
     } catch(err) {
         showToast('发帖失败：' + err.message, true);
+        console.error(err);
     }
 }
 
