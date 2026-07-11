@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>窍某论坛</title>
     <style>
+        /* ---------- 样式（完整） ---------- */
         *{margin:0;padding:0;box-sizing:border-box;}
         body{background:#0b0e1a;color:#e8edf5;font-family:'Segoe UI',sans-serif;padding:20px;line-height:1.6;}
         .container{max-width:1200px;margin:0 auto;}
@@ -398,9 +399,9 @@
             return await handleResponse(resp);
         }
 
+        // 修复：移除 comment_count 字段，避免字段不存在错误
         async function fetchPosts() {
-            // 只获取必要字段，提高传输效率
-            const resp = await fetch(SUPABASE_URL + '/rest/v1/posts?order=created_at.desc&select=id,title,content,excerpt,category,author_name,author_avatar,likes,views,created_at,comment_count', {
+            const resp = await fetch(SUPABASE_URL + '/rest/v1/posts?order=created_at.desc', {
                 headers: getHeaders(false)
             });
             return await handleResponse(resp);
@@ -637,7 +638,7 @@
                         <div class="post-excerpt">${p.excerpt || (p.content ? p.content.replace(/<[^>]+>/g,'').slice(0,80)+'...' : '')}</div>
                         <div class="post-footer">
                             <span class="like-btn ${p.likes > 0 ? 'liked' : ''}" onclick="handleLike('${p.id}')" id="like-btn-${p.id}">❤️ <span id="like-count-${p.id}">${p.likes || 0}</span></span>
-                            <span>💬 ${p.comment_count || 0}</span>
+                            <span>💬 0</span>
                             <span>👁️ ${p.views || 0}</span>
                         </div>
                     </div>
@@ -735,7 +736,7 @@
                     <div class="post-body">${post.content}</div>
                     <div class="post-actions">
                         <span class="like-btn ${post.likes > 0 ? 'liked' : ''}" onclick="handleLike('${post.id}')" id="like-btn-detail-${post.id}">❤️ <span id="like-count-detail-${post.id}">${post.likes || 0}</span></span>
-                        <span>💬 回复 <span id="reply-count">0</span></span>
+                        <span>💬 0</span>
                     </div>
                     <hr style="border-color:#333;margin:16px 0;" />
                     <h3 style="margin-bottom:12px;">💬 全部回复</h3>
