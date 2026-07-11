@@ -113,8 +113,8 @@
 // =============================================================
 // 🔥 Supabase 配置（与 index.html 相同）
 // =============================================================
-const SUPABASE_URL = 'https://bkvsceiezbyexzqpvblj.supabase.co';  // 你的 Project URL
-const SUPABASE_ANON_KEY = 'sb_publishable_7zn5_p-Iw0u5WTov1qqlTw_Cz5YSD4s';  // 你的可发布密钥
+const SUPABASE_URL = 'https://bkvsceiezbyexzqpvblj.supabase.co';
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJrdnNjZWllemJ5ZXh6cXB2YmxqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODM3MDk1MzIsImV4cCI6MjA5OTI4NTUzMn0.1h4Yp8YaJdMMOQW8N2zqvJi6QrxHPncBFMK9LjdmZ6E';
 
 const supabase = supabaseJs.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
@@ -314,7 +314,7 @@ async function deleteComment(commentId) {
         await supabase.from('comments').delete().eq('id', commentId);
         alert('删除成功！');
         loadAllData();
-    } catch (e) { alert('删除失败：' + e.message); }
+    } catch(e) { alert('删除失败：' + e.message); }
 }
 
 // =============================================================
@@ -347,7 +347,7 @@ async function deleteTopic(topicId) {
         await supabase.from('topics').delete().eq('id', topicId);
         alert('删除成功！');
         loadAllData();
-    } catch (e) { alert('删除失败：' + e.message); }
+    } catch(e) { alert('删除失败：' + e.message); }
 }
 
 // =============================================================
