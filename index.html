@@ -6,6 +6,7 @@
     <title>窍某论坛</title>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
+        /* ===== 完整样式 ===== */
         *{margin:0;padding:0;box-sizing:border-box;}
         body{background:#0b0e1a;color:#e8edf5;font-family:'Segoe UI',sans-serif;padding:20px;line-height:1.6;}
         .container{max-width:1200px;margin:0 auto;}
@@ -117,1114 +118,1051 @@
     </style>
 </head>
 <body>
-<div class="container">
-    <header>
-        <h1>✦ 窍某论坛</h1>
-        <div class="nav-controls">
-            <input type="text" id="searchInput" class="search-box" placeholder="🔍 搜索帖子..." onkeyup="searchPosts()" />
-            <button class="btn btn-outline" onclick="toggleTheme()" id="themeToggle">🌙</button>
-            <div class="auth-section">
-                <button class="btn" id="loginBtn" onclick="openModal()">登录</button>
-                <img id="userAvatar" class="user-avatar hidden" alt="头像" />
-                <span id="userName" class="user-name hidden"></span>
-                <button class="logout-btn hidden" id="logoutBtn" onclick="logout()">退出</button>
-                <a id="adminLink" href="admin.html">⚙️ 管理</a>
-                <span id="profileLink" class="profile-link hidden" onclick="openProfile()">👤 个人中心</span>
-            </div>
-        </div>
-    </header>
-
-    <div class="forum-stats">
-        <span>📄 帖子：<strong id="statPosts">0</strong></span>
-        <span>💬 回复：<strong id="statComments">0</strong></span>
-        <span>👤 用户：<strong id="statUsers">0</strong></span>
-        <span>🏷️ 版块：<strong id="statTopics">0</strong></span>
-    </div>
-
-    <div style="display:flex;gap:12px;flex-wrap:wrap;margin-bottom:12px;">
-        <button class="btn" onclick="togglePublish()">📝 发帖</button>
-        <button class="btn" onclick="openNewTopic()">🏷️ 新建版块</button>
-    </div>
-
-    <div class="publish-form" id="publishForm">
-        <h3 style="margin-bottom:6px;">📝 发布新帖子</h3>
-        <input type="text" id="newTitle" maxlength="100" placeholder="标题（限100字符）" />
-        <input type="text" id="newExcerpt" maxlength="300" placeholder="摘要（可选）" />
-        <select id="newCategory">
-            <option value="闲聊">💬 闲聊</option>
-            <option value="tech">💻 科技</option>
-            <option value="life">🌿 生活</option>
-            <option value="career">💼 职场</option>
-        </select>
-        <textarea id="newContent" rows="6" maxlength="50000" placeholder="正文内容（支持 HTML 和图片链接）"></textarea>
-        <button class="btn" onclick="publishPost()" id="publishBtn">提交帖子</button>
-        <p style="color:rgba(255,255,255,0.2);font-size:0.8rem;margin-top:4px;">请勿重复提交</p>
-    </div>
-
-    <div class="board-nav" id="boardNav">
-        <button class="board-btn active" data-cat="all" onclick="setCategory('all')">📋 全部</button>
-        <button class="board-btn" data-cat="tech" onclick="setCategory('tech')">💻 科技</button>
-        <button class="board-btn" data-cat="life" onclick="setCategory('life')">🌿 生活</button>
-        <button class="board-btn" data-cat="career" onclick="setCategory('career')">💼 职场</button>
-        <span id="dynamicBoards"></span>
-    </div>
-
-    <hr style="border-color:#333;margin:16px 0;" />
-
-    <div class="main-layout">
-        <div class="main-content">
-            <div id="postList"></div>
-            <div id="detailArea" class="hidden"></div>
-        </div>
-        <div class="sidebar">
-            <div class="hot-list" id="hotList">
-                <h3>🔥 热门帖子</h3>
-                <div id="hotContent"><p style="color:rgba(255,255,255,0.2);font-size:0.9rem;">加载中...</p></div>
-            </div>
-        </div>
-    </div>
-</div>
-
-<footer>
-    <div class="social-links">
-        <a href="#">💬 QQ: 3880374029</a>
-        <a href="#">▶️ @qiaomouqiao</a>
-        <a href="#">🎵 @mr.qiaomou</a>
-        <a href="#">🐙 GitHub</a>
-    </div>
-    <div>📧 投稿邮箱：<a href="mailto:3880374029@qq.com" style="color:rgba(255,255,255,0.3);">3880374029@qq.com</a></div>
-    <p>© 2026 窍某论坛</p>
-</footer>
-
-<!-- 登录模态框 -->
-<div class="modal" id="authModal">
-    <div class="modal-box">
-        <span class="close" onclick="closeModal()">&times;</span>
-        <h2 id="modalTitle">欢迎回来</h2>
-        <p class="sub" id="modalSub">登录你的账号</p>
-        <div class="modal-tabs">
-            <button class="active" data-tab="login" onclick="switchTab('login')">登录</button>
-            <button data-tab="register" onclick="switchTab('register')">注册</button>
-        </div>
-        <form class="auth-form active" id="loginForm" onsubmit="handleLogin(event)">
-            <label for="loginEmail">邮箱地址</label>
-            <input type="email" id="loginEmail" placeholder="your@email.com" required />
-            <label for="loginPassword">密码</label>
-            <input type="password" id="loginPassword" placeholder="••••••••" required />
-            <button type="submit" class="btn">登录</button>
-            <div class="divider">或</div>
-            <button type="button" class="social-btn google-btn" onclick="handleSocialLogin('google')">🔵 使用 Google 登录</button>
-            <button type="button" class="social-btn github-btn" onclick="handleSocialLogin('github')">🐙 使用 GitHub 登录</button>
-        </form>
-        <form class="auth-form" id="registerForm" onsubmit="handleRegister(event)">
-            <label for="regName">昵称</label>
-            <input type="text" id="regName" maxlength="30" placeholder="你的昵称" required />
-            <label for="regEmail">邮箱地址</label>
-            <input type="email" id="regEmail" placeholder="your@email.com" required />
-            <label for="regPassword">密码</label>
-            <input type="password" id="regPassword" placeholder="至少6位" minlength="6" required />
-            <label for="regConfirm">确认密码</label>
-            <input type="password" id="regConfirm" placeholder="再次输入" required />
-            <button type="submit" class="btn">注册</button>
-            <div class="divider">或</div>
-            <button type="button" class="social-btn google-btn" onclick="handleSocialLogin('google')">🔵 使用 Google 登录</button>
-            <button type="button" class="social-btn github-btn" onclick="handleSocialLogin('github')">🐙 使用 GitHub 登录</button>
-        </form>
-    </div>
-</div>
-
-<!-- 新建版块模态框 -->
-<div class="modal" id="topicModal">
-    <div class="modal-box">
-        <span class="close" onclick="closeTopicModal()">&times;</span>
-        <h2>🏷️ 新建版块</h2>
-        <p style="color:rgba(255,255,255,0.4);margin-bottom:16px;">输入新版块名称，创建后即可在发帖时选择</p>
-        <input type="text" id="newTopicName" maxlength="30" placeholder="版块名称（限30字符）" />
-        <button class="btn" onclick="createTopic()" style="margin-top:12px;width:100%;">创建版块</button>
-        <div id="topicMsg" style="margin-top:8px;"></div>
-    </div>
-</div>
-
-<!-- 个人中心模态框 -->
-<div class="modal" id="profileModal">
-    <div class="modal-box">
-        <span class="close" onclick="closeProfile()">&times;</span>
-        <h2>👤 个人中心</h2>
-        <div class="profile-form">
-            <div style="text-align:center;">
-                <img id="profileAvatarPreview" class="profile-avatar-preview" src="https://ui-avatars.com/api/?name=User&background=6d5bff&color=fff&size=100" alt="头像预览" />
-                <div class="profile-upload-btn" style="margin:0 auto 16px;">
-                    <button class="btn" style="position:relative;">📷 上传头像</button>
-                    <input type="file" id="avatarInput" accept="image/*" onchange="uploadAvatar(event)" />
+    <!-- ===== HTML 结构（与之前完全一致） ===== -->
+    <div class="container">
+        <header>
+            <h1>✦ 窍某论坛</h1>
+            <div class="nav-controls">
+                <input type="text" id="searchInput" class="search-box" placeholder="🔍 搜索帖子..." onkeyup="searchPosts()" />
+                <button class="btn btn-outline" onclick="toggleTheme()" id="themeToggle">🌙</button>
+                <div class="auth-section">
+                    <button class="btn" id="loginBtn" onclick="openModal()">登录</button>
+                    <img id="userAvatar" class="user-avatar hidden" alt="头像" />
+                    <span id="userName" class="user-name hidden"></span>
+                    <button class="logout-btn hidden" id="logoutBtn" onclick="logout()">退出</button>
+                    <a id="adminLink" href="admin.html">⚙️ 管理</a>
+                    <span id="profileLink" class="profile-link hidden" onclick="openProfile()">👤 个人中心</span>
                 </div>
             </div>
-            <div class="form-group">
-                <label for="profileNameInput">昵称</label>
-                <input type="text" id="profileNameInput" maxlength="30" placeholder="输入新昵称" />
+        </header>
+        <div class="forum-stats">
+            <span>📄 帖子：<strong id="statPosts">0</strong></span>
+            <span>💬 回复：<strong id="statComments">0</strong></span>
+            <span>👤 用户：<strong id="statUsers">0</strong></span>
+            <span>🏷️ 版块：<strong id="statTopics">0</strong></span>
+        </div>
+        <div style="display:flex;gap:12px;flex-wrap:wrap;margin-bottom:12px;">
+            <button class="btn" onclick="togglePublish()">📝 发帖</button>
+            <button class="btn" onclick="openNewTopic()">🏷️ 新建版块</button>
+        </div>
+        <div class="publish-form" id="publishForm">
+            <h3 style="margin-bottom:6px;">📝 发布新帖子</h3>
+            <input type="text" id="newTitle" maxlength="100" placeholder="标题（限100字符）" />
+            <input type="text" id="newExcerpt" maxlength="300" placeholder="摘要（可选）" />
+            <select id="newCategory">
+                <option value="闲聊">💬 闲聊</option>
+                <option value="tech">💻 科技</option>
+                <option value="life">🌿 生活</option>
+                <option value="career">💼 职场</option>
+            </select>
+            <textarea id="newContent" rows="6" maxlength="50000" placeholder="正文内容（支持 HTML 和图片链接）"></textarea>
+            <button class="btn" onclick="publishPost()" id="publishBtn">提交帖子</button>
+            <p style="color:rgba(255,255,255,0.2);font-size:0.8rem;margin-top:4px;">请勿重复提交</p>
+        </div>
+        <div class="board-nav" id="boardNav">
+            <button class="board-btn active" data-cat="all" onclick="setCategory('all')">📋 全部</button>
+            <button class="board-btn" data-cat="tech" onclick="setCategory('tech')">💻 科技</button>
+            <button class="board-btn" data-cat="life" onclick="setCategory('life')">🌿 生活</button>
+            <button class="board-btn" data-cat="career" onclick="setCategory('career')">💼 职场</button>
+            <span id="dynamicBoards"></span>
+        </div>
+        <hr style="border-color:#333;margin:16px 0;" />
+        <div class="main-layout">
+            <div class="main-content">
+                <div id="postList"></div>
+                <div id="detailArea" class="hidden"></div>
             </div>
-            <button class="btn" onclick="saveProfile()">保存</button>
-            <div id="profileMsg" style="margin-top:8px;"></div>
+            <div class="sidebar">
+                <div class="hot-list" id="hotList">
+                    <h3>🔥 热门帖子</h3>
+                    <div id="hotContent"><p style="color:rgba(255,255,255,0.2);font-size:0.9rem;">加载中...</p></div>
+                </div>
+            </div>
         </div>
     </div>
-</div>
+    <footer>
+        <div class="social-links"><a href="#">💬 QQ: 3880374029</a><a href="#">▶️ @qiaomouqiao</a><a href="#">🎵 @mr.qiaomou</a><a href="#">🐙 GitHub</a></div>
+        <div>📧 投稿邮箱：<a href="mailto:3880374029@qq.com" style="color:rgba(255,255,255,0.3);">3880374029@qq.com</a></div>
+        <p>© 2026 窍某论坛</p>
+    </footer>
 
-<!-- Toast -->
-<div class="toast" id="toast"></div>
+    <!-- 模态框 -->
+    <div class="modal" id="authModal">
+        <div class="modal-box">
+            <span class="close" onclick="closeModal()">&times;</span>
+            <h2 id="modalTitle">欢迎回来</h2>
+            <p class="sub" id="modalSub">登录你的账号</p>
+            <div class="modal-tabs">
+                <button class="active" data-tab="login" onclick="switchTab('login')">登录</button>
+                <button data-tab="register" onclick="switchTab('register')">注册</button>
+            </div>
+            <form class="auth-form active" id="loginForm" onsubmit="handleLogin(event)">
+                <label for="loginEmail">邮箱地址</label>
+                <input type="email" id="loginEmail" placeholder="your@email.com" required />
+                <label for="loginPassword">密码</label>
+                <input type="password" id="loginPassword" placeholder="••••••••" required />
+                <button type="submit" class="btn">登录</button>
+                <div class="divider">或</div>
+                <button type="button" class="social-btn google-btn" onclick="handleSocialLogin('google')">🔵 使用 Google 登录</button>
+                <button type="button" class="social-btn github-btn" onclick="handleSocialLogin('github')">🐙 使用 GitHub 登录</button>
+            </form>
+            <form class="auth-form" id="registerForm" onsubmit="handleRegister(event)">
+                <label for="regName">昵称</label>
+                <input type="text" id="regName" maxlength="30" placeholder="你的昵称" required />
+                <label for="regEmail">邮箱地址</label>
+                <input type="email" id="regEmail" placeholder="your@email.com" required />
+                <label for="regPassword">密码</label>
+                <input type="password" id="regPassword" placeholder="至少6位" minlength="6" required />
+                <label for="regConfirm">确认密码</label>
+                <input type="password" id="regConfirm" placeholder="再次输入" required />
+                <button type="submit" class="btn">注册</button>
+                <div class="divider">或</div>
+                <button type="button" class="social-btn google-btn" onclick="handleSocialLogin('google')">🔵 使用 Google 登录</button>
+                <button type="button" class="social-btn github-btn" onclick="handleSocialLogin('github')">🐙 使用 GitHub 登录</button>
+            </form>
+        </div>
+    </div>
+    <div class="modal" id="topicModal">
+        <div class="modal-box">
+            <span class="close" onclick="closeTopicModal()">&times;</span>
+            <h2>🏷️ 新建版块</h2>
+            <p style="color:rgba(255,255,255,0.4);margin-bottom:16px;">输入新版块名称，创建后即可在发帖时选择</p>
+            <input type="text" id="newTopicName" maxlength="30" placeholder="版块名称（限30字符）" />
+            <button class="btn" onclick="createTopic()" style="margin-top:12px;width:100%;">创建版块</button>
+            <div id="topicMsg" style="margin-top:8px;"></div>
+        </div>
+    </div>
+    <div class="modal" id="profileModal">
+        <div class="modal-box">
+            <span class="close" onclick="closeProfile()">&times;</span>
+            <h2>👤 个人中心</h2>
+            <div class="profile-form">
+                <div style="text-align:center;">
+                    <img id="profileAvatarPreview" class="profile-avatar-preview" src="https://ui-avatars.com/api/?name=User&background=6d5bff&color=fff&size=100" alt="头像预览" />
+                    <div class="profile-upload-btn" style="margin:0 auto 16px;">
+                        <button class="btn" style="position:relative;">📷 上传头像</button>
+                        <input type="file" id="avatarInput" accept="image/*" onchange="uploadAvatar(event)" />
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="profileNameInput">昵称</label>
+                    <input type="text" id="profileNameInput" maxlength="30" placeholder="输入新昵称" />
+                </div>
+                <button class="btn" onclick="saveProfile()">保存</button>
+                <div id="profileMsg" style="margin-top:8px;"></div>
+            </div>
+        </div>
+    </div>
+    <div class="toast" id="toast"></div>
 
-<script>
-    // =============================================================
-    // Supabase 配置
-    // =============================================================
-    const SUPABASE_URL = 'https://bkvsceiezbyexzqpvblj.supabase.co';
-    const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJrdnNjZWllemJ5ZXh6cXB2YmxqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODM3MDk1MzIsImV4cCI6MjA5OTI4NTUzMn0.1h4Yp8YaJdMMOQW8N2zqvJi6QrxHPncBFMK9LjdmZ6E';
+    <script>
+        // =============================================================
+        // 所有变量声明在最顶部（避免暂时性死区）
+        // =============================================================
+        const SUPABASE_URL = 'https://bkvsceiezbyexzqpvblj.supabase.co';
+        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJrdnNjZWllemJ5ZXh6cXB2YmxqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODM3MDk1MzIsImV4cCI6MjA5OTI4NTUzMn0.1h4Yp8YaJdMMOQW8N2zqvJi6QrxHPncBFMK9LjdmZ6E';
+        const sb = supabaseJs.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-    // 创建客户端
-    const sb = supabaseJs.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+        let currentUser = null;
+        let userProfile = null;
+        let accessToken = null;
+        let postsCache = [];
+        let topicsCache = [];
+        let currentCategory = 'all';
+        let isSubmitting = false;
+        let isAdmin = false;
 
-    // =============================================================
-    // 全局状态
-    // =============================================================
-    let currentUser = null;
-    let userProfile = null;
-    let accessToken = null;
-    let postsCache = [];
-    let topicsCache = [];
-    let currentCategory = 'all';
-    let isSubmitting = false;
-    let isAdmin = false;
-
-    // =============================================================
-    // 工具函数
-    // =============================================================
-    function formatDate(d) {
-        if (!d) return '';
-        return new Date(d).toLocaleDateString('zh-CN');
-    }
-    function formatTime(d) {
-        if (!d) return '';
-        return new Date(d).toLocaleString('zh-CN');
-    }
-    function getAvatarUrl(user) {
-        if (user && user.avatar_url) return user.avatar_url;
-        const name = user?.username || user?.email || 'U';
-        return `https://ui-avatars.com/api/?name=${encodeURIComponent(name)}&background=6d5bff&color=fff&size=100`;
-    }
-    function showToast(msg, isError = false) {
-        const t = document.getElementById('toast');
-        t.textContent = msg;
-        t.className = 'toast show' + (isError ? ' error' : '');
-        clearTimeout(t._hide);
-        t._hide = setTimeout(() => { t.className = 'toast'; }, 4000);
-    }
-
-    function getHeaders(includeAuth = true) {
-        const headers = {
-            'apikey': SUPABASE_ANON_KEY,
-            'Content-Type': 'application/json'
-        };
-        if (includeAuth && accessToken) {
-            headers['Authorization'] = 'Bearer ' + accessToken;
+        // =============================================================
+        // 工具函数（全部使用上述变量）
+        // =============================================================
+        function formatDate(d) {
+            if (!d) return '';
+            return new Date(d).toLocaleDateString('zh-CN');
         }
-        return headers;
-    }
-
-    async function handleResponse(res) {
-        const text = await res.text();
-        let json = null;
-        try { json = JSON.parse(text); } catch(e) {}
-        if (!res.ok) {
-            console.error('HTTP Error:', res.status, res.statusText);
-            console.error('Response body:', text);
-            const msg = json?.error_description || json?.message || json?.error || text || '请求失败';
-            throw new Error(msg);
+        function formatTime(d) {
+            if (!d) return '';
+            return new Date(d).toLocaleString('zh-CN');
         }
-        return json || text;
-    }
+        function getAvatarUrl(user) {
+            if (user && user.avatar_url) return user.avatar_url;
+            const name = user?.username || user?.email || 'U';
+            return `https://ui-avatars.com/api/?name=${encodeURIComponent(name)}&background=6d5bff&color=fff&size=100`;
+        }
+        function showToast(msg, isError = false) {
+            const t = document.getElementById('toast');
+            t.textContent = msg;
+            t.className = 'toast show' + (isError ? ' error' : '');
+            clearTimeout(t._hide);
+            t._hide = setTimeout(() => { t.className = 'toast'; }, 4000);
+        }
 
-    // =============================================================
-    // API 调用
-    // =============================================================
-    async function signIn(email, password) {
-        const resp = await fetch(SUPABASE_URL + '/auth/v1/token?grant_type=password', {
-            method: 'POST',
-            headers: getHeaders(false),
-            body: JSON.stringify({ email, password })
-        });
-        return await handleResponse(resp);
-    }
+        function getHeaders(includeAuth = true) {
+            const headers = {
+                'apikey': SUPABASE_ANON_KEY,
+                'Content-Type': 'application/json'
+            };
+            if (includeAuth && accessToken) {
+                headers['Authorization'] = 'Bearer ' + accessToken;
+            }
+            return headers;
+        }
 
-    async function signUp(email, password, username) {
-        const resp = await fetch(SUPABASE_URL + '/auth/v1/signup', {
-            method: 'POST',
-            headers: getHeaders(false),
-            body: JSON.stringify({ email, password, data: { username } })
-        });
-        return await handleResponse(resp);
-    }
+        async function handleResponse(res) {
+            const text = await res.text();
+            let json = null;
+            try { json = JSON.parse(text); } catch(e) {}
+            if (!res.ok) {
+                console.error('HTTP Error:', res.status, res.statusText);
+                console.error('Response body:', text);
+                const msg = json?.error_description || json?.message || json?.error || text || '请求失败';
+                throw new Error(msg);
+            }
+            return json || text;
+        }
 
-    async function getProfile(userId) {
-        const resp = await fetch(SUPABASE_URL + '/rest/v1/profiles?id=eq.' + userId, {
-            headers: getHeaders(true)
-        });
-        if (resp.status === 404) return null;
-        const data = await handleResponse(resp);
-        return data && data.length > 0 ? data[0] : null;
-    }
+        // =============================================================
+        // API 调用
+        // =============================================================
+        async function signIn(email, password) {
+            const resp = await fetch(SUPABASE_URL + '/auth/v1/token?grant_type=password', {
+                method: 'POST',
+                headers: getHeaders(false),
+                body: JSON.stringify({ email, password })
+            });
+            return await handleResponse(resp);
+        }
 
-    async function upsertProfile(data) {
-        const resp = await fetch(SUPABASE_URL + '/rest/v1/profiles', {
-            method: 'POST',
-            headers: getHeaders(true),
-            body: JSON.stringify(data)
-        });
-        return await handleResponse(resp);
-    }
+        async function signUp(email, password, username) {
+            const resp = await fetch(SUPABASE_URL + '/auth/v1/signup', {
+                method: 'POST',
+                headers: getHeaders(false),
+                body: JSON.stringify({ email, password, data: { username } })
+            });
+            return await handleResponse(resp);
+        }
 
-    async function fetchPosts() {
-        const resp = await fetch(SUPABASE_URL + '/rest/v1/posts?order=created_at.desc', {
-            headers: getHeaders(false)
-        });
-        return await handleResponse(resp);
-    }
-
-    async function fetchComments(postId) {
-        const resp = await fetch(SUPABASE_URL + `/rest/v1/comments?post_id=eq.${postId}&order=created_at.asc`, {
-            headers: getHeaders(false)
-        });
-        return await handleResponse(resp);
-    }
-
-    async function createComment(data) {
-        const resp = await fetch(SUPABASE_URL + '/rest/v1/comments', {
-            method: 'POST',
-            headers: getHeaders(true),
-            body: JSON.stringify(data)
-        });
-        return await handleResponse(resp);
-    }
-
-    async function createPost(data) {
-        const resp = await fetch(SUPABASE_URL + '/rest/v1/posts', {
-            method: 'POST',
-            headers: getHeaders(true),
-            body: JSON.stringify(data)
-        });
-        return await handleResponse(resp);
-    }
-
-    async function fetchTopics() {
-        const resp = await fetch(SUPABASE_URL + '/rest/v1/topics?order=name.asc', {
-            headers: getHeaders(false)
-        });
-        return await handleResponse(resp);
-    }
-
-    async function createTopic(name) {
-        const resp = await fetch(SUPABASE_URL + '/rest/v1/topics', {
-            method: 'POST',
-            headers: getHeaders(true),
-            body: JSON.stringify({ name })
-        });
-        return await handleResponse(resp);
-    }
-
-    // =============================================================
-    // 点赞核心函数（修复版）
-    // =============================================================
-    async function toggleLike(postId, userId) {
-        const numericPostId = parseInt(postId);
-        const userIdStr = String(userId);
-
-        try {
-            // 1. 查询是否已点赞
-            const checkUrl = `${SUPABASE_URL}/rest/v1/likes?post_id=eq.${numericPostId}&user_id=eq.${userIdStr}`;
-            const checkResp = await fetch(checkUrl, {
+        async function getProfile(userId) {
+            const resp = await fetch(SUPABASE_URL + '/rest/v1/profiles?id=eq.' + userId, {
                 headers: getHeaders(true)
             });
+            if (resp.status === 404) return null;
+            const data = await handleResponse(resp);
+            return data && data.length > 0 ? data[0] : null;
+        }
 
-            let existing = [];
-            try {
-                existing = await checkResp.json();
-            } catch (e) {
-                existing = [];
-            }
-
-            // 2. 如果已点赞 → 取消点赞
-            if (existing && existing.length > 0) {
-                const deleteUrl = `${SUPABASE_URL}/rest/v1/likes?id=eq.${existing[0].id}`;
-                const deleteResp = await fetch(deleteUrl, {
-                    method: 'DELETE',
-                    headers: getHeaders(true)
-                });
-
-                if (deleteResp.ok) {
-                    return 'unliked';
-                } else {
-                    throw new Error(`取消点赞失败 (HTTP ${deleteResp.status})`);
-                }
-            }
-
-            // 3. 如果未点赞 → 新增点赞
-            const insertResp = await fetch(`${SUPABASE_URL}/rest/v1/likes`, {
+        async function upsertProfile(data) {
+            const resp = await fetch(SUPABASE_URL + '/rest/v1/profiles', {
                 method: 'POST',
                 headers: getHeaders(true),
-                body: JSON.stringify({
-                    post_id: numericPostId,
-                    user_id: userIdStr
-                })
+                body: JSON.stringify(data)
             });
+            return await handleResponse(resp);
+        }
 
-            if (insertResp.status === 201 || insertResp.status === 200) {
-                return 'liked';
-            }
+        async function fetchPosts() {
+            const resp = await fetch(SUPABASE_URL + '/rest/v1/posts?order=created_at.desc', {
+                headers: getHeaders(false)
+            });
+            return await handleResponse(resp);
+        }
 
-            // 4. 处理 409 冲突（强制切换）
-            if (insertResp.status === 409) {
-                console.warn('检测到冲突，执行强制切换...');
+        async function fetchComments(postId) {
+            const resp = await fetch(SUPABASE_URL + `/rest/v1/comments?post_id=eq.${postId}&order=created_at.asc`, {
+                headers: getHeaders(false)
+            });
+            return await handleResponse(resp);
+        }
 
-                await fetch(`${SUPABASE_URL}/rest/v1/likes?post_id=eq.${numericPostId}&user_id=eq.${userIdStr}`, {
-                    method: 'DELETE',
-                    headers: getHeaders(true)
-                });
+        async function createComment(data) {
+            const resp = await fetch(SUPABASE_URL + '/rest/v1/comments', {
+                method: 'POST',
+                headers: getHeaders(true),
+                body: JSON.stringify(data)
+            });
+            return await handleResponse(resp);
+        }
 
-                const retryResp = await fetch(`${SUPABASE_URL}/rest/v1/likes`, {
+        async function createPost(data) {
+            const resp = await fetch(SUPABASE_URL + '/rest/v1/posts', {
+                method: 'POST',
+                headers: getHeaders(true),
+                body: JSON.stringify(data)
+            });
+            return await handleResponse(resp);
+        }
+
+        async function fetchTopics() {
+            const resp = await fetch(SUPABASE_URL + '/rest/v1/topics?order=name.asc', {
+                headers: getHeaders(false)
+            });
+            return await handleResponse(resp);
+        }
+
+        async function createTopic(name) {
+            const resp = await fetch(SUPABASE_URL + '/rest/v1/topics', {
+                method: 'POST',
+                headers: getHeaders(true),
+                body: JSON.stringify({ name })
+            });
+            return await handleResponse(resp);
+        }
+
+        // =============================================================
+        // 点赞核心（修复版）
+        // =============================================================
+        async function toggleLike(postId, userId) {
+            const numericPostId = parseInt(postId);
+            const userIdStr = String(userId);
+
+            try {
+                const checkUrl = `${SUPABASE_URL}/rest/v1/likes?post_id=eq.${numericPostId}&user_id=eq.${userIdStr}`;
+                const checkResp = await fetch(checkUrl, { headers: getHeaders(true) });
+                let existing = [];
+                try {
+                    existing = await checkResp.json();
+                } catch (e) {
+                    existing = [];
+                }
+
+                if (existing && existing.length > 0) {
+                    const deleteUrl = `${SUPABASE_URL}/rest/v1/likes?id=eq.${existing[0].id}`;
+                    const deleteResp = await fetch(deleteUrl, { method: 'DELETE', headers: getHeaders(true) });
+                    if (deleteResp.ok) {
+                        return 'unliked';
+                    } else {
+                        throw new Error(`取消点赞失败 (HTTP ${deleteResp.status})`);
+                    }
+                }
+
+                const insertResp = await fetch(`${SUPABASE_URL}/rest/v1/likes`, {
                     method: 'POST',
                     headers: getHeaders(true),
-                    body: JSON.stringify({
-                        post_id: numericPostId,
-                        user_id: userIdStr
-                    })
+                    body: JSON.stringify({ post_id: numericPostId, user_id: userIdStr })
                 });
-
-                if (retryResp.status === 201 || retryResp.status === 200) {
+                if (insertResp.status === 201 || insertResp.status === 200) {
                     return 'liked';
-                } else {
-                    throw new Error(`强制切换失败 (HTTP ${retryResp.status})`);
                 }
-            }
-
-            const text = await insertResp.text();
-            throw new Error(`点赞失败: ${insertResp.status} - ${text}`);
-
-        } catch (error) {
-            console.error('toggleLike 错误:', error);
-            throw error;
-        }
-    }
-
-    // =============================================================
-    // 点赞处理函数
-    // =============================================================
-    async function handleLike(postId) {
-        if (!currentUser) {
-            showToast('请先登录', true);
-            return;
-        }
-
-        try {
-            const result = await toggleLike(postId, currentUser.id);
-
-            const numericId = parseInt(postId);
-            const post = postsCache.find(p => parseInt(p.id) === numericId);
-            if (post) {
-                if (result === 'liked') {
-                    post.likes = (post.likes || 0) + 1;
-                } else {
-                    post.likes = Math.max((post.likes || 0) - 1, 0);
+                if (insertResp.status === 409) {
+                    console.warn('检测到冲突，执行强制切换...');
+                    await fetch(`${SUPABASE_URL}/rest/v1/likes?post_id=eq.${numericPostId}&user_id=eq.${userIdStr}`, {
+                        method: 'DELETE',
+                        headers: getHeaders(true)
+                    });
+                    const retryResp = await fetch(`${SUPABASE_URL}/rest/v1/likes`, {
+                        method: 'POST',
+                        headers: getHeaders(true),
+                        body: JSON.stringify({ post_id: numericPostId, user_id: userIdStr })
+                    });
+                    if (retryResp.status === 201 || retryResp.status === 200) {
+                        return 'liked';
+                    } else {
+                        throw new Error(`强制切换失败 (HTTP ${retryResp.status})`);
+                    }
                 }
+                const text = await insertResp.text();
+                throw new Error(`点赞失败: ${insertResp.status} - ${text}`);
+            } catch (error) {
+                console.error('toggleLike 错误:', error);
+                throw error;
             }
+        }
 
-            const keyword = document.getElementById('searchInput').value.trim();
-            const filtered = getFilteredPosts(currentCategory, keyword);
-            renderPosts(filtered);
-            renderHotList(postsCache);
-
-            const detailArea = document.getElementById('detailArea');
-            if (!detailArea.classList.contains('hidden')) {
-                await showPost(postId);
+        // =============================================================
+        // 点赞处理
+        // =============================================================
+        async function handleLike(postId) {
+            if (!currentUser) {
+                showToast('请先登录', true);
+                return;
             }
-
-            showToast(result === 'liked' ? '❤️ 点赞成功！' : '已取消点赞');
-
-        } catch (err) {
-            showToast('操作失败：' + err.message, true);
-            console.error(err);
-        }
-    }
-
-    // =============================================================
-    // 帖子列表相关
-    // =============================================================
-    function getFilteredPosts(category, keyword = '') {
-        let filtered = postsCache;
-        if (category !== 'all') {
-            filtered = filtered.filter(p => p.category === category);
-        }
-        if (keyword) {
-            const kw = keyword.toLowerCase();
-            filtered = filtered.filter(p =>
-                p.title.toLowerCase().includes(kw) ||
-                (p.excerpt && p.excerpt.toLowerCase().includes(kw)) ||
-                (p.content && p.content.toLowerCase().includes(kw))
-            );
-        }
-        return filtered;
-    }
-
-    async function loadPosts(category = 'all', keyword = '') {
-        const list = document.getElementById('postList');
-        list.innerHTML = '<div class="empty-state">⏳ 加载中...</div>';
-
-        try {
-            const data = await fetchPosts();
-            postsCache = data || [];
-
-            const filtered = getFilteredPosts(category, keyword);
-            renderPosts(filtered);
-            renderHotList(postsCache);
-            updateStats();
-
-        } catch (err) {
-            list.innerHTML = `
-                <div class="empty-state">
-                    ❌ ${err.message}
-                    <br>
-                    <button class="btn" onclick="loadPosts('${category}')">🔄 重试</button>
-                </div>
-            `;
-            console.error(err);
-        }
-    }
-
-    function renderPosts(posts) {
-        const list = document.getElementById('postList');
-        if (!posts || posts.length === 0) {
-            list.innerHTML = '<div class="empty-state"><h3>📭 还没有帖子</h3><p style="color:rgba(255,255,255,0.3);">登录后点击「发帖」开始讨论！</p></div>';
-            return;
-        }
-        const catMap = { tech: '科技', life: '生活', career: '职场', '闲聊': '闲聊' };
-        list.innerHTML = posts.map(p => {
-            const badgeClass = ['tech','life','career','闲聊'].includes(p.category) ? 'badge ' + p.category : 'badge topic';
-            const badgeText = catMap[p.category] || p.category || '闲聊';
-            const avatar = p.author_avatar || `https://ui-avatars.com/api/?name=${encodeURIComponent(p.author_name||'U')}&background=6d5bff&color=fff&size=30`;
-            return `
-                <div class="post-card">
-                    <div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;">
-                        <span class="post-title" onclick="showPost('${p.id}')">${p.title}</span>
-                        <span class="${badgeClass}" style="flex-shrink:0;margin-top:2px;">${badgeText}</span>
-                    </div>
-                    <div class="post-meta">
-                        <img class="author-avatar" src="${avatar}" alt="${p.author_name||'用户'}" />
-                        <span class="author">${p.author_name || '匿名'}</span>
-                        <span>· ${formatDate(p.created_at)}</span>
-                    </div>
-                    <div class="post-excerpt">${p.excerpt || (p.content ? p.content.replace(/<[^>]+>/g,'').slice(0,80)+'...' : '')}</div>
-                    <div class="post-footer">
-                        <span class="like-btn" onclick="handleLike('${p.id}')" id="like-btn-${p.id}">❤️ <span id="like-count-${p.id}">${p.likes || 0}</span></span>
-                        <span>💬 ${p.comment_count || 0}</span>
-                        <span>👁️ ${p.views || 0}</span>
-                    </div>
-                </div>
-            `;
-        }).join('');
-    }
-
-    function renderHotList(posts) {
-        const container = document.getElementById('hotContent');
-        if (!container) return;
-        const sorted = [...posts].sort((a,b) => (b.likes||0) - (a.likes||0));
-        const top = sorted.slice(0,5);
-        if (!top.length) {
-            container.innerHTML = '<p style="color:rgba(255,255,255,0.2);font-size:0.9rem;">暂无帖子</p>';
-            return;
-        }
-        container.innerHTML = top.map((p, i) => {
-            const emoji = i===0?'🥇':i===1?'🥈':i===2?'🥉':`#${i+1}`;
-            return `<div class="hot-item"><a href="#" onclick="showPost('${p.id}');return false;"><span><span class="hot-num">${emoji}</span> ${p.title}</span><span>❤️ ${p.likes||0}</span></a></div>`;
-        }).join('');
-    }
-
-    async function updateStats() {
-        document.getElementById('statPosts').textContent = postsCache.length;
-        try {
-            const resp = await fetch(SUPABASE_URL + '/rest/v1/comments?select=id', {
-                headers: getHeaders(false)
-            });
-            const data = await resp.json();
-            document.getElementById('statComments').textContent = data?.length || 0;
-        } catch(e) {}
-        try {
-            const resp = await fetch(SUPABASE_URL + '/rest/v1/profiles?select=id', {
-                headers: getHeaders(false)
-            });
-            const data = await resp.json();
-            document.getElementById('statUsers').textContent = data?.length || 0;
-        } catch(e) {}
-        document.getElementById('statTopics').textContent = topicsCache.length;
-    }
-
-    // =============================================================
-    // 帖子详情
-    // =============================================================
-    async function showPost(postId) {
-        const post = postsCache.find(p => parseInt(p.id) === parseInt(postId));
-        if (!post) {
-            showToast('帖子不存在', true);
-            return;
-        }
-
-        document.getElementById('postList').style.display = 'none';
-        const area = document.getElementById('detailArea');
-        area.classList.remove('hidden');
-
-        const avatar = post.author_avatar || `https://ui-avatars.com/api/?name=${encodeURIComponent(post.author_name||'U')}&background=6d5bff&color=fff&size=40`;
-
-        area.innerHTML = `
-            <div class="post-detail">
-                <button class="back-btn" onclick="backToList()">← 返回列表</button>
-                <h1 style="font-size:1.6rem;">${post.title}</h1>
-                <div class="post-author-info">
-                    <img src="${avatar}" alt="${post.author_name||'用户'}" />
-                    <span class="author-name">${post.author_name || '匿名'}</span>
-                    <span class="post-time">${formatTime(post.created_at)}</span>
-                    <span style="margin-left:12px;">👁️ ${post.views || 0}</span>
-                </div>
-                <div class="post-body">${post.content}</div>
-                <div class="post-actions">
-                    <span class="like-btn" onclick="handleLike('${post.id}')" id="like-btn-detail-${post.id}">❤️ <span id="like-count-detail-${post.id}">${post.likes || 0}</span></span>
-                    <span>💬 回复 <span id="reply-count">0</span></span>
-                </div>
-                <hr style="border-color:#333;margin:16px 0;" />
-                <h3 style="margin-bottom:12px;">💬 全部回复</h3>
-                <div id="commentsArea"><p style="color:rgba(255,255,255,0.3);">加载中...</p></div>
-                ${currentUser ? `
-                    <div style="margin-top:16px;">
-                        <textarea id="commentInput" rows="3" maxlength="2000" placeholder="写下你的回复..."></textarea>
-                        <button class="btn" onclick="publishComment('${post.id}')" id="commentSubmitBtn" style="margin-top:8px;">发表回复</button>
-                    </div>
-                ` : '<p style="color:rgba(255,255,255,0.3);margin-top:12px;">登录后即可回复</p>'}
-            </div>
-        `;
-
-        try {
-            const comments = await fetchComments(post.id);
-            const areaC = document.getElementById('commentsArea');
-            const replyCount = document.getElementById('reply-count');
-            if (!comments || comments.length === 0) {
-                areaC.innerHTML = '<p style="color:rgba(255,255,255,0.3);">还没有回复，来抢沙发！</p>';
-                if (replyCount) replyCount.textContent = '0';
-            } else {
-                let html = '';
-                comments.forEach(c => {
-                    const ava = c.user_avatar || `https://ui-avatars.com/api/?name=${encodeURIComponent(c.username||'U')}&background=6d5bff&color=fff&size=28`;
-                    html += `<div class="reply-item">
-                                <div class="reply-author-info">
-                                    <img src="${ava}" alt="${c.username||'用户'}" />
-                                    <span class="reply-author">${c.username || '用户'}</span>
-                                    <span class="reply-time">${formatTime(c.created_at)}</span>
-                                </div>
-                                <div class="reply-content">${c.content}</div>
-                            </div>`;
-                });
-                areaC.innerHTML = html;
-                if (replyCount) replyCount.textContent = comments.length;
+            try {
+                const result = await toggleLike(postId, currentUser.id);
+                const numericId = parseInt(postId);
+                const post = postsCache.find(p => parseInt(p.id) === numericId);
+                if (post) {
+                    if (result === 'liked') {
+                        post.likes = (post.likes || 0) + 1;
+                    } else {
+                        post.likes = Math.max((post.likes || 0) - 1, 0);
+                    }
+                }
+                const keyword = document.getElementById('searchInput').value.trim();
+                const filtered = getFilteredPosts(currentCategory, keyword);
+                renderPosts(filtered);
+                renderHotList(postsCache);
+                const detailArea = document.getElementById('detailArea');
+                if (!detailArea.classList.contains('hidden')) {
+                    await showPost(postId);
+                }
+                showToast(result === 'liked' ? '❤️ 点赞成功！' : '已取消点赞');
+            } catch (err) {
+                showToast('操作失败：' + err.message, true);
+                console.error(err);
             }
-        } catch(err) {
-            document.getElementById('commentsArea').innerHTML = '<p style="color:#ef4444;">加载评论失败</p>';
         }
-    }
 
-    function backToList() {
-        document.getElementById('postList').style.display = 'block';
-        document.getElementById('detailArea').classList.add('hidden');
-        document.getElementById('detailArea').innerHTML = '';
-        loadPosts(currentCategory);
-    }
-
-    // =============================================================
-    // 发帖
-    // =============================================================
-    function togglePublish() {
-        const form = document.getElementById('publishForm');
-        form.style.display = form.style.display === 'none' ? 'block' : 'none';
-    }
-
-    async function publishPost() {
-        if (isSubmitting) { showToast('请勿重复提交', true); return; }
-        if (!currentUser) { showToast('请先登录', true); return; }
-        const title = document.getElementById('newTitle').value.trim();
-        const content = document.getElementById('newContent').value.trim();
-        const excerpt = document.getElementById('newExcerpt').value.trim();
-        const category = document.getElementById('newCategory').value;
-        if (!title || !content) { showToast('请填写标题和内容', true); return; }
-        if (title.length > 100) { showToast('标题不能超过100字符', true); return; }
-        if (content.length > 50000) { showToast('正文过长', true); return; }
-
-        isSubmitting = true;
-        const btn = document.getElementById('publishBtn');
-        if (btn) btn.disabled = true;
-
-        try {
-            const avatar = userProfile?.avatar_url || `https://ui-avatars.com/api/?name=${encodeURIComponent(currentUser.email)}&background=6d5bff&color=fff&size=100`;
-            await createPost({
-                title, content, excerpt, category,
-                author_id: currentUser.id,
-                author_name: currentUser.email,
-                author_avatar: avatar,
-                likes: 0, views: 0
-            });
-            showToast('发帖成功！🎉');
-            document.getElementById('newTitle').value = '';
-            document.getElementById('newContent').value = '';
-            document.getElementById('newExcerpt').value = '';
-            document.getElementById('publishForm').style.display = 'none';
-            await loadPosts(currentCategory);
-        } catch(err) {
-            showToast('发帖失败：' + err.message, true);
-        } finally {
-            isSubmitting = false;
-            if (btn) btn.disabled = false;
+        // =============================================================
+        // 帖子列表
+        // =============================================================
+        function getFilteredPosts(category, keyword = '') {
+            let filtered = postsCache;
+            if (category !== 'all') filtered = filtered.filter(p => p.category === category);
+            if (keyword) {
+                const kw = keyword.toLowerCase();
+                filtered = filtered.filter(p =>
+                    p.title.toLowerCase().includes(kw) ||
+                    (p.excerpt && p.excerpt.toLowerCase().includes(kw)) ||
+                    (p.content && p.content.toLowerCase().includes(kw))
+                );
+            }
+            return filtered;
         }
-    }
 
-    // =============================================================
-    // 评论
-    // =============================================================
-    async function publishComment(postId) {
-        if (isSubmitting) { showToast('请勿重复提交', true); return; }
-        const input = document.getElementById('commentInput');
-        if (!input) return;
-        const content = input.value.trim();
-        if (!content) { showToast('请输入回复内容', true); return; }
-        if (content.length > 2000) { showToast('回复不能超过2000字符', true); return; }
-        if (!currentUser) { showToast('请先登录', true); return; }
-
-        isSubmitting = true;
-        const btn = document.getElementById('commentSubmitBtn');
-        if (btn) btn.disabled = true;
-
-        try {
-            await createComment({
-                post_id: parseInt(postId),
-                user_id: currentUser.id,
-                username: currentUser.email,
-                user_avatar: userProfile?.avatar_url || null,
-                content
-            });
-            input.value = '';
-            showToast('回复成功！');
-            await showPost(postId);
-        } catch(err) {
-            showToast('回复失败：' + err.message, true);
-        } finally {
-            isSubmitting = false;
-            if (btn) btn.disabled = false;
+        async function loadPosts(category = 'all', keyword = '') {
+            const list = document.getElementById('postList');
+            list.innerHTML = '<div class="empty-state">⏳ 加载中...</div>';
+            try {
+                const data = await fetchPosts();
+                postsCache = data || [];
+                const filtered = getFilteredPosts(category, keyword);
+                renderPosts(filtered);
+                renderHotList(postsCache);
+                updateStats();
+            } catch (err) {
+                list.innerHTML = `
+                    <div class="empty-state">
+                        ❌ ${err.message}
+                        <br>
+                        <button class="btn" onclick="loadPosts('${category}')">🔄 重试</button>
+                    </div>
+                `;
+                console.error(err);
+            }
         }
-    }
 
-    // =============================================================
-    // 分类和搜索
-    // =============================================================
-    function setCategory(cat) {
-        currentCategory = cat;
-        document.querySelectorAll('.board-btn').forEach(b => {
-            b.classList.toggle('active', b.dataset.cat === cat || b.dataset.cat === decodeURIComponent(cat));
-        });
-        const keyword = document.getElementById('searchInput').value.trim();
-        loadPosts(cat, keyword);
-    }
+        function renderPosts(posts) {
+            const list = document.getElementById('postList');
+            if (!posts || posts.length === 0) {
+                list.innerHTML = '<div class="empty-state"><h3>📭 还没有帖子</h3><p style="color:rgba(255,255,255,0.3);">登录后点击「发帖」开始讨论！</p></div>';
+                return;
+            }
+            const catMap = { tech: '科技', life: '生活', career: '职场', '闲聊': '闲聊' };
+            list.innerHTML = posts.map(p => {
+                const badgeClass = ['tech','life','career','闲聊'].includes(p.category) ? 'badge ' + p.category : 'badge topic';
+                const badgeText = catMap[p.category] || p.category || '闲聊';
+                const avatar = p.author_avatar || `https://ui-avatars.com/api/?name=${encodeURIComponent(p.author_name||'U')}&background=6d5bff&color=fff&size=30`;
+                return `
+                    <div class="post-card">
+                        <div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;">
+                            <span class="post-title" onclick="showPost('${p.id}')">${p.title}</span>
+                            <span class="${badgeClass}" style="flex-shrink:0;margin-top:2px;">${badgeText}</span>
+                        </div>
+                        <div class="post-meta">
+                            <img class="author-avatar" src="${avatar}" alt="${p.author_name||'用户'}" />
+                            <span class="author">${p.author_name || '匿名'}</span>
+                            <span>· ${formatDate(p.created_at)}</span>
+                        </div>
+                        <div class="post-excerpt">${p.excerpt || (p.content ? p.content.replace(/<[^>]+>/g,'').slice(0,80)+'...' : '')}</div>
+                        <div class="post-footer">
+                            <span class="like-btn" onclick="handleLike('${p.id}')" id="like-btn-${p.id}">❤️ <span id="like-count-${p.id}">${p.likes || 0}</span></span>
+                            <span>💬 ${p.comment_count || 0}</span>
+                            <span>👁️ ${p.views || 0}</span>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
 
-    function searchPosts() {
-        const keyword = document.getElementById('searchInput').value.trim();
-        loadPosts(currentCategory, keyword);
-    }
+        function renderHotList(posts) {
+            const container = document.getElementById('hotContent');
+            if (!container) return;
+            const sorted = [...posts].sort((a,b) => (b.likes||0) - (a.likes||0));
+            const top = sorted.slice(0,5);
+            if (!top.length) {
+                container.innerHTML = '<p style="color:rgba(255,255,255,0.2);font-size:0.9rem;">暂无帖子</p>';
+                return;
+            }
+            container.innerHTML = top.map((p, i) => {
+                const emoji = i===0?'🥇':i===1?'🥈':i===2?'🥉':`#${i+1}`;
+                return `<div class="hot-item"><a href="#" onclick="showPost('${p.id}');return false;"><span><span class="hot-num">${emoji}</span> ${p.title}</span><span>❤️ ${p.likes||0}</span></a></div>`;
+            }).join('');
+        }
 
-    // =============================================================
-    // 版块管理
-    // =============================================================
-    async function loadTopics() {
-        try {
-            const data = await fetchTopics();
-            topicsCache = data || [];
-            updateBoardNav();
-            updateCategorySelect();
+        async function updateStats() {
+            document.getElementById('statPosts').textContent = postsCache.length;
+            try {
+                const resp = await fetch(SUPABASE_URL + '/rest/v1/comments?select=id', { headers: getHeaders(false) });
+                const data = await resp.json();
+                document.getElementById('statComments').textContent = data?.length || 0;
+            } catch(e) {}
+            try {
+                const resp = await fetch(SUPABASE_URL + '/rest/v1/profiles?select=id', { headers: getHeaders(false) });
+                const data = await resp.json();
+                document.getElementById('statUsers').textContent = data?.length || 0;
+            } catch(e) {}
             document.getElementById('statTopics').textContent = topicsCache.length;
-        } catch(err) {
-            console.error('加载版块失败', err);
         }
-    }
 
-    function updateBoardNav() {
-        const container = document.getElementById('dynamicBoards');
-        if (!container) return;
-        container.innerHTML = topicsCache.map(t =>
-            `<button class="board-btn" data-cat="${encodeURIComponent(t.name)}" onclick="setCategory('${encodeURIComponent(t.name)}')">🏷️ ${t.name}</button>`
-        ).join('');
-    }
-
-    function updateCategorySelect() {
-        const select = document.getElementById('newCategory');
-        const fixed = ['闲聊', 'tech', 'life', 'career'];
-        const opts = select.querySelectorAll('option');
-        opts.forEach(o => { if(!fixed.includes(o.value)) o.remove(); });
-        topicsCache.forEach(t => {
-            const opt = document.createElement('option');
-            opt.value = t.name;
-            opt.textContent = '🏷️ ' + t.name;
-            select.appendChild(opt);
-        });
-    }
-
-    function openNewTopic() {
-        if (!currentUser) { showToast('请先登录', true); return; }
-        document.getElementById('topicModal').classList.add('active');
-        document.getElementById('newTopicName').value = '';
-        document.getElementById('topicMsg').innerHTML = '';
-    }
-    function closeTopicModal() {
-        document.getElementById('topicModal').classList.remove('active');
-    }
-    document.getElementById('topicModal').addEventListener('click', function(e) {
-        if (e.target === this) closeTopicModal();
-    });
-
-    async function createTopic() {
-        const name = document.getElementById('newTopicName').value.trim();
-        const msg = document.getElementById('topicMsg');
-        if (!name) { msg.innerHTML = '<p style="color:#ef4444;">请输入版块名称</p>'; return; }
-        if (name.length > 30) { msg.innerHTML = '<p style="color:#ef4444;">名称不能超过30字符</p>'; return; }
-        if (topicsCache.some(t => t.name === name)) { msg.innerHTML = '<p style="color:#ef4444;">该版块已存在</p>'; return; }
-        try {
-            await createTopic(name);
-            msg.innerHTML = '<p style="color:#6ee7b7;">✅ 版块创建成功！</p>';
-            document.getElementById('newTopicName').value = '';
-            await loadTopics();
-            await loadPosts(currentCategory);
-            setTimeout(closeTopicModal, 1000);
-        } catch(err) {
-            msg.innerHTML = '<p style="color:#ef4444;">创建失败：'+err.message+'</p>';
-        }
-    }
-
-    // =============================================================
-    // 个人中心
-    // =============================================================
-    function openProfile() {
-        if (!currentUser) { showToast('请先登录', true); return; }
-        document.getElementById('profileModal').classList.add('active');
-        document.getElementById('profileNameInput').value = userProfile?.username || '';
-        document.getElementById('profileAvatarPreview').src = getAvatarUrl(userProfile || currentUser);
-        document.getElementById('profileMsg').innerHTML = '';
-    }
-    function closeProfile() {
-        document.getElementById('profileModal').classList.remove('active');
-    }
-    document.getElementById('profileModal').addEventListener('click', function(e) {
-        if (e.target === this) closeProfile();
-    });
-
-    async function uploadAvatar(event) {
-        const file = event.target.files[0];
-        if (!file) return;
-        if (!currentUser) { showToast('请先登录', true); return; }
-        if (file.size > 2 * 1024 * 1024) { showToast('图片不能超过2MB', true); return; }
-
-        const msg = document.getElementById('profileMsg');
-        msg.innerHTML = '<p style="color:rgba(255,255,255,0.5);">上传中...</p>';
-
-        try {
-            const resp = await fetch(SUPABASE_URL + '/storage/v1/object/avatars/' + currentUser.id + '.png', {
-                method: 'POST',
-                headers: {
-                    'apikey': SUPABASE_ANON_KEY,
-                    'Authorization': 'Bearer ' + accessToken
-                },
-                body: file
-            });
-            if (!resp.ok) throw new Error('上传失败');
-            const publicUrl = SUPABASE_URL + '/storage/v1/object/public/avatars/' + currentUser.id + '.png';
-            await upsertProfile({ avatar_url: publicUrl });
-            userProfile.avatar_url = publicUrl;
-            document.getElementById('profileAvatarPreview').src = publicUrl;
-            document.getElementById('userAvatar').src = publicUrl;
-            msg.innerHTML = '<p style="color:#6ee7b7;">✅ 头像上传成功！</p>';
-        } catch(err) {
-            msg.innerHTML = '<p style="color:#ef4444;">上传失败：' + err.message + '</p>';
-        }
-    }
-
-    async function saveProfile() {
-        const newName = document.getElementById('profileNameInput').value.trim();
-        const msg = document.getElementById('profileMsg');
-        if (!newName) { msg.innerHTML = '<p style="color:#ef4444;">昵称不能为空</p>'; return; }
-        if (newName.length > 30) { msg.innerHTML = '<p style="color:#ef4444;">昵称不能超过30字符</p>'; return; }
-        try {
-            await upsertProfile({ username: newName });
-            userProfile.username = newName;
-            document.getElementById('userName').textContent = newName;
-            msg.innerHTML = '<p style="color:#6ee7b7;">✅ 昵称修改成功！</p>';
-            loadPosts(currentCategory);
-        } catch(err) {
-            msg.innerHTML = '<p style="color:#ef4444;">修改失败：' + err.message + '</p>';
-        }
-    }
-
-    // =============================================================
-    // 主题切换
-    // =============================================================
-    function toggleTheme() {
-        const body = document.body;
-        const btn = document.getElementById('themeToggle');
-        const isLight = body.style.background === '#f0f2f8';
-        if (isLight) {
-            body.style.background = '#0b0e1a';
-            body.style.color = '#e8edf5';
-            btn.textContent = '🌙';
-            document.querySelectorAll('.post-card, .publish-form, .post-detail, .modal-box').forEach(el => {
-                el.style.background = 'rgba(255,255,255,0.04)';
-            });
-        } else {
-            body.style.background = '#f0f2f8';
-            body.style.color = '#1a1a2e';
-            btn.textContent = '☀️';
-            document.querySelectorAll('.post-card, .publish-form, .post-detail, .modal-box').forEach(el => {
-                el.style.background = 'rgba(255,255,255,0.7)';
-            });
-        }
-    }
-
-    // =============================================================
-    // 模态框
-    // =============================================================
-    function openModal() { document.getElementById('authModal').classList.add('active'); }
-    function closeModal() { document.getElementById('authModal').classList.remove('active'); }
-    document.getElementById('authModal').addEventListener('click', function(e) {
-        if (e.target === this) closeModal();
-    });
-    document.addEventListener('keydown', function(e) {
-        if (e.key === 'Escape') {
-            closeModal();
-            closeTopicModal();
-            closeProfile();
-        }
-    });
-
-    function switchTab(tab) {
-        document.querySelectorAll('.modal-tabs button').forEach(b => b.classList.toggle('active', b.dataset.tab === tab));
-        document.getElementById('loginForm').classList.toggle('active', tab === 'login');
-        document.getElementById('registerForm').classList.toggle('active', tab === 'register');
-        document.getElementById('modalTitle').textContent = tab === 'login' ? '欢迎回来' : '创建账号';
-        document.getElementById('modalSub').textContent = tab === 'login' ? '登录你的账号' : '加入窍某论坛';
-    }
-
-    // =============================================================
-    // 认证
-    // =============================================================
-    async function handleLogin(e) {
-        e.preventDefault();
-        const email = document.getElementById('loginEmail').value.trim();
-        const pass = document.getElementById('loginPassword').value.trim();
-        if (!email || !pass) { showToast('请填写完整', true); return; }
-        try {
-            const data = await signIn(email, pass);
-            accessToken = data.access_token;
-            currentUser = data.user;
-            localStorage.setItem('sb_token', accessToken);
-            localStorage.setItem('sb_user', JSON.stringify(currentUser));
-            userProfile = await getProfile(currentUser.id);
-            closeModal();
-            document.getElementById('loginEmail').value = '';
-            document.getElementById('loginPassword').value = '';
-            showToast('登录成功！🎉');
-            updateUI();
-            loadPosts();
-        } catch(err) {
-            showToast('登录失败：' + err.message, true);
-        }
-    }
-
-    async function handleRegister(e) {
-        e.preventDefault();
-        const name = document.getElementById('regName').value.trim();
-        const email = document.getElementById('regEmail').value.trim();
-        const pass = document.getElementById('regPassword').value;
-        const confirm = document.getElementById('regConfirm').value;
-        if (!name || !email || !pass || !confirm) { showToast('请填写完整', true); return; }
-        if (pass !== confirm) { showToast('密码不一致', true); return; }
-        if (pass.length < 6) { showToast('密码至少6位', true); return; }
-        if (name.length > 30) { showToast('昵称过长', true); return; }
-        try {
-            const data = await signUp(email, pass, name);
-            accessToken = data.access_token;
-            currentUser = data.user;
-            localStorage.setItem('sb_token', accessToken);
-            localStorage.setItem('sb_user', JSON.stringify(currentUser));
-            await upsertProfile({
-                id: currentUser.id,
-                username: name,
-                email: email,
-                is_admin: false
-            });
-            userProfile = { username: name, email: email, is_admin: false };
-            showToast('注册成功！🎉');
-            closeModal();
-            updateUI();
-            loadPosts();
-        } catch(err) {
-            showToast('注册失败：' + err.message, true);
-        }
-    }
-
-    async function handleSocialLogin(provider) {
-        if (!sb) {
-            showToast('客户端未初始化', true);
-            return;
-        }
-        try {
-            const { data, error } = await sb.auth.signInWithOAuth({
-                provider: provider,
-                options: {
-                    redirectTo: window.location.origin
+        // =============================================================
+        // 帖子详情
+        // =============================================================
+        async function showPost(postId) {
+            const post = postsCache.find(p => parseInt(p.id) === parseInt(postId));
+            if (!post) {
+                showToast('帖子不存在', true);
+                return;
+            }
+            document.getElementById('postList').style.display = 'none';
+            const area = document.getElementById('detailArea');
+            area.classList.remove('hidden');
+            const avatar = post.author_avatar || `https://ui-avatars.com/api/?name=${encodeURIComponent(post.author_name||'U')}&background=6d5bff&color=fff&size=40`;
+            area.innerHTML = `
+                <div class="post-detail">
+                    <button class="back-btn" onclick="backToList()">← 返回列表</button>
+                    <h1 style="font-size:1.6rem;">${post.title}</h1>
+                    <div class="post-author-info">
+                        <img src="${avatar}" alt="${post.author_name||'用户'}" />
+                        <span class="author-name">${post.author_name || '匿名'}</span>
+                        <span class="post-time">${formatTime(post.created_at)}</span>
+                        <span style="margin-left:12px;">👁️ ${post.views || 0}</span>
+                    </div>
+                    <div class="post-body">${post.content}</div>
+                    <div class="post-actions">
+                        <span class="like-btn" onclick="handleLike('${post.id}')" id="like-btn-detail-${post.id}">❤️ <span id="like-count-detail-${post.id}">${post.likes || 0}</span></span>
+                        <span>💬 回复 <span id="reply-count">0</span></span>
+                    </div>
+                    <hr style="border-color:#333;margin:16px 0;" />
+                    <h3 style="margin-bottom:12px;">💬 全部回复</h3>
+                    <div id="commentsArea"><p style="color:rgba(255,255,255,0.3);">加载中...</p></div>
+                    ${currentUser ? `
+                        <div style="margin-top:16px;">
+                            <textarea id="commentInput" rows="3" maxlength="2000" placeholder="写下你的回复..."></textarea>
+                            <button class="btn" onclick="publishComment('${post.id}')" id="commentSubmitBtn" style="margin-top:8px;">发表回复</button>
+                        </div>
+                    ` : '<p style="color:rgba(255,255,255,0.3);margin-top:12px;">登录后即可回复</p>'}
+                </div>
+            `;
+            try {
+                const comments = await fetchComments(post.id);
+                const areaC = document.getElementById('commentsArea');
+                const replyCount = document.getElementById('reply-count');
+                if (!comments || comments.length === 0) {
+                    areaC.innerHTML = '<p style="color:rgba(255,255,255,0.3);">还没有回复，来抢沙发！</p>';
+                    if (replyCount) replyCount.textContent = '0';
+                } else {
+                    let html = '';
+                    comments.forEach(c => {
+                        const ava = c.user_avatar || `https://ui-avatars.com/api/?name=${encodeURIComponent(c.username||'U')}&background=6d5bff&color=fff&size=28`;
+                        html += `<div class="reply-item">
+                                    <div class="reply-author-info">
+                                        <img src="${ava}" alt="${c.username||'用户'}" />
+                                        <span class="reply-author">${c.username || '用户'}</span>
+                                        <span class="reply-time">${formatTime(c.created_at)}</span>
+                                    </div>
+                                    <div class="reply-content">${c.content}</div>
+                                </div>`;
+                    });
+                    areaC.innerHTML = html;
+                    if (replyCount) replyCount.textContent = comments.length;
                 }
-            });
-            if (error) throw error;
-        } catch (error) {
-            showToast('登录失败：' + error.message, true);
+            } catch(err) {
+                document.getElementById('commentsArea').innerHTML = '<p style="color:#ef4444;">加载评论失败</p>';
+            }
         }
-    }
 
-    async function logout() {
-        await sb.auth.signOut();
-        accessToken = null;
-        currentUser = null;
-        userProfile = null;
-        localStorage.removeItem('sb_token');
-        localStorage.removeItem('sb_user');
-        updateUI();
-        loadPosts();
-        showToast('已退出');
-    }
+        function backToList() {
+            document.getElementById('postList').style.display = 'block';
+            document.getElementById('detailArea').classList.add('hidden');
+            document.getElementById('detailArea').innerHTML = '';
+            loadPosts(currentCategory);
+        }
 
-    // =============================================================
-    // UI 更新
-    // =============================================================
-    function updateUI() {
-        const loginBtn = document.getElementById('loginBtn');
-        const avatar = document.getElementById('userAvatar');
-        const nameEl = document.getElementById('userName');
-        const logoutBtn = document.getElementById('logoutBtn');
-        const adminLink = document.getElementById('adminLink');
-        const profileLink = document.getElementById('profileLink');
+        // =============================================================
+        // 发帖
+        // =============================================================
+        function togglePublish() {
+            const form = document.getElementById('publishForm');
+            form.style.display = form.style.display === 'none' ? 'block' : 'none';
+        }
 
-        if (currentUser && accessToken) {
-            loginBtn.style.display = 'none';
-            avatar.classList.remove('hidden');
-            nameEl.classList.remove('hidden');
-            logoutBtn.classList.remove('hidden');
-            profileLink.classList.remove('hidden');
-            avatar.src = getAvatarUrl(userProfile || currentUser);
-            nameEl.textContent = userProfile?.username || currentUser.email;
-            if (userProfile?.is_admin) {
-                adminLink.style.display = 'inline-block';
-                isAdmin = true;
+        async function publishPost() {
+            if (isSubmitting) { showToast('请勿重复提交', true); return; }
+            if (!currentUser) { showToast('请先登录', true); return; }
+            const title = document.getElementById('newTitle').value.trim();
+            const content = document.getElementById('newContent').value.trim();
+            const excerpt = document.getElementById('newExcerpt').value.trim();
+            const category = document.getElementById('newCategory').value;
+            if (!title || !content) { showToast('请填写标题和内容', true); return; }
+            if (title.length > 100) { showToast('标题不能超过100字符', true); return; }
+            if (content.length > 50000) { showToast('正文过长', true); return; }
+
+            isSubmitting = true;
+            const btn = document.getElementById('publishBtn');
+            if (btn) btn.disabled = true;
+
+            try {
+                const avatar = userProfile?.avatar_url || `https://ui-avatars.com/api/?name=${encodeURIComponent(currentUser.email)}&background=6d5bff&color=fff&size=100`;
+                await createPost({
+                    title, content, excerpt, category,
+                    author_id: currentUser.id,
+                    author_name: currentUser.email,
+                    author_avatar: avatar,
+                    likes: 0, views: 0
+                });
+                showToast('发帖成功！🎉');
+                document.getElementById('newTitle').value = '';
+                document.getElementById('newContent').value = '';
+                document.getElementById('newExcerpt').value = '';
+                document.getElementById('publishForm').style.display = 'none';
+                await loadPosts(currentCategory);
+            } catch(err) {
+                showToast('发帖失败：' + err.message, true);
+            } finally {
+                isSubmitting = false;
+                if (btn) btn.disabled = false;
+            }
+        }
+
+        // =============================================================
+        // 评论
+        // =============================================================
+        async function publishComment(postId) {
+            if (isSubmitting) { showToast('请勿重复提交', true); return; }
+            const input = document.getElementById('commentInput');
+            if (!input) return;
+            const content = input.value.trim();
+            if (!content) { showToast('请输入回复内容', true); return; }
+            if (content.length > 2000) { showToast('回复不能超过2000字符', true); return; }
+            if (!currentUser) { showToast('请先登录', true); return; }
+
+            isSubmitting = true;
+            const btn = document.getElementById('commentSubmitBtn');
+            if (btn) btn.disabled = true;
+
+            try {
+                await createComment({
+                    post_id: parseInt(postId),
+                    user_id: currentUser.id,
+                    username: currentUser.email,
+                    user_avatar: userProfile?.avatar_url || null,
+                    content
+                });
+                input.value = '';
+                showToast('回复成功！');
+                await showPost(postId);
+            } catch(err) {
+                showToast('回复失败：' + err.message, true);
+            } finally {
+                isSubmitting = false;
+                if (btn) btn.disabled = false;
+            }
+        }
+
+        // =============================================================
+        // 分类和搜索
+        // =============================================================
+        function setCategory(cat) {
+            currentCategory = cat;
+            document.querySelectorAll('.board-btn').forEach(b => {
+                b.classList.toggle('active', b.dataset.cat === cat || b.dataset.cat === decodeURIComponent(cat));
+            });
+            const keyword = document.getElementById('searchInput').value.trim();
+            loadPosts(cat, keyword);
+        }
+
+        function searchPosts() {
+            const keyword = document.getElementById('searchInput').value.trim();
+            loadPosts(currentCategory, keyword);
+        }
+
+        // =============================================================
+        // 版块管理
+        // =============================================================
+        async function loadTopics() {
+            try {
+                const data = await fetchTopics();
+                topicsCache = data || [];
+                updateBoardNav();
+                updateCategorySelect();
+                document.getElementById('statTopics').textContent = topicsCache.length;
+            } catch(err) {
+                console.error('加载版块失败', err);
+            }
+        }
+
+        function updateBoardNav() {
+            const container = document.getElementById('dynamicBoards');
+            if (!container) return;
+            container.innerHTML = topicsCache.map(t =>
+                `<button class="board-btn" data-cat="${encodeURIComponent(t.name)}" onclick="setCategory('${encodeURIComponent(t.name)}')">🏷️ ${t.name}</button>`
+            ).join('');
+        }
+
+        function updateCategorySelect() {
+            const select = document.getElementById('newCategory');
+            const fixed = ['闲聊', 'tech', 'life', 'career'];
+            const opts = select.querySelectorAll('option');
+            opts.forEach(o => { if(!fixed.includes(o.value)) o.remove(); });
+            topicsCache.forEach(t => {
+                const opt = document.createElement('option');
+                opt.value = t.name;
+                opt.textContent = '🏷️ ' + t.name;
+                select.appendChild(opt);
+            });
+        }
+
+        function openNewTopic() {
+            if (!currentUser) { showToast('请先登录', true); return; }
+            document.getElementById('topicModal').classList.add('active');
+            document.getElementById('newTopicName').value = '';
+            document.getElementById('topicMsg').innerHTML = '';
+        }
+        function closeTopicModal() {
+            document.getElementById('topicModal').classList.remove('active');
+        }
+        document.getElementById('topicModal').addEventListener('click', function(e) {
+            if (e.target === this) closeTopicModal();
+        });
+
+        async function createTopic() {
+            const name = document.getElementById('newTopicName').value.trim();
+            const msg = document.getElementById('topicMsg');
+            if (!name) { msg.innerHTML = '<p style="color:#ef4444;">请输入版块名称</p>'; return; }
+            if (name.length > 30) { msg.innerHTML = '<p style="color:#ef4444;">名称不能超过30字符</p>'; return; }
+            if (topicsCache.some(t => t.name === name)) { msg.innerHTML = '<p style="color:#ef4444;">该版块已存在</p>'; return; }
+            try {
+                await createTopic(name);
+                msg.innerHTML = '<p style="color:#6ee7b7;">✅ 版块创建成功！</p>';
+                document.getElementById('newTopicName').value = '';
+                await loadTopics();
+                await loadPosts(currentCategory);
+                setTimeout(closeTopicModal, 1000);
+            } catch(err) {
+                msg.innerHTML = '<p style="color:#ef4444;">创建失败：'+err.message+'</p>';
+            }
+        }
+
+        // =============================================================
+        // 个人中心
+        // =============================================================
+        function openProfile() {
+            if (!currentUser) { showToast('请先登录', true); return; }
+            document.getElementById('profileModal').classList.add('active');
+            document.getElementById('profileNameInput').value = userProfile?.username || '';
+            document.getElementById('profileAvatarPreview').src = getAvatarUrl(userProfile || currentUser);
+            document.getElementById('profileMsg').innerHTML = '';
+        }
+        function closeProfile() {
+            document.getElementById('profileModal').classList.remove('active');
+        }
+        document.getElementById('profileModal').addEventListener('click', function(e) {
+            if (e.target === this) closeProfile();
+        });
+
+        async function uploadAvatar(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+            if (!currentUser) { showToast('请先登录', true); return; }
+            if (file.size > 2 * 1024 * 1024) { showToast('图片不能超过2MB', true); return; }
+
+            const msg = document.getElementById('profileMsg');
+            msg.innerHTML = '<p style="color:rgba(255,255,255,0.5);">上传中...</p>';
+
+            try {
+                const resp = await fetch(SUPABASE_URL + '/storage/v1/object/avatars/' + currentUser.id + '.png', {
+                    method: 'POST',
+                    headers: {
+                        'apikey': SUPABASE_ANON_KEY,
+                        'Authorization': 'Bearer ' + accessToken
+                    },
+                    body: file
+                });
+                if (!resp.ok) throw new Error('上传失败');
+                const publicUrl = SUPABASE_URL + '/storage/v1/object/public/avatars/' + currentUser.id + '.png';
+                await upsertProfile({ avatar_url: publicUrl });
+                userProfile.avatar_url = publicUrl;
+                document.getElementById('profileAvatarPreview').src = publicUrl;
+                document.getElementById('userAvatar').src = publicUrl;
+                msg.innerHTML = '<p style="color:#6ee7b7;">✅ 头像上传成功！</p>';
+            } catch(err) {
+                msg.innerHTML = '<p style="color:#ef4444;">上传失败：' + err.message + '</p>';
+            }
+        }
+
+        async function saveProfile() {
+            const newName = document.getElementById('profileNameInput').value.trim();
+            const msg = document.getElementById('profileMsg');
+            if (!newName) { msg.innerHTML = '<p style="color:#ef4444;">昵称不能为空</p>'; return; }
+            if (newName.length > 30) { msg.innerHTML = '<p style="color:#ef4444;">昵称不能超过30字符</p>'; return; }
+            try {
+                await upsertProfile({ username: newName });
+                userProfile.username = newName;
+                document.getElementById('userName').textContent = newName;
+                msg.innerHTML = '<p style="color:#6ee7b7;">✅ 昵称修改成功！</p>';
+                loadPosts(currentCategory);
+            } catch(err) {
+                msg.innerHTML = '<p style="color:#ef4444;">修改失败：' + err.message + '</p>';
+            }
+        }
+
+        // =============================================================
+        // 主题切换
+        // =============================================================
+        function toggleTheme() {
+            const body = document.body;
+            const btn = document.getElementById('themeToggle');
+            const isLight = body.style.background === '#f0f2f8';
+            if (isLight) {
+                body.style.background = '#0b0e1a';
+                body.style.color = '#e8edf5';
+                btn.textContent = '🌙';
+                document.querySelectorAll('.post-card, .publish-form, .post-detail, .modal-box').forEach(el => {
+                    el.style.background = 'rgba(255,255,255,0.04)';
+                });
             } else {
+                body.style.background = '#f0f2f8';
+                body.style.color = '#1a1a2e';
+                btn.textContent = '☀️';
+                document.querySelectorAll('.post-card, .publish-form, .post-detail, .modal-box').forEach(el => {
+                    el.style.background = 'rgba(255,255,255,0.7)';
+                });
+            }
+        }
+
+        // =============================================================
+        // 模态框
+        // =============================================================
+        function openModal() { document.getElementById('authModal').classList.add('active'); }
+        function closeModal() { document.getElementById('authModal').classList.remove('active'); }
+        document.getElementById('authModal').addEventListener('click', function(e) {
+            if (e.target === this) closeModal();
+        });
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') {
+                closeModal();
+                closeTopicModal();
+                closeProfile();
+            }
+        });
+
+        function switchTab(tab) {
+            document.querySelectorAll('.modal-tabs button').forEach(b => b.classList.toggle('active', b.dataset.tab === tab));
+            document.getElementById('loginForm').classList.toggle('active', tab === 'login');
+            document.getElementById('registerForm').classList.toggle('active', tab === 'register');
+            document.getElementById('modalTitle').textContent = tab === 'login' ? '欢迎回来' : '创建账号';
+            document.getElementById('modalSub').textContent = tab === 'login' ? '登录你的账号' : '加入窍某论坛';
+        }
+
+        // =============================================================
+        // 认证
+        // =============================================================
+        async function handleLogin(e) {
+            e.preventDefault();
+            const email = document.getElementById('loginEmail').value.trim();
+            const pass = document.getElementById('loginPassword').value.trim();
+            if (!email || !pass) { showToast('请填写完整', true); return; }
+            try {
+                const data = await signIn(email, pass);
+                accessToken = data.access_token;
+                currentUser = data.user;
+                localStorage.setItem('sb_token', accessToken);
+                localStorage.setItem('sb_user', JSON.stringify(currentUser));
+                userProfile = await getProfile(currentUser.id);
+                closeModal();
+                document.getElementById('loginEmail').value = '';
+                document.getElementById('loginPassword').value = '';
+                showToast('登录成功！🎉');
+                updateUI();
+                loadPosts();
+            } catch(err) {
+                showToast('登录失败：' + err.message, true);
+            }
+        }
+
+        async function handleRegister(e) {
+            e.preventDefault();
+            const name = document.getElementById('regName').value.trim();
+            const email = document.getElementById('regEmail').value.trim();
+            const pass = document.getElementById('regPassword').value;
+            const confirm = document.getElementById('regConfirm').value;
+            if (!name || !email || !pass || !confirm) { showToast('请填写完整', true); return; }
+            if (pass !== confirm) { showToast('密码不一致', true); return; }
+            if (pass.length < 6) { showToast('密码至少6位', true); return; }
+            if (name.length > 30) { showToast('昵称过长', true); return; }
+            try {
+                const data = await signUp(email, pass, name);
+                accessToken = data.access_token;
+                currentUser = data.user;
+                localStorage.setItem('sb_token', accessToken);
+                localStorage.setItem('sb_user', JSON.stringify(currentUser));
+                await upsertProfile({
+                    id: currentUser.id,
+                    username: name,
+                    email: email,
+                    is_admin: false
+                });
+                userProfile = { username: name, email: email, is_admin: false };
+                showToast('注册成功！🎉');
+                closeModal();
+                updateUI();
+                loadPosts();
+            } catch(err) {
+                showToast('注册失败：' + err.message, true);
+            }
+        }
+
+        async function handleSocialLogin(provider) {
+            if (!sb) {
+                showToast('客户端未初始化', true);
+                return;
+            }
+            try {
+                const { data, error } = await sb.auth.signInWithOAuth({
+                    provider: provider,
+                    options: {
+                        redirectTo: window.location.origin
+                    }
+                });
+                if (error) throw error;
+            } catch (error) {
+                showToast('登录失败：' + error.message, true);
+            }
+        }
+
+        async function logout() {
+            await sb.auth.signOut();
+            accessToken = null;
+            currentUser = null;
+            userProfile = null;
+            localStorage.removeItem('sb_token');
+            localStorage.removeItem('sb_user');
+            updateUI();
+            loadPosts();
+            showToast('已退出');
+        }
+
+        // =============================================================
+        // UI 更新
+        // =============================================================
+        function updateUI() {
+            const loginBtn = document.getElementById('loginBtn');
+            const avatar = document.getElementById('userAvatar');
+            const nameEl = document.getElementById('userName');
+            const logoutBtn = document.getElementById('logoutBtn');
+            const adminLink = document.getElementById('adminLink');
+            const profileLink = document.getElementById('profileLink');
+
+            if (currentUser && accessToken) {
+                loginBtn.style.display = 'none';
+                avatar.classList.remove('hidden');
+                nameEl.classList.remove('hidden');
+                logoutBtn.classList.remove('hidden');
+                profileLink.classList.remove('hidden');
+                avatar.src = getAvatarUrl(userProfile || currentUser);
+                nameEl.textContent = userProfile?.username || currentUser.email;
+                if (userProfile?.is_admin) {
+                    adminLink.style.display = 'inline-block';
+                    isAdmin = true;
+                } else {
+                    adminLink.style.display = 'none';
+                    isAdmin = false;
+                }
+            } else {
+                loginBtn.style.display = 'inline-block';
+                avatar.classList.add('hidden');
+                nameEl.classList.add('hidden');
+                logoutBtn.classList.add('hidden');
                 adminLink.style.display = 'none';
+                profileLink.classList.add('hidden');
                 isAdmin = false;
             }
-        } else {
-            loginBtn.style.display = 'inline-block';
-            avatar.classList.add('hidden');
-            nameEl.classList.add('hidden');
-            logoutBtn.classList.add('hidden');
-            adminLink.style.display = 'none';
-            profileLink.classList.add('hidden');
-            isAdmin = false;
-        }
-    }
-
-    // =============================================================
-    // 暴露全局函数（确保 onclick 能访问）
-    // =============================================================
-    window.openModal = openModal;
-    window.closeModal = closeModal;
-    window.switchTab = switchTab;
-    window.handleLogin = handleLogin;
-    window.handleRegister = handleRegister;
-    window.handleSocialLogin = handleSocialLogin;
-    window.logout = logout;
-    window.setCategory = setCategory;
-    window.searchPosts = searchPosts;
-    window.showPost = showPost;
-    window.backToList = backToList;
-    window.togglePublish = togglePublish;
-    window.publishPost = publishPost;
-    window.publishComment = publishComment;
-    window.handleLike = handleLike;
-    window.openNewTopic = openNewTopic;
-    window.closeTopicModal = closeTopicModal;
-    window.createTopic = createTopic;
-    window.toggleTheme = toggleTheme;
-    window.openProfile = openProfile;
-    window.closeProfile = closeProfile;
-    window.uploadAvatar = uploadAvatar;
-    window.saveProfile = saveProfile;
-    window.loadPosts = loadPosts;
-
-    // =============================================================
-    // 初始化
-    // =============================================================
-    async function init() {
-        // 尝试从 localStorage 恢复会话
-        const token = localStorage.getItem('sb_token');
-        const userStr = localStorage.getItem('sb_user');
-        if (token && userStr) {
-            accessToken = token;
-            try { currentUser = JSON.parse(userStr); } catch(e) {}
         }
 
-        // 用 Supabase 客户端恢复会话（优先）
-        const { data: { session } } = await sb.auth.getSession();
-        if (session) {
-            currentUser = session.user;
-            accessToken = session.access_token;
-            localStorage.setItem('sb_token', accessToken);
-            localStorage.setItem('sb_user', JSON.stringify(currentUser));
-        }
+        // =============================================================
+        // 初始化（确保 accessToken 在使用前已赋值）
+        // =============================================================
+        async function init() {
+            // 优先从 localStorage 恢复
+            const token = localStorage.getItem('sb_token');
+            const userStr = localStorage.getItem('sb_user');
+            if (token && userStr) {
+                accessToken = token;
+                try { currentUser = JSON.parse(userStr); } catch(e) {}
+            }
 
-        if (currentUser && accessToken) {
-            try {
-                userProfile = await getProfile(currentUser.id);
-            } catch(e) {}
-        }
-
-        // 监听认证状态变化
-        sb.auth.onAuthStateChange(async (event, session) => {
-            if (event === 'SIGNED_IN' && session) {
+            // 从 Supabase 会话恢复（优先级更高）
+            const { data: { session } } = await sb.auth.getSession();
+            if (session) {
                 currentUser = session.user;
                 accessToken = session.access_token;
                 localStorage.setItem('sb_token', accessToken);
                 localStorage.setItem('sb_user', JSON.stringify(currentUser));
-                userProfile = await getProfile(currentUser.id);
-                updateUI();
-                loadPosts();
-            } else if (event === 'SIGNED_OUT') {
-                currentUser = null;
-                accessToken = null;
-                userProfile = null;
-                localStorage.removeItem('sb_token');
-                localStorage.removeItem('sb_user');
-                updateUI();
-                loadPosts();
             }
+
+            // 获取用户资料
+            if (currentUser && accessToken) {
+                try {
+                    userProfile = await getProfile(currentUser.id);
+                } catch(e) {}
+            }
+
+            // 监听认证状态变化
+            sb.auth.onAuthStateChange(async (event, session) => {
+                if (event === 'SIGNED_IN' && session) {
+                    currentUser = session.user;
+                    accessToken = session.access_token;
+                    localStorage.setItem('sb_token', accessToken);
+                    localStorage.setItem('sb_user', JSON.stringify(currentUser));
+                    userProfile = await getProfile(currentUser.id);
+                    updateUI();
+                    loadPosts();
+                } else if (event === 'SIGNED_OUT') {
+                    currentUser = null;
+                    accessToken = null;
+                    userProfile = null;
+                    localStorage.removeItem('sb_token');
+                    localStorage.removeItem('sb_user');
+                    updateUI();
+                    loadPosts();
+                }
+                updateUI();
+            });
+
             updateUI();
-        });
+            await loadTopics();
+            loadPosts('all', '');
+        }
 
-        updateUI();
-        await loadTopics();
-        loadPosts('all', '');
-    }
+        // =============================================================
+        // 暴露全局函数（确保 onclick 能访问）
+        // =============================================================
+        window.openModal = openModal;
+        window.closeModal = closeModal;
+        window.switchTab = switchTab;
+        window.handleLogin = handleLogin;
+        window.handleRegister = handleRegister;
+        window.handleSocialLogin = handleSocialLogin;
+        window.logout = logout;
+        window.setCategory = setCategory;
+        window.searchPosts = searchPosts;
+        window.showPost = showPost;
+        window.backToList = backToList;
+        window.togglePublish = togglePublish;
+        window.publishPost = publishPost;
+        window.publishComment = publishComment;
+        window.handleLike = handleLike;
+        window.openNewTopic = openNewTopic;
+        window.closeTopicModal = closeTopicModal;
+        window.createTopic = createTopic;
+        window.toggleTheme = toggleTheme;
+        window.openProfile = openProfile;
+        window.closeProfile = closeProfile;
+        window.uploadAvatar = uploadAvatar;
+        window.saveProfile = saveProfile;
+        window.loadPosts = loadPosts;
 
-    init();
-</script>
+        // 启动
+        init();
+    </script>
 </body>
 </html>
