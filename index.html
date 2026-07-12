@@ -311,7 +311,6 @@
         let currentCategory = 'all';
         let isSubmitting = false;
         let isAdmin = false;
-        // 评论计数缓存
         let commentCountMap = {};
 
         const STATS_CACHE_KEY = 'forum_stats_cache';
@@ -632,7 +631,6 @@
                 ]);
                 postsCache = postsData || [];
                 commentCountMap = counts || {};
-                // 合并评论数到帖子对象
                 postsCache.forEach(p => {
                     p._comment_count = commentCountMap[p.id] || 0;
                 });
@@ -902,7 +900,6 @@
                 });
                 input.value = '';
                 showToast('回复成功！');
-                // 重新加载帖子列表以更新评论数
                 await loadPosts(currentCategory);
                 await showPost(postId);
             } catch(err) {
@@ -932,7 +929,7 @@
         }
 
         // =============================================================
-        // 版块管理
+        // 版块管理（修复：新建板块不闪烁）
         // =============================================================
         async function loadTopics() {
             try {
@@ -980,6 +977,7 @@
             if (e.target === this) closeTopicModal();
         });
 
+        // ===== 关键修复：本地更新缓存，避免重新请求 =====
         async function createTopic() {
             const name = document.getElementById('newTopicName').value.trim();
             const msg = document.getElementById('topicMsg');
@@ -987,11 +985,23 @@
             if (name.length > 30) { msg.innerHTML = '<p style="color:#ef4444;">名称不能超过30字符</p>'; return; }
             if (topicsCache.some(t => t.name === name)) { msg.innerHTML = '<p style="color:#ef4444;">该版块已存在</p>'; return; }
             try {
-                await createTopic(name);
+                // 1. 调用 API 创建版块
+                const result = await createTopic(name);
                 msg.innerHTML = '<p style="color:#6ee7b7;">✅ 版块创建成功！</p>';
                 document.getElementById('newTopicName').value = '';
-                await loadTopics();
+
+                // 2. 本地更新缓存（避免重新请求，减少闪烁）
+                const newTopic = { id: Date.now(), name: name };
+                topicsCache.push(newTopic);
+                // 3. 刷新导航和下拉菜单
+                updateBoardNav();
+                updateCategorySelect();
+                document.getElementById('statTopics').textContent = topicsCache.length;
+
+                // 4. 自动切换到新版块（触发帖子列表刷新）
                 await setCategory(name);
+
+                // 5. 关闭模态框
                 setTimeout(closeTopicModal, 1000);
             } catch(err) {
                 if (err.message !== 'Unauthorized') {
