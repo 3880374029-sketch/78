@@ -25,11 +25,24 @@
                 script.onload = function() {
                     console.log('✅ Supabase 库加载成功：', cdnList[index]);
                     const lib = window.supabase || window.supabaseJs;
-                    if (lib && typeof startApp === 'function') {
-                        startApp(lib);
-                    } else {
-                        console.error('❌ 无法找到 Supabase 库对象或主程序');
+                    if (!lib) {
+                        console.error('❌ 无法找到 Supabase 库对象');
+                        return;
                     }
+                    // 等待主程序加载完成
+                    let waitCount = 0;
+                    const waitForApp = setInterval(function() {
+                        if (typeof startApp === 'function') {
+                            clearInterval(waitForApp);
+                            startApp(lib);
+                            console.log('✅ 主程序已启动');
+                        } else if (waitCount > 20) { // 10秒超时
+                            clearInterval(waitForApp);
+                            console.error('❌ 主程序未定义，请检查脚本加载顺序');
+                            document.body.innerHTML = `<div style="text-align:center;padding:50px;color:#ef4444;"><h1>⚠️ 加载超时</h1><p>主程序未响应，请刷新页面。</p><button onclick="location.reload()" style="background:#6d5bff;color:#fff;border:none;padding:10px 24px;border-radius:30px;cursor:pointer;margin-top:16px;">刷新重试</button></div>`;
+                        }
+                        waitCount++;
+                    }, 500);
                 };
                 script.onerror = function() {
                     console.warn('⚠️ 加载失败，尝试下一个 CDN：', cdnList[index]);
@@ -337,7 +350,7 @@
     </footer>
 
     <!-- ===== 模态框 ===== -->
-    <!-- 登录模态框 -->
+    <!-- 登录 -->
     <div class="modal" id="authModal">
         <div class="modal-box">
             <span class="close" onclick="closeModal()">&times;</span>
@@ -374,7 +387,7 @@
         </div>
     </div>
 
-    <!-- 新建版块模态框 -->
+    <!-- 新建版块 -->
     <div class="modal" id="topicModal">
         <div class="modal-box">
             <span class="close" onclick="closeTopicModal()">&times;</span>
@@ -386,7 +399,7 @@
         </div>
     </div>
 
-    <!-- 通知模态框 -->
+    <!-- 通知 -->
     <div class="modal" id="notificationModal">
         <div class="modal-box">
             <span class="close" onclick="closeNotificationPanel()">&times;</span>
@@ -395,7 +408,7 @@
         </div>
     </div>
 
-    <!-- 个人中心模态框 -->
+    <!-- 个人中心 -->
     <div class="modal" id="profileModal">
         <div class="modal-box">
             <span class="close" onclick="closeProfile()">&times;</span>
@@ -536,7 +549,6 @@
                 const data = await handleResponse(resp);
                 return data && data.length > 0 ? data[0] : null;
             }
-            // ---- 修复：使用 PATCH 更新 ----
             async function updateProfile(userId, updates) {
                 const resp = await authFetch(SUPABASE_URL + '/rest/v1/profiles?id=eq.' + userId, {
                     method: 'PATCH',
@@ -1182,28 +1194,43 @@
             function closeProfile() { document.getElementById('profileModal').classList.remove('active'); }
             document.getElementById('profileModal').addEventListener('click', function(e) { if (e.target === this) closeProfile(); });
 
+            // 修复：使用原生 fetch 上传文件（不经过 authFetch）
             async function uploadAvatar(event) {
                 const file = event.target.files[0];
                 if (!file) return;
                 if (!currentUser) { showToast('请先登录', true); return; }
                 if (file.size > 2 * 1024 * 1024) { showToast('图片不能超过2MB', true); return; }
+
                 const msg = document.getElementById('profileMsg');
                 msg.innerHTML = '<p style="color:rgba(255,255,255,0.5);">上传中...</p>';
+
                 try {
-                    const resp = await authFetch(SUPABASE_URL + '/storage/v1/object/avatars/' + currentUser.id + '.png', {
+                    const filePath = currentUser.id + '.png';
+                    const resp = await fetch(SUPABASE_URL + '/storage/v1/object/avatars/' + filePath, {
                         method: 'POST',
-                        headers: { 'Content-Type': file.type },
+                        headers: {
+                            'apikey': SUPABASE_ANON_KEY,
+                            'Authorization': 'Bearer ' + accessToken
+                        },
                         body: file
                     });
-                    if (!resp.ok) throw new Error('上传失败');
-                    const publicUrl = SUPABASE_URL + '/storage/v1/object/public/avatars/' + currentUser.id + '.png';
+                    if (!resp.ok) {
+                        const errText = await resp.text();
+                        throw new Error('上传失败：' + errText);
+                    }
+                    const publicUrl = SUPABASE_URL + '/storage/v1/object/public/avatars/' + filePath;
                     await updateProfile(currentUser.id, { avatar_url: publicUrl });
                     userProfile.avatar_url = publicUrl;
                     document.getElementById('profileAvatarPreview').src = publicUrl;
                     document.getElementById('userAvatar').src = publicUrl;
                     msg.innerHTML = '<p style="color:#6ee7b7;">✅ 头像上传成功！</p>';
                 } catch (err) {
-                    if (err.message !== 'Unauthorized') { msg.innerHTML = '<p style="color:#ef4444;">上传失败：' + err.message + '</p>'; }
+                    if (err.message !== 'Unauthorized') {
+                        msg.innerHTML = '<p style="color:#ef4444;">上传失败：' + err.message + '</p>';
+                    } else {
+                        showToast('登录已过期，请重新登录', true);
+                    }
+                    console.error(err);
                 }
             }
 
