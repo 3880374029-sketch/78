@@ -2,18 +2,17 @@
 <html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
     <title>窍某论坛</title>
     <style>
-        /* ---------- 样式（完整） ---------- */
         *{margin:0;padding:0;box-sizing:border-box;}
-        body{background:#0b0e1a;color:#e8edf5;font-family:'Segoe UI',sans-serif;padding:20px;line-height:1.6;}
+        body{background:#0b0e1a;color:#e8edf5;font-family:'Segoe UI',sans-serif;padding:12px;line-height:1.6;}
         .container{max-width:1200px;margin:0 auto;}
         header{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;margin-bottom:20px;}
         h1{background:linear-gradient(135deg,#c4b5fd,#818cf8);-webkit-background-clip:text;-webkit-text-fill-color:transparent;font-size:1.8rem;}
         .nav-controls{display:flex;align-items:center;gap:12px;flex-wrap:wrap;}
         .search-box{padding:8px 16px;border-radius:30px;border:1px solid #444;background:rgba(255,255,255,0.05);color:#fff;width:200px;}
-        .btn{background:linear-gradient(135deg,#6d5bff,#8b5cf6);color:#fff;border:none;padding:6px 18px;border-radius:30px;cursor:pointer;font-size:0.9rem;transition:0.3s;}
+        .btn{background:linear-gradient(135deg,#6d5bff,#8b5cf6);color:#fff;border:none;padding:6px 18px;border-radius:30px;cursor:pointer;font-size:0.9rem;transition:0.3s;min-height:44px;min-width:44px;display:inline-flex;align-items:center;justify-content:center;}
         .btn:hover{transform:scale(1.04);}
         .btn-outline{background:transparent;border:1px solid #444;}
         .btn-outline:hover{background:rgba(255,255,255,0.05);}
@@ -40,11 +39,11 @@
         .post-card:hover{border-color:rgba(255,255,255,0.12);}
         .post-card .post-title{font-size:1.1rem;font-weight:600;color:#e8edf5;cursor:pointer;}
         .post-card .post-title:hover{color:#a5b4fc;}
-        .post-card .post-meta{color:rgba(255,255,255,0.35);font-size:0.8rem;margin:4px 0 8px;display:flex;align-items:center;gap:8px;}
+        .post-card .post-meta{color:rgba(255,255,255,0.35);font-size:0.8rem;margin:4px 0 8px;display:flex;align-items:center;gap:8px;flex-wrap:wrap;}
         .post-card .post-meta .author-avatar{width:24px;height:24px;border-radius:50%;object-fit:cover;}
         .post-card .post-meta .author{color:#a5b4fc;}
         .post-card .post-excerpt{color:rgba(255,255,255,0.5);font-size:0.9rem;}
-        .post-card .post-footer{display:flex;align-items:center;gap:16px;margin-top:10px;font-size:0.8rem;color:rgba(255,255,255,0.3);}
+        .post-card .post-footer{display:flex;align-items:center;gap:16px;margin-top:10px;font-size:0.8rem;color:rgba(255,255,255,0.3);flex-wrap:wrap;}
         .post-card .post-footer .like-btn{cursor:pointer;user-select:none;}
         .post-card .badge{padding:2px 10px;border-radius:30px;font-size:0.65rem;font-weight:600;}
         .post-card .badge.tech{background:rgba(96,165,250,0.15);color:#93bbfc;}
@@ -53,17 +52,17 @@
         .post-card .badge.topic{background:rgba(251,191,36,0.15);color:#fcd34d;}
         .post-detail{background:rgba(255,255,255,0.04);padding:24px;border-radius:20px;border:1px solid rgba(255,255,255,0.06);margin-top:20px;}
         .post-detail .back-btn{background:rgba(255,255,255,0.06);border:1px solid #444;color:#e8edf5;padding:6px 16px;border-radius:30px;cursor:pointer;margin-bottom:16px;}
-        .post-detail .post-author-info{display:flex;align-items:center;gap:12px;margin:8px 0;}
+        .post-detail .post-author-info{display:flex;align-items:center;gap:12px;margin:8px 0;flex-wrap:wrap;}
         .post-detail .post-author-info img{width:40px;height:40px;border-radius:50%;object-fit:cover;}
         .post-detail .post-author-info .author-name{color:#a5b4fc;font-weight:600;}
         .post-detail .post-time{color:rgba(255,255,255,0.3);font-size:0.85rem;}
         .post-detail .post-body{margin:16px 0;}
         .post-detail .post-body p{margin:8px 0;color:rgba(255,255,255,0.75);}
         .post-detail .post-body img{max-width:100%;border-radius:8px;margin:8px 0;}
-        .post-detail .post-actions{display:flex;align-items:center;gap:20px;padding:12px 0;border-top:1px solid rgba(255,255,255,0.06);margin-top:12px;}
+        .post-detail .post-actions{display:flex;align-items:center;gap:20px;padding:12px 0;border-top:1px solid rgba(255,255,255,0.06);margin-top:12px;flex-wrap:wrap;}
         .post-detail .post-actions .like-btn{cursor:pointer;user-select:none;}
         .reply-item{border-bottom:1px solid rgba(255,255,255,0.06);padding:12px 0;}
-        .reply-item .reply-author-info{display:flex;align-items:center;gap:8px;}
+        .reply-item .reply-author-info{display:flex;align-items:center;gap:8px;flex-wrap:wrap;}
         .reply-item .reply-author-info img{width:28px;height:28px;border-radius:50%;object-fit:cover;}
         .reply-item .reply-author{color:#a5b4fc;font-weight:600;}
         .reply-item .reply-time{color:rgba(255,255,255,0.3);font-size:0.8rem;margin-left:10px;}
@@ -75,10 +74,10 @@
         .hot-list h3{font-size:1.1rem;margin-bottom:12px;color:#fcd34d;}
         .hot-item{padding:6px 0;border-bottom:1px solid rgba(255,255,255,0.04);}
         .hot-item:last-child{border-bottom:none;}
-        .hot-item a{color:rgba(255,255,255,0.7);text-decoration:none;display:flex;justify-content:space-between;font-size:0.9rem;}
+        .hot-item a{color:rgba(255,255,255,0.7);text-decoration:none;display:flex;justify-content:space-between;font-size:0.9rem;flex-wrap:wrap;}
         .hot-item a:hover{color:#fff;}
         .hot-item .hot-num{color:#fcd34d;font-weight:700;margin-right:6px;}
-        .modal{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.7);backdrop-filter:blur(8px);justify-content:center;align-items:center;z-index:999;}
+        .modal{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.7);backdrop-filter:blur(8px);justify-content:center;align-items:center;z-index:999;padding:20px;}
         .modal.active{display:flex;}
         .modal-box{background:#1a1a2e;padding:30px;border-radius:20px;max-width:480px;width:100%;max-height:90vh;overflow-y:auto;position:relative;}
         .modal-box .close{position:absolute;top:12px;right:20px;font-size:1.8rem;cursor:pointer;color:rgba(255,255,255,0.4);}
@@ -112,14 +111,40 @@
         .toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:#1a1a2e;padding:12px 24px;border-radius:8px;border:1px solid #444;z-index:1000;display:none;max-width:90%;}
         .toast.show{display:block;animation:fadeIn 0.3s;}
         .toast.error{border-color:#ef4444;}
-        @keyframes fadeIn{from{opacity:0;transform:translateX(-50%) translateY(20px);}to{opacity:1;transform:translateX(-50%) translateY(0);}}
-        @media (max-width:820px){.main-layout{flex-direction:column;}.sidebar{width:100%;}.search-box{width:100%;}}
+        @keyframes fadeIn{from{opacity:0;transform:translateX(-50%) translateY(20px);}to{opacity:1;transform:translateX(-50%) translateY(0);}
+
+        /* ---------- 移动端响应式 ---------- */
+        @media (max-width: 768px) {
+            body{padding:8px;}
+            header{flex-direction:column;align-items:stretch;}
+            .nav-controls{flex-wrap:wrap;justify-content:center;}
+            .search-box{width:100%;}
+            .auth-section{justify-content:center;flex-wrap:wrap;}
+            .btn{font-size:0.85rem;padding:8px 14px;}
+            .post-card{padding:12px;}
+            .post-card .post-title{font-size:1rem;}
+            .post-card .post-meta{font-size:0.7rem;}
+            .post-card .post-excerpt{font-size:0.8rem;}
+            .post-card .post-footer{font-size:0.7rem;gap:10px;}
+            .board-nav .board-btn{font-size:0.7rem;padding:4px 10px;}
+            .modal-box{max-width:95%;padding:20px;}
+            .forum-stats{flex-wrap:wrap;gap:10px;}
+            .forum-stats span{font-size:0.7rem;}
+            .main-layout{flex-direction:column;}
+            .sidebar{width:100%;}
+            .publish-form input,.publish-form textarea,.publish-form select{font-size:0.9rem;}
+            .toast{font-size:0.8rem;padding:10px 16px;}
+        }
+        @media (max-width: 480px) {
+            .btn{font-size:0.75rem;padding:6px 10px;}
+            .post-card .post-footer{flex-wrap:wrap;gap:6px;}
+            .modal-box{max-width:100%;margin:10px;border-radius:12px;}
+            .modal-tabs button{font-size:0.8rem;}
+            .auth-form input{font-size:0.9rem;}
+        }
     </style>
 </head>
 <body>
-    <!-- ============================================================ -->
-    <!-- HTML 结构（完整） -->
-    <!-- ============================================================ -->
     <div class="container">
         <header>
             <h1>✦ 窍某论坛</h1>
@@ -194,7 +219,7 @@
         <p>© 2026 窍某论坛</p>
     </footer>
 
-    <!-- 模态框 -->
+    <!-- 登录模态框 -->
     <div class="modal" id="authModal">
         <div class="modal-box">
             <span class="close" onclick="closeModal()">&times;</span>
@@ -231,6 +256,7 @@
         </div>
     </div>
 
+    <!-- 新建版块模态框 -->
     <div class="modal" id="topicModal">
         <div class="modal-box">
             <span class="close" onclick="closeTopicModal()">&times;</span>
@@ -242,6 +268,7 @@
         </div>
     </div>
 
+    <!-- 个人中心模态框 -->
     <div class="modal" id="profileModal">
         <div class="modal-box">
             <span class="close" onclick="closeProfile()">&times;</span>
@@ -266,9 +293,6 @@
 
     <div class="toast" id="toast"></div>
 
-    <!-- ============================================================ -->
-    <!-- JavaScript 完整逻辑 -->
-    <!-- ============================================================ -->
     <script>
         // =============================================================
         // 配置
@@ -288,28 +312,21 @@
         let isSubmitting = false;
         let isAdmin = false;
 
-        // 统计信息缓存 (localStorage)
+        // 统计缓存
         const STATS_CACHE_KEY = 'forum_stats_cache';
-        const STATS_CACHE_TTL = 60 * 1000; // 1分钟
-
+        const STATS_CACHE_TTL = 60 * 1000;
         function getCachedStats() {
             const cached = localStorage.getItem(STATS_CACHE_KEY);
             if (cached) {
                 try {
                     const { data, timestamp } = JSON.parse(cached);
-                    if (Date.now() - timestamp < STATS_CACHE_TTL) {
-                        return data;
-                    }
+                    if (Date.now() - timestamp < STATS_CACHE_TTL) return data;
                 } catch(e) {}
             }
             return null;
         }
-
         function setCachedStats(data) {
-            localStorage.setItem(STATS_CACHE_KEY, JSON.stringify({
-                data,
-                timestamp: Date.now()
-            }));
+            localStorage.setItem(STATS_CACHE_KEY, JSON.stringify({ data, timestamp: Date.now() }));
         }
 
         // =============================================================
@@ -335,18 +352,11 @@
             clearTimeout(t._hide);
             t._hide = setTimeout(() => { t.className = 'toast'; }, 4000);
         }
-
         function getHeaders(includeAuth = true) {
-            const headers = {
-                'apikey': SUPABASE_ANON_KEY,
-                'Content-Type': 'application/json'
-            };
-            if (includeAuth && accessToken) {
-                headers['Authorization'] = 'Bearer ' + accessToken;
-            }
+            const headers = { 'apikey': SUPABASE_ANON_KEY, 'Content-Type': 'application/json' };
+            if (includeAuth && accessToken) headers['Authorization'] = 'Bearer ' + accessToken;
             return headers;
         }
-
         async function handleResponse(res) {
             const text = await res.text();
             let json = null;
@@ -371,7 +381,6 @@
             });
             return await handleResponse(resp);
         }
-
         async function signUp(email, password, username) {
             const resp = await fetch(SUPABASE_URL + '/auth/v1/signup', {
                 method: 'POST',
@@ -380,16 +389,12 @@
             });
             return await handleResponse(resp);
         }
-
         async function getProfile(userId) {
-            const resp = await fetch(SUPABASE_URL + '/rest/v1/profiles?id=eq.' + userId, {
-                headers: getHeaders(true)
-            });
+            const resp = await fetch(SUPABASE_URL + '/rest/v1/profiles?id=eq.' + userId, { headers: getHeaders(true) });
             if (resp.status === 404) return null;
             const data = await handleResponse(resp);
             return data && data.length > 0 ? data[0] : null;
         }
-
         async function upsertProfile(data) {
             const resp = await fetch(SUPABASE_URL + '/rest/v1/profiles', {
                 method: 'POST',
@@ -398,22 +403,14 @@
             });
             return await handleResponse(resp);
         }
-
-        // 修复：移除 comment_count 字段，避免字段不存在错误
         async function fetchPosts() {
-            const resp = await fetch(SUPABASE_URL + '/rest/v1/posts?order=created_at.desc', {
-                headers: getHeaders(false)
-            });
+            const resp = await fetch(SUPABASE_URL + '/rest/v1/posts?order=created_at.desc', { headers: getHeaders(false) });
             return await handleResponse(resp);
         }
-
         async function fetchComments(postId) {
-            const resp = await fetch(SUPABASE_URL + `/rest/v1/comments?post_id=eq.${postId}&order=created_at.asc`, {
-                headers: getHeaders(false)
-            });
+            const resp = await fetch(SUPABASE_URL + `/rest/v1/comments?post_id=eq.${postId}&order=created_at.asc`, { headers: getHeaders(false) });
             return await handleResponse(resp);
         }
-
         async function createComment(data) {
             const resp = await fetch(SUPABASE_URL + '/rest/v1/comments', {
                 method: 'POST',
@@ -422,7 +419,6 @@
             });
             return await handleResponse(resp);
         }
-
         async function createPost(data) {
             const resp = await fetch(SUPABASE_URL + '/rest/v1/posts', {
                 method: 'POST',
@@ -431,14 +427,10 @@
             });
             return await handleResponse(resp);
         }
-
         async function fetchTopics() {
-            const resp = await fetch(SUPABASE_URL + '/rest/v1/topics?order=name.asc', {
-                headers: getHeaders(false)
-            });
+            const resp = await fetch(SUPABASE_URL + '/rest/v1/topics?order=name.asc', { headers: getHeaders(false) });
             return await handleResponse(resp);
         }
-
         async function createTopic(name) {
             const resp = await fetch(SUPABASE_URL + '/rest/v1/topics', {
                 method: 'POST',
@@ -454,25 +446,15 @@
         async function toggleLike(postId, userId) {
             const numericPostId = parseInt(postId);
             const userIdStr = String(userId);
-
-            // 1. 查询是否已点赞
             const checkUrl = `${SUPABASE_URL}/rest/v1/likes?post_id=eq.${numericPostId}&user_id=eq.${userIdStr}`;
             const checkResp = await fetch(checkUrl, { headers: getHeaders(true) });
             let existing = [];
-            try {
-                existing = await checkResp.json();
-            } catch (e) {
-                existing = [];
-            }
-
-            let action = ''; // 'liked' 或 'unliked'
-
+            try { existing = await checkResp.json(); } catch(e) { existing = []; }
+            let action = '';
             if (existing && existing.length > 0) {
                 const deleteUrl = `${SUPABASE_URL}/rest/v1/likes?id=eq.${existing[0].id}`;
                 const deleteResp = await fetch(deleteUrl, { method: 'DELETE', headers: getHeaders(true) });
-                if (!deleteResp.ok) {
-                    throw new Error(`取消点赞失败 (HTTP ${deleteResp.status})`);
-                }
+                if (!deleteResp.ok) throw new Error(`取消点赞失败 (HTTP ${deleteResp.status})`);
                 action = 'unliked';
             } else {
                 const insertResp = await fetch(`${SUPABASE_URL}/rest/v1/likes`, {
@@ -480,28 +462,20 @@
                     headers: getHeaders(true),
                     body: JSON.stringify({ post_id: numericPostId, user_id: userIdStr })
                 });
-                if (insertResp.status === 201 || insertResp.status === 200) {
-                    action = 'liked';
-                } else if (insertResp.status === 409) {
-                    // 冲突视为已点赞
-                    return 'liked';
-                } else {
+                if (insertResp.status === 201 || insertResp.status === 200) action = 'liked';
+                else if (insertResp.status === 409) return 'liked';
+                else {
                     const text = await insertResp.text();
                     throw new Error(`点赞失败: ${insertResp.status} - ${text}`);
                 }
             }
-
-            // 2. 原子更新 posts 表中的 likes 字段（增量）
             const increment = action === 'liked' ? 1 : -1;
             const updateResp = await fetch(`${SUPABASE_URL}/rest/v1/posts?id=eq.${numericPostId}`, {
                 method: 'PATCH',
                 headers: getHeaders(true),
                 body: JSON.stringify({ likes: increment })
             });
-            if (!updateResp.ok) {
-                console.warn('更新帖子点赞数失败，但点赞记录已操作', updateResp.status);
-                // 可以回滚，但为了简化，只记录警告
-            }
+            if (!updateResp.ok) console.warn('更新帖子点赞数失败，但点赞记录已操作', updateResp.status);
             return action;
         }
 
@@ -509,35 +483,20 @@
         // 点赞处理（乐观更新）
         // =============================================================
         async function handleLike(postId) {
-            if (!currentUser) {
-                showToast('请先登录', true);
-                return;
-            }
-
+            if (!currentUser) { showToast('请先登录', true); return; }
             const numericId = parseInt(postId);
             const post = postsCache.find(p => parseInt(p.id) === numericId);
-            if (!post) {
-                showToast('帖子不存在', true);
-                return;
-            }
-
-            // 乐观更新
+            if (!post) { showToast('帖子不存在', true); return; }
             const oldLikes = post.likes || 0;
             const btn = document.getElementById(`like-btn-${postId}`);
             const isLiked = btn ? btn.classList.contains('liked') : false;
             const willLike = !isLiked;
             const newLikes = willLike ? oldLikes + 1 : Math.max(oldLikes - 1, 0);
-
-            // 更新缓存
             post.likes = newLikes;
-
-            // 更新 UI（列表和详情）
             const keyword = document.getElementById('searchInput').value.trim();
             const filtered = getFilteredPosts(currentCategory, keyword);
             renderPosts(filtered);
             renderHotList(postsCache);
-
-            // 更新详情
             const detailArea = document.getElementById('detailArea');
             if (!detailArea.classList.contains('hidden')) {
                 const detailLikeSpan = document.getElementById(`like-count-detail-${postId}`);
@@ -545,26 +504,18 @@
                 const detailBtn = document.getElementById(`like-btn-detail-${postId}`);
                 if (detailBtn) detailBtn.classList.toggle('liked', willLike);
             }
-
-            // 更新列表按钮样式
             if (btn) btn.classList.toggle('liked', willLike);
-
-            // 异步同步数据库
             try {
                 const result = await toggleLike(postId, currentUser.id);
-                // 验证结果一致性（简单处理）
                 if ((willLike && result !== 'liked') || (!willLike && result !== 'unliked')) {
-                    // 回滚
                     post.likes = oldLikes;
                     renderPosts(getFilteredPosts(currentCategory, keyword));
                     renderHotList(postsCache);
                     showToast('操作结果与预期不符，已恢复', true);
                 } else {
-                    // 成功，更新统计（可选）
                     updateStats();
                 }
             } catch (err) {
-                // 回滚
                 post.likes = oldLikes;
                 renderPosts(getFilteredPosts(currentCategory, keyword));
                 renderHotList(postsCache);
@@ -589,7 +540,6 @@
             }
             return filtered;
         }
-
         async function loadPosts(category = 'all', keyword = '') {
             const list = document.getElementById('postList');
             list.innerHTML = '<div class="empty-state">⏳ 加载中...</div>';
@@ -599,7 +549,6 @@
                 const filtered = getFilteredPosts(category, keyword);
                 renderPosts(filtered);
                 renderHotList(postsCache);
-                // 异步更新统计（不阻塞）
                 setTimeout(() => updateStats(), 0);
             } catch (err) {
                 list.innerHTML = `
@@ -612,7 +561,6 @@
                 console.error(err);
             }
         }
-
         function renderPosts(posts) {
             const list = document.getElementById('postList');
             if (!posts || posts.length === 0) {
@@ -673,7 +621,7 @@
         }
 
         // =============================================================
-        // 统计信息（带缓存，异步）
+        // 统计信息（带缓存）
         // =============================================================
         async function updateStats() {
             const cached = getCachedStats();
@@ -684,21 +632,17 @@
                 document.getElementById('statTopics').textContent = cached.topics;
                 return;
             }
-
             try {
-                // 并行请求
                 const [postsCount, commentsCount, usersCount] = await Promise.all([
                     fetch(SUPABASE_URL + '/rest/v1/posts?select=id', { headers: getHeaders(false) }).then(r => r.json()).then(data => data?.length || 0),
                     fetch(SUPABASE_URL + '/rest/v1/comments?select=id', { headers: getHeaders(false) }).then(r => r.json()).then(data => data?.length || 0),
                     fetch(SUPABASE_URL + '/rest/v1/profiles?select=id', { headers: getHeaders(false) }).then(r => r.json()).then(data => data?.length || 0)
                 ]);
                 const topicsCount = topicsCache.length;
-
                 document.getElementById('statPosts').textContent = postsCount;
                 document.getElementById('statComments').textContent = commentsCount;
                 document.getElementById('statUsers').textContent = usersCount;
                 document.getElementById('statTopics').textContent = topicsCount;
-
                 setCachedStats({
                     posts: postsCount,
                     comments: commentsCount,
@@ -715,10 +659,7 @@
         // =============================================================
         async function showPost(postId) {
             const post = postsCache.find(p => parseInt(p.id) === parseInt(postId));
-            if (!post) {
-                showToast('帖子不存在', true);
-                return;
-            }
+            if (!post) { showToast('帖子不存在', true); return; }
             document.getElementById('postList').style.display = 'none';
             const area = document.getElementById('detailArea');
             area.classList.remove('hidden');
@@ -776,7 +717,6 @@
                 document.getElementById('commentsArea').innerHTML = '<p style="color:#ef4444;">加载评论失败</p>';
             }
         }
-
         function backToList() {
             document.getElementById('postList').style.display = 'block';
             document.getElementById('detailArea').classList.add('hidden');
@@ -791,7 +731,6 @@
             const form = document.getElementById('publishForm');
             form.style.display = form.style.display === 'none' ? 'block' : 'none';
         }
-
         async function publishPost() {
             if (isSubmitting) { showToast('请勿重复提交', true); return; }
             if (!currentUser) { showToast('请先登录', true); return; }
@@ -802,11 +741,9 @@
             if (!title || !content) { showToast('请填写标题和内容', true); return; }
             if (title.length > 100) { showToast('标题不能超过100字符', true); return; }
             if (content.length > 50000) { showToast('正文过长', true); return; }
-
             isSubmitting = true;
             const btn = document.getElementById('publishBtn');
             if (btn) btn.disabled = true;
-
             try {
                 const avatar = userProfile?.avatar_url || `https://ui-avatars.com/api/?name=${encodeURIComponent(currentUser.email)}&background=6d5bff&color=fff&size=100`;
                 await createPost({
@@ -841,11 +778,9 @@
             if (!content) { showToast('请输入回复内容', true); return; }
             if (content.length > 2000) { showToast('回复不能超过2000字符', true); return; }
             if (!currentUser) { showToast('请先登录', true); return; }
-
             isSubmitting = true;
             const btn = document.getElementById('commentSubmitBtn');
             if (btn) btn.disabled = true;
-
             try {
                 await createComment({
                     post_id: parseInt(postId),
@@ -876,14 +811,13 @@
             const keyword = document.getElementById('searchInput').value.trim();
             loadPosts(cat, keyword);
         }
-
         function searchPosts() {
             const keyword = document.getElementById('searchInput').value.trim();
             loadPosts(currentCategory, keyword);
         }
 
         // =============================================================
-        // 版块管理
+        // 版块管理（修复 BUG）
         // =============================================================
         async function loadTopics() {
             try {
@@ -941,8 +875,11 @@
                 await createTopic(name);
                 msg.innerHTML = '<p style="color:#6ee7b7;">✅ 版块创建成功！</p>';
                 document.getElementById('newTopicName').value = '';
+                // 重新加载版块列表并更新 UI
                 await loadTopics();
-                await loadPosts(currentCategory);
+                // 同时刷新帖子（如果当前分类是 'all'，则保持；否则可能需要重置）
+                // 为了保持一致性，我们调用 setCategory 刷新当前分类
+                await setCategory(currentCategory);
                 setTimeout(closeTopicModal, 1000);
             } catch(err) {
                 msg.innerHTML = '<p style="color:#ef4444;">创建失败：'+err.message+'</p>';
@@ -965,16 +902,13 @@
         document.getElementById('profileModal').addEventListener('click', function(e) {
             if (e.target === this) closeProfile();
         });
-
         async function uploadAvatar(event) {
             const file = event.target.files[0];
             if (!file) return;
             if (!currentUser) { showToast('请先登录', true); return; }
             if (file.size > 2 * 1024 * 1024) { showToast('图片不能超过2MB', true); return; }
-
             const msg = document.getElementById('profileMsg');
             msg.innerHTML = '<p style="color:rgba(255,255,255,0.5);">上传中...</p>';
-
             try {
                 const resp = await fetch(SUPABASE_URL + '/storage/v1/object/avatars/' + currentUser.id + '.png', {
                     method: 'POST',
@@ -995,7 +929,6 @@
                 msg.innerHTML = '<p style="color:#ef4444;">上传失败：' + err.message + '</p>';
             }
         }
-
         async function saveProfile() {
             const newName = document.getElementById('profileNameInput').value.trim();
             const msg = document.getElementById('profileMsg');
@@ -1051,7 +984,6 @@
                 closeProfile();
             }
         });
-
         function switchTab(tab) {
             document.querySelectorAll('.modal-tabs button').forEach(b => b.classList.toggle('active', b.dataset.tab === tab));
             document.getElementById('loginForm').classList.toggle('active', tab === 'login');
@@ -1085,7 +1017,6 @@
                 showToast('登录失败：' + err.message, true);
             }
         }
-
         async function handleRegister(e) {
             e.preventDefault();
             const name = document.getElementById('regName').value.trim();
@@ -1130,12 +1061,10 @@
                 showToast('登录失败：' + error.message, true);
             }
         }
-
         async function handleOAuthCallback() {
             const hash = window.location.hash;
             const search = window.location.search;
             let token = null, refreshToken = null, user = null;
-
             if (hash && hash.includes('access_token')) {
                 const params = new URLSearchParams(hash.substring(1));
                 token = params.get('access_token');
@@ -1153,12 +1082,10 @@
                     try { user = JSON.parse(decodeURIComponent(userStr)); } catch(e) {}
                 }
             }
-
             if (token) {
                 accessToken = token;
                 localStorage.setItem('sb_token', token);
                 if (refreshToken) localStorage.setItem('sb_refresh_token', refreshToken);
-
                 if (user) {
                     currentUser = user;
                     localStorage.setItem('sb_user', JSON.stringify(user));
@@ -1225,7 +1152,6 @@
             const logoutBtn = document.getElementById('logoutBtn');
             const adminLink = document.getElementById('adminLink');
             const profileLink = document.getElementById('profileLink');
-
             if (currentUser && accessToken) {
                 loginBtn.style.display = 'none';
                 avatar.classList.remove('hidden');
@@ -1282,13 +1208,10 @@
         window.renderHotList = renderHotList;
 
         // =============================================================
-        // 初始化（含 OAuth 回调检测、会话恢复、统计缓存）
+        // 初始化
         // =============================================================
         async function init() {
-            // 1. 处理 OAuth 回调
             await handleOAuthCallback();
-
-            // 2. 恢复会话
             const token = localStorage.getItem('sb_token');
             const userStr = localStorage.getItem('sb_user');
             if (token && userStr) {
@@ -1296,18 +1219,12 @@
                 try { currentUser = JSON.parse(userStr); } catch(e) {}
             }
             if (currentUser && accessToken) {
-                try {
-                    userProfile = await getProfile(currentUser.id);
-                } catch(e) {}
+                try { userProfile = await getProfile(currentUser.id); } catch(e) {}
             }
             updateUI();
-
-            // 3. 加载版块和帖子（统计信息异步更新）
             await loadTopics();
             await loadPosts('all', '');
         }
-
-        // 启动
         init();
     </script>
 </body>
