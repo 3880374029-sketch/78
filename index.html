@@ -4,9 +4,46 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
     <title>窍某论坛</title>
-    <!-- 样式（与之前完全相同，为了精简此处用简写，但实际使用时请保留完整样式） -->
+    <script>
+        // =============================================================
+        // 加载器：动态加载 Supabase 库（多 CDN 备份）
+        // =============================================================
+        (function loadSupabase() {
+            const cdnList = [
+                'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2',
+                'https://unpkg.com/@supabase/supabase-js@2',
+                'https://cdnjs.cloudflare.com/ajax/libs/supabase-js/2.39.0/umd/supabase.min.js'
+            ];
+            let index = 0;
+            function tryLoad() {
+                if (index >= cdnList.length) {
+                    document.body.innerHTML = `<div style="text-align:center;padding:50px;color:#ef4444;font-size:18px;"><h1>❌ 加载失败</h1><p>无法加载 Supabase 库，请检查网络或刷新重试。</p><button onclick="location.reload()" style="background:#6d5bff;color:#fff;border:none;padding:10px 24px;border-radius:30px;cursor:pointer;margin-top:16px;">刷新重试</button></div>`;
+                    return;
+                }
+                const script = document.createElement('script');
+                script.src = cdnList[index];
+                script.onload = function() {
+                    console.log('✅ Supabase 库加载成功：', cdnList[index]);
+                    const lib = window.supabase || window.supabaseJs;
+                    if (lib && typeof startApp === 'function') {
+                        startApp(lib);
+                    } else {
+                        console.error('❌ 无法找到 Supabase 库对象或主程序');
+                    }
+                };
+                script.onerror = function() {
+                    console.warn('⚠️ 加载失败，尝试下一个 CDN：', cdnList[index]);
+                    index++;
+                    tryLoad();
+                };
+                document.head.appendChild(script);
+            }
+            tryLoad();
+        })();
+    </script>
+
     <style>
-        /* ===== 完整样式（与前几版一致） ===== */
+        /* ===== 完整样式（含个人中心新样式） ===== */
         *{margin:0;padding:0;box-sizing:border-box;}
         body{background:#0b0e1a;color:#e8edf5;font-family:'Segoe UI',sans-serif;padding:12px;line-height:1.6;}
         .container{max-width:1200px;margin:0 auto;}
@@ -84,7 +121,7 @@
         .hot-item .hot-num{color:#fcd34d;font-weight:700;margin-right:6px;}
         .modal{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.7);backdrop-filter:blur(8px);justify-content:center;align-items:center;z-index:999;padding:20px;}
         .modal.active{display:flex;}
-        .modal-box{background:#1a1a2e;padding:30px;border-radius:20px;max-width:480px;width:100%;max-height:90vh;overflow-y:auto;position:relative;}
+        .modal-box{background:#1a1a2e;padding:30px;border-radius:20px;max-width:560px;width:100%;max-height:90vh;overflow-y:auto;position:relative;}
         .modal-box .close{position:absolute;top:12px;right:20px;font-size:1.8rem;cursor:pointer;color:rgba(255,255,255,0.4);}
         .modal-box .close:hover{color:#fff;}
         .modal-tabs{display:flex;gap:8px;border-bottom:1px solid #333;padding-bottom:12px;margin-bottom:20px;}
@@ -100,7 +137,21 @@
         .divider::before,.divider::after{content:'';flex:1;height:1px;background:#333;}
         .auth-switch{text-align:center;color:rgba(255,255,255,0.4);}
         .auth-switch a{color:#6d5bff;cursor:pointer;}
-        .profile-avatar-preview{width:100px;height:100px;border-radius:50%;object-fit:cover;border:3px solid #6d5bff;margin:0 auto 16px;display:block;}
+        /* ---- 个人中心新样式 ---- */
+        .profile-header{display:flex;align-items:center;gap:20px;flex-wrap:wrap;margin-bottom:20px;}
+        .profile-avatar-large{width:80px;height:80px;border-radius:50%;object-fit:cover;border:3px solid #6d5bff;}
+        .profile-info h2{margin-bottom:4px;}
+        .profile-info .email{color:rgba(255,255,255,0.4);font-size:0.9rem;}
+        .stats-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(80px,1fr));gap:10px;margin:16px 0;}
+        .stat-item{background:rgba(255,255,255,0.04);padding:10px;border-radius:8px;text-align:center;}
+        .stat-item .num{font-size:1.3rem;font-weight:700;color:#a5b4fc;}
+        .stat-item .label{color:rgba(255,255,255,0.4);font-size:0.7rem;}
+        .level-progress{background:rgba(255,255,255,0.08);border-radius:20px;height:8px;margin:8px 0;overflow:hidden;}
+        .level-progress .bar{height:100%;background:linear-gradient(90deg,#6d5bff,#a5b4fc);width:0%;}
+        .my-posts-list .mini-post{padding:8px 0;border-bottom:1px solid rgba(255,255,255,0.05);cursor:pointer;}
+        .my-posts-list .mini-post:hover{color:#a5b4fc;}
+        .my-posts-list .mini-post .mp-title{font-size:0.9rem;}
+        .my-posts-list .mini-post .mp-meta{font-size:0.7rem;color:rgba(255,255,255,0.3);}
         .profile-upload-btn{position:relative;display:inline-block;}
         .profile-upload-btn input[type="file"]{position:absolute;inset:0;opacity:0;cursor:pointer;}
         .profile-form .form-group{margin-bottom:16px;}
@@ -123,12 +174,12 @@
         .btn-sm:hover{background:rgba(255,255,255,0.12);}
         .tag-item{display:inline-block;background:rgba(255,255,255,0.08);padding:2px 10px;border-radius:20px;font-size:0.7rem;margin:2px;color:rgba(255,255,255,0.5);}
         .tag-item:hover{background:rgba(255,255,255,0.15);cursor:pointer;}
-        @media (max-width:768px){body{padding:8px;font-size:14px;}header{flex-direction:column;align-items:stretch;gap:8px;}.nav-controls{flex-wrap:wrap;justify-content:center;gap:6px;}.search-box{width:100%;font-size:14px;}.auth-section{justify-content:center;flex-wrap:wrap;gap:4px;}.btn{font-size:14px;padding:8px 14px;min-height:44px;min-width:44px;}h1{font-size:1.5rem;}.forum-stats{flex-wrap:wrap;gap:8px;padding:10px;}.forum-stats span{font-size:13px;}.board-nav{gap:6px;padding:8px 0;}.board-nav .board-btn{font-size:13px;padding:4px 10px;}.post-card{padding:12px;}.post-card .post-title{font-size:16px;line-height:1.4;word-break:break-word;}.post-card .post-meta{font-size:12px;flex-wrap:wrap;gap:4px;}.post-card .post-meta .author-avatar{width:20px;height:20px;}.post-card .post-excerpt{font-size:14px;}.post-card .post-footer{font-size:13px;gap:12px;flex-wrap:wrap;}.post-detail{padding:16px;}.post-detail .post-author-info{gap:8px;}.post-detail .post-author-info img{width:32px;height:32px;}.post-detail .post-body{font-size:15px;line-height:1.7;}.post-detail .post-actions{gap:16px;flex-wrap:wrap;}.reply-item{padding:8px 0;}.reply-item .reply-author-info{gap:6px;}.reply-item .reply-author-info img{width:24px;height:24px;}.reply-item .reply-content{font-size:14px;}.modal{padding:12px;}.modal-box{max-width:95%;padding:16px;}.modal-tabs button{font-size:14px;}.auth-form input{font-size:15px;}.publish-form{padding:16px;}.publish-form input,.publish-form textarea,.publish-form select{font-size:15px;}.hot-list{padding:12px;}.hot-list h3{font-size:16px;}.hot-item a{font-size:14px;flex-wrap:wrap;gap:4px;}.sidebar{width:100%;}.toast{font-size:14px;padding:10px 16px;max-width:95%;}.empty-state{padding:30px 16px;}.empty-state h3{font-size:16px;}}
+        @media (max-width:768px){body{padding:8px;font-size:14px;}header{flex-direction:column;align-items:stretch;gap:8px;}.nav-controls{flex-wrap:wrap;justify-content:center;gap:6px;}.search-box{width:100%;font-size:14px;}.auth-section{justify-content:center;flex-wrap:wrap;gap:4px;}.btn{font-size:14px;padding:8px 14px;min-height:44px;min-width:44px;}h1{font-size:1.5rem;}.forum-stats{flex-wrap:wrap;gap:8px;padding:10px;}.forum-stats span{font-size:13px;}.board-nav{gap:6px;padding:8px 0;}.board-nav .board-btn{font-size:13px;padding:4px 10px;}.post-card{padding:12px;}.post-card .post-title{font-size:16px;line-height:1.4;word-break:break-word;}.post-card .post-meta{font-size:12px;flex-wrap:wrap;gap:4px;}.post-card .post-meta .author-avatar{width:20px;height:20px;}.post-card .post-excerpt{font-size:14px;}.post-card .post-footer{font-size:13px;gap:12px;flex-wrap:wrap;}.post-detail{padding:16px;}.post-detail .post-author-info{gap:8px;}.post-detail .post-author-info img{width:32px;height:32px;}.post-detail .post-body{font-size:15px;line-height:1.7;}.post-detail .post-actions{gap:16px;flex-wrap:wrap;}.reply-item{padding:8px 0;}.reply-item .reply-author-info{gap:6px;}.reply-item .reply-author-info img{width:24px;height:24px;}.reply-item .reply-content{font-size:14px;}.modal{padding:12px;}.modal-box{max-width:95%;padding:16px;}.modal-tabs button{font-size:14px;}.auth-form input{font-size:15px;}.publish-form{padding:16px;}.publish-form input,.publish-form textarea,.publish-form select{font-size:15px;}.hot-list{padding:12px;}.hot-list h3{font-size:16px;}.hot-item a{font-size:14px;flex-wrap:wrap;gap:4px;}.sidebar{width:100%;}.toast{font-size:14px;padding:10px 16px;max-width:95%;}.empty-state{padding:30px 16px;}.empty-state h3{font-size:16px;}.profile-header{flex-direction:column;text-align:center;}.profile-avatar-large{width:60px;height:60px;}.stats-grid{grid-template-columns:repeat(3,1fr);}}
         @media (max-width:480px){body{font-size:13px;padding:6px;}.btn{font-size:13px;padding:6px 12px;min-height:40px;min-width:40px;}h1{font-size:1.3rem;}.post-card .post-title{font-size:15px;}.post-card .post-meta{font-size:11px;}.post-card .post-footer{font-size:12px;gap:8px;flex-wrap:wrap;}.board-nav .board-btn{font-size:12px;padding:3px 8px;}.modal-box{max-width:100%;margin:8px;border-radius:12px;padding:12px;}.modal-tabs button{font-size:13px;}.auth-form input{font-size:14px;}.forum-stats span{font-size:12px;}.post-detail .post-body{font-size:14px;}.reply-item .reply-content{font-size:13px;}.search-box{font-size:13px;}}
     </style>
 </head>
 <body>
-    <!-- ===== HTML 结构（与之前完全相同） ===== -->
+    <!-- ===== 页面结构 ===== -->
     <div class="container">
         <header>
             <h1>✦ 窍某论坛</h1>
@@ -213,95 +264,134 @@
         <p>© 2026 窍某论坛</p>
     </footer>
 
-    <!-- 模态框（与之前完全相同） -->
-    <div class="modal" id="authModal"> ... </div>
-    <div class="modal" id="topicModal"> ... </div>
-    <div class="modal" id="profileModal"> ... </div>
-    <div class="modal" id="notificationModal"> ... </div>
+    <!-- ===== 模态框 ===== -->
+    <div class="modal" id="authModal">
+        <div class="modal-box">
+            <span class="close" onclick="closeModal()">&times;</span>
+            <h2 id="modalTitle">欢迎回来</h2>
+            <p class="sub" id="modalSub">登录你的账号</p>
+            <div class="modal-tabs">
+                <button class="active" data-tab="login" onclick="switchTab('login')">登录</button>
+                <button data-tab="register" onclick="switchTab('register')">注册</button>
+            </div>
+            <form class="auth-form active" id="loginForm" onsubmit="handleLogin(event)">
+                <label for="loginEmail">邮箱地址</label>
+                <input type="email" id="loginEmail" placeholder="your@email.com" required />
+                <label for="loginPassword">密码</label>
+                <input type="password" id="loginPassword" placeholder="••••••••" required />
+                <button type="submit" class="btn">登录</button>
+                <div class="divider">或</div>
+                <button type="button" class="social-btn google-btn" onclick="handleSocialLogin('google')">🔵 使用 Google 登录</button>
+                <button type="button" class="social-btn github-btn" onclick="handleSocialLogin('github')">🐙 使用 GitHub 登录</button>
+            </form>
+            <form class="auth-form" id="registerForm" onsubmit="handleRegister(event)">
+                <label for="regName">昵称</label>
+                <input type="text" id="regName" maxlength="30" placeholder="你的昵称" required />
+                <label for="regEmail">邮箱地址</label>
+                <input type="email" id="regEmail" placeholder="your@email.com" required />
+                <label for="regPassword">密码</label>
+                <input type="password" id="regPassword" placeholder="至少6位" minlength="6" required />
+                <label for="regConfirm">确认密码</label>
+                <input type="password" id="regConfirm" placeholder="再次输入" required />
+                <button type="submit" class="btn">注册</button>
+                <div class="divider">或</div>
+                <button type="button" class="social-btn google-btn" onclick="handleSocialLogin('google')">🔵 使用 Google 登录</button>
+                <button type="button" class="social-btn github-btn" onclick="handleSocialLogin('github')">🐙 使用 GitHub 登录</button>
+            </form>
+        </div>
+    </div>
+
+    <div class="modal" id="topicModal">
+        <div class="modal-box">
+            <span class="close" onclick="closeTopicModal()">&times;</span>
+            <h2>🏷️ 新建版块</h2>
+            <p style="color:rgba(255,255,255,0.4);margin-bottom:16px;">输入新版块名称，创建后即可在发帖时选择</p>
+            <input type="text" id="newTopicName" maxlength="30" placeholder="版块名称（限30字符）" />
+            <button class="btn" onclick="createTopic()" style="margin-top:12px;width:100%;">创建版块</button>
+            <div id="topicMsg" style="margin-top:8px;"></div>
+        </div>
+    </div>
+
+    <div class="modal" id="notificationModal">
+        <div class="modal-box">
+            <span class="close" onclick="closeNotificationPanel()">&times;</span>
+            <h2>🔔 通知</h2>
+            <div id="notificationList"><p style="color:rgba(255,255,255,0.3);">暂无通知</p></div>
+        </div>
+    </div>
+
+    <div class="modal" id="profileModal">
+        <div class="modal-box">
+            <span class="close" onclick="closeProfile()">&times;</span>
+            <h2>👤 个人中心</h2>
+            <div class="profile-header">
+                <img id="profileAvatarPreview" class="profile-avatar-large" src="https://ui-avatars.com/api/?name=User&background=6d5bff&color=fff&size=100" alt="头像" />
+                <div class="profile-info">
+                    <h2 id="profileDisplayName">用户</h2>
+                    <div class="email" id="profileEmail">email@example.com</div>
+                    <div style="margin-top:4px;">
+                        <span class="level-badge" id="profileLevel">Lv.1</span>
+                        <span style="margin-left:8px;color:#fcd34d;">⭐ <span id="profilePoints">0</span></span>
+                        <span style="margin-left:8px;color:rgba(255,255,255,0.3);">📅 连续签到 <span id="profileStreak">0</span> 天</span>
+                    </div>
+                </div>
+            </div>
+            <div class="profile-upload-btn" style="text-align:center;margin-bottom:12px;">
+                <button class="btn" style="position:relative;">📷 更换头像</button>
+                <input type="file" id="avatarInput" accept="image/*" onchange="uploadAvatar(event)" />
+            </div>
+            <div class="stats-grid">
+                <div class="stat-item"><div class="num" id="statPostsCount">0</div><div class="label">📄 帖子</div></div>
+                <div class="stat-item"><div class="num" id="statCommentsCount">0</div><div class="label">💬 评论</div></div>
+                <div class="stat-item"><div class="num" id="statLikesReceived">0</div><div class="label">❤️ 获赞</div></div>
+                <div class="stat-item"><div class="num" id="statFollowing">0</div><div class="label">关注</div></div>
+                <div class="stat-item"><div class="num" id="statFollowers">0</div><div class="label">粉丝</div></div>
+            </div>
+            <div style="margin:8px 0;">
+                <div style="display:flex;justify-content:space-between;font-size:0.8rem;color:rgba(255,255,255,0.4);">
+                    <span>升级进度</span>
+                    <span id="levelProgressText">0 / 50</span>
+                </div>
+                <div class="level-progress"><div class="bar" id="levelProgressBar" style="width:0%;"></div></div>
+            </div>
+            <div class="profile-form">
+                <div class="form-group">
+                    <label for="profileNameInput">修改昵称</label>
+                    <input type="text" id="profileNameInput" maxlength="30" placeholder="输入新昵称" />
+                </div>
+                <button class="btn" onclick="saveProfile()">保存</button>
+                <div id="profileMsg" style="margin-top:8px;"></div>
+            </div>
+            <hr style="border-color:#333;margin:16px 0;" />
+            <h4 style="margin-bottom:8px;">📝 我的帖子</h4>
+            <div id="myPostsList" class="my-posts-list"><p style="color:rgba(255,255,255,0.3);font-size:0.9rem;">加载中...</p></div>
+        </div>
+    </div>
+
     <div class="toast" id="toast"></div>
 
     <!-- ============================================================= -->
-    <!-- 加载器脚本（修复：正确检测全局变量） -->
+    <!-- 主程序脚本（startApp） -->
     <!-- ============================================================= -->
     <script>
-        (function loadSupabase() {
-            const cdnList = [
-                'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2',
-                'https://unpkg.com/@supabase/supabase-js@2',
-                'https://cdnjs.cloudflare.com/ajax/libs/supabase-js/2.39.0/umd/supabase.min.js'
-            ];
-            let index = 0;
-
-            function tryLoad() {
-                if (index >= cdnList.length) {
-                    document.body.innerHTML = `
-                        <div style="text-align:center;padding:50px;color:#ef4444;font-size:18px;">
-                            <h1>❌ 加载失败</h1>
-                            <p>无法加载 Supabase 库，请检查网络或刷新重试。</p>
-                            <button onclick="location.reload()" style="background:#6d5bff;color:#fff;border:none;padding:10px 24px;border-radius:30px;cursor:pointer;margin-top:16px;">刷新重试</button>
-                        </div>
-                    `;
-                    return;
-                }
-                const script = document.createElement('script');
-                script.src = cdnList[index];
-                script.onload = function() {
-                    console.log('✅ Supabase 库加载成功：', cdnList[index]);
-                    // 关键：检测正确的全局变量名（window.supabase 或 window.supabaseJs）
-                    const lib = window.supabase || window.supabaseJs;
-                    if (lib) {
-                        if (typeof startApp === 'function') {
-                            startApp(lib);
-                        } else {
-                            console.error('❌ 主程序未定义');
-                        }
-                    } else {
-                        console.error('❌ 无法找到 Supabase 库对象，请检查 CDN 是否成功加载');
-                    }
-                };
-                script.onerror = function() {
-                    console.warn('⚠️ 加载失败，尝试下一个 CDN：', cdnList[index]);
-                    index++;
-                    tryLoad();
-                };
-                document.head.appendChild(script);
-            }
-            tryLoad();
-        })();
-    </script>
-
-    <!-- ============================================================= -->
-    <!-- 主程序脚本（定义 startApp 函数） -->
-    <!-- ============================================================= -->
-    <script>
-        // 主程序入口，由加载器调用
         function startApp(supabase) {
-            // 1. 配置
             const SUPABASE_URL = 'https://bkvsceiezbyexzqpvblj.supabase.co';
             const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJrdnNjZWllemJ5ZXh6cXB2YmxqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODM3MDk1MzIsImV4cCI6MjA5OTI4NTUzMn0.1h4Yp8YaJdMMOQW8N2zqvJi6QrxHPncBFMK9LjdmZ6E';
             const sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-            // 2. 全局状态
-            let currentUser = null;
-            let userProfile = null;
-            let accessToken = null;
-            let refreshToken = null;
-            let postsCache = [];
-            let topicsCache = [];
-            let currentCategory = 'all';
-            let isSubmitting = false;
-            let isAdmin = false;
-            let commentCountMap = {};
-            let unreadCount = 0;
+            // ---- 全局状态 ----
+            let currentUser = null, userProfile = null, accessToken = null, refreshToken = null;
+            let postsCache = [], topicsCache = [], currentCategory = 'all';
+            let isSubmitting = false, isAdmin = false, commentCountMap = {}, unreadCount = 0;
             let followingMap = new Map();
 
-            // 3. 工具函数
+            // ---- 工具函数 ----
             function formatDate(d) { if (!d) return ''; return new Date(d).toLocaleDateString('zh-CN'); }
             function formatTime(d) { if (!d) return ''; return new Date(d).toLocaleString('zh-CN'); }
             function getAvatarUrl(user) { if (user && user.avatar_url) return user.avatar_url; const name = user?.username || user?.email || 'U'; return `https://ui-avatars.com/api/?name=${encodeURIComponent(name)}&background=6d5bff&color=fff&size=100`; }
             function showToast(msg, isError) { const t = document.getElementById('toast'); t.textContent = msg; t.className = 'toast show' + (isError ? ' error' : ''); clearTimeout(t._hide); t._hide = setTimeout(() => { t.className = 'toast'; }, 4000); }
 
-            // 4. 网络请求（使用 sb）
+            // ---- 网络请求 ----
             async function fetchWithAuth(url, options) {
                 const headers = options.headers || {};
                 if (accessToken) headers['Authorization'] = 'Bearer ' + accessToken;
@@ -347,7 +437,7 @@
                 return json || text;
             }
 
-            // 5. API 调用（使用 sb）
+            // ---- API 调用 ----
             async function signIn(email, password) {
                 const resp = await fetch(SUPABASE_URL + '/auth/v1/token?grant_type=password', {
                     method: 'POST',
@@ -415,7 +505,7 @@
                 return map;
             }
 
-            // 新功能 API
+            // ---- 新功能 API ----
             async function doCheckin() {
                 if (!currentUser) { showToast('请先登录', true); return; }
                 const today = new Date().toISOString().split('T')[0];
@@ -489,7 +579,47 @@
                 return data || [];
             }
 
-            // 6. 渲染函数
+            // ---- 个人中心增强 ----
+            async function loadProfileStats() {
+                if (!currentUser) return;
+                const { data: postsData } = await sb.from('posts').select('id', { count: 'exact' }).eq('author_id', currentUser.id);
+                document.getElementById('statPostsCount').textContent = postsData?.length || 0;
+                const { data: commentsData } = await sb.from('comments').select('id', { count: 'exact' }).eq('user_id', currentUser.id);
+                document.getElementById('statCommentsCount').textContent = commentsData?.length || 0;
+                const { data: myPosts } = await sb.from('posts').select('likes').eq('author_id', currentUser.id);
+                const totalLikes = myPosts ? myPosts.reduce((sum, p) => sum + (p.likes || 0), 0) : 0;
+                document.getElementById('statLikesReceived').textContent = totalLikes;
+                const { data: following } = await sb.from('follows').select('id', { count: 'exact' }).eq('follower_id', currentUser.id);
+                const { data: followers } = await sb.from('follows').select('id', { count: 'exact' }).eq('following_id', currentUser.id);
+                document.getElementById('statFollowing').textContent = following?.length || 0;
+                document.getElementById('statFollowers').textContent = followers?.length || 0;
+                const { data: checkins } = await sb.from('checkins').select('streak').eq('user_id', currentUser.id).order('checkin_date', { ascending: false }).limit(1);
+                const streak = checkins && checkins.length > 0 ? checkins[0].streak : 0;
+                document.getElementById('profileStreak').textContent = streak;
+                if (userProfile) {
+                    document.getElementById('profilePoints').textContent = userProfile.points || 0;
+                    document.getElementById('profileLevel').textContent = `Lv.${userProfile.level || 1}`;
+                    const nextLevel = (userProfile.level || 1) * 50;
+                    const current = userProfile.points || 0;
+                    const progress = Math.min((current / nextLevel) * 100, 100);
+                    document.getElementById('levelProgressBar').style.width = progress + '%';
+                    document.getElementById('levelProgressText').textContent = `${current} / ${nextLevel}`;
+                }
+                const { data: myRecentPosts } = await sb.from('posts').select('id, title, created_at').eq('author_id', currentUser.id).order('created_at', { ascending: false }).limit(10);
+                const container = document.getElementById('myPostsList');
+                if (!myRecentPosts || myRecentPosts.length === 0) {
+                    container.innerHTML = '<p style="color:rgba(255,255,255,0.3);font-size:0.9rem;">你还没有发布帖子</p>';
+                } else {
+                    container.innerHTML = myRecentPosts.map(p => `
+                        <div class="mini-post" onclick="showPost('${p.id}')">
+                            <div class="mp-title">${p.title}</div>
+                            <div class="mp-meta">${formatDate(p.created_at)}</div>
+                        </div>
+                    `).join('');
+                }
+            }
+
+            // ---- 渲染函数 ----
             function renderPosts(posts) {
                 const list = document.getElementById('postList');
                 if (!posts || posts.length === 0) {
@@ -583,7 +713,7 @@
                 if (badge) badge.textContent = count > 0 ? count : '0';
             }
 
-            // 7. 加载帖子
+            // ---- 加载帖子 ----
             async function loadPosts(category, keyword) {
                 const list = document.getElementById('postList');
                 list.innerHTML = '<div class="empty-state">⏳ 加载中...</div>';
@@ -625,7 +755,7 @@
                 searchPosts();
             }
 
-            // 8. 发帖（含标签）
+            // ---- 发帖 ----
             async function publishPost() {
                 if (isSubmitting) { showToast('请勿重复提交', true); return; }
                 if (!currentUser) { showToast('请先登录', true); return; }
@@ -683,7 +813,7 @@
                 }
             }
 
-            // 9. 点赞、评论、详情
+            // ---- 点赞 ----
             async function handleLike(postId) {
                 if (!currentUser) { showToast('请先登录', true); return; }
                 const numericId = parseInt(postId);
@@ -762,6 +892,7 @@
                 return action;
             }
 
+            // ---- 帖子详情 ----
             async function showPost(postId) {
                 const post = postsCache.find(p => parseInt(p.id) === parseInt(postId));
                 if (!post) { showToast('帖子不存在', true); return; }
@@ -838,6 +969,7 @@
                 loadPosts(currentCategory);
             }
 
+            // ---- 评论 ----
             async function publishComment(postId) {
                 if (isSubmitting) { showToast('请勿重复提交', true); return; }
                 const input = document.getElementById('commentInput');
@@ -869,7 +1001,7 @@
                 }
             }
 
-            // 10. 分类、搜索、版块管理
+            // ---- 分类、搜索、版块管理 ----
             function setCategory(cat) {
                 currentCategory = cat;
                 document.querySelectorAll('.board-btn').forEach(b => {
@@ -949,12 +1081,15 @@
                 }
             }
 
-            // 11. 个人中心
+            // ---- 个人中心相关 ----
             function openProfile() {
                 if (!currentUser) { showToast('请先登录', true); return; }
                 document.getElementById('profileModal').classList.add('active');
-                document.getElementById('profileNameInput').value = userProfile?.username || '';
+                document.getElementById('profileDisplayName').textContent = userProfile?.username || currentUser.email;
+                document.getElementById('profileEmail').textContent = currentUser.email;
                 document.getElementById('profileAvatarPreview').src = getAvatarUrl(userProfile || currentUser);
+                document.getElementById('profileNameInput').value = userProfile?.username || '';
+                loadProfileStats();
                 document.getElementById('profileMsg').innerHTML = '';
             }
             function closeProfile() { document.getElementById('profileModal').classList.remove('active'); }
@@ -994,6 +1129,7 @@
                     await upsertProfile({ username: newName });
                     userProfile.username = newName;
                     document.getElementById('userName').textContent = newName;
+                    document.getElementById('profileDisplayName').textContent = newName;
                     msg.innerHTML = '<p style="color:#6ee7b7;">✅ 昵称修改成功！</p>';
                     loadPosts(currentCategory);
                 } catch (err) {
@@ -1001,7 +1137,7 @@
                 }
             }
 
-            // 12. 主题切换
+            // ---- 主题切换 ----
             function toggleTheme() {
                 const body = document.body;
                 const btn = document.getElementById('themeToggle');
@@ -1019,7 +1155,7 @@
                 }
             }
 
-            // 13. 模态框
+            // ---- 模态框 ----
             function openModal() { document.getElementById('authModal').classList.add('active'); }
             function closeModal() { document.getElementById('authModal').classList.remove('active'); }
             document.getElementById('authModal').addEventListener('click', function(e) { if (e.target === this) closeModal(); });
@@ -1035,7 +1171,7 @@
                 document.getElementById('modalSub').textContent = tab === 'login' ? '登录你的账号' : '加入窍某论坛';
             }
 
-            // 14. 认证
+            // ---- 认证 ----
             async function handleLogin(e) {
                 e.preventDefault();
                 const email = document.getElementById('loginEmail').value.trim();
@@ -1189,7 +1325,7 @@
                 showToast('已退出');
             }
 
-            // 15. UI 更新
+            // ---- UI 更新 ----
             function updateUI() {
                 const loginBtn = document.getElementById('loginBtn');
                 const avatar = document.getElementById('userAvatar');
@@ -1223,7 +1359,7 @@
                 }
             }
 
-            // 16. 暴露全局（供 onclick 使用）
+            // ---- 暴露全局（供 onclick 使用） ----
             window.openModal = openModal;
             window.closeModal = closeModal;
             window.switchTab = switchTab;
@@ -1259,7 +1395,7 @@
             window.markNotificationRead = markNotificationRead;
             window.searchByTag = searchByTag;
 
-            // 17. 初始化
+            // ---- 初始化 ----
             async function init() {
                 await handleOAuthCallback();
                 const token = localStorage.getItem('sb_token');
