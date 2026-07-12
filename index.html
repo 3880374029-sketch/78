@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
     <title>窍某论坛</title>
     <style>
-        /* ===== 完整样式 ===== */
         *{margin:0;padding:0;box-sizing:border-box;}
         body{background:#0b0e1a;color:#e8edf5;font-family:'Segoe UI',sans-serif;padding:12px;line-height:1.6;}
         .container{max-width:1200px;margin:0 auto;}
@@ -114,38 +113,88 @@
         .toast.error{border-color:#ef4444;}
         @keyframes fadeIn{from{opacity:0;transform:translateX(-50%) translateY(20px);}to{opacity:1;transform:translateX(-50%) translateY(0);}
 
-        /* 移动端响应式 */
+        /* ===== 移动端适配（全面优化） ===== */
         @media (max-width: 768px) {
-            body{padding:8px;}
-            header{flex-direction:column;align-items:stretch;}
-            .nav-controls{flex-wrap:wrap;justify-content:center;}
-            .search-box{width:100%;}
-            .auth-section{justify-content:center;flex-wrap:wrap;}
-            .btn{font-size:0.85rem;padding:8px 14px;}
-            .post-card{padding:12px;}
-            .post-card .post-title{font-size:1rem;}
-            .post-card .post-meta{font-size:0.7rem;}
-            .post-card .post-excerpt{font-size:0.8rem;}
-            .post-card .post-footer{font-size:0.7rem;gap:10px;}
-            .board-nav .board-btn{font-size:0.7rem;padding:4px 10px;}
-            .modal-box{max-width:95%;padding:20px;}
-            .forum-stats{flex-wrap:wrap;gap:10px;}
-            .forum-stats span{font-size:0.7rem;}
-            .main-layout{flex-direction:column;}
-            .sidebar{width:100%;}
-            .publish-form input,.publish-form textarea,.publish-form select{font-size:0.9rem;}
-            .toast{font-size:0.8rem;padding:10px 16px;}
+            body { padding: 8px; font-size: 14px; }
+            header { flex-direction: column; align-items: stretch; gap: 8px; }
+            .nav-controls { flex-wrap: wrap; justify-content: center; gap: 6px; }
+            .search-box { width: 100%; font-size: 14px; }
+            .auth-section { justify-content: center; flex-wrap: wrap; gap: 4px; }
+            .btn { font-size: 14px; padding: 8px 14px; min-height: 44px; min-width: 44px; }
+            h1 { font-size: 1.5rem; }
+
+            .forum-stats { flex-wrap: wrap; gap: 8px; padding: 10px; }
+            .forum-stats span { font-size: 13px; }
+
+            .board-nav { gap: 6px; padding: 8px 0; }
+            .board-nav .board-btn { font-size: 13px; padding: 4px 10px; }
+
+            .post-card { padding: 12px; }
+            .post-card .post-title { font-size: 16px; line-height: 1.4; word-break: break-word; }
+            .post-card .post-meta { font-size: 12px; flex-wrap: wrap; gap: 4px; }
+            .post-card .post-meta .author-avatar { width: 20px; height: 20px; }
+            .post-card .post-excerpt { font-size: 14px; }
+            .post-card .post-footer { font-size: 13px; gap: 12px; flex-wrap: wrap; }
+
+            .post-detail { padding: 16px; }
+            .post-detail .post-author-info { gap: 8px; }
+            .post-detail .post-author-info img { width: 32px; height: 32px; }
+            .post-detail .post-body { font-size: 15px; line-height: 1.7; }
+            .post-detail .post-actions { gap: 16px; flex-wrap: wrap; }
+
+            .reply-item { padding: 8px 0; }
+            .reply-item .reply-author-info { gap: 6px; }
+            .reply-item .reply-author-info img { width: 24px; height: 24px; }
+            .reply-item .reply-content { font-size: 14px; }
+
+            .modal { padding: 12px; }
+            .modal-box { max-width: 95%; padding: 16px; }
+            .modal-tabs button { font-size: 14px; }
+            .auth-form input { font-size: 15px; }
+
+            .publish-form { padding: 16px; }
+            .publish-form input,
+            .publish-form textarea,
+            .publish-form select { font-size: 15px; }
+
+            .hot-list { padding: 12px; }
+            .hot-list h3 { font-size: 16px; }
+            .hot-item a { font-size: 14px; flex-wrap: wrap; gap: 4px; }
+
+            .sidebar { width: 100%; }
+
+            .toast { font-size: 14px; padding: 10px 16px; max-width: 95%; }
+
+            .empty-state { padding: 30px 16px; }
+            .empty-state h3 { font-size: 16px; }
         }
+
         @media (max-width: 480px) {
-            .btn{font-size:0.75rem;padding:6px 10px;}
-            .post-card .post-footer{flex-wrap:wrap;gap:6px;}
-            .modal-box{max-width:100%;margin:10px;border-radius:12px;}
-            .modal-tabs button{font-size:0.8rem;}
-            .auth-form input{font-size:0.9rem;}
+            body { font-size: 13px; padding: 6px; }
+            .btn { font-size: 13px; padding: 6px 12px; min-height: 40px; min-width: 40px; }
+            h1 { font-size: 1.3rem; }
+
+            .post-card .post-title { font-size: 15px; }
+            .post-card .post-meta { font-size: 11px; }
+            .post-card .post-footer { font-size: 12px; gap: 8px; flex-wrap: wrap; }
+
+            .board-nav .board-btn { font-size: 12px; padding: 3px 8px; }
+
+            .modal-box { max-width: 100%; margin: 8px; border-radius: 12px; padding: 12px; }
+            .modal-tabs button { font-size: 13px; }
+            .auth-form input { font-size: 14px; }
+
+            .forum-stats span { font-size: 12px; }
+
+            .post-detail .post-body { font-size: 14px; }
+            .reply-item .reply-content { font-size: 13px; }
+
+            .search-box { font-size: 13px; }
         }
     </style>
 </head>
 <body>
+    <!-- ===== 完整的 HTML 结构（与之前相同） ===== -->
     <div class="container">
         <header>
             <h1>✦ 窍某论坛</h1>
@@ -354,30 +403,43 @@
             t._hide = setTimeout(() => { t.className = 'toast'; }, 4000);
         }
 
-        // 带自动刷新的fetch
+        // 带自动刷新的 fetch（支持超时）
         async function fetchWithAuth(url, options = {}) {
             const headers = options.headers || {};
             if (accessToken) headers['Authorization'] = 'Bearer ' + accessToken;
             headers['apikey'] = SUPABASE_ANON_KEY;
             headers['Content-Type'] = headers['Content-Type'] || 'application/json';
-            const response = await fetch(url, { ...options, headers });
-            if (response.status === 401 && refreshToken) {
-                try {
-                    const newTokens = await refreshAccessToken();
-                    if (newTokens) {
-                        accessToken = newTokens.access_token;
-                        refreshToken = newTokens.refresh_token;
-                        localStorage.setItem('sb_token', accessToken);
-                        localStorage.setItem('sb_refresh_token', refreshToken);
-                        const retryHeaders = { ...headers, 'Authorization': 'Bearer ' + accessToken };
-                        const retryResponse = await fetch(url, { ...options, headers: retryHeaders });
-                        return retryResponse;
+
+            const controller = new AbortController();
+            const timeoutId = setTimeout(() => controller.abort(), 15000);
+            const fetchOptions = { ...options, headers, signal: controller.signal };
+            try {
+                const response = await fetch(url, fetchOptions);
+                clearTimeout(timeoutId);
+                if (response.status === 401 && refreshToken) {
+                    try {
+                        const newTokens = await refreshAccessToken();
+                        if (newTokens) {
+                            accessToken = newTokens.access_token;
+                            refreshToken = newTokens.refresh_token;
+                            localStorage.setItem('sb_token', accessToken);
+                            localStorage.setItem('sb_refresh_token', refreshToken);
+                            const retryHeaders = { ...headers, 'Authorization': 'Bearer ' + accessToken };
+                            const retryResponse = await fetch(url, { ...options, headers: retryHeaders });
+                            return retryResponse;
+                        }
+                    } catch(e) {
+                        console.warn('刷新token失败', e);
                     }
-                } catch(e) {
-                    console.warn('刷新token失败', e);
                 }
+                return response;
+            } catch(err) {
+                clearTimeout(timeoutId);
+                if (err.name === 'AbortError') {
+                    throw new Error('请求超时，请检查网络');
+                }
+                throw err;
             }
-            return response;
         }
 
         async function refreshAccessToken() {
@@ -417,10 +479,6 @@
                 throw new Error(msg);
             }
             return json || text;
-        }
-
-        function getHeaders() {
-            return { 'apikey': SUPABASE_ANON_KEY, 'Content-Type': 'application/json' };
         }
 
         // =============================================================
@@ -496,7 +554,7 @@
             return await handleResponse(resp);
         }
 
-        async function createTopic(name) {
+        async function createTopicAPI(name) {
             const resp = await authFetch(SUPABASE_URL + '/rest/v1/topics', {
                 method: 'POST',
                 body: JSON.stringify({ name })
@@ -504,7 +562,7 @@
             return await handleResponse(resp);
         }
 
-        // 获取所有评论的计数（按 post_id 分组）
+        // 获取评论计数
         async function fetchCommentCounts() {
             const resp = await fetch(SUPABASE_URL + '/rest/v1/comments?select=post_id', {
                 headers: { 'apikey': SUPABASE_ANON_KEY, 'Content-Type': 'application/json' }
@@ -929,7 +987,7 @@
         }
 
         // =============================================================
-        // 版块管理（修复：新建板块不闪烁）
+        // 版块管理
         // =============================================================
         async function loadTopics() {
             try {
@@ -977,36 +1035,41 @@
             if (e.target === this) closeTopicModal();
         });
 
-        // ===== 关键修复：本地更新缓存，避免重新请求 =====
+        // ===== 新建板块（防卡死） =====
         async function createTopic() {
             const name = document.getElementById('newTopicName').value.trim();
             const msg = document.getElementById('topicMsg');
             if (!name) { msg.innerHTML = '<p style="color:#ef4444;">请输入版块名称</p>'; return; }
             if (name.length > 30) { msg.innerHTML = '<p style="color:#ef4444;">名称不能超过30字符</p>'; return; }
             if (topicsCache.some(t => t.name === name)) { msg.innerHTML = '<p style="color:#ef4444;">该版块已存在</p>'; return; }
+
+            const btn = document.querySelector('#topicModal .btn[onclick="createTopic()"]');
+            if (btn) btn.disabled = true;
+            msg.innerHTML = '<p style="color:rgba(255,255,255,0.5);">⏳ 创建中...</p>';
+
             try {
-                // 1. 调用 API 创建版块
-                const result = await createTopic(name);
+                const result = await createTopicAPI(name);
                 msg.innerHTML = '<p style="color:#6ee7b7;">✅ 版块创建成功！</p>';
                 document.getElementById('newTopicName').value = '';
 
-                // 2. 本地更新缓存（避免重新请求，减少闪烁）
                 const newTopic = { id: Date.now(), name: name };
                 topicsCache.push(newTopic);
-                // 3. 刷新导航和下拉菜单
                 updateBoardNav();
                 updateCategorySelect();
                 document.getElementById('statTopics').textContent = topicsCache.length;
 
-                // 4. 自动切换到新版块（触发帖子列表刷新）
-                await setCategory(name);
+                setTimeout(() => {
+                    setCategory(name);
+                }, 300);
 
-                // 5. 关闭模态框
-                setTimeout(closeTopicModal, 1000);
-            } catch(err) {
+                setTimeout(closeTopicModal, 1200);
+            } catch (err) {
                 if (err.message !== 'Unauthorized') {
-                    msg.innerHTML = '<p style="color:#ef4444;">创建失败：'+err.message+'</p>';
+                    msg.innerHTML = '<p style="color:#ef4444;">❌ 创建失败：'+err.message+'</p>';
                 }
+                console.error(err);
+            } finally {
+                if (btn) btn.disabled = false;
             }
         }
 
