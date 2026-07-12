@@ -305,16 +305,18 @@
         let currentUser = null;
         let userProfile = null;
         let accessToken = null;
-        let refreshToken = null;     // 新增：保存 refresh_token
+        let refreshToken = null;
         let postsCache = [];
         let topicsCache = [];
         let currentCategory = 'all';
         let isSubmitting = false;
         let isAdmin = false;
+        // 评论计数缓存
+        let commentCountMap = {};
 
-        // 统计缓存
         const STATS_CACHE_KEY = 'forum_stats_cache';
         const STATS_CACHE_TTL = 60 * 1000;
+
         function getCachedStats() {
             const cached = localStorage.getItem(STATS_CACHE_KEY);
             if (cached) {
@@ -353,17 +355,13 @@
             t._hide = setTimeout(() => { t.className = 'toast'; }, 4000);
         }
 
-        // ---- 核心：带自动刷新的请求函数 ----
+        // 带自动刷新的fetch
         async function fetchWithAuth(url, options = {}) {
             const headers = options.headers || {};
-            if (accessToken) {
-                headers['Authorization'] = 'Bearer ' + accessToken;
-            }
+            if (accessToken) headers['Authorization'] = 'Bearer ' + accessToken;
             headers['apikey'] = SUPABASE_ANON_KEY;
             headers['Content-Type'] = headers['Content-Type'] || 'application/json';
-
             const response = await fetch(url, { ...options, headers });
-            // 如果401且存在refreshToken，尝试刷新
             if (response.status === 401 && refreshToken) {
                 try {
                     const newTokens = await refreshAccessToken();
@@ -372,13 +370,12 @@
                         refreshToken = newTokens.refresh_token;
                         localStorage.setItem('sb_token', accessToken);
                         localStorage.setItem('sb_refresh_token', refreshToken);
-                        // 重新发起请求
                         const retryHeaders = { ...headers, 'Authorization': 'Bearer ' + accessToken };
                         const retryResponse = await fetch(url, { ...options, headers: retryHeaders });
                         return retryResponse;
                     }
                 } catch(e) {
-                    console.warn('刷新token失败，可能需要重新登录', e);
+                    console.warn('刷新token失败', e);
                 }
             }
             return response;
@@ -389,10 +386,7 @@
             try {
                 const resp = await fetch(SUPABASE_URL + '/auth/v1/token?grant_type=refresh_token', {
                     method: 'POST',
-                    headers: {
-                        'apikey': SUPABASE_ANON_KEY,
-                        'Content-Type': 'application/json'
-                    },
+                    headers: { 'apikey': SUPABASE_ANON_KEY, 'Content-Type': 'application/json' },
                     body: JSON.stringify({ refresh_token: refreshToken })
                 });
                 if (!resp.ok) return null;
@@ -403,10 +397,8 @@
             }
         }
 
-        // 简化的带认证fetch（内部调用fetchWithAuth）
         async function authFetch(url, options = {}) {
             const resp = await fetchWithAuth(url, options);
-            // 如果401且刷新失败，清除会话
             if (resp.status === 401) {
                 showToast('登录已过期，请重新登录', true);
                 logout();
@@ -415,7 +407,6 @@
             return resp;
         }
 
-        // 工具：处理响应（与之前相同）
         async function handleResponse(res) {
             const text = await res.text();
             let json = null;
@@ -429,15 +420,12 @@
             return json || text;
         }
 
-        // 获取headers（内部调用时不再需要显式添加Authorization，由authFetch处理）
-        function getHeaders(includeAuth = true) {
-            const headers = { 'apikey': SUPABASE_ANON_KEY, 'Content-Type': 'application/json' };
-            // 注意：includeAuth参数不再使用，因为authFetch会处理
-            return headers;
+        function getHeaders() {
+            return { 'apikey': SUPABASE_ANON_KEY, 'Content-Type': 'application/json' };
         }
 
         // =============================================================
-        // API 调用（使用 authFetch）
+        // API 调用
         // =============================================================
         async function signIn(email, password) {
             const resp = await fetch(SUPABASE_URL + '/auth/v1/token?grant_type=password', {
@@ -517,8 +505,25 @@
             return await handleResponse(resp);
         }
 
+        // 获取所有评论的计数（按 post_id 分组）
+        async function fetchCommentCounts() {
+            const resp = await fetch(SUPABASE_URL + '/rest/v1/comments?select=post_id', {
+                headers: { 'apikey': SUPABASE_ANON_KEY, 'Content-Type': 'application/json' }
+            });
+            const data = await handleResponse(resp);
+            if (!data || !Array.isArray(data)) return {};
+            const map = {};
+            data.forEach(c => {
+                const pid = c.post_id;
+                if (pid !== null && pid !== undefined) {
+                    map[pid] = (map[pid] || 0) + 1;
+                }
+            });
+            return map;
+        }
+
         // =============================================================
-        // 点赞核心（使用 authFetch）
+        // 点赞核心
         // =============================================================
         async function toggleLike(postId, userId) {
             const numericPostId = parseInt(postId);
@@ -554,9 +559,6 @@
             return action;
         }
 
-        // =============================================================
-        // 点赞处理（乐观更新）
-        // =============================================================
         async function handleLike(postId) {
             if (!currentUser) { showToast('请先登录', true); return; }
             const numericId = parseInt(postId);
@@ -592,7 +594,7 @@
                 }
             } catch (err) {
                 if (err.message === 'Unauthorized') {
-                    // 已经由authFetch处理了，会提示重新登录
+                    // handled
                 } else {
                     post.likes = oldLikes;
                     renderPosts(getFilteredPosts(currentCategory, keyword));
@@ -619,12 +621,21 @@
             }
             return filtered;
         }
+
         async function loadPosts(category = 'all', keyword = '') {
             const list = document.getElementById('postList');
             list.innerHTML = '<div class="empty-state">⏳ 加载中...</div>';
             try {
-                const data = await fetchPosts();
-                postsCache = data || [];
+                const [postsData, counts] = await Promise.all([
+                    fetchPosts(),
+                    fetchCommentCounts()
+                ]);
+                postsCache = postsData || [];
+                commentCountMap = counts || {};
+                // 合并评论数到帖子对象
+                postsCache.forEach(p => {
+                    p._comment_count = commentCountMap[p.id] || 0;
+                });
                 const filtered = getFilteredPosts(category, keyword);
                 renderPosts(filtered);
                 renderHotList(postsCache);
@@ -640,6 +651,7 @@
                 console.error(err);
             }
         }
+
         function renderPosts(posts) {
             const list = document.getElementById('postList');
             if (!posts || posts.length === 0) {
@@ -651,6 +663,7 @@
                 const badgeClass = ['tech','life','career','闲聊'].includes(p.category) ? 'badge ' + p.category : 'badge topic';
                 const badgeText = catMap[p.category] || p.category || '闲聊';
                 const avatar = p.author_avatar || `https://ui-avatars.com/api/?name=${encodeURIComponent(p.author_name||'U')}&background=6d5bff&color=fff&size=30`;
+                const commentCount = p._comment_count || 0;
                 return `
                     <div class="post-card">
                         <div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;">
@@ -665,7 +678,7 @@
                         <div class="post-excerpt">${p.excerpt || (p.content ? p.content.replace(/<[^>]+>/g,'').slice(0,80)+'...' : '')}</div>
                         <div class="post-footer">
                             <span class="like-btn ${p.likes > 0 ? 'liked' : ''}" onclick="handleLike('${p.id}')" id="like-btn-${p.id}">❤️ <span id="like-count-${p.id}">${p.likes || 0}</span></span>
-                            <span>💬 0</span>
+                            <span>💬 ${commentCount}</span>
                             <span>👁️ ${p.views || 0}</span>
                         </div>
                     </div>
@@ -700,7 +713,7 @@
         }
 
         // =============================================================
-        // 统计信息（带缓存）
+        // 统计信息
         // =============================================================
         async function updateStats() {
             const cached = getCachedStats();
@@ -734,15 +747,31 @@
         }
 
         // =============================================================
-        // 帖子详情
+        // 帖子详情（含浏览量增加）
         // =============================================================
         async function showPost(postId) {
             const post = postsCache.find(p => parseInt(p.id) === parseInt(postId));
             if (!post) { showToast('帖子不存在', true); return; }
+
+            // 增加浏览量
+            try {
+                const increment = 1;
+                const updateResp = await authFetch(`${SUPABASE_URL}/rest/v1/posts?id=eq.${postId}`, {
+                    method: 'PATCH',
+                    body: JSON.stringify({ views: increment })
+                });
+                if (updateResp.ok) {
+                    post.views = (post.views || 0) + 1;
+                }
+            } catch(err) {
+                console.warn('浏览量更新失败', err);
+            }
+
             document.getElementById('postList').style.display = 'none';
             const area = document.getElementById('detailArea');
             area.classList.remove('hidden');
             const avatar = post.author_avatar || `https://ui-avatars.com/api/?name=${encodeURIComponent(post.author_name||'U')}&background=6d5bff&color=fff&size=40`;
+            const commentCount = post._comment_count || 0;
             area.innerHTML = `
                 <div class="post-detail">
                     <button class="back-btn" onclick="backToList()">← 返回列表</button>
@@ -756,7 +785,7 @@
                     <div class="post-body">${post.content}</div>
                     <div class="post-actions">
                         <span class="like-btn ${post.likes > 0 ? 'liked' : ''}" onclick="handleLike('${post.id}')" id="like-btn-detail-${post.id}">❤️ <span id="like-count-detail-${post.id}">${post.likes || 0}</span></span>
-                        <span>💬 0</span>
+                        <span>💬 ${commentCount}</span>
                     </div>
                     <hr style="border-color:#333;margin:16px 0;" />
                     <h3 style="margin-bottom:12px;">💬 全部回复</h3>
@@ -796,6 +825,7 @@
                 document.getElementById('commentsArea').innerHTML = '<p style="color:#ef4444;">加载评论失败</p>';
             }
         }
+
         function backToList() {
             document.getElementById('postList').style.display = 'block';
             document.getElementById('detailArea').classList.add('hidden');
@@ -872,6 +902,8 @@
                 });
                 input.value = '';
                 showToast('回复成功！');
+                // 重新加载帖子列表以更新评论数
+                await loadPosts(currentCategory);
                 await showPost(postId);
             } catch(err) {
                 if (err.message !== 'Unauthorized') {
@@ -900,7 +932,7 @@
         }
 
         // =============================================================
-        // 版块管理（修复 BUG）
+        // 版块管理
         // =============================================================
         async function loadTopics() {
             try {
@@ -959,7 +991,6 @@
                 msg.innerHTML = '<p style="color:#6ee7b7;">✅ 版块创建成功！</p>';
                 document.getElementById('newTopicName').value = '';
                 await loadTopics();
-                // 自动切换到新版块
                 await setCategory(name);
                 setTimeout(closeTopicModal, 1000);
             } catch(err) {
@@ -1138,7 +1169,7 @@
         }
 
         // =============================================================
-        // OAuth 登录（含回调处理）
+        // OAuth 登录
         // =============================================================
         async function handleSocialLogin(provider) {
             try {
