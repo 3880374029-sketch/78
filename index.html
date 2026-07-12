@@ -123,11 +123,11 @@
         .btn-sm:hover{background:rgba(255,255,255,0.12);}
         .tag-item{display:inline-block;background:rgba(255,255,255,0.08);padding:2px 10px;border-radius:20px;font-size:0.7rem;margin:2px;color:rgba(255,255,255,0.5);}
         .tag-item:hover{background:rgba(255,255,255,0.15);cursor:pointer;}
-        @media (max-width:768px){ /* 响应式样式（与之前相同，略） */ }
+        @media (max-width:768px){body{padding:8px;font-size:14px;}header{flex-direction:column;align-items:stretch;gap:8px;}.nav-controls{flex-wrap:wrap;justify-content:center;gap:6px;}.search-box{width:100%;font-size:14px;}.auth-section{justify-content:center;flex-wrap:wrap;gap:4px;}.btn{font-size:14px;padding:8px 14px;min-height:44px;min-width:44px;}h1{font-size:1.5rem;}.forum-stats{flex-wrap:wrap;gap:8px;padding:10px;}.forum-stats span{font-size:13px;}.board-nav{gap:6px;padding:8px 0;}.board-nav .board-btn{font-size:13px;padding:4px 10px;}.post-card{padding:12px;}.post-card .post-title{font-size:16px;line-height:1.4;word-break:break-word;}.post-card .post-meta{font-size:12px;flex-wrap:wrap;gap:4px;}.post-card .post-meta .author-avatar{width:20px;height:20px;}.post-card .post-excerpt{font-size:14px;}.post-card .post-footer{font-size:13px;gap:12px;flex-wrap:wrap;}.post-detail{padding:16px;}.post-detail .post-author-info{gap:8px;}.post-detail .post-author-info img{width:32px;height:32px;}.post-detail .post-body{font-size:15px;line-height:1.7;}.post-detail .post-actions{gap:16px;flex-wrap:wrap;}.reply-item{padding:8px 0;}.reply-item .reply-author-info{gap:6px;}.reply-item .reply-author-info img{width:24px;height:24px;}.reply-item .reply-content{font-size:14px;}.modal{padding:12px;}.modal-box{max-width:95%;padding:16px;}.modal-tabs button{font-size:14px;}.auth-form input{font-size:15px;}.publish-form{padding:16px;}.publish-form input,.publish-form textarea,.publish-form select{font-size:15px;}.hot-list{padding:12px;}.hot-list h3{font-size:16px;}.hot-item a{font-size:14px;flex-wrap:wrap;gap:4px;}.sidebar{width:100%;}.toast{font-size:14px;padding:10px 16px;max-width:95%;}.empty-state{padding:30px 16px;}.empty-state h3{font-size:16px;}}
+        @media (max-width:480px){body{font-size:13px;padding:6px;}.btn{font-size:13px;padding:6px 12px;min-height:40px;min-width:40px;}h1{font-size:1.3rem;}.post-card .post-title{font-size:15px;}.post-card .post-meta{font-size:11px;}.post-card .post-footer{font-size:12px;gap:8px;flex-wrap:wrap;}.board-nav .board-btn{font-size:12px;padding:3px 8px;}.modal-box{max-width:100%;margin:8px;border-radius:12px;padding:12px;}.modal-tabs button{font-size:13px;}.auth-form input{font-size:14px;}.forum-stats span{font-size:12px;}.post-detail .post-body{font-size:14px;}.reply-item .reply-content{font-size:13px;}.search-box{font-size:13px;}}
     </style>
 </head>
 <body>
-    <!-- ===== 页面结构 ===== -->
     <div class="container">
         <header>
             <h1>✦ 窍某论坛</h1>
@@ -292,33 +292,35 @@
 
     <div class="toast" id="toast"></div>
 
-    <!-- ============================================================= -->
-    <!-- JavaScript -->
-    <!-- ============================================================= -->
     <script>
         // =============================================================
-        // 配置
+        // 1. 所有变量声明（顶部）
+        // =============================================================
         const SUPABASE_URL = 'https://bkvsceiezbyexzqpvblj.supabase.co';
         const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJrdnNjZWllemJ5ZXh6cXB2YmxqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODM3MDk1MzIsImV4cCI6MjA5OTI4NTUzMn0.1h4Yp8YaJdMMOQW8N2zqvJi6QrxHPncBFMK9LjdmZ6E';
         const sb = supabaseJs.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-        // =============================================================
-        // 全局状态
-        let currentUser = null, userProfile = null, accessToken = null, refreshToken = null;
-        let postsCache = [], topicsCache = [], currentCategory = 'all';
-        let isSubmitting = false, isAdmin = false;
+        let currentUser = null;
+        let userProfile = null;
+        let accessToken = null;
+        let refreshToken = null;
+        let postsCache = [];
+        let topicsCache = [];
+        let currentCategory = 'all';
+        let isSubmitting = false;
+        let isAdmin = false;
         let commentCountMap = {};
         let unreadCount = 0;
         let followingMap = new Map();
 
         // =============================================================
-        // 工具函数
+        // 2. 工具函数
+        // =============================================================
         function formatDate(d){ if(!d)return ''; return new Date(d).toLocaleDateString('zh-CN'); }
         function formatTime(d){ if(!d)return ''; return new Date(d).toLocaleString('zh-CN'); }
         function getAvatarUrl(user){ if(user && user.avatar_url) return user.avatar_url; const name = user?.username || user?.email || 'U'; return `https://ui-avatars.com/api/?name=${encodeURIComponent(name)}&background=6d5bff&color=fff&size=100`; }
         function showToast(msg, isError=false){ const t = document.getElementById('toast'); t.textContent = msg; t.className = 'toast show' + (isError?' error':''); clearTimeout(t._hide); t._hide = setTimeout(()=>{ t.className = 'toast'; }, 4000); }
 
-        // 网络请求（带自动刷新 token）
         async function fetchWithAuth(url, options={}) {
             const headers = options.headers || {};
             if (accessToken) headers['Authorization'] = 'Bearer ' + accessToken;
@@ -365,20 +367,76 @@
         }
 
         // =============================================================
-        // API 调用
-        async function signIn(email, password) { const resp = await fetch(SUPABASE_URL + '/auth/v1/token?grant_type=password', { method:'POST', headers:{'apikey':SUPABASE_ANON_KEY,'Content-Type':'application/json'}, body:JSON.stringify({email, password}) }); return await handleResponse(resp); }
-        async function signUp(email, password, username) { const resp = await fetch(SUPABASE_URL + '/auth/v1/signup', { method:'POST', headers:{'apikey':SUPABASE_ANON_KEY,'Content-Type':'application/json'}, body:JSON.stringify({email, password, data:{username}}) }); return await handleResponse(resp); }
-        async function getProfile(userId) { const resp = await authFetch(SUPABASE_URL + '/rest/v1/profiles?id=eq.' + userId, { method:'GET' }); if (resp.status===404) return null; const data = await handleResponse(resp); return data && data.length>0 ? data[0] : null; }
-        async function upsertProfile(data) { const resp = await authFetch(SUPABASE_URL + '/rest/v1/profiles', { method:'POST', body:JSON.stringify(data) }); return await handleResponse(resp); }
-        async function fetchPosts() { const resp = await fetch(SUPABASE_URL + '/rest/v1/posts?order=created_at.desc', { headers:{'apikey':SUPABASE_ANON_KEY,'Content-Type':'application/json'} }); return await handleResponse(resp); }
-        async function fetchComments(postId) { const resp = await fetch(SUPABASE_URL + `/rest/v1/comments?post_id=eq.${postId}&order=created_at.asc`, { headers:{'apikey':SUPABASE_ANON_KEY,'Content-Type':'application/json'} }); return await handleResponse(resp); }
-        async function createComment(data) { const resp = await authFetch(SUPABASE_URL + '/rest/v1/comments', { method:'POST', body:JSON.stringify(data) }); return await handleResponse(resp); }
-        async function createPost(data) { const resp = await authFetch(SUPABASE_URL + '/rest/v1/posts', { method:'POST', body:JSON.stringify(data) }); return await handleResponse(resp); }
-        async function fetchTopics() { const resp = await fetch(SUPABASE_URL + '/rest/v1/topics?order=name.asc', { headers:{'apikey':SUPABASE_ANON_KEY,'Content-Type':'application/json'} }); return await handleResponse(resp); }
-        async function createTopicAPI(name) { const resp = await authFetch(SUPABASE_URL + '/rest/v1/topics', { method:'POST', body:JSON.stringify({name}) }); return await handleResponse(resp); }
-        async function fetchCommentCounts() { const resp = await fetch(SUPABASE_URL + '/rest/v1/comments?select=post_id', { headers:{'apikey':SUPABASE_ANON_KEY,'Content-Type':'application/json'} }); const data = await handleResponse(resp); if (!data || !Array.isArray(data)) return {}; const map = {}; data.forEach(c => { const pid = c.post_id; if (pid !== null && pid !== undefined) map[pid] = (map[pid]||0) + 1; }); return map; }
+        // 3. API 调用
+        // =============================================================
+        async function signIn(email, password) {
+            const resp = await fetch(SUPABASE_URL + '/auth/v1/token?grant_type=password', {
+                method:'POST',
+                headers:{'apikey':SUPABASE_ANON_KEY,'Content-Type':'application/json'},
+                body:JSON.stringify({email, password})
+            });
+            return await handleResponse(resp);
+        }
+        async function signUp(email, password, username) {
+            const resp = await fetch(SUPABASE_URL + '/auth/v1/signup', {
+                method:'POST',
+                headers:{'apikey':SUPABASE_ANON_KEY,'Content-Type':'application/json'},
+                body:JSON.stringify({email, password, data:{username}})
+            });
+            return await handleResponse(resp);
+        }
+        async function getProfile(userId) {
+            const resp = await authFetch(SUPABASE_URL + '/rest/v1/profiles?id=eq.' + userId, { method:'GET' });
+            if (resp.status===404) return null;
+            const data = await handleResponse(resp);
+            return data && data.length>0 ? data[0] : null;
+        }
+        async function upsertProfile(data) {
+            const resp = await authFetch(SUPABASE_URL + '/rest/v1/profiles', { method:'POST', body:JSON.stringify(data) });
+            return await handleResponse(resp);
+        }
+        async function fetchPosts() {
+            const resp = await fetch(SUPABASE_URL + '/rest/v1/posts?order=created_at.desc', {
+                headers:{'apikey':SUPABASE_ANON_KEY,'Content-Type':'application/json'}
+            });
+            return await handleResponse(resp);
+        }
+        async function fetchComments(postId) {
+            const resp = await fetch(SUPABASE_URL + `/rest/v1/comments?post_id=eq.${postId}&order=created_at.asc`, {
+                headers:{'apikey':SUPABASE_ANON_KEY,'Content-Type':'application/json'}
+            });
+            return await handleResponse(resp);
+        }
+        async function createComment(data) {
+            const resp = await authFetch(SUPABASE_URL + '/rest/v1/comments', { method:'POST', body:JSON.stringify(data) });
+            return await handleResponse(resp);
+        }
+        async function createPost(data) {
+            const resp = await authFetch(SUPABASE_URL + '/rest/v1/posts', { method:'POST', body:JSON.stringify(data) });
+            return await handleResponse(resp);
+        }
+        async function fetchTopics() {
+            const resp = await fetch(SUPABASE_URL + '/rest/v1/topics?order=name.asc', {
+                headers:{'apikey':SUPABASE_ANON_KEY,'Content-Type':'application/json'}
+            });
+            return await handleResponse(resp);
+        }
+        async function createTopicAPI(name) {
+            const resp = await authFetch(SUPABASE_URL + '/rest/v1/topics', { method:'POST', body:JSON.stringify({name}) });
+            return await handleResponse(resp);
+        }
+        async function fetchCommentCounts() {
+            const resp = await fetch(SUPABASE_URL + '/rest/v1/comments?select=post_id', {
+                headers:{'apikey':SUPABASE_ANON_KEY,'Content-Type':'application/json'}
+            });
+            const data = await handleResponse(resp);
+            if (!data || !Array.isArray(data)) return {};
+            const map = {};
+            data.forEach(c => { const pid = c.post_id; if (pid !== null && pid !== undefined) map[pid] = (map[pid]||0) + 1; });
+            return map;
+        }
 
-        // ===== 新增：积分、签到、关注、通知 =====
+        // 新功能 API
         async function doCheckin() {
             if (!currentUser) { showToast('请先登录', true); return; }
             const today = new Date().toISOString().split('T')[0];
@@ -389,17 +447,13 @@
             const streak = (yData ? yData.streak : 0) + 1;
             const { error } = await sb.from('checkins').insert({ user_id: currentUser.id, checkin_date: today, streak });
             if (!error) {
-                // 手动增加积分（因为触发器可能有限制）
                 const { data: prof } = await sb.from('profiles').select('points').eq('id', currentUser.id).single();
                 const newPoints = (prof?.points || 0) + 2;
                 await sb.from('profiles').update({ points: newPoints }).eq('id', currentUser.id);
                 showToast(`签到成功！连续 ${streak} 天，+2 积分`, false);
                 updateUI();
-            } else {
-                showToast('签到失败', true);
-            }
+            } else { showToast('签到失败', true); }
         }
-
         async function toggleFollow(targetUserId) {
             if (!currentUser) { showToast('请先登录', true); return; }
             if (targetUserId === currentUser.id) { showToast('不能关注自己', true); return; }
@@ -421,23 +475,19 @@
             }
             loadPosts(currentCategory);
         }
-
         async function fetchUnreadNotifications() {
             if (!currentUser) return 0;
             const { count, error } = await sb.from('notifications').select('id', { count:'exact', head:true }).eq('user_id', currentUser.id).eq('is_read', false);
             return count || 0;
         }
-
         async function getNotifications() {
             if (!currentUser) return [];
             const { data, error } = await sb.from('notifications').select('*, from_user_id(username, avatar_url)').eq('user_id', currentUser.id).order('created_at', { ascending: false }).limit(20);
             return data || [];
         }
-
         async function markNotificationRead(id) {
             await sb.from('notifications').update({ is_read: true }).eq('id', id);
         }
-
         async function openNotificationPanel() {
             const modal = document.getElementById('notificationModal');
             modal.classList.add('active');
@@ -451,25 +501,18 @@
                     ${!n.is_read ? '<span style="color:#fbbf24;">●</span>' : ''}
                 </div>
             `).join('');
-            // 标记所有为已读（简单处理）
             await sb.from('notifications').update({ is_read: true }).eq('user_id', currentUser.id);
             updateUnreadBadge();
         }
         function closeNotificationPanel() { document.getElementById('notificationModal').classList.remove('active'); }
-
-        async function getUserPointsAndLevel(userId) {
-            const { data, error } = await sb.from('profiles').select('points, level').eq('id', userId).single();
-            if (!error) return data;
-            return { points: 0, level: 1 };
-        }
-
         async function fetchHotTags() {
             const { data, error } = await sb.from('tags').select('name').order('created_at', { ascending: true }).limit(10);
             return data || [];
         }
 
         // =============================================================
-        // 帖子列表渲染（集成新功能）
+        // 4. 渲染函数
+        // =============================================================
         function renderPosts(posts) {
             const list = document.getElementById('postList');
             if (!posts || posts.length === 0) {
@@ -511,7 +554,6 @@
             }).join('');
         }
 
-        // 其他已有函数（保持原样，但为了完整性重新列出）
         function getFilteredPosts(category, keyword) {
             let filtered = postsCache;
             if (category !== 'all') filtered = filtered.filter(p => p.category === category);
@@ -552,11 +594,8 @@
                 document.getElementById('statUsers').textContent = usersCount;
                 document.getElementById('statTopics').textContent = topicsCount;
                 localStorage.setItem('forum_stats_cache', JSON.stringify({ data:{ posts:postsCount, comments:commentsCount, users:usersCount, topics:topicsCount }, timestamp:Date.now() }));
-                // 积分榜
                 const { data: topUser } = await sb.from('profiles').select('username, points').order('points', { ascending: false }).limit(1);
-                if (topUser && topUser.length) {
-                    document.getElementById('topUserPoints').textContent = `${topUser[0].username} (${topUser[0].points}分)`;
-                }
+                if (topUser && topUser.length) { document.getElementById('topUserPoints').textContent = `${topUser[0].username} (${topUser[0].points}分)`; }
             } catch(err) { console.warn('更新统计失败', err); }
         }
 
@@ -568,7 +607,8 @@
         }
 
         // =============================================================
-        // 加载帖子（增强版）
+        // 5. 加载帖子
+        // =============================================================
         async function loadPosts(category = 'all', keyword = '') {
             const list = document.getElementById('postList');
             list.innerHTML = '<div class="empty-state">⏳ 加载中...</div>';
@@ -580,7 +620,6 @@
                 postsCache = postsData || [];
                 commentCountMap = counts || {};
                 postsCache.forEach(p => { p._comment_count = commentCountMap[p.id] || 0; });
-                // 获取作者积分
                 const userIds = postsCache.map(p => p.author_id).filter(Boolean);
                 if (userIds.length) {
                     const { data: profilesData } = await sb.from('profiles').select('id, points, level').in('id', userIds);
@@ -593,7 +632,6 @@
                 renderPosts(filtered);
                 renderHotList(postsCache);
                 setTimeout(() => updateStats(), 0);
-                // 加载标签
                 const tags = await fetchHotTags();
                 const tagContainer = document.getElementById('tagContent');
                 if (tags.length) {
@@ -613,7 +651,8 @@
         }
 
         // =============================================================
-        // 发帖（增加标签处理）
+        // 6. 发帖（含标签）
+        // =============================================================
         async function publishPost() {
             if (isSubmitting) { showToast('请勿重复提交', true); return; }
             if (!currentUser) { showToast('请先登录', true); return; }
@@ -630,7 +669,6 @@
             if (btn) btn.disabled = true;
             try {
                 const avatar = userProfile?.avatar_url || `https://ui-avatars.com/api/?name=${encodeURIComponent(currentUser.email)}&background=6d5bff&color=fff&size=100`;
-                // 创建帖子
                 const postData = {
                     title, content, excerpt, category,
                     author_id: currentUser.id,
@@ -642,11 +680,9 @@
                 const { data: newPost, error: postError } = await sb.from('posts').insert(postData).select();
                 if (postError) throw postError;
                 const postId = newPost[0].id;
-                // 处理标签
                 if (tagsInput) {
                     const tags = tagsInput.split(',').map(s => s.trim()).filter(Boolean);
                     for (const tagName of tags) {
-                        // 查找或创建标签
                         let { data: existingTag } = await sb.from('tags').select('id').eq('name', tagName).maybeSingle();
                         let tagId;
                         if (!existingTag) {
@@ -675,12 +711,8 @@
         }
 
         // =============================================================
-        // 其他已有函数（保持原样，但需补全）
-        // 由于篇幅限制，以下函数直接复用之前版本，核心功能不变。
-        // 注意：handleLike、toggleLike、publishComment、showPost 等已在之前版本实现，此处不再重复。
-        // 但为了完整性，我会提供简写，实际使用时可从之前版本复制完整代码。
-        // 这里提供关键函数的最小实现，确保不报错。
-
+        // 7. 点赞、评论、详情
+        // =============================================================
         async function handleLike(postId) {
             if (!currentUser) { showToast('请先登录', true); return; }
             const numericId = parseInt(postId);
@@ -705,7 +737,6 @@
             }
             if (btn) btn.classList.toggle('liked', willLike);
             try {
-                // 实际点赞/取消点赞（调用 toggleLike）
                 const result = await toggleLike(postId, currentUser.id);
                 if ((willLike && result !== 'liked') || (!willLike && result !== 'unliked')) {
                     post.likes = oldLikes;
@@ -760,22 +791,13 @@
             return action;
         }
 
-        // 评论、详情等函数与之前版本相同，这里省略，但为保持完整性，放置占位。
-        // 实际可从之前完整代码复制。
-        // 但由于字数限制，我将提供完整可用的文件下载链接，或分两次发送。
-
-        // 此处继续补全剩余函数（如 showPost, publishComment 等）...
-
-        // =============================================================
-        // 帖子详情（含浏览量增加）
         async function showPost(postId) {
             const post = postsCache.find(p => parseInt(p.id) === parseInt(postId));
             if (!post) { showToast('帖子不存在', true); return; }
             try {
-                const increment = 1;
                 const updateResp = await authFetch(`${SUPABASE_URL}/rest/v1/posts?id=eq.${postId}`, {
                     method: 'PATCH',
-                    body: JSON.stringify({ views: increment })
+                    body: JSON.stringify({ views: 1 })
                 });
                 if (updateResp.ok) { post.views = (post.views || 0) + 1; }
             } catch(err) { console.warn('浏览量更新失败', err); }
@@ -877,7 +899,8 @@
         }
 
         // =============================================================
-        // 分类、搜索、版块管理（与之前相同）
+        // 8. 分类、搜索、版块管理
+        // =============================================================
         function setCategory(cat) {
             currentCategory = cat;
             document.querySelectorAll('.board-btn').forEach(b => {
@@ -919,6 +942,7 @@
                 select.appendChild(opt);
             });
         }
+
         function openNewTopic() {
             if (!currentUser) { showToast('请先登录', true); return; }
             document.getElementById('topicModal').classList.add('active');
@@ -957,7 +981,8 @@
         }
 
         // =============================================================
-        // 个人中心
+        // 9. 个人中心
+        // =============================================================
         function openProfile() {
             if (!currentUser) { showToast('请先登录', true); return; }
             document.getElementById('profileModal').classList.add('active');
@@ -1010,7 +1035,8 @@
         }
 
         // =============================================================
-        // 主题切换
+        // 10. 主题切换
+        // =============================================================
         function toggleTheme() {
             const body = document.body;
             const btn = document.getElementById('themeToggle');
@@ -1029,17 +1055,13 @@
         }
 
         // =============================================================
-        // 模态框通用
+        // 11. 模态框
+        // =============================================================
         function openModal() { document.getElementById('authModal').classList.add('active'); }
         function closeModal() { document.getElementById('authModal').classList.remove('active'); }
         document.getElementById('authModal').addEventListener('click', function(e) { if (e.target === this) closeModal(); });
         document.addEventListener('keydown', function(e) {
-            if (e.key === 'Escape') {
-                closeModal();
-                closeTopicModal();
-                closeProfile();
-                closeNotificationPanel();
-            }
+            if (e.key === 'Escape') { closeModal(); closeTopicModal(); closeProfile(); closeNotificationPanel(); }
         });
 
         function switchTab(tab) {
@@ -1051,7 +1073,8 @@
         }
 
         // =============================================================
-        // 认证
+        // 12. 认证
+        // =============================================================
         async function handleLogin(e) {
             e.preventDefault();
             const email = document.getElementById('loginEmail').value.trim();
@@ -1070,7 +1093,6 @@
                 document.getElementById('loginEmail').value = '';
                 document.getElementById('loginPassword').value = '';
                 showToast('登录成功！🎉');
-                // 更新关注状态
                 if (currentUser) {
                     const { data: follows } = await sb.from('follows').select('following_id').eq('follower_id', currentUser.id);
                     if (follows) { follows.forEach(f => followingMap.set(f.following_id, true)); }
@@ -1207,7 +1229,8 @@
         }
 
         // =============================================================
-        // UI 更新
+        // 13. UI 更新
+        // =============================================================
         function updateUI() {
             const loginBtn = document.getElementById('loginBtn');
             const avatar = document.getElementById('userAvatar');
@@ -1242,7 +1265,8 @@
         }
 
         // =============================================================
-        // 暴露全局函数
+        // 14. 暴露全局
+        // =============================================================
         window.openModal = openModal;
         window.closeModal = closeModal;
         window.switchTab = switchTab;
@@ -1279,7 +1303,8 @@
         window.searchByTag = searchByTag;
 
         // =============================================================
-        // 初始化
+        // 15. 初始化
+        // =============================================================
         async function init() {
             await handleOAuthCallback();
             const token = localStorage.getItem('sb_token');
