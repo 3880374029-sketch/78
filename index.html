@@ -884,7 +884,8 @@
                     </select>
                     <input id="publishTitle" placeholder="标题" maxlength="100">
                     <textarea id="publishContent" placeholder="内容（支持 Markdown）" rows="5"></textarea>
-                    <input id="publishTags" placeholder="标签，用逗号分隔（如：AI,前端）">
+                    <!-- 标签输入框保留但不保存 -->
+                    <input id="publishTags" placeholder="标签（暂不支持保存）">
                     <button class="btn" onclick="publishPost()">发布</button>
                 </div>
 
@@ -1786,8 +1787,7 @@
                     const q = currentSearch.trim().toLowerCase();
                     posts = posts.filter(p =>
                         p.title.toLowerCase().includes(q) ||
-                        p.content.toLowerCase().includes(q) ||
-                        (p.tags && p.tags.toLowerCase().includes(q))
+                        p.content.toLowerCase().includes(q)
                     );
                 }
                 return posts;
@@ -1936,7 +1936,7 @@
                 loadPosts(cat, currentSearch);
             }
 
-            // ---- 【修复】显示帖子详情（增强版：缓存未命中时直接请求后端） ----
+            // ---- 显示帖子详情 ----
             async function showPost(postId) {
                 const list = document.getElementById('postList');
                 const detail = document.getElementById('postDetail');
@@ -1945,9 +1945,7 @@
                 currentPostId = postId;
 
                 try {
-                    // 1. 先从缓存查找
                     let post = postsCache.find(p => p.id === postId);
-                    // 2. 如果缓存没有，直接从后端请求
                     if (!post) {
                         console.warn('⚠️ 缓存未命中，向后端请求帖子:', postId);
                         const resp = await fetch(SUPABASE_URL + `/rest/v1/posts?id=eq.${postId}`, {
@@ -1956,7 +1954,6 @@
                         const data = await handleResponse(resp);
                         if (data && data.length > 0) {
                             post = data[0];
-                            // 补充作者信息
                             const authorId = post.author_id;
                             if (authorId) {
                                 const { data: profile } = await sb.from('profiles').select('username, avatar_url, points, level')
@@ -1968,7 +1965,6 @@
                                     post.author_level = profile.level;
                                 }
                             }
-                            // 将新帖子加入缓存（可选）
                             postsCache.push(post);
                         }
                     }
@@ -1979,7 +1975,6 @@
                         return;
                     }
 
-                    // 增加浏览量
                     await sb.from('posts').update({ views: (post.views || 0) + 1 }).eq('id', postId);
                     post.views = (post.views || 0) + 1;
 
@@ -2020,7 +2015,6 @@
                         `;
                     detail.innerHTML = html;
 
-                    // 加载评论
                     const comments = await fetchComments(postId);
                     const commentList = document.getElementById('commentList');
                     if (comments.length === 0) {
@@ -2065,14 +2059,13 @@
                 renderPosts();
             }
 
-            // ---- 发布帖子 ----
+            // ---- 发布帖子（修复：移除 tags 字段） ----
             async function publishPost() {
                 if (!currentUser) { showToast('请先登录', true); return; }
                 if (isSubmitting) return;
                 const title = document.getElementById('publishTitle').value.trim();
                 const content = document.getElementById('publishContent').value.trim();
                 const category = document.getElementById('publishCategory').value;
-                const tags = document.getElementById('publishTags').value.trim();
                 if (!title) { showToast('请输入标题', true); return; }
                 if (!content) { showToast('请输入内容', true); return; }
                 isSubmitting = true;
@@ -2082,7 +2075,6 @@
                         content,
                         category: category,
                         author_id: currentUser.id,
-                        tags: tags || '',
                         likes: 0,
                         views: 0,
                         is_pinned: false
