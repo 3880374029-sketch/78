@@ -1022,7 +1022,7 @@
     <div class="toast" id="toast"></div>
 
     <!-- ============================================================= -->
-    <!-- 主程序脚本（完整版） -->
+    <!-- 主程序脚本（完整修复版） -->
     <!-- ============================================================= -->
     <script>
         function startApp(supabase) {
@@ -1044,7 +1044,7 @@
                 commentCountMap = {},
                 unreadCount = 0;
             let followingMap = new Map();
-            let currentPostId = null; // 当前查看的帖子ID
+            let currentPostId = null;
 
             // ---- 工具函数 ----
             function formatDate(d) { if (!d) return '';
@@ -1739,16 +1739,12 @@
 
             function updateBoardNav() {
                 const nav = document.getElementById('boardNav');
-                const existing = nav.querySelectorAll('.board-btn:not([data-category])');
-                // 移除动态话题按钮（保留固定按钮）
                 const fixed = ['all', 'tech', 'life', 'career', 'topic'];
                 const toRemove = [];
                 nav.querySelectorAll('.board-btn[data-category]').forEach(btn => {
                     if (!fixed.includes(btn.dataset.category)) toRemove.push(btn);
                 });
                 toRemove.forEach(btn => btn.remove());
-
-                // 添加话题按钮
                 topicsCache.forEach(t => {
                     const btn = document.createElement('button');
                     btn.className = 'board-btn';
@@ -1757,7 +1753,6 @@
                     btn.onclick = function() { setCategory(t.id); };
                     nav.appendChild(btn);
                 });
-                // 确保“全部”高亮
                 document.querySelectorAll('.board-btn[data-category]').forEach(b => {
                     b.classList.toggle('active', b.dataset.category === currentCategory);
                 });
@@ -1765,34 +1760,28 @@
 
             function updateCategorySelect() {
                 const sel = document.getElementById('publishCategory');
-                // 保留固定选项
                 const fixed = ['tech', 'life', 'career', 'topic'];
                 const currentVal = sel.value;
-                // 清除动态选项（保留固定）
                 const toRemove = [];
                 sel.querySelectorAll('option').forEach(opt => {
                     if (!fixed.includes(opt.value) && opt.value !== '') toRemove.push(opt);
                 });
                 toRemove.forEach(opt => opt.remove());
-                // 添加话题
                 topicsCache.forEach(t => {
                     const opt = document.createElement('option');
                     opt.value = t.id;
                     opt.textContent = '#' + t.name;
                     sel.appendChild(opt);
                 });
-                // 恢复选中值
                 if (currentVal) sel.value = currentVal;
             }
 
             // ---- 核心渲染函数 ----
             function getFilteredPosts() {
                 let posts = postsCache;
-                // 分类过滤
                 if (currentCategory !== 'all') {
                     posts = posts.filter(p => p.category === currentCategory || p.topic_id === currentCategory);
                 }
-                // 搜索过滤
                 if (currentSearch.trim()) {
                     const q = currentSearch.trim().toLowerCase();
                     posts = posts.filter(p =>
@@ -1807,12 +1796,10 @@
             function renderPosts() {
                 const list = document.getElementById('postList');
                 const detail = document.getElementById('postDetail');
-                // 如果正在查看详情，不渲染列表
                 if (detail.style.display !== 'none') {
                     list.innerHTML = '';
                     return;
                 }
-
                 const posts = getFilteredPosts();
                 if (posts.length === 0) {
                     list.innerHTML = `
@@ -1824,7 +1811,6 @@
                         `;
                     return;
                 }
-
                 let html = '';
                 posts.forEach(p => {
                     const isPinned = p.is_pinned || false;
@@ -1835,7 +1821,6 @@
                     const categoryMap = { tech: '技术', life: '生活', career: '职业', topic: '话题' };
                     const catName = topicsCache.find(t => t.id === p.topic_id)?.name || categoryMap[categoryLabel] ||
                         categoryLabel;
-
                     html += `
                             <div class="post-card">
                                 ${isPinned ? '<span class="pin-icon">📌</span>' : ''}
@@ -1888,7 +1873,6 @@
                     document.getElementById('statComments').textContent = commentsCount || 0;
                     const { count: usersCount } = await sb.from('profiles').select('id', { count: 'exact' });
                     document.getElementById('statUsers').textContent = usersCount || 0;
-                    // 今日新增
                     const today = new Date().toISOString().split('T')[0];
                     const { count: todayCount } = await sb.from('posts').select('id', { count: 'exact' }).gte(
                         'created_at', today);
@@ -1903,7 +1887,6 @@
                 try {
                     postsCache = await fetchPosts();
                     commentCountMap = await fetchCommentCounts();
-                    // 补充作者信息
                     const authorIds = postsCache.map(p => p.author_id).filter(Boolean);
                     if (authorIds.length) {
                         const { data: profiles } = await sb.from('profiles').select('id, username, avatar_url, points, level')
@@ -1926,7 +1909,6 @@
                     renderHotList();
                     updateStats();
                     updateUnreadBadge();
-                    // 更新导航高亮
                     document.querySelectorAll('.board-btn[data-category]').forEach(b => {
                         b.classList.toggle('active', b.dataset.category === currentCategory);
                     });
@@ -1954,7 +1936,7 @@
                 loadPosts(cat, currentSearch);
             }
 
-            // ---- 显示帖子详情 ----
+            // ---- 【修复】显示帖子详情（增强版：缓存未命中时直接请求后端） ----
             async function showPost(postId) {
                 const list = document.getElementById('postList');
                 const detail = document.getElementById('postDetail');
@@ -1963,8 +1945,39 @@
                 currentPostId = postId;
 
                 try {
-                    const post = postsCache.find(p => p.id === postId);
-                    if (!post) { showToast('帖子不存在', true); return; }
+                    // 1. 先从缓存查找
+                    let post = postsCache.find(p => p.id === postId);
+                    // 2. 如果缓存没有，直接从后端请求
+                    if (!post) {
+                        console.warn('⚠️ 缓存未命中，向后端请求帖子:', postId);
+                        const resp = await fetch(SUPABASE_URL + `/rest/v1/posts?id=eq.${postId}`, {
+                            headers: { 'apikey': SUPABASE_ANON_KEY, 'Content-Type': 'application/json' }
+                        });
+                        const data = await handleResponse(resp);
+                        if (data && data.length > 0) {
+                            post = data[0];
+                            // 补充作者信息
+                            const authorId = post.author_id;
+                            if (authorId) {
+                                const { data: profile } = await sb.from('profiles').select('username, avatar_url, points, level')
+                                    .eq('id', authorId).single();
+                                if (profile) {
+                                    post.author_name = profile.username;
+                                    post.author_avatar = profile.avatar_url;
+                                    post.author_points = profile.points;
+                                    post.author_level = profile.level;
+                                }
+                            }
+                            // 将新帖子加入缓存（可选）
+                            postsCache.push(post);
+                        }
+                    }
+
+                    if (!post) {
+                        showToast('帖子不存在', true);
+                        backToList();
+                        return;
+                    }
 
                     // 增加浏览量
                     await sb.from('posts').update({ views: (post.views || 0) + 1 }).eq('id', postId);
@@ -2013,7 +2026,6 @@
                     if (comments.length === 0) {
                         commentList.innerHTML = '<p style="color:rgba(255,255,255,0.3);">还没有评论，来说两句吧</p>';
                     } else {
-                        // 获取评论者信息
                         const userIds = comments.map(c => c.user_id).filter(Boolean);
                         let userMap = {};
                         if (userIds.length) {
@@ -2041,9 +2053,11 @@
                 } catch (e) {
                     console.error('加载帖子详情失败', e);
                     showToast('加载失败', true);
+                    backToList();
                 }
             }
 
+            // ---- 返回列表 ----
             function backToList() {
                 document.getElementById('postList').style.display = 'block';
                 document.getElementById('postDetail').style.display = 'none';
@@ -2059,10 +2073,8 @@
                 const content = document.getElementById('publishContent').value.trim();
                 const category = document.getElementById('publishCategory').value;
                 const tags = document.getElementById('publishTags').value.trim();
-
                 if (!title) { showToast('请输入标题', true); return; }
                 if (!content) { showToast('请输入内容', true); return; }
-
                 isSubmitting = true;
                 try {
                     const data = {
@@ -2075,13 +2087,12 @@
                         views: 0,
                         is_pinned: false
                     };
-                    // 如果是话题（topic_id）
                     const isTopic = topicsCache.some(t => t.id === category);
                     if (isTopic) {
                         data.topic_id = category;
                         data.category = 'topic';
                     }
-                    const result = await createPost(data);
+                    await createPost(data);
                     showToast('发布成功！🎉');
                     document.getElementById('publishTitle').value = '';
                     document.getElementById('publishContent').value = '';
@@ -2108,9 +2119,7 @@
                     });
                     input.value = '';
                     showToast('评论成功');
-                    // 刷新评论
                     await showPost(postId);
-                    // 更新评论计数
                     commentCountMap = await fetchCommentCounts();
                     renderPosts();
                 } catch (err) {
@@ -2124,14 +2133,12 @@
                 try {
                     const post = postsCache.find(p => p.id === postId);
                     if (!post) return;
-                    // 简单实现：检查是否已点赞（通过本地状态）
                     const key = 'liked_' + postId + '_' + currentUser.id;
                     const liked = localStorage.getItem(key) === 'true';
                     const newLikes = liked ? (post.likes || 0) - 1 : (post.likes || 0) + 1;
                     await sb.from('posts').update({ likes: newLikes }).eq('id', postId);
                     post.likes = newLikes;
                     localStorage.setItem(key, liked ? 'false' : 'true');
-                    // 更新UI
                     if (currentPostId === postId) {
                         await showPost(postId);
                     } else {
