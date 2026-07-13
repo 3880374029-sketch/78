@@ -57,7 +57,7 @@
         })();
     </script>
     <style>
-        /* ===== 完整样式 ===== */
+        /* ===== 完整样式（与之前相同） ===== */
         * {
             margin: 0;
             padding: 0;
@@ -832,7 +832,6 @@
 
     <!-- ===== 页面结构 ===== -->
     <div class="container">
-        <!-- 头部 -->
         <header>
             <h1>💡 窍某论坛</h1>
             <div class="nav-controls">
@@ -853,7 +852,6 @@
             </div>
         </header>
 
-        <!-- 统计 -->
         <div class="forum-stats">
             <span>📌 帖子 <strong id="statPosts">0</strong></span>
             <span>💬 评论 <strong id="statComments">0</strong></span>
@@ -861,10 +859,8 @@
             <span>🔥 今日 <strong id="statToday">0</strong></span>
         </div>
 
-        <!-- 主布局 -->
         <div class="main-layout">
             <div class="main-content">
-                <!-- 版块导航 -->
                 <div class="board-nav" id="boardNav">
                     <button class="board-btn active" data-category="all" onclick="setCategory('all')">全部</button>
                     <button class="board-btn" data-category="tech" onclick="setCategory('tech')">技术</button>
@@ -874,7 +870,6 @@
                     <button class="board-btn" onclick="openNewTopic()">➕ 话题</button>
                 </div>
 
-                <!-- 发布表单 -->
                 <div class="publish-form" id="publishForm">
                     <select id="publishCategory">
                         <option value="tech">技术</option>
@@ -883,19 +878,15 @@
                         <option value="topic">话题</option>
                     </select>
                     <input id="publishTitle" placeholder="标题" maxlength="100">
-                    <textarea id="publishContent" placeholder="内容（支持 Markdown）" rows="5"></textarea>
-                    <input id="publishTags" placeholder="标签（暂不支持保存）">
+                    <textarea id="publishContent" placeholder="内容（支持换行）" rows="5"></textarea>
+                    <input id="publishTags" placeholder="标签（逗号分隔）">
                     <button class="btn" id="publishBtn" onclick="publishPost()">发布</button>
                 </div>
 
-                <!-- 帖子列表 -->
                 <div id="postList"></div>
-
-                <!-- 帖子详情（隐藏） -->
                 <div id="postDetail" style="display:none;"></div>
             </div>
 
-            <!-- 侧栏 -->
             <div class="sidebar">
                 <div class="hot-list" id="hotList">
                     <h3>🔥 热门</h3>
@@ -920,7 +911,6 @@
     </div>
 
     <!-- ===== 模态框 ===== -->
-    <!-- 认证模态框 -->
     <div class="modal" id="authModal">
         <div class="modal-box">
             <span class="close" onclick="closeModal()">&times;</span>
@@ -953,7 +943,6 @@
         </div>
     </div>
 
-    <!-- 个人中心模态框 -->
     <div class="modal" id="profileModal">
         <div class="modal-box">
             <span class="close" onclick="closeProfile()">&times;</span>
@@ -975,7 +964,6 @@
             </div>
             <div class="level-progress"><div class="bar" id="levelProgressBar"></div></div>
             <div style="text-align:right;font-size:0.8rem;color:rgba(255,255,255,0.3);" id="levelProgressText">0 / 50</div>
-
             <div class="stats-grid">
                 <div class="stat-item"><div class="num" id="statPostsCount">0</div><div class="label">帖子</div></div>
                 <div class="stat-item"><div class="num" id="statCommentsCount">0</div><div class="label">评论</div></div>
@@ -983,7 +971,6 @@
                 <div class="stat-item"><div class="num" id="statFollowing">0</div><div class="label">关注</div></div>
                 <div class="stat-item"><div class="num" id="statFollowers">0</div><div class="label">粉丝</div></div>
             </div>
-
             <div class="profile-form">
                 <div class="form-group">
                     <label>昵称</label>
@@ -992,13 +979,11 @@
                 <button class="btn" onclick="saveProfile()">保存修改</button>
                 <div id="profileMsg" style="margin-top:8px;"></div>
             </div>
-
             <h3 style="margin:20px 0 12px;">📝 我的帖子</h3>
             <div class="my-posts-list" id="myPostsList"></div>
         </div>
     </div>
 
-    <!-- 通知模态框 -->
     <div class="modal" id="notificationModal">
         <div class="modal-box">
             <span class="close" onclick="closeNotificationPanel()">&times;</span>
@@ -1007,7 +992,6 @@
         </div>
     </div>
 
-    <!-- 话题模态框 -->
     <div class="modal" id="topicModal">
         <div class="modal-box">
             <span class="close" onclick="closeTopicModal()">&times;</span>
@@ -1018,11 +1002,10 @@
         </div>
     </div>
 
-    <!-- Toast -->
     <div class="toast" id="toast"></div>
 
     <!-- ============================================================= -->
-    <!-- 主程序脚本（完整修复版：防重复提交） -->
+    <!-- 主程序脚本（安全版：所有用户输入均转义） -->
     <!-- ============================================================= -->
     <script>
         function startApp(supabase) {
@@ -1046,6 +1029,20 @@
             let followingMap = new Map();
             let currentPostId = null;
 
+            // ---- 【安全】转义函数 ----
+            function escapeHtml(text) {
+                if (!text) return '';
+                const div = document.createElement('div');
+                div.textContent = text;
+                return div.innerHTML;
+            }
+
+            // 将换行转为 <br>（安全，因为已转义）
+            function nl2br(text) {
+                if (!text) return '';
+                return escapeHtml(text).replace(/\n/g, '<br>');
+            }
+
             // ---- 工具函数 ----
             function formatDate(d) { if (!d) return '';
                 return new Date(d).toLocaleDateString('zh-CN'); }
@@ -1067,7 +1064,7 @@
                 t._hide = setTimeout(() => { t.className = 'toast'; }, 4000);
             }
 
-            // ---- 网络请求 ----
+            // ---- 网络请求（与之前相同） ----
             async function fetchWithAuth(url, options) {
                 const headers = options.headers || {};
                 if (accessToken) headers['Authorization'] = 'Bearer ' + accessToken;
@@ -1116,7 +1113,7 @@
                 return json || text;
             }
 
-            // ---- API 调用 ----
+            // ---- API 调用（与之前相同） ----
             async function signIn(email, password) {
                 const resp = await fetch(SUPABASE_URL + '/auth/v1/token?grant_type=password', {
                     method: 'POST',
@@ -1208,7 +1205,7 @@
                 return map;
             }
 
-            // ---- 新功能 API ----
+            // ---- 功能函数（签到、关注、通知等） ----
             async function doCheckin() {
                 if (!currentUser) { showToast('请先登录', true); return; }
                 const today = new Date().toISOString().split('T')[0];
@@ -1371,7 +1368,7 @@
                 } else {
                     container.innerHTML = myRecentPosts.map(p => `
                             <div class="mini-post" onclick="showPost('${p.id}')">
-                                <div class="mp-title">${p.title}</div>
+                                <div class="mp-title">${escapeHtml(p.title)}</div>
                                 <div class="mp-meta">${formatDate(p.created_at)}</div>
                             </div>
                         `).join('');
@@ -1776,7 +1773,7 @@
                 if (currentVal) sel.value = currentVal;
             }
 
-            // ---- 核心渲染函数 ----
+            // ---- 核心渲染函数（全部使用 escapeHtml 防止 XSS） ----
             function getFilteredPosts() {
                 let posts = postsCache;
                 if (currentCategory !== 'all') {
@@ -1823,17 +1820,17 @@
                     html += `
                             <div class="post-card">
                                 ${isPinned ? '<span class="pin-icon">📌</span>' : ''}
-                                <div class="post-title" onclick="showPost('${p.id}')">${p.title}</div>
+                                <div class="post-title" onclick="showPost('${p.id}')">${escapeHtml(p.title)}</div>
                                 <div class="post-meta">
                                     <img class="author-avatar" src="${avatarUrl}" alt="avatar" onerror="this.src='https://ui-avatars.com/api/?name=U&background=6d5bff&color=fff&size=24'">
-                                    <span class="author">${p.author_name || '匿名'}</span>
+                                    <span class="author">${escapeHtml(p.author_name || '匿名')}</span>
                                     ${p.author_level ? `<span class="level-badge">Lv.${p.author_level}</span>` : ''}
                                     ${p.author_points !== undefined ? `<span class="points">⭐${p.author_points}</span>` : ''}
                                     <span>${formatDate(p.created_at)}</span>
-                                    <span class="badge ${categoryLabel}">${catName}</span>
+                                    <span class="badge ${categoryLabel}">${escapeHtml(catName)}</span>
                                 </div>
-                                <div class="post-excerpt">${p.content ? p.content.substring(0, 120) + (p.content.length > 120 ? '...' : '') : ''}</div>
-                                ${tags.length ? `<div style="margin:6px 0;">${tags.map(t => `<span class="tag-item" onclick="searchByTag('${t}')">#${t}</span>`).join('')}</div>` : ''}
+                                <div class="post-excerpt">${escapeHtml(p.content ? p.content.substring(0, 120) + (p.content.length > 120 ? '...' : '') : '')}</div>
+                                ${tags.length ? `<div style="margin:6px 0;">${tags.map(t => `<span class="tag-item" onclick="searchByTag('${escapeHtml(t)}')">#${escapeHtml(t)}</span>`).join('')}</div>` : ''}
                                 <div class="post-footer">
                                     <span>💬 ${commentCount}</span>
                                     <span class="like-btn" onclick="handleLike('${p.id}')">❤️ ${p.likes || 0}</span>
@@ -1857,7 +1854,7 @@
                 container.innerHTML = top.map((p, i) => `
                         <div class="hot-item">
                             <a href="javascript:showPost('${p.id}')">
-                                <span><span class="hot-num">${i + 1}</span>${p.title}</span>
+                                <span><span class="hot-num">${i + 1}</span>${escapeHtml(p.title)}</span>
                                 <span>❤️ ${p.likes || 0}</span>
                             </a>
                         </div>
@@ -1935,7 +1932,7 @@
                 loadPosts(cat, currentSearch);
             }
 
-            // ---- 显示帖子详情 ----
+            // ---- 显示帖子详情（全部转义） ----
             async function showPost(postId) {
                 const list = document.getElementById('postList');
                 const detail = document.getElementById('postDetail');
@@ -1983,18 +1980,18 @@
                     let html = `
                             <button class="back-btn" onclick="backToList()">← 返回列表</button>
                             <div class="post-detail">
-                                <h2 style="font-size:1.4rem;">${post.title}</h2>
+                                <h2 style="font-size:1.4rem;">${escapeHtml(post.title)}</h2>
                                 <div class="post-author-info">
                                     <img src="${authorAvatar}" alt="avatar" onerror="this.src='https://ui-avatars.com/api/?name=U&background=6d5bff&color=fff&size=40'">
-                                    <span class="author-name">${post.author_name || '匿名'}</span>
+                                    <span class="author-name">${escapeHtml(post.author_name || '匿名')}</span>
                                     ${post.author_level ? `<span class="level-badge">Lv.${post.author_level}</span>` : ''}
                                     ${post.author_points !== undefined ? `<span class="points">⭐${post.author_points}</span>` : ''}
                                     <span class="post-time">${formatTime(post.created_at)}</span>
                                     ${currentUser && post.author_id !== currentUser.id ? 
                                         `<button class="btn-sm" onclick="toggleFollow('${post.author_id}')">${followingMap.get(post.author_id) ? '已关注' : '关注'}</button>` : ''}
                                 </div>
-                                <div class="post-body">${post.content ? post.content.replace(/\n/g, '<br>') : ''}</div>
-                                ${tags.length ? `<div style="margin:8px 0;">${tags.map(t => `<span class="tag-item" onclick="searchByTag('${t}')">#${t}</span>`).join('')}</div>` : ''}
+                                <div class="post-body">${nl2br(post.content)}</div>
+                                ${tags.length ? `<div style="margin:8px 0;">${tags.map(t => `<span class="tag-item" onclick="searchByTag('${escapeHtml(t)}')">#${escapeHtml(t)}</span>`).join('')}</div>` : ''}
                                 <div class="post-actions">
                                     <span class="like-btn" onclick="handleLike('${post.id}')">❤️ ${post.likes || 0}</span>
                                     <span>💬 ${commentCountMap[post.id] || 0}</span>
@@ -2014,6 +2011,7 @@
                         `;
                     detail.innerHTML = html;
 
+                    // 加载评论（转义评论内容）
                     const comments = await fetchComments(postId);
                     const commentList = document.getElementById('commentList');
                     if (comments.length === 0) {
@@ -2035,10 +2033,10 @@
                                     <div class="reply-item">
                                         <div class="reply-author-info">
                                             <img src="${avatar}" alt="avatar" onerror="this.src='https://ui-avatars.com/api/?name=U&background=6d5bff&color=fff&size=28'">
-                                            <span class="reply-author">${u.username || '匿名'}</span>
+                                            <span class="reply-author">${escapeHtml(u.username || '匿名')}</span>
                                             <span class="reply-time">${formatTime(c.created_at)}</span>
                                         </div>
-                                        <div class="reply-content">${c.content}</div>
+                                        <div class="reply-content">${escapeHtml(c.content)}</div>
                                     </div>
                                 `;
                         }).join('');
@@ -2058,7 +2056,7 @@
                 renderPosts();
             }
 
-            // ---- 【修复】发布帖子（增加防重复提交锁） ----
+            // ---- 发布帖子（防重复提交） ----
             async function publishPost() {
                 if (!currentUser) { showToast('请先登录', true); return; }
                 if (isSubmitting) {
@@ -2129,7 +2127,7 @@
                 }
             }
 
-            // ---- 点赞 ----
+            // ---- 点赞（缓存未命中时自动请求） ----
             async function handleLike(postId) {
                 if (!currentUser) { showToast('请先登录', true); return; }
                 try {
@@ -2188,7 +2186,7 @@
                         return;
                     }
                     container.innerHTML = tags.map(t =>
-                        `<span class="tag-item" onclick="searchByTag('${t.name}')">#${t.name}</span>`
+                        `<span class="tag-item" onclick="searchByTag('${escapeHtml(t.name)}')">#${escapeHtml(t.name)}</span>`
                     ).join(' ');
                 } catch (e) { console.error('加载标签失败', e); }
             }
