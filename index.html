@@ -884,7 +884,6 @@
                     </select>
                     <input id="publishTitle" placeholder="标题" maxlength="100">
                     <textarea id="publishContent" placeholder="内容（支持 Markdown）" rows="5"></textarea>
-                    <!-- 标签输入框保留但不保存 -->
                     <input id="publishTags" placeholder="标签（暂不支持保存）">
                     <button class="btn" onclick="publishPost()">发布</button>
                 </div>
@@ -1023,7 +1022,7 @@
     <div class="toast" id="toast"></div>
 
     <!-- ============================================================= -->
-    <!-- 主程序脚本（完整修复版） -->
+    <!-- 主程序脚本（完整修复版：帖子不存在、tags列缺失、点赞无反应） -->
     <!-- ============================================================= -->
     <script>
         function startApp(supabase) {
@@ -2059,7 +2058,7 @@
                 renderPosts();
             }
 
-            // ---- 发布帖子（修复：移除 tags 字段） ----
+            // ---- 发布帖子（移除 tags 字段） ----
             async function publishPost() {
                 if (!currentUser) { showToast('请先登录', true); return; }
                 if (isSubmitting) return;
@@ -2119,25 +2118,44 @@
                 }
             }
 
-            // ---- 点赞 ----
+            // ---- 【修复】点赞（增强版：缓存未命中时主动请求） ----
             async function handleLike(postId) {
                 if (!currentUser) { showToast('请先登录', true); return; }
                 try {
-                    const post = postsCache.find(p => p.id === postId);
-                    if (!post) return;
+                    // 1. 先从缓存查找
+                    let post = postsCache.find(p => p.id === postId);
+                    // 2. 如果缓存没有，从服务器获取
+                    if (!post) {
+                        console.warn('⚠️ 点赞：缓存未命中，请求帖子数据:', postId);
+                        const resp = await fetch(SUPABASE_URL + `/rest/v1/posts?id=eq.${postId}`, {
+                            headers: { 'apikey': SUPABASE_ANON_KEY, 'Content-Type': 'application/json' }
+                        });
+                        const data = await handleResponse(resp);
+                        if (data && data.length > 0) {
+                            post = data[0];
+                            postsCache.push(post);
+                        } else {
+                            showToast('帖子不存在', true);
+                            return;
+                        }
+                    }
+
                     const key = 'liked_' + postId + '_' + currentUser.id;
                     const liked = localStorage.getItem(key) === 'true';
                     const newLikes = liked ? (post.likes || 0) - 1 : (post.likes || 0) + 1;
+
                     await sb.from('posts').update({ likes: newLikes }).eq('id', postId);
                     post.likes = newLikes;
                     localStorage.setItem(key, liked ? 'false' : 'true');
+
                     if (currentPostId === postId) {
                         await showPost(postId);
                     } else {
                         renderPosts();
                     }
                 } catch (err) {
-                    showToast('操作失败', true);
+                    console.error('点赞失败:', err);
+                    showToast('操作失败：' + err.message, true);
                 }
             }
 
