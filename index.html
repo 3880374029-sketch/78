@@ -1213,7 +1213,9 @@
             } catch (e) { console.error('更新统计失败', e); }
         }
 
-        // ---- 加载帖子（缓存优先） ----
+        // =============================================================
+        // 【修复】loadPosts：将 postCount 改为 statPosts
+        // =============================================================
         async function loadPosts(category, search) {
             if (category !== undefined) currentCategory = category;
             if (search !== undefined) currentSearch = search;
@@ -1226,7 +1228,8 @@
                 }
                 renderPosts();
                 renderHotList();
-                document.getElementById('postCount').textContent = postsCache.length;
+                // 修复：使用正确的 ID
+                document.getElementById('statPosts').textContent = postsCache.length;
             }
 
             try {
@@ -1407,20 +1410,18 @@
             renderPosts();
         }
 
-        // ---- 发布帖子（防重复加强版） ----
+        // ---- 发布帖子（防重复） ----
         async function publishPost() {
             if (!currentUser) {
                 showToast('请先登录', true);
                 return;
             }
 
-            // 防重复锁
             if (publishLock) {
                 showToast('正在提交，请勿重复操作', false);
                 return;
             }
 
-            // 防抖（1.5秒内禁止重复）
             const now = Date.now();
             if (now - lastPublishTime < 1500) {
                 showToast('操作过快，请稍后再试', false);
