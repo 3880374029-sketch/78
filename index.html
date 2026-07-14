@@ -4,14 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
     <title>窍某论坛</title>
-    
-    <!-- CSP 安全策略 -->
     <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' https://cdn.jsdelivr.net https://unpkg.com 'unsafe-inline'; connect-src 'self' https://bkvsceiezbyexzqpvblj.supabase.co; img-src 'self' data: https://ui-avatars.com https://bkvsceiezbyexzqpvblj.supabase.co; style-src 'self' 'unsafe-inline'; frame-ancestors 'none';">
-    
     <script>
-        // =============================================================
-        // 加载器：动态加载 Supabase 库
-        // =============================================================
         (function loadSupabase() {
             const cdnList = [
                 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2',
@@ -57,18 +51,12 @@
             tryLoad();
         })();
     </script>
-
     <style>
-        /* ===== 完整样式（无修改） ===== */
+        /* ===== 完整样式（不变） ===== */
         *{margin:0;padding:0;box-sizing:border-box;}
         body{background:#0b0e1a;color:#e8edf5;font-family:'Segoe UI',sans-serif;padding:12px;line-height:1.6;}
         .container{max-width:1200px;margin:0 auto;}
-        .post-card, .post-detail, .reply-item, .post-excerpt, .post-body, .post-title, .hot-item a, .comment-content {
-            word-wrap: break-word;
-            overflow-wrap: break-word;
-            word-break: break-word;
-            max-width: 100%;
-        }
+        .post-card, .post-detail, .reply-item, .post-excerpt, .post-body, .post-title, .hot-item a, .comment-content {word-wrap:break-word;overflow-wrap:break-word;word-break:break-word;max-width:100%;}
         img{max-width:100%;height:auto;}
         header{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;margin-bottom:20px;}
         h1{background:linear-gradient(135deg,#c4b5fd,#818cf8);-webkit-background-clip:text;-webkit-text-fill-color:transparent;font-size:1.8rem;}
@@ -198,9 +186,7 @@
     </style>
 </head>
 <body>
-
 <div class="container">
-    <!-- 头部 -->
     <header>
         <h1>💡 窍某论坛</h1>
         <div class="nav-controls">
@@ -220,7 +206,6 @@
         </div>
     </header>
 
-    <!-- 统计 -->
     <div class="forum-stats">
         <span>📌 帖子 <strong id="statPosts">0</strong></span>
         <span>💬 评论 <strong id="statComments">0</strong></span>
@@ -228,7 +213,6 @@
         <span>🔥 今日 <strong id="statToday">0</strong></span>
     </div>
 
-    <!-- 主布局 -->
     <div class="main-layout">
         <div class="main-content">
             <div class="board-nav" id="boardNav">
@@ -240,7 +224,6 @@
                 <button class="board-btn" onclick="openNewTopic()">➕ 话题</button>
             </div>
 
-            <!-- 发布表单 -->
             <div class="publish-form" id="publishForm">
                 <select id="publishCategory">
                     <option value="tech">技术</option>
@@ -254,14 +237,10 @@
                 <button class="btn" id="publishBtn" onclick="publishPost()">发布</button>
             </div>
 
-            <!-- 帖子列表 -->
             <div id="postList"></div>
-
-            <!-- 帖子详情 -->
             <div id="postDetail" style="display:none;"></div>
         </div>
 
-        <!-- 侧栏 -->
         <div class="sidebar">
             <div class="hot-list" id="hotList">
                 <h3>🔥 热门</h3>
@@ -285,7 +264,7 @@
     </footer>
 </div>
 
-<!-- ===== 模态框 ===== -->
+<!-- ===== 模态框（不变） ===== -->
 <div class="modal" id="authModal">
     <div class="modal-box">
         <span class="close" onclick="closeModal()">&times;</span>
@@ -1213,9 +1192,7 @@
             } catch (e) { console.error('更新统计失败', e); }
         }
 
-        // =============================================================
-        // 【修复】loadPosts：将 postCount 改为 statPosts
-        // =============================================================
+        // ===== 修复：使用正确的 ID =====
         async function loadPosts(category, search) {
             if (category !== undefined) currentCategory = category;
             if (search !== undefined) currentSearch = search;
@@ -1228,7 +1205,6 @@
                 }
                 renderPosts();
                 renderHotList();
-                // 修复：使用正确的 ID
                 document.getElementById('statPosts').textContent = postsCache.length;
             }
 
