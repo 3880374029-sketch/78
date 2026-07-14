@@ -59,7 +59,7 @@
     </script>
 
     <style>
-        /* ===== 完整样式（与之前相同） ===== */
+        /* ===== 完整样式 ===== */
         *{margin:0;padding:0;box-sizing:border-box;}
         body{background:#0b0e1a;color:#e8edf5;font-family:'Segoe UI',sans-serif;padding:12px;line-height:1.6;}
         .container{max-width:1200px;margin:0 auto;}
@@ -158,7 +158,6 @@
         .divider::before,.divider::after{content:'';flex:1;height:1px;background:#333;}
         .auth-switch{text-align:center;color:rgba(255,255,255,0.4);}
         .auth-switch a{color:#6d5bff;cursor:pointer;}
-        /* 个人中心 */
         .profile-header{display:flex;align-items:center;gap:20px;flex-wrap:wrap;margin-bottom:20px;}
         .profile-avatar-large{width:80px;height:80px;border-radius:50%;object-fit:cover;border:3px solid #6d5bff;}
         .profile-info h2{margin-bottom:4px;}
@@ -200,7 +199,6 @@
 </head>
 <body>
 
-<!-- ===== 页面结构（与之前相同） ===== -->
 <div class="container">
     <!-- 头部 -->
     <header>
@@ -218,7 +216,6 @@
                 <span class="user-name hidden" id="userName"></span>
                 <a class="profile-link hidden" id="profileLink" onclick="openProfile()">👤</a>
                 <button class="logout-btn hidden" id="logoutBtn" onclick="logout()">退出</button>
-                <!-- 管理链接已移除 -->
             </div>
         </div>
     </header>
@@ -288,7 +285,7 @@
     </footer>
 </div>
 
-<!-- ===== 模态框（不变） ===== -->
+<!-- ===== 模态框 ===== -->
 <div class="modal" id="authModal">
     <div class="modal-box">
         <span class="close" onclick="closeModal()">&times;</span>
@@ -379,9 +376,6 @@
 
 <div class="toast" id="toast"></div>
 
-<!-- ============================================================= -->
-<!-- 主程序脚本（优化版：缓存 + 自动登录） -->
-<!-- ============================================================= -->
 <script>
     function startApp(supabase) {
         const SUPABASE_URL = 'https://bkvsceiezbyexzqpvblj.supabase.co';
@@ -397,7 +391,7 @@
 
         // ---- 缓存管理 ----
         const CACHE_KEY = 'forum_posts_cache';
-        const CACHE_EXPIRE = 5 * 60 * 1000; // 5 分钟
+        const CACHE_EXPIRE = 5 * 60 * 1000;
 
         function getCache() {
             try {
@@ -438,7 +432,7 @@
             return escapeHtml(text).replace(/\n/g, '<br>');
         }
 
-        // ---- 工具函数 ----
+        // ---- 工具 ----
         function formatDate(d) { if (!d) return ''; return new Date(d).toLocaleDateString('zh-CN'); }
         function formatTime(d) { if (!d) return ''; return new Date(d).toLocaleString('zh-CN'); }
         function getAvatarUrl(user) {
@@ -454,7 +448,7 @@
             t._hide = setTimeout(() => { t.className = 'toast'; }, 4000);
         }
 
-        // ---- 网络请求（与之前相同） ----
+        // ---- 网络请求 ----
         async function fetchWithAuth(url, options) {
             const headers = options.headers || {};
             if (accessToken) headers['Authorization'] = 'Bearer ' + accessToken;
@@ -500,7 +494,7 @@
             return json || text;
         }
 
-        // ---- API 调用（不变） ----
+        // ---- API 调用 ----
         async function signIn(email, password) {
             const resp = await fetch(SUPABASE_URL + '/auth/v1/token?grant_type=password', {
                 method: 'POST',
@@ -564,7 +558,11 @@
             return await handleResponse(resp);
         }
         async function createTopicAPI(name) {
-            const resp = await authFetch(SUPABASE_URL + '/rest/v1/topics', { method: 'POST', body: JSON.stringify({ name }) });
+            if (!currentUser) throw new Error('请先登录');
+            const resp = await authFetch(SUPABASE_URL + '/rest/v1/topics', {
+                method: 'POST',
+                body: JSON.stringify({ name })
+            });
             return await handleResponse(resp);
         }
         async function fetchCommentCounts() {
@@ -578,7 +576,7 @@
             return map;
         }
 
-        // ---- 功能函数（签到、关注、通知等，与之前相同） ----
+        // ---- 功能函数 ----
         async function doCheckin() {
             if (!currentUser) { showToast('请先登录', true); return; }
             const today = new Date().toISOString().split('T')[0];
@@ -688,7 +686,7 @@
             return data || [];
         }
 
-        // ---- 个人中心（与之前相同） ----
+        // ---- 个人中心 ----
         async function loadProfileStats() {
             if (!currentUser) return;
             const { data: postsData } = await sb.from('posts').select('id', { count: 'exact' }).eq('author_id', currentUser.id);
@@ -837,19 +835,43 @@
         }
         function closeTopicModal() { document.getElementById('topicModal').classList.remove('active'); }
         document.getElementById('topicModal').addEventListener('click', function(e) { if (e.target === this) closeTopicModal(); });
+        
+        // ---- 修复：createTopic 增强错误处理 ----
         async function createTopic() {
+            if (!currentUser) {
+                showToast('请先登录再创建话题', true);
+                return;
+            }
             const name = document.getElementById('topicNameInput').value.trim();
             const msg = document.getElementById('topicMsg');
-            if (!name) { msg.innerHTML = '<p style="color:#ef4444;">请输入话题名称</p>'; return; }
-            if (name.length > 30) { msg.innerHTML = '<p style="color:#ef4444;">名称不能超过30字符</p>'; return; }
+            if (!name) {
+                msg.innerHTML = '<p style="color:#ef4444;">请输入话题名称</p>';
+                return;
+            }
+            if (name.length > 30) {
+                msg.innerHTML = '<p style="color:#ef4444;">名称不能超过30字符</p>';
+                return;
+            }
             try {
                 await createTopicAPI(name);
                 msg.innerHTML = '<p style="color:#6ee7b7;">✅ 话题创建成功！</p>';
                 await loadTopics();
-                closeTopicModal();
-                showToast('话题已创建');
+                setTimeout(() => {
+                    closeTopicModal();
+                    showToast('话题已创建');
+                }, 1000);
             } catch (err) {
-                msg.innerHTML = '<p style="color:#ef4444;">创建失败：' + err.message + '</p>';
+                let errorMsg = err.message || '未知错误';
+                if (errorMsg.includes('duplicate key') || errorMsg.includes('unique constraint') || errorMsg.includes('already exists')) {
+                    msg.innerHTML = '<p style="color:#ef4444;">⚠️ 该话题已存在，请更换名称</p>';
+                } else if (errorMsg.includes('Unauthorized') || errorMsg.includes('401')) {
+                    msg.innerHTML = '<p style="color:#ef4444;">⚠️ 请先登录再创建话题</p>';
+                } else if (errorMsg.includes('permission') || errorMsg.includes('violates row-level security')) {
+                    msg.innerHTML = '<p style="color:#ef4444;">⚠️ 您没有创建话题的权限，请联系管理员</p>';
+                } else {
+                    msg.innerHTML = `<p style="color:#ef4444;">❌ 创建失败：${escapeHtml(errorMsg)}</p>`;
+                }
+                console.error('创建话题失败:', err);
             }
         }
 
@@ -1027,7 +1049,7 @@
             }
         }
 
-        // ---- 更新未读徽章 ----
+        // ---- 未读徽章 ----
         async function updateUnreadBadge() {
             if (!currentUser) {
                 document.getElementById('notifCount').classList.add('hidden');
@@ -1090,7 +1112,7 @@
             if (currentVal) sel.value = currentVal;
         }
 
-        // ---- 核心渲染函数 ----
+        // ---- 核心渲染 ----
         function getFilteredPosts() {
             let posts = postsCache;
             if (currentCategory !== 'all') {
@@ -1190,30 +1212,27 @@
             } catch (e) { console.error('更新统计失败', e); }
         }
 
-        // ---- 【优化】加载帖子：先展示缓存，再异步刷新 ----
+        // ---- 加载帖子（缓存优先） ----
         async function loadPosts(category, search) {
             if (category !== undefined) currentCategory = category;
             if (search !== undefined) currentSearch = search;
 
-            // 1. 先尝试读取缓存并立即渲染
+            // 先展示缓存
             const cached = getCache();
             if (cached && cached.length > 0) {
                 postsCache = cached;
-                // 尝试获取评论计数（缓存中可能没有）
                 if (!commentCountMap || Object.keys(commentCountMap).length === 0) {
                     commentCountMap = await fetchCommentCounts();
                 }
                 renderPosts();
                 renderHotList();
-                // 更新统计（使用缓存数据）
                 document.getElementById('postCount').textContent = postsCache.length;
             }
 
-            // 2. 从服务器获取最新数据
+            // 再请求最新
             try {
                 const freshPosts = await fetchPosts();
                 if (freshPosts) {
-                    // 补充作者信息
                     const authorIds = freshPosts.map(p => p.author_id).filter(Boolean);
                     if (authorIds.length) {
                         const { data: profiles } = await sb.from('profiles').select('id, username, avatar_url, points, level').in('id', authorIds);
@@ -1230,24 +1249,19 @@
                             });
                         }
                     }
-                    // 获取评论计数
                     commentCountMap = await fetchCommentCounts();
                     postsCache = freshPosts;
-                    // 更新缓存
                     setCache(postsCache);
-                    // 重新渲染
                     renderPosts();
                     renderHotList();
                     updateStats();
                     updateUnreadBadge();
-                    // 更新导航高亮
                     document.querySelectorAll('.board-btn[data-category]').forEach(b => {
                         b.classList.toggle('active', b.dataset.category === currentCategory);
                     });
                 }
             } catch (e) {
                 console.error('加载帖子失败', e);
-                // 如果连缓存都没有，显示错误提示
                 if (!cached || cached.length === 0) {
                     showToast('加载失败，请刷新', true);
                 }
@@ -1430,7 +1444,6 @@
                 document.getElementById('publishContent').value = '';
                 document.getElementById('publishTags').value = '';
                 document.getElementById('publishForm').style.display = 'none';
-                // 清除缓存，强制刷新
                 clearCache();
                 await loadPosts(currentCategory);
             } catch (err) {
@@ -1459,14 +1472,13 @@
                 await showPost(postId);
                 commentCountMap = await fetchCommentCounts();
                 renderPosts();
-                // 清除缓存，因为评论数变了
                 clearCache();
             } catch (err) {
                 showToast('评论失败：' + err.message, true);
             }
         }
 
-        // ---- 点赞 ----
+        // ---- 点赞（修复） ----
         async function handleLike(postId) {
             if (!currentUser) { showToast('请先登录', true); return; }
             try {
@@ -1499,7 +1511,6 @@
                     renderPosts();
                     renderHotList();
                 }
-                // 清除缓存，因为点赞数变了
                 clearCache();
             } catch (err) {
                 console.error('点赞失败:', err);
@@ -1565,12 +1576,11 @@
         window.searchByTag = searchByTag;
         window.renderHotList = renderHotList;
 
-        // ---- 【优化】初始化：自动登录 + 加载缓存 ----
+        // ---- 初始化（自动登录 + 缓存） ----
         async function init() {
-            // 1. 处理 OAuth 回调
             await handleOAuthCallback();
 
-            // 2. 自动登录：从 localStorage 恢复 session
+            // 自动登录
             const token = localStorage.getItem('sb_token');
             const refresh = localStorage.getItem('sb_refresh_token');
             const userStr = localStorage.getItem('sb_user');
@@ -1581,13 +1591,11 @@
                 if (currentUser) {
                     try {
                         userProfile = await getProfile(currentUser.id);
-                        // 获取关注列表
                         const { data: follows } = await sb.from('follows').select('following_id').eq('follower_id', currentUser.id);
                         if (follows) { follows.forEach(f => followingMap.set(f.following_id, true)); }
                         updateUnreadBadge();
                     } catch (e) {
                         console.warn('自动登录恢复失败', e);
-                        // 如果 token 无效，清除登录状态
                         localStorage.removeItem('sb_token');
                         localStorage.removeItem('sb_refresh_token');
                         localStorage.removeItem('sb_user');
@@ -1597,16 +1605,9 @@
                 }
             }
 
-            // 3. 更新 UI（显示登录状态）
             updateUI();
-
-            // 4. 加载话题
             await loadTopics();
-
-            // 5. 加载帖子（自动使用缓存）
             await loadPosts('all', '');
-
-            // 6. 加载标签
             await loadTags();
         }
         init();
