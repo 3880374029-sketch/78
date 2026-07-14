@@ -10,7 +10,7 @@
     
     <script>
         // =============================================================
-        // 加载器：动态加载 Supabase 库（多 CDN 备份）
+        // 加载器：动态加载 Supabase 库
         // =============================================================
         (function loadSupabase() {
             const cdnList = [
@@ -59,7 +59,7 @@
     </script>
 
     <style>
-        /* ===== 完整样式 ===== */
+        /* ===== 完整样式（无修改） ===== */
         *{margin:0;padding:0;box-sizing:border-box;}
         body{background:#0b0e1a;color:#e8edf5;font-family:'Segoe UI',sans-serif;padding:12px;line-height:1.6;}
         .container{max-width:1200px;margin:0 auto;}
@@ -385,9 +385,11 @@
         // ---- 全局状态 ----
         let currentUser = null, userProfile = null, accessToken = null, refreshToken = null;
         let postsCache = [], topicsCache = [], currentCategory = 'all', currentSearch = '';
-        let isSubmitting = false, isAdmin = false, commentCountMap = {}, unreadCount = 0;
+        let isAdmin = false, commentCountMap = {}, unreadCount = 0;
         let followingMap = new Map();
         let currentPostId = null;
+        let publishLock = false;
+        let lastPublishTime = 0;
 
         // ---- 缓存管理 ----
         const CACHE_KEY = 'forum_posts_cache';
@@ -836,7 +838,6 @@
         function closeTopicModal() { document.getElementById('topicModal').classList.remove('active'); }
         document.getElementById('topicModal').addEventListener('click', function(e) { if (e.target === this) closeTopicModal(); });
         
-        // ---- 修复：createTopic 增强错误处理 ----
         async function createTopic() {
             if (!currentUser) {
                 showToast('请先登录再创建话题', true);
@@ -1217,7 +1218,6 @@
             if (category !== undefined) currentCategory = category;
             if (search !== undefined) currentSearch = search;
 
-            // 先展示缓存
             const cached = getCache();
             if (cached && cached.length > 0) {
                 postsCache = cached;
@@ -1229,7 +1229,6 @@
                 document.getElementById('postCount').textContent = postsCache.length;
             }
 
-            // 再请求最新
             try {
                 const freshPosts = await fetchPosts();
                 if (freshPosts) {
@@ -1287,7 +1286,7 @@
             loadPosts(cat, currentSearch);
         }
 
-        // ---- 显示帖子详情 ----
+        // ---- 帖子详情 ----
         async function showPost(postId) {
             const list = document.getElementById('postList');
             const detail = document.getElementById('postDetail');
@@ -1408,17 +1407,34 @@
             renderPosts();
         }
 
-        // ---- 发布帖子 ----
+        // ---- 发布帖子（防重复加强版） ----
         async function publishPost() {
-            if (!currentUser) { showToast('请先登录', true); return; }
-            if (isSubmitting) { showToast('正在发布中，请勿重复提交', false); return; }
+            if (!currentUser) {
+                showToast('请先登录', true);
+                return;
+            }
+
+            // 防重复锁
+            if (publishLock) {
+                showToast('正在提交，请勿重复操作', false);
+                return;
+            }
+
+            // 防抖（1.5秒内禁止重复）
+            const now = Date.now();
+            if (now - lastPublishTime < 1500) {
+                showToast('操作过快，请稍后再试', false);
+                return;
+            }
+            lastPublishTime = now;
+
             const title = document.getElementById('publishTitle').value.trim();
             const content = document.getElementById('publishContent').value.trim();
             const category = document.getElementById('publishCategory').value;
             if (!title) { showToast('请输入标题', true); return; }
             if (!content) { showToast('请输入内容', true); return; }
 
-            isSubmitting = true;
+            publishLock = true;
             const btn = document.getElementById('publishBtn');
             btn.disabled = true;
             btn.textContent = '发布中...';
@@ -1447,11 +1463,16 @@
                 clearCache();
                 await loadPosts(currentCategory);
             } catch (err) {
-                showToast('发布失败：' + err.message, true);
+                if (err.message && (err.message.includes('duplicate key') || err.message.includes('unique constraint'))) {
+                    showToast('该帖子已发布过，请勿重复提交', true);
+                } else {
+                    showToast('发布失败：' + err.message, true);
+                }
             } finally {
-                isSubmitting = false;
+                publishLock = false;
                 btn.disabled = false;
                 btn.textContent = '发布';
+                setTimeout(() => { lastPublishTime = 0; }, 1000);
             }
         }
 
@@ -1478,7 +1499,7 @@
             }
         }
 
-        // ---- 点赞（修复） ----
+        // ---- 点赞 ----
         async function handleLike(postId) {
             if (!currentUser) { showToast('请先登录', true); return; }
             try {
@@ -1576,7 +1597,7 @@
         window.searchByTag = searchByTag;
         window.renderHotList = renderHotList;
 
-        // ---- 初始化（自动登录 + 缓存） ----
+        // ---- 初始化 ----
         async function init() {
             await handleOAuthCallback();
 
