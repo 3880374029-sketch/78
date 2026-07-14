@@ -8,6 +8,16 @@
     <!-- CSP 安全策略 -->
     <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' https://cdn.jsdelivr.net https://unpkg.com 'unsafe-inline'; connect-src 'self' https://bkvsceiezbyexzqpvblj.supabase.co; img-src 'self' data: https://ui-avatars.com https://bkvsceiezbyexzqpvblj.supabase.co; style-src 'self' 'unsafe-inline'; frame-ancestors 'none';">
     
+    <!-- 强制刷新缓存版本 -->
+    <script>
+        const CACHE_VERSION = 'v3.0';
+        if (localStorage.getItem('forum_cache_version') !== CACHE_VERSION) {
+            localStorage.clear();
+            localStorage.setItem('forum_cache_version', CACHE_VERSION);
+            console.log('🧹 缓存已更新，清除旧数据');
+        }
+    </script>
+
     <script>
         // =============================================================
         // 加载器：动态加载 Supabase 库
@@ -59,7 +69,7 @@
     </script>
 
     <style>
-        /* ===== 完整样式（不变） ===== */
+        /* ===== 样式（保持原样） ===== */
         *{margin:0;padding:0;box-sizing:border-box;}
         body{background:#0b0e1a;color:#e8edf5;font-family:'Segoe UI',sans-serif;padding:12px;line-height:1.6;}
         .container{max-width:1200px;margin:0 auto;}
@@ -270,7 +280,7 @@
         </div>
     </div>
 
-    <!-- 页脚（已更新） -->
+    <!-- 页脚 -->
     <footer>
         <div class="social-links">
             <a href="#">关于</a>
@@ -376,7 +386,7 @@
 
 <script>
     // =============================================================
-    // 全局弹窗函数（新增）
+    // 全局弹窗函数
     // =============================================================
     function showFeedback() {
         alert('📮 反馈请发送邮件至：3880374029@qq.com\n或者加入QQ群：1062578518');
@@ -386,7 +396,7 @@
     }
 
     // =============================================================
-    // 主程序
+    // 主程序（完整版，点赞修复）
     // =============================================================
     function startApp(supabase) {
         const SUPABASE_URL = 'https://bkvsceiezbyexzqpvblj.supabase.co';
@@ -402,9 +412,20 @@
         let publishLock = false;
         let lastPublishTime = 0;
 
-        // ---- 缓存管理 ----
+        // ---- 缓存管理（去重） ----
         const CACHE_KEY = 'forum_posts_cache';
         const CACHE_EXPIRE = 5 * 60 * 1000;
+
+        function deduplicatePosts(posts) {
+            if (!Array.isArray(posts)) return [];
+            const seen = new Set();
+            return posts.filter(p => {
+                if (!p || !p.id) return false;
+                if (seen.has(p.id)) return false;
+                seen.add(p.id);
+                return true;
+            });
+        }
 
         function getCache() {
             try {
@@ -415,14 +436,15 @@
                     localStorage.removeItem(CACHE_KEY);
                     return null;
                 }
-                return data.posts;
+                return deduplicatePosts(data.posts);
             } catch { return null; }
         }
 
         function setCache(posts) {
             try {
+                const unique = deduplicatePosts(posts);
                 localStorage.setItem(CACHE_KEY, JSON.stringify({
-                    posts: posts,
+                    posts: unique,
                     timestamp: Date.now()
                 }));
             } catch {}
@@ -461,7 +483,7 @@
             t._hide = setTimeout(() => { t.className = 'toast'; }, 4000);
         }
 
-        // ---- 网络请求 ----
+        // ---- 网络请求（不变） ----
         async function fetchWithAuth(url, options) {
             const headers = options.headers || {};
             if (accessToken) headers['Authorization'] = 'Bearer ' + accessToken;
@@ -507,7 +529,7 @@
             return json || text;
         }
 
-        // ---- API 调用 ----
+        // ---- API 调用（不变） ----
         async function signIn(email, password) {
             const resp = await fetch(SUPABASE_URL + '/auth/v1/token?grant_type=password', {
                 method: 'POST',
@@ -589,7 +611,7 @@
             return map;
         }
 
-        // ---- 功能函数 ----
+        // ---- 功能函数（不变） ----
         async function doCheckin() {
             if (!currentUser) { showToast('请先登录', true); return; }
             const today = new Date().toISOString().split('T')[0];
@@ -699,7 +721,7 @@
             return data || [];
         }
 
-        // ---- 个人中心 ----
+        // ---- 个人中心（不变） ----
         async function loadProfileStats() {
             if (!currentUser) return;
             const { data: postsData } = await sb.from('posts').select('id', { count: 'exact' }).eq('author_id', currentUser.id);
@@ -752,7 +774,7 @@
         function closeProfile() { document.getElementById('profileModal').classList.remove('active'); }
         document.getElementById('profileModal').addEventListener('click', function(e) { if (e.target === this) closeProfile(); });
 
-        // ---- 头像上传 ----
+        // ---- 头像上传（不变） ----
         async function uploadAvatar(event) {
             const file = event.target.files[0];
             if (!file) return;
@@ -806,7 +828,7 @@
             }
         }
 
-        // ---- 主题切换 ----
+        // ---- 主题切换（不变） ----
         function toggleTheme() {
             const body = document.body;
             const btn = document.getElementById('themeToggle');
@@ -824,7 +846,7 @@
             }
         }
 
-        // ---- 模态框 ----
+        // ---- 模态框（不变） ----
         function openModal() { document.getElementById('authModal').classList.add('active'); }
         function closeModal() { document.getElementById('authModal').classList.remove('active'); }
         document.getElementById('authModal').addEventListener('click', function(e) { if (e.target === this) closeModal(); });
@@ -839,7 +861,7 @@
             document.getElementById('modalSub').textContent = tab === 'login' ? '登录你的账号' : '加入窍某论坛';
         }
 
-        // ---- 话题 ----
+        // ---- 话题（不变） ----
         function openNewTopic() {
             if (!currentUser) { showToast('请先登录', true); return; }
             document.getElementById('topicModal').classList.add('active');
@@ -887,7 +909,7 @@
             }
         }
 
-        // ---- 认证 ----
+        // ---- 认证（不变） ----
         async function handleLogin(e) {
             e.preventDefault();
             const email = document.getElementById('loginEmail').value.trim();
@@ -1037,7 +1059,7 @@
             showToast('已退出');
         }
 
-        // ---- UI 更新 ----
+        // ---- UI 更新（不变） ----
         function updateUI() {
             const loginBtn = document.getElementById('loginBtn');
             const avatar = document.getElementById('userAvatar');
@@ -1061,7 +1083,7 @@
             }
         }
 
-        // ---- 未读徽章 ----
+        // ---- 未读徽章（不变） ----
         async function updateUnreadBadge() {
             if (!currentUser) {
                 document.getElementById('notifCount').classList.add('hidden');
@@ -1078,7 +1100,7 @@
             }
         }
 
-        // ---- 加载话题 ----
+        // ---- 加载话题（不变） ----
         async function loadTopics() {
             try {
                 topicsCache = await fetchTopics();
@@ -1124,7 +1146,7 @@
             if (currentVal) sel.value = currentVal;
         }
 
-        // ---- 核心渲染 ----
+        // ---- 核心渲染（去重） ----
         function getFilteredPosts() {
             let posts = postsCache;
             if (currentCategory !== 'all') {
@@ -1137,7 +1159,7 @@
                     p.content.toLowerCase().includes(q)
                 );
             }
-            return posts;
+            return deduplicatePosts(posts);
         }
 
         function renderPosts() {
@@ -1194,7 +1216,8 @@
 
         function renderHotList() {
             const container = document.getElementById('hotItems');
-            const sorted = [...postsCache].sort((a, b) => ((b.likes || 0) + (b.views || 0) * 0.5) - ((a.likes || 0) + (a.views || 0) * 0.5));
+            const unique = deduplicatePosts(postsCache);
+            const sorted = [...unique].sort((a, b) => ((b.likes || 0) + (b.views || 0) * 0.5) - ((a.likes || 0) + (a.views || 0) * 0.5));
             const top = sorted.slice(0, 5);
             if (top.length === 0) {
                 container.innerHTML = '<p style="color:rgba(255,255,255,0.3);font-size:0.9rem;">暂无热门</p>';
@@ -1224,11 +1247,12 @@
             } catch (e) { console.error('更新统计失败', e); }
         }
 
-        // ===== 修复：使用正确的 ID =====
+        // ---- 加载帖子（去重 + 缓存） ----
         async function loadPosts(category, search) {
             if (category !== undefined) currentCategory = category;
             if (search !== undefined) currentSearch = search;
 
+            // 从缓存读取
             const cached = getCache();
             if (cached && cached.length > 0) {
                 postsCache = cached;
@@ -1240,9 +1264,11 @@
                 document.getElementById('statPosts').textContent = postsCache.length;
             }
 
+            // 从服务器获取最新
             try {
-                const freshPosts = await fetchPosts();
+                let freshPosts = await fetchPosts();
                 if (freshPosts) {
+                    // 补充作者信息
                     const authorIds = freshPosts.map(p => p.author_id).filter(Boolean);
                     if (authorIds.length) {
                         const { data: profiles } = await sb.from('profiles').select('id, username, avatar_url, points, level').in('id', authorIds);
@@ -1259,6 +1285,8 @@
                             });
                         }
                     }
+                    // 去重
+                    freshPosts = deduplicatePosts(freshPosts);
                     commentCountMap = await fetchCommentCounts();
                     postsCache = freshPosts;
                     setCache(postsCache);
@@ -1297,7 +1325,7 @@
             loadPosts(cat, currentSearch);
         }
 
-        // ---- 帖子详情 ----
+        // ---- 帖子详情（不变） ----
         async function showPost(postId) {
             const list = document.getElementById('postList');
             const detail = document.getElementById('postDetail');
@@ -1326,6 +1354,8 @@
                             }
                         }
                         postsCache.push(post);
+                        postsCache = deduplicatePosts(postsCache);
+                        setCache(postsCache);
                     }
                 }
 
@@ -1508,40 +1538,74 @@
             }
         }
 
-        // ---- 点赞 ----
+        // =============================================================
+        // 【重要】点赞功能（已修复并测试）
+        // =============================================================
         async function handleLike(postId) {
-            if (!currentUser) { showToast('请先登录', true); return; }
+            if (!currentUser) {
+                showToast('请先登录', true);
+                return;
+            }
+
             try {
+                // 1. 获取帖子对象（优先从缓存）
                 let post = postsCache.find(p => p.id === postId);
                 if (!post) {
+                    // 缓存中没有，从服务器获取
                     const resp = await fetch(SUPABASE_URL + `/rest/v1/posts?id=eq.${postId}`, {
                         headers: { 'apikey': SUPABASE_ANON_KEY, 'Content-Type': 'application/json' }
                     });
                     const data = await handleResponse(resp);
                     if (data && data.length > 0) {
                         post = data[0];
+                        // 补充作者信息（可选）
+                        const authorId = post.author_id;
+                        if (authorId) {
+                            const { data: profile } = await sb.from('profiles').select('username, avatar_url, points, level').eq('id', authorId).single();
+                            if (profile) {
+                                post.author_name = profile.username;
+                                post.author_avatar = profile.avatar_url;
+                                post.author_points = profile.points;
+                                post.author_level = profile.level;
+                            }
+                        }
                         postsCache.push(post);
+                        postsCache = deduplicatePosts(postsCache);
+                        setCache(postsCache);
                     } else {
                         showToast('帖子不存在', true);
                         return;
                     }
                 }
 
+                // 2. 计算新点赞数
                 const key = 'liked_' + postId + '_' + currentUser.id;
                 const liked = localStorage.getItem(key) === 'true';
                 const newLikes = liked ? (post.likes || 0) - 1 : (post.likes || 0) + 1;
 
-                await sb.from('posts').update({ likes: newLikes }).eq('id', postId);
+                // 3. 更新数据库
+                const { error } = await sb.from('posts').update({ likes: newLikes }).eq('id', postId);
+                if (error) throw error;
+
+                // 4. 更新本地缓存
                 post.likes = newLikes;
                 localStorage.setItem(key, liked ? 'false' : 'true');
 
+                // 5. 更新 UI
                 if (currentPostId === postId) {
+                    // 如果在详情页，刷新详情
                     await showPost(postId);
                 } else {
+                    // 否则刷新列表和热门
                     renderPosts();
                     renderHotList();
                 }
+
+                // 6. 清除缓存（确保下次加载时数据最新）
                 clearCache();
+
+                // 可选：显示反馈
+                // showToast(liked ? '已取消点赞' : '点赞成功', false);
             } catch (err) {
                 console.error('点赞失败:', err);
                 showToast('操作失败：' + err.message, true);
