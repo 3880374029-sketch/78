@@ -4,8 +4,14 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
     <title>窍某论坛</title>
+    
+    <!-- CSP 安全策略 -->
     <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' https://cdn.jsdelivr.net https://unpkg.com 'unsafe-inline'; connect-src 'self' https://bkvsceiezbyexzqpvblj.supabase.co; img-src 'self' data: https://ui-avatars.com https://bkvsceiezbyexzqpvblj.supabase.co; style-src 'self' 'unsafe-inline'; frame-ancestors 'none';">
+    
     <script>
+        // =============================================================
+        // 加载器：动态加载 Supabase 库
+        // =============================================================
         (function loadSupabase() {
             const cdnList = [
                 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2',
@@ -51,6 +57,7 @@
             tryLoad();
         })();
     </script>
+
     <style>
         /* ===== 完整样式（不变） ===== */
         *{margin:0;padding:0;box-sizing:border-box;}
@@ -165,9 +172,10 @@
         .profile-form .form-group{margin-bottom:16px;}
         .profile-form label{display:block;color:rgba(255,255,255,0.6);margin-bottom:4px;font-size:0.9rem;}
         .profile-form .btn{width:100%;margin-top:8px;}
-        footer{text-align:center;margin-top:40px;padding:20px;border-top:1px solid rgba(255,255,255,0.04);color:rgba(255,255,255,0.2);font-size:0.85rem;}
+        footer{text-align:center;margin-top:40px;padding:20px;border-top:1px solid rgba(255,255,255,0.04);}
+        footer .footer-status {color: rgba(255,255,255,0.4); font-size: 0.85rem; margin-top: 8px;}
         .social-links{display:flex;justify-content:center;gap:20px;flex-wrap:wrap;margin-bottom:8px;}
-        .social-links a{color:rgba(255,255,255,0.3);text-decoration:none;}
+        .social-links a{color:rgba(255,255,255,0.3);text-decoration:none;cursor:pointer;}
         .social-links a:hover{color:rgba(255,255,255,0.7);}
         .empty-state{padding:40px 20px;text-align:center;border:2px dashed rgba(255,255,255,0.08);border-radius:16px;margin:20px 0;}
         .empty-state h3{color:rgba(255,255,255,0.4);margin-bottom:8px;}
@@ -187,6 +195,7 @@
 </head>
 <body>
 <div class="container">
+    <!-- 头部 -->
     <header>
         <h1>💡 窍某论坛</h1>
         <div class="nav-controls">
@@ -206,6 +215,7 @@
         </div>
     </header>
 
+    <!-- 统计 -->
     <div class="forum-stats">
         <span>📌 帖子 <strong id="statPosts">0</strong></span>
         <span>💬 评论 <strong id="statComments">0</strong></span>
@@ -213,6 +223,7 @@
         <span>🔥 今日 <strong id="statToday">0</strong></span>
     </div>
 
+    <!-- 主布局 -->
     <div class="main-layout">
         <div class="main-content">
             <div class="board-nav" id="boardNav">
@@ -224,6 +235,7 @@
                 <button class="board-btn" onclick="openNewTopic()">➕ 话题</button>
             </div>
 
+            <!-- 发布表单 -->
             <div class="publish-form" id="publishForm">
                 <select id="publishCategory">
                     <option value="tech">技术</option>
@@ -237,10 +249,14 @@
                 <button class="btn" id="publishBtn" onclick="publishPost()">发布</button>
             </div>
 
+            <!-- 帖子列表 -->
             <div id="postList"></div>
+
+            <!-- 帖子详情 -->
             <div id="postDetail" style="display:none;"></div>
         </div>
 
+        <!-- 侧栏 -->
         <div class="sidebar">
             <div class="hot-list" id="hotList">
                 <h3>🔥 热门</h3>
@@ -254,13 +270,16 @@
         </div>
     </div>
 
+    <!-- 页脚（已更新） -->
     <footer>
         <div class="social-links">
             <a href="#">关于</a>
             <a href="#">帮助</a>
-            <a href="#">反馈</a>
+            <a href="#" onclick="showFeedback()">反馈</a>
+            <a href="#" onclick="showStatus()">📊 帖子状态</a>
         </div>
-        <p>© 2026 窍某论坛 · 用 ❤️ 构建</p>
+        <p class="footer-status">🔧 帖子重复问题已修复，如有疑问请联系管理员</p>
+        <p style="color:rgba(255,255,255,0.2);font-size:0.85rem;margin-top:4px;">© 2026 窍某论坛 · 用 ❤️ 构建</p>
     </footer>
 </div>
 
@@ -356,6 +375,19 @@
 <div class="toast" id="toast"></div>
 
 <script>
+    // =============================================================
+    // 全局弹窗函数（新增）
+    // =============================================================
+    function showFeedback() {
+        alert('📮 反馈请发送邮件至：3880374029@qq.com\n或者加入QQ群：1062578518');
+    }
+    function showStatus() {
+        alert('✅ 帖子重复问题已通过数据库唯一约束修复。\n如有异常，请刷新页面或联系管理员。');
+    }
+
+    // =============================================================
+    // 主程序
+    // =============================================================
     function startApp(supabase) {
         const SUPABASE_URL = 'https://bkvsceiezbyexzqpvblj.supabase.co';
         const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJrdnNjZWllemJ5ZXh6cXB2YmxqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODM3MDk1MzIsImV4cCI6MjA5OTI4NTUzMn0.1h4Yp8YaJdMMOQW8N2zqvJi6QrxHPncBFMK9LjdmZ6E';
