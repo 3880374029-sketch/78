@@ -5,15 +5,13 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
     <title>管理后台 - 窍某论坛</title>
     <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' https://cdn.jsdelivr.net https://unpkg.com 'unsafe-inline'; connect-src 'self' https://bkvsceiezbyexzqpvblj.supabase.co; img-src 'self' data: https://ui-avatars.com https://bkvsceiezbyexzqpvblj.supabase.co; style-src 'self' 'unsafe-inline';">
-    
     <script>
-        const ADMIN_CACHE_VERSION = 'v3.0';
+        const ADMIN_CACHE_VERSION = 'v4.0';
         if (localStorage.getItem('admin_cache_version') !== ADMIN_CACHE_VERSION) {
             localStorage.removeItem('admin_token');
             localStorage.setItem('admin_cache_version', ADMIN_CACHE_VERSION);
         }
     </script>
-
     <script>
         (function loadSupabase() {
             const script = document.createElement('script');
@@ -31,7 +29,6 @@
             document.head.appendChild(script);
         })();
     </script>
-
     <style>
         *{margin:0;padding:0;box-sizing:border-box;}
         body{background:#0b0e1a;color:#e8edf5;font-family:'Segoe UI',sans-serif;padding:12px;line-height:1.6;}
@@ -194,10 +191,9 @@
 
 <script>
     // =============================================================
-    // 后台主程序（使用 service_role 绕过 RLS）
+    // 后台主程序（使用普通 anon 密钥，依赖 RLS 策略）
     // =============================================================
     function startAdmin(supabase) {
-        // 防止重复初始化
         if (window._adminStarted) {
             console.log('后台已启动，跳过重复初始化');
             return;
@@ -206,18 +202,7 @@
 
         const SUPABASE_URL = 'https://bkvsceiezbyexzqpvblj.supabase.co';
         const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJrdnNjZWllemJ5ZXh6cXB2YmxqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODM3MDk1MzIsImV4cCI6MjA5OTI4NTUzMn0.1h4Yp8YaJdMMOQW8N2zqvJi6QrxHPncBFMK9LjdmZ6E';
-        // ===== 请将下面的 YOUR_SERVICE_ROLE_KEY 替换为您的 service_role 密钥 =====
-        const SUPABASE_SERVICE_ROLE_KEY = 'YOUR_SERVICE_ROLE_KEY'; // 务必替换！
-
-        if (SUPABASE_SERVICE_ROLE_KEY === 'YOUR_SERVICE_ROLE_KEY') {
-            alert('⚠️ 请先配置 service_role 密钥！\n在 admin.html 中替换 YOUR_SERVICE_ROLE_KEY');
-            document.body.innerHTML = `<div style="text-align:center;padding:50px;color:#ef4444;"><h1>⚠️ 配置错误</h1><p>请设置 service_role 密钥后再使用后台。</p></div>`;
-            return;
-        }
-
-        // 创建两个客户端
-        const adminClient = supabase.createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
-        const anonClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+        const sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
         let currentUser = null;
         let accessToken = null;
@@ -299,62 +284,50 @@
             return data && data.length > 0 ? data[0] : null;
         }
 
-        // ---- 管理操作（使用 adminClient） ----
+        // ---- API 调用（全部使用 sb，即 anonClient） ----
+        // 由于 RLS 策略已赋予管理员权限，所有操作将正常进行
         async function deletePost(postId) {
-            const { error } = await adminClient.from('posts').delete().eq('id', postId);
+            const { error } = await sb.from('posts').delete().eq('id', postId);
             if (error) throw new Error(error.message);
         }
         async function deleteComment(commentId) {
-            const { error } = await adminClient.from('comments').delete().eq('id', commentId);
+            const { error } = await sb.from('comments').delete().eq('id', commentId);
             if (error) throw new Error(error.message);
         }
         async function deleteTopic(topicId) {
-            const { error } = await adminClient.from('topics').delete().eq('id', topicId);
+            const { error } = await sb.from('topics').delete().eq('id', topicId);
             if (error) throw new Error(error.message);
         }
         async function deleteUser(userId) {
-            // 1. 删除关联数据（posts, comments）
-            await adminClient.from('comments').delete().eq('user_id', userId);
-            await adminClient.from('posts').delete().eq('author_id', userId);
-            // 2. 删除 profile
-            const { error: profileError } = await adminClient.from('profiles').delete().eq('id', userId);
+            // 删除关联数据
+            await sb.from('comments').delete().eq('user_id', userId);
+            await sb.from('posts').delete().eq('author_id', userId);
+            // 删除 profile
+            const { error: profileError } = await sb.from('profiles').delete().eq('id', userId);
             if (profileError) throw new Error(profileError.message);
-            // 3. 删除 auth.user（使用 Admin API）
-            const resp = await fetch(SUPABASE_URL + '/auth/v1/admin/users/' + userId, {
-                method: 'DELETE',
-                headers: {
-                    'apikey': SUPABASE_ANON_KEY,
-                    'Authorization': 'Bearer ' + SUPABASE_SERVICE_ROLE_KEY
-                }
-            });
-            if (!resp.ok) {
-                const errText = await resp.text();
-                throw new Error('删除 auth 用户失败：' + errText);
-            }
         }
         async function updateUser(userId, updates) {
-            const { error } = await adminClient.from('profiles').update(updates).eq('id', userId);
+            const { error } = await sb.from('profiles').update(updates).eq('id', userId);
             if (error) throw new Error(error.message);
         }
 
-        // ---- 读取数据（使用 anonClient） ----
         async function fetchPosts() {
-            const { data, error } = await anonClient.from('posts').select('*').order('created_at', { ascending: false });
+            const { data, error } = await sb.from('posts').select('*').order('created_at', { ascending: false });
             if (error) throw new Error(error.message);
             return data;
         }
         async function fetchComments() {
-            const { data, error } = await anonClient.from('comments').select('*').order('created_at', { ascending: false });
+            const { data, error } = await sb.from('comments').select('*').order('created_at', { ascending: false });
             if (error) throw new Error(error.message);
             return data;
         }
         async function fetchTopics() {
-            const { data, error } = await anonClient.from('topics').select('*').order('name', { ascending: true });
+            const { data, error } = await sb.from('topics').select('*').order('name', { ascending: true });
             if (error) throw new Error(error.message);
             return data;
         }
         async function fetchUsers() {
-            const { data, error } = await anonClient.from('profiles').select('*').order('created_at', { ascending: false });
+            const { data, error } = await sb.from('profiles').select('*').order('created_at', { ascending: false });
             if (error) throw new Error(error.message);
             return data;
         }
@@ -515,8 +488,7 @@
         async function deletePostHandler(postId) {
             if (!confirm('确定删除这篇帖子（将同时删除所有回复）？')) return;
             try {
-                // 先删除关联评论
-                await adminClient.from('comments').delete().eq('post_id', postId);
+                await sb.from('comments').delete().eq('post_id', postId);
                 await deletePost(postId);
                 showToast('删除成功！');
                 loadAllData();
@@ -682,8 +654,8 @@
             if (!confirm(`确定删除选中的 ${ids.length} 位用户吗？此操作不可恢复！`)) return;
             try {
                 for (const userId of ids) {
-                    await adminClient.from('comments').delete().eq('user_id', userId);
-                    await adminClient.from('posts').delete().eq('author_id', userId);
+                    await sb.from('comments').delete().eq('user_id', userId);
+                    await sb.from('posts').delete().eq('author_id', userId);
                     await deleteUser(userId);
                 }
                 showToast(`✅ 已删除 ${ids.length} 位用户`);
@@ -737,8 +709,8 @@
                 if (!confirm('⚠️ 你要删除自己的账号吗？')) return;
             }
             try {
-                await adminClient.from('comments').delete().eq('user_id', userId);
-                await adminClient.from('posts').delete().eq('author_id', userId);
+                await sb.from('comments').delete().eq('user_id', userId);
+                await sb.from('posts').delete().eq('author_id', userId);
                 await deleteUser(userId);
                 showToast('✅ 用户及其所有内容已删除！');
                 selectedUsers.delete(userId);
@@ -781,16 +753,14 @@
             }
             msg.innerHTML = '<p style="color:rgba(255,255,255,0.5);">⏳ 创建中...</p>';
             try {
-                // 使用 anonClient 创建用户
-                const { data: authData, error: authError } = await anonClient.auth.signUp({
+                const { data: authData, error: authError } = await sb.auth.signUp({
                     email,
                     password,
                     options: { data: { username } }
                 });
                 if (authError) throw authError;
                 if (!authData.user) throw new Error('创建用户失败');
-                // 使用 adminClient 插入 profile
-                const { error: profileError } = await adminClient.from('profiles').insert({
+                const { error: profileError } = await sb.from('profiles').insert({
                     id: authData.user.id,
                     username: username,
                     email: email,
