@@ -4,32 +4,70 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
     <title>管理后台 - 窍某论坛</title>
-    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' https://cdn.jsdelivr.net https://unpkg.com 'unsafe-inline'; connect-src 'self' https://bkvsceiezbyexzqpvblj.supabase.co; img-src 'self' data: https://ui-avatars.com https://bkvsceiezbyexzqpvblj.supabase.co; style-src 'self' 'unsafe-inline';">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' https://cdn.jsdelivr.net https://unpkg.com https://cdnjs.cloudflare.com 'unsafe-inline'; connect-src 'self' https://bkvsceiezbyexzqpvblj.supabase.co; img-src 'self' data: https://ui-avatars.com https://bkvsceiezbyexzqpvblj.supabase.co; style-src 'self' 'unsafe-inline';">
     <script>
-        const ADMIN_CACHE_VERSION = 'v6.0';
+        // 强制清除缓存
+        const ADMIN_CACHE_VERSION = 'v7.0';
         if (localStorage.getItem('admin_cache_version') !== ADMIN_CACHE_VERSION) {
             localStorage.removeItem('admin_token');
             localStorage.setItem('admin_cache_version', ADMIN_CACHE_VERSION);
         }
-    </script>
-    <script>
+
+        // =============================================================
+        // 多 CDN 加载 Supabase 库（带超时重试）
+        // =============================================================
         (function loadSupabase() {
-            const script = document.createElement('script');
-            script.src = 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2';
-            script.onload = function() {
-                if (typeof supabase !== 'undefined' && typeof startAdmin === 'function') {
-                    startAdmin(supabase);
-                } else {
-                    console.error('加载失败');
+            // 如果已经加载完成，直接启动
+            if (window._supabaseLoaded) {
+                console.log('Supabase 已加载，直接启动');
+                if (typeof startAdmin === 'function') startAdmin(window.supabase);
+                return;
+            }
+
+            const cdnList = [
+                'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2',
+                'https://unpkg.com/@supabase/supabase-js@2',
+                'https://cdnjs.cloudflare.com/ajax/libs/supabase-js/2.39.0/umd/supabase.min.js'
+            ];
+            let index = 0;
+            let loading = false;
+
+            function tryLoad() {
+                if (index >= cdnList.length) {
+                    document.body.innerHTML = `<div style="text-align:center;padding:50px;color:#ef4444;"><h1>❌ 加载失败</h1><p>无法加载 Supabase 库，请检查网络或刷新重试。</p><button onclick="location.reload()" style="background:#6d5bff;color:#fff;border:none;padding:10px 24px;border-radius:30px;cursor:pointer;margin-top:16px;">刷新重试</button></div>`;
+                    return;
                 }
-            };
-            script.onerror = function() {
-                document.body.innerHTML = `<div style="text-align:center;padding:50px;color:#ef4444;"><h1>❌ 库加载失败</h1><p>请刷新重试</p></div>`;
-            };
-            document.head.appendChild(script);
+                const script = document.createElement('script');
+                script.src = cdnList[index];
+                script.onload = function() {
+                    console.log('✅ Supabase 库加载成功：', cdnList[index]);
+                    window._supabaseLoaded = true;
+                    const lib = window.supabase || window.supabaseJs;
+                    if (!lib) {
+                        console.error('❌ 无法找到 Supabase 库对象');
+                        return;
+                    }
+                    // 延迟一下等待 DOM 就绪
+                    if (document.readyState === 'complete') {
+                        if (typeof startAdmin === 'function') startAdmin(lib);
+                    } else {
+                        window.addEventListener('load', function() {
+                            if (typeof startAdmin === 'function') startAdmin(lib);
+                        });
+                    }
+                };
+                script.onerror = function() {
+                    console.warn('⚠️ 加载失败，尝试下一个 CDN：', cdnList[index]);
+                    index++;
+                    tryLoad();
+                };
+                document.head.appendChild(script);
+            }
+            tryLoad();
         })();
     </script>
     <style>
+        /* ===== 样式（与之前相同） ===== */
         *{margin:0;padding:0;box-sizing:border-box;}
         body{background:#0b0e1a;color:#e8edf5;font-family:'Segoe UI',sans-serif;padding:12px;line-height:1.6;}
         .container{max-width:1200px;margin:0 auto;}
@@ -191,9 +229,10 @@
 
 <script>
     // =============================================================
-    // 后台主程序（使用 service_role 密钥，已内置）
+    // 后台主程序（使用 service_role 密钥，已内置，防重复初始化）
     // =============================================================
     function startAdmin(supabase) {
+        // 防止重复初始化
         if (window._adminStarted) {
             console.log('后台已启动，跳过重复初始化');
             return;
@@ -205,9 +244,15 @@
         // ===== 已内置 service_role 密钥 =====
         const SUPABASE_SERVICE_ROLE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJrdnNjZWllemJ5ZXh6cXB2YmxqIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc4MzcwOTUzMiwiZXhwIjoyMDk5Mjg1NTMyfQ.0IAmxMpuWyw0Gy_vlUcOFz7bGWheEvULM_nXM6hCXE8';
 
-        // 创建两个客户端
-        const adminClient = supabase.createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
-        const anonClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+        // 创建两个客户端，但只创建一次（防止重复）
+        if (!window._adminClients) {
+            window._adminClients = {
+                admin: supabase.createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY),
+                anon: supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY)
+            };
+        }
+        const adminClient = window._adminClients.admin;
+        const anonClient = window._adminClients.anon;
 
         let currentUser = null;
         let accessToken = null;
@@ -303,12 +348,10 @@
             if (error) throw new Error(error.message);
         }
         async function deleteUser(userId) {
-            // 删除关联数据
             await adminClient.from('comments').delete().eq('user_id', userId);
             await adminClient.from('posts').delete().eq('author_id', userId);
             const { error: profileError } = await adminClient.from('profiles').delete().eq('id', userId);
             if (profileError) throw new Error(profileError.message);
-            // 删除 auth.user（使用 Admin API）
             try {
                 const resp = await fetch(SUPABASE_URL + '/auth/v1/admin/users/' + userId, {
                     method: 'DELETE',
@@ -849,17 +892,10 @@
         init();
     }
 
-    // 启动
+    // 如果 Supabase 库已加载但 startAdmin 还未被调用（兜底）
     window.addEventListener('load', function() {
-        if (typeof supabase !== 'undefined') {
+        if (typeof supabase !== 'undefined' && typeof startAdmin === 'function' && !window._adminStarted) {
             startAdmin(supabase);
-        } else {
-            const check = setInterval(() => {
-                if (typeof supabase !== 'undefined') {
-                    clearInterval(check);
-                    startAdmin(supabase);
-                }
-            }, 200);
         }
     });
 </script>
