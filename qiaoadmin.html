@@ -4,9 +4,17 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
     <title>管理后台 - 窍某论坛</title>
+    <!-- 强制清除缓存 -->
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
     <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' https://cdn.jsdelivr.net https://unpkg.com 'unsafe-inline'; connect-src 'self' https://bkvsceiezbyexzqpvblj.supabase.co; img-src 'self' data: https://ui-avatars.com https://bkvsceiezbyexzqpvblj.supabase.co; style-src 'self' 'unsafe-inline';">
+    <script>
+        // 清除旧的缓存版本
+        localStorage.removeItem('admin_cache_version');
+    </script>
     <style>
-        /* 样式与之前相同，此处省略以节省篇幅，但实际代码需完整 */
+        /* 样式（与之前相同，为节省篇幅省略，但实际文件需完整） */
         *{margin:0;padding:0;box-sizing:border-box;}
         body{background:#0b0e1a;color:#e8edf5;font-family:'Segoe UI',sans-serif;padding:12px;line-height:1.6;}
         .container{max-width:1200px;margin:0 auto;}
@@ -166,28 +174,32 @@
 
 <div class="toast" id="toast"></div>
 
-<!-- ============================================================ -->
 <!-- 使用稳定的 script 标签加载 Supabase（非动态加载） -->
-<!-- ============================================================ -->
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
 <script>
-    // 全局变量，防止重复初始化
-    if (window._adminStarted) {
-        console.log('后台已启动，跳过重复初始化');
-    } else {
+    // 立即执行
+    (function() {
+        console.log('🔧 后台脚本开始执行...');
+        if (window._adminStarted) {
+            console.log('⚠️ 后台已启动，跳过重复初始化');
+            return;
+        }
         window._adminStarted = true;
 
         // 定义 startAdmin 为全局函数（供后续调用）
         window.startAdmin = function(supabase) {
-            console.log('🔧 startAdmin 开始执行');
+            console.log('🔧 startAdmin 被调用，参数:', supabase ? '已提供' : '未提供');
+            if (!supabase) {
+                console.error('❌ supabase 对象未传递');
+                return;
+            }
 
             const SUPABASE_URL = 'https://bkvsceiezbyexzqpvblj.supabase.co';
             const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJrdnNjZWllemJ5ZXh6cXB2YmxqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODM3MDk1MzIsImV4cCI6MjA5OTI4NTUzMn0.1h4Yp8YaJdMMOQW8N2zqvJi6QrxHPncBFMK9LjdmZ6E';
-            // 已内置 service_role 密钥
             const SUPABASE_SERVICE_ROLE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJrdnNjZWllemJ5ZXh6cXB2YmxqIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc4MzcwOTUzMiwiZXhwIjoyMDk5Mjg1NTMyfQ.0IAmxMpuWyw0Gy_vlUcOFz7bGWheEvULM_nXM6hCXE8';
 
-            console.log('✅ service_role 密钥已加载');
+            console.log('✅ 密钥已加载 (service_role 长度:', SUPABASE_SERVICE_ROLE_KEY.length);
 
             // 创建两个客户端
             const adminClient = supabase.createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
@@ -349,13 +361,14 @@
 
             // ---- 权限检查 ----
             async function checkAuth() {
+                console.log('🔐 检查权限...');
                 const token = localStorage.getItem('sb_token');
                 const refresh = localStorage.getItem('sb_refresh_token');
                 const userStr = localStorage.getItem('sb_user');
                 if (token && userStr) {
                     accessToken = token;
                     refreshToken = refresh || null;
-                    try { currentUser = JSON.parse(userStr); } catch (e) {}
+                    try { currentUser = JSON.parse(userStr); } catch (e) { console.error('解析用户失败', e); }
                 }
                 if (!currentUser || !accessToken) {
                     document.getElementById('loginCheck').innerHTML = `
@@ -367,6 +380,7 @@
                     `;
                     document.getElementById('adminContent').style.display = 'none';
                     document.getElementById('userInfo').style.display = 'none';
+                    console.log('⛔ 未登录');
                     return false;
                 }
                 try {
@@ -378,6 +392,7 @@
                         document.getElementById('adminContent').style.display = 'block';
                         document.getElementById('userInfo').style.display = 'flex';
                         document.getElementById('adminName').textContent = escapeHtml(profile.username || currentUser.email);
+                        console.log('✅ 管理员权限验证通过');
                         return true;
                     } else {
                         document.getElementById('loginCheck').innerHTML = `
@@ -389,10 +404,12 @@
                         `;
                         document.getElementById('adminContent').style.display = 'none';
                         document.getElementById('userInfo').style.display = 'none';
+                        console.warn('⛔ 用户不是管理员');
                         return false;
                     }
                 } catch (err) {
                     showToast('权限检查失败：' + err.message, true);
+                    console.error('权限检查异常', err);
                     return false;
                 }
             }
@@ -406,8 +423,10 @@
                     await loadTopics();
                     await loadUsers();
                     updateStats();
+                    console.log('✅ 数据加载完成');
                 } catch (err) {
                     showToast('加载数据失败：' + err.message, true);
+                    console.error('加载数据异常', err);
                 }
             }
 
@@ -842,6 +861,7 @@
         // ============================================================
         // 当 Supabase 库加载完成后，调用 startAdmin
         // ============================================================
+        console.log('📡 检测 Supabase 库加载状态...');
         if (typeof supabase !== 'undefined') {
             console.log('✅ Supabase 已加载，立即启动');
             window.startAdmin(supabase);
@@ -849,19 +869,21 @@
             // 如果尚未加载，等待加载事件
             document.addEventListener('DOMContentLoaded', function() {
                 if (typeof supabase !== 'undefined') {
+                    console.log('✅ DOM 加载后 Supabase 已就绪');
                     window.startAdmin(supabase);
                 } else {
                     // 等待 script 加载
                     const check = setInterval(() => {
                         if (typeof supabase !== 'undefined') {
                             clearInterval(check);
+                            console.log('✅ 轮询检测到 Supabase 已加载');
                             window.startAdmin(supabase);
                         }
                     }, 200);
                 }
             });
         }
-    } // end if _adminStarted
+    })();
 </script>
 </body>
 </html>
