@@ -4,12 +4,10 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
     <title>管理后台 - 窍某论坛</title>
-    <!-- CSP -->
-    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' https://cdn.jsdelivr.net https://unpkg.com 'unsafe-inline'; connect-src 'self' https://bkvsceiezbyexzqpvblj.supabase.co; img-src 'self' data: https://ui-avatars.com https://bkvsceiezbyexzqpvblj.supabase.co; style-src 'self' 'unsafe-inline'; frame-ancestors 'none';">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' https://cdn.jsdelivr.net https://unpkg.com 'unsafe-inline'; connect-src 'self' https://bkvsceiezbyexzqpvblj.supabase.co; img-src 'self' data: https://ui-avatars.com https://bkvsceiezbyexzqpvblj.supabase.co; style-src 'self' 'unsafe-inline';">
     
     <script>
-        // 缓存版本控制（只清除后台自己的缓存）
-        const ADMIN_CACHE_VERSION = 'v1.0';
+        const ADMIN_CACHE_VERSION = 'v3.0';
         if (localStorage.getItem('admin_cache_version') !== ADMIN_CACHE_VERSION) {
             localStorage.removeItem('admin_token');
             localStorage.setItem('admin_cache_version', ADMIN_CACHE_VERSION);
@@ -17,7 +15,6 @@
     </script>
 
     <script>
-        // 直接加载 Supabase（稳定）
         (function loadSupabase() {
             const script = document.createElement('script');
             script.src = 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2';
@@ -36,7 +33,6 @@
     </script>
 
     <style>
-        /* ===== 后台样式 ===== */
         *{margin:0;padding:0;box-sizing:border-box;}
         body{background:#0b0e1a;color:#e8edf5;font-family:'Segoe UI',sans-serif;padding:12px;line-height:1.6;}
         .container{max-width:1200px;margin:0 auto;}
@@ -114,7 +110,6 @@
 
     <div id="loginCheck"></div>
     <div id="adminContent" style="display:none;">
-        <!-- 统计 -->
         <div class="stats" id="statsArea">
             <div class="stat-card"><div class="num" id="postCount">0</div><div class="label">📄 帖子</div></div>
             <div class="stat-card"><div class="num" id="commentCount">0</div><div class="label">💬 回复</div></div>
@@ -123,7 +118,6 @@
             <div class="stat-card"><div class="num" id="likeCount">0</div><div class="label">❤️ 总点赞</div></div>
         </div>
 
-        <!-- Tab -->
         <div class="tab-bar">
             <button class="tab-btn active" onclick="switchTab('posts')">📄 帖子管理</button>
             <button class="tab-btn" onclick="switchTab('comments')">💬 回复管理</button>
@@ -131,7 +125,6 @@
             <button class="tab-btn" onclick="switchTab('users')">👤 用户管理</button>
         </div>
 
-        <!-- 帖子管理 -->
         <div id="tabPosts" class="panel">
             <div class="filter-bar">
                 <button class="filter-btn active" data-cat="all" onclick="filterPosts('all')">📋 全部</button>
@@ -143,17 +136,14 @@
             <div id="postsList"><p class="empty-state">加载中...</p></div>
         </div>
 
-        <!-- 回复管理 -->
         <div id="tabComments" class="panel" style="display:none;">
             <div id="commentsList"><p class="empty-state">加载中...</p></div>
         </div>
 
-        <!-- 版块管理 -->
         <div id="tabTopics" class="panel" style="display:none;">
             <div id="topicsList"><p class="empty-state">加载中...</p></div>
         </div>
 
-        <!-- 用户管理 -->
         <div id="tabUsers" class="panel" style="display:none;">
             <div class="toolbar">
                 <button class="btn-sm" onclick="openAddUserModal()">➕ 添加用户</button>
@@ -204,12 +194,30 @@
 
 <script>
     // =============================================================
-    // 后台主程序
+    // 后台主程序（使用 service_role 绕过 RLS）
     // =============================================================
     function startAdmin(supabase) {
+        // 防止重复初始化
+        if (window._adminStarted) {
+            console.log('后台已启动，跳过重复初始化');
+            return;
+        }
+        window._adminStarted = true;
+
         const SUPABASE_URL = 'https://bkvsceiezbyexzqpvblj.supabase.co';
         const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJrdnNjZWllemJ5ZXh6cXB2YmxqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODM3MDk1MzIsImV4cCI6MjA5OTI4NTUzMn0.1h4Yp8YaJdMMOQW8N2zqvJi6QrxHPncBFMK9LjdmZ6E';
-        const sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+        // ===== 请将下面的 YOUR_SERVICE_ROLE_KEY 替换为您的 service_role 密钥 =====
+        const SUPABASE_SERVICE_ROLE_KEY = 'YOUR_SERVICE_ROLE_KEY'; // 务必替换！
+
+        if (SUPABASE_SERVICE_ROLE_KEY === 'YOUR_SERVICE_ROLE_KEY') {
+            alert('⚠️ 请先配置 service_role 密钥！\n在 admin.html 中替换 YOUR_SERVICE_ROLE_KEY');
+            document.body.innerHTML = `<div style="text-align:center;padding:50px;color:#ef4444;"><h1>⚠️ 配置错误</h1><p>请设置 service_role 密钥后再使用后台。</p></div>`;
+            return;
+        }
+
+        // 创建两个客户端
+        const adminClient = supabase.createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
+        const anonClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
         let currentUser = null;
         let accessToken = null;
@@ -222,19 +230,17 @@
         let editingUserId = null;
         let selectedUsers = new Set();
 
-        // ---- 工具函数 ----
+        // ---- 工具 ----
         function escapeHtml(text) {
             if (!text) return '';
             const d = document.createElement('div');
             d.textContent = text;
             return d.innerHTML;
         }
-
         function formatTime(d) {
             if (!d) return '';
             return new Date(d).toLocaleString('zh-CN');
         }
-
         function showToast(msg, isError) {
             const t = document.getElementById('toast');
             t.textContent = msg;
@@ -243,7 +249,7 @@
             t._hide = setTimeout(() => { t.className = 'toast'; }, 4000);
         }
 
-        // ---- 网络请求 ----
+        // ---- 认证（使用 anonClient） ----
         async function fetchWithAuth(url, options) {
             const headers = options.headers || {};
             if (accessToken) headers['Authorization'] = 'Bearer ' + accessToken;
@@ -286,52 +292,83 @@
             }
             return json || text;
         }
-
-        // ---- API 调用 ----
         async function getProfile(userId) {
             const resp = await authFetch(SUPABASE_URL + '/rest/v1/profiles?id=eq.' + userId, { method: 'GET' });
             if (resp.status === 404) return null;
             const data = await handleResponse(resp);
             return data && data.length > 0 ? data[0] : null;
         }
-        async function fetchPosts() {
-            const resp = await authFetch(SUPABASE_URL + '/rest/v1/posts?order=created_at.desc', { method: 'GET' });
-            return await handleResponse(resp);
-        }
+
+        // ---- 管理操作（使用 adminClient） ----
         async function deletePost(postId) {
-            const resp = await authFetch(SUPABASE_URL + '/rest/v1/posts?id=eq.' + postId, { method: 'DELETE' });
-            return await handleResponse(resp);
-        }
-        async function fetchComments() {
-            const resp = await authFetch(SUPABASE_URL + '/rest/v1/comments?order=created_at.desc', { method: 'GET' });
-            return await handleResponse(resp);
+            const { error } = await adminClient.from('posts').delete().eq('id', postId);
+            if (error) throw new Error(error.message);
         }
         async function deleteComment(commentId) {
-            const resp = await authFetch(SUPABASE_URL + '/rest/v1/comments?id=eq.' + commentId, { method: 'DELETE' });
-            return await handleResponse(resp);
-        }
-        async function fetchTopics() {
-            const resp = await authFetch(SUPABASE_URL + '/rest/v1/topics?order=name.asc', { method: 'GET' });
-            return await handleResponse(resp);
+            const { error } = await adminClient.from('comments').delete().eq('id', commentId);
+            if (error) throw new Error(error.message);
         }
         async function deleteTopic(topicId) {
-            const resp = await authFetch(SUPABASE_URL + '/rest/v1/topics?id=eq.' + topicId, { method: 'DELETE' });
-            return await handleResponse(resp);
-        }
-        async function fetchUsers() {
-            const resp = await authFetch(SUPABASE_URL + '/rest/v1/profiles?order=created_at.desc', { method: 'GET' });
-            return await handleResponse(resp);
-        }
-        async function updateUser(userId, updates) {
-            const resp = await authFetch(SUPABASE_URL + '/rest/v1/profiles?id=eq.' + userId, {
-                method: 'PATCH',
-                body: JSON.stringify(updates)
-            });
-            return await handleResponse(resp);
+            const { error } = await adminClient.from('topics').delete().eq('id', topicId);
+            if (error) throw new Error(error.message);
         }
         async function deleteUser(userId) {
-            const resp = await authFetch(SUPABASE_URL + '/rest/v1/profiles?id=eq.' + userId, { method: 'DELETE' });
-            return await handleResponse(resp);
+            // 1. 删除关联数据（posts, comments）
+            await adminClient.from('comments').delete().eq('user_id', userId);
+            await adminClient.from('posts').delete().eq('author_id', userId);
+            // 2. 删除 profile
+            const { error: profileError } = await adminClient.from('profiles').delete().eq('id', userId);
+            if (profileError) throw new Error(profileError.message);
+            // 3. 删除 auth.user（使用 Admin API）
+            const resp = await fetch(SUPABASE_URL + '/auth/v1/admin/users/' + userId, {
+                method: 'DELETE',
+                headers: {
+                    'apikey': SUPABASE_ANON_KEY,
+                    'Authorization': 'Bearer ' + SUPABASE_SERVICE_ROLE_KEY
+                }
+            });
+            if (!resp.ok) {
+                const errText = await resp.text();
+                throw new Error('删除 auth 用户失败：' + errText);
+            }
+        }
+        async function updateUser(userId, updates) {
+            const { error } = await adminClient.from('profiles').update(updates).eq('id', userId);
+            if (error) throw new Error(error.message);
+        }
+
+        // ---- 读取数据（使用 anonClient） ----
+        async function fetchPosts() {
+            const { data, error } = await anonClient.from('posts').select('*').order('created_at', { ascending: false });
+            if (error) throw new Error(error.message);
+            return data;
+        }
+        async function fetchComments() {
+            const { data, error } = await anonClient.from('comments').select('*').order('created_at', { ascending: false });
+            if (error) throw new Error(error.message);
+            return data;
+        }
+        async function fetchTopics() {
+            const { data, error } = await anonClient.from('topics').select('*').order('name', { ascending: true });
+            if (error) throw new Error(error.message);
+            return data;
+        }
+        async function fetchUsers() {
+            const { data, error } = await anonClient.from('profiles').select('*').order('created_at', { ascending: false });
+            if (error) throw new Error(error.message);
+            return data;
+        }
+
+        // ---- 批量操作 ----
+        async function batchUpdateUsers(userIds, updates) {
+            if (!userIds.length) return;
+            const promises = userIds.map(id => updateUser(id, updates));
+            await Promise.all(promises);
+        }
+        async function batchDeleteUsers(userIds) {
+            if (!userIds.length) return;
+            const promises = userIds.map(id => deleteUser(id).catch(e => console.warn('删除失败:', id, e)));
+            await Promise.all(promises);
         }
 
         // ---- 权限检查 ----
@@ -404,25 +441,21 @@
             totalLikes = postsCache.reduce((sum, p) => sum + (p.likes || 0), 0);
             renderPosts(currentCategory);
         }
-
         async function loadComments() {
             const data = await fetchComments();
             commentsCache = data || [];
             renderComments();
         }
-
         async function loadTopics() {
             const data = await fetchTopics();
             topicsCache = data || [];
             renderTopics();
         }
-
         async function loadUsers() {
             const data = await fetchUsers();
             usersCache = data || [];
             renderUsers();
         }
-
         function updateStats() {
             document.getElementById('postCount').textContent = postsCache.length;
             document.getElementById('commentCount').textContent = commentsCache.length;
@@ -448,7 +481,6 @@
             });
             renderPosts(category);
         }
-
         function renderPosts(category) {
             const list = document.getElementById('postsList');
             let filtered = postsCache;
@@ -483,6 +515,8 @@
         async function deletePostHandler(postId) {
             if (!confirm('确定删除这篇帖子（将同时删除所有回复）？')) return;
             try {
+                // 先删除关联评论
+                await adminClient.from('comments').delete().eq('post_id', postId);
                 await deletePost(postId);
                 showToast('删除成功！');
                 loadAllData();
@@ -609,7 +643,6 @@
             });
             updateSelectedCount();
         }
-
         function toggleAllCheckbox(checked) {
             document.querySelectorAll('.user-checkbox').forEach(cb => {
                 cb.checked = checked;
@@ -619,7 +652,6 @@
             });
             updateSelectedCount();
         }
-
         function updateSelectedCount() {
             selectedUsers.clear();
             document.querySelectorAll('.user-checkbox:checked').forEach(cb => {
@@ -650,8 +682,8 @@
             if (!confirm(`确定删除选中的 ${ids.length} 位用户吗？此操作不可恢复！`)) return;
             try {
                 for (const userId of ids) {
-                    await sb.from('comments').delete().eq('user_id', userId);
-                    await sb.from('posts').delete().eq('author_id', userId);
+                    await adminClient.from('comments').delete().eq('user_id', userId);
+                    await adminClient.from('posts').delete().eq('author_id', userId);
                     await deleteUser(userId);
                 }
                 showToast(`✅ 已删除 ${ids.length} 位用户`);
@@ -670,7 +702,6 @@
             document.getElementById('editUserModal').classList.add('active');
             document.getElementById('editUserMsg').innerHTML = '';
         }
-
         function closeEditUserModal() {
             document.getElementById('editUserModal').classList.remove('active');
             editingUserId = null;
@@ -706,8 +737,8 @@
                 if (!confirm('⚠️ 你要删除自己的账号吗？')) return;
             }
             try {
-                await sb.from('comments').delete().eq('user_id', userId);
-                await sb.from('posts').delete().eq('author_id', userId);
+                await adminClient.from('comments').delete().eq('user_id', userId);
+                await adminClient.from('posts').delete().eq('author_id', userId);
                 await deleteUser(userId);
                 showToast('✅ 用户及其所有内容已删除！');
                 selectedUsers.delete(userId);
@@ -727,7 +758,6 @@
             document.getElementById('addUserAdmin').checked = false;
             document.getElementById('addUserMsg').innerHTML = '';
         }
-
         function closeAddUserModal() {
             document.getElementById('addUserModal').classList.remove('active');
         }
@@ -751,48 +781,31 @@
             }
             msg.innerHTML = '<p style="color:rgba(255,255,255,0.5);">⏳ 创建中...</p>';
             try {
-                const authRes = await fetch(SUPABASE_URL + '/auth/v1/signup', {
-                    method: 'POST',
-                    headers: { 'apikey': SUPABASE_ANON_KEY, 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ email, password, data: { username } })
+                // 使用 anonClient 创建用户
+                const { data: authData, error: authError } = await anonClient.auth.signUp({
+                    email,
+                    password,
+                    options: { data: { username } }
                 });
-                const authData = await authRes.json();
-                if (!authRes.ok) {
-                    if (authRes.status === 429) {
-                        msg.innerHTML = '<p style="color:#ef4444;">❌ 注册限流，请稍后重试或配置 SMTP</p>';
-                    } else {
-                        msg.innerHTML = '<p style="color:#ef4444;">❌ 创建失败：' + (authData.error_description || authData.message || '未知错误') + '</p>';
-                    }
-                    return;
-                }
-                const profileRes = await fetch(SUPABASE_URL + '/rest/v1/profiles', {
-                    method: 'POST',
-                    headers: {
-                        'apikey': SUPABASE_ANON_KEY,
-                        'Authorization': 'Bearer ' + accessToken,
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({
-                        id: authData.user.id,
-                        username: username,
-                        email: email,
-                        is_admin: makeAdmin,
-                        points: 0,
-                        level: 1
-                    })
+                if (authError) throw authError;
+                if (!authData.user) throw new Error('创建用户失败');
+                // 使用 adminClient 插入 profile
+                const { error: profileError } = await adminClient.from('profiles').insert({
+                    id: authData.user.id,
+                    username: username,
+                    email: email,
+                    is_admin: makeAdmin,
+                    points: 0,
+                    level: 1
                 });
-                if (!profileRes.ok) {
-                    const profileErr = await profileRes.text();
-                    console.warn('创建 profiles 失败:', profileErr);
-                    msg.innerHTML = '<p style="color:#ef4444;">⚠️ 用户已创建，但 profiles 同步失败</p>';
-                    return;
-                }
+                if (profileError) throw profileError;
                 msg.innerHTML = '<p style="color:#6ee7b7;">✅ 用户创建成功！</p>';
                 setTimeout(() => {
                     closeAddUserModal();
                     loadAllData();
                 }, 1500);
             } catch (err) {
+                console.error(err);
                 msg.innerHTML = '<p style="color:#ef4444;">❌ 添加失败：' + err.message + '</p>';
             }
         }
@@ -848,12 +861,11 @@
         init();
     }
 
-    // 加载完成后启动
+    // 启动
     window.addEventListener('load', function() {
         if (typeof supabase !== 'undefined') {
             startAdmin(supabase);
         } else {
-            // 等待库加载
             const check = setInterval(() => {
                 if (typeof supabase !== 'undefined') {
                     clearInterval(check);
