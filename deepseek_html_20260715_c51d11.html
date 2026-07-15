@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>调试后台 - 删除测试</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <style>
+        body { background: #0b0e1a; color: #e8edf5; font-family: monospace; padding: 20px; }
+        .box { background: #1a1a2e; padding: 20px; border-radius: 8px; margin-bottom: 16px; }
+        button { background: #6d5bff; color: #fff; border: none; padding: 10px 24px; border-radius: 30px; cursor: pointer; margin: 8px 0; }
+        .log { color: #a5b4fc; white-space: pre-wrap; }
+        .error { color: #ef4444; }
+        .success { color: #6ee7b7; }
+        hr { border-color: #333; }
+    </style>
+</head>
+<body>
+    <div class="box">
+        <h2>🔧 调试后台 - 删除测试</h2>
+        <div id="status">⏳ 初始化...</div>
+        <hr>
+        <div id="userInfo">未登录</div>
+        <button id="deleteBtn">🗑️ 删除帖子 (输入ID)</button>
+        <div id="log" class="log"></div>
+    </div>
+
+    <script>
+        // ===== 配置 =====
+        const SUPABASE_URL = 'https://bkvsceiezbyexzqpvblj.supabase.co';
+        const ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJrdnNjZWllemJ5ZXh6cXB2YmxqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODM3MDk1MzIsImV4cCI6MjA5OTI4NTUzMn0.1h4Yp8YaJdMMOQW8N2zqvJi6QrxHPncBFMK9LjdmZ6E';
+        // service_role 密钥（用于删除操作，绕过 RLS）
+        const SERVICE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJrdnNjZWllemJ5ZXh6cXB2YmxqIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc4MzcwOTUzMiwiZXhwIjoyMDk5Mjg1NTMyfQ.0IAmxMpuWyw0Gy_vlUcOFz7bGWheEvULM_nXM6hCXE8';
+
+        // 创建两个客户端
+        const anonClient = supabase.createClient(SUPABASE_URL, ANON_KEY);
+        const adminClient = supabase.createClient(SUPABASE_URL, SERVICE_KEY);
+
+        const statusDiv = document.getElementById('status');
+        const logDiv = document.getElementById('log');
+        const userInfoDiv = document.getElementById('userInfo');
+
+        function log(msg, type = '') {
+            const p = document.createElement('div');
+            p.textContent = msg;
+            if (type) p.className = type;
+            logDiv.appendChild(p);
+            console.log(msg);
+        }
+
+        // 检查登录状态
+        async function checkAuth() {
+            try {
+                const { data: { session }, error } = await anonClient.auth.getSession();
+                if (error || !session) {
+                    statusDiv.textContent = '⚠️ 未登录';
+                    userInfoDiv.innerHTML = '🔐 未登录，请先登录';
+                    return null;
+                }
+                const user = session.user;
+                userInfoDiv.innerHTML = `✅ 已登录: ${user.email} (ID: ${user.id})`;
+                statusDiv.textContent = '✅ 已登录';
+                return user;
+            } catch (err) {
+                statusDiv.textContent = '❌ 认证错误: ' + err.message;
+                return null;
+            }
+        }
+
+        // 执行删除测试
+        async function testDelete() {
+            const postId = prompt('请输入要删除的帖子 ID');
+            if (!postId) return;
+            log(`⏳ 尝试删除帖子: ${postId}`);
+
+            // 先尝试用 adminClient 删除
+            try {
+                log('📌 使用 adminClient (service_role) 删除...');
+                const { error } = await adminClient.from('posts').delete().eq('id', postId);
+                if (error) {
+                    log(`❌ adminClient 删除失败: ${error.message}`, 'error');
+                    // 再尝试 anonClient
+                    log('📌 尝试用 anonClient (普通) 删除...');
+                    const { error: anonError } = await anonClient.from('posts').delete().eq('id', postId);
+                    if (anonError) {
+                        log(`❌ anonClient 删除也失败: ${anonError.message}`, 'error');
+                        log('💡 可能原因: 帖子不存在或权限不足', 'error');
+                    } else {
+                        log('✅ anonClient 删除成功！', 'success');
+                    }
+                } else {
+                    log('✅ adminClient 删除成功！', 'success');
+                }
+            } catch (err) {
+                log(`💥 异常: ${err.message}`, 'error');
+            }
+        }
+
+        // 初始化
+        (async function init() {
+            log('🚀 调试后台启动...');
+            const user = await checkAuth();
+            if (!user) {
+                log('🔑 请先登录论坛，然后刷新此页面', '');
+                log('💡 登录后，localStorage 会保存 token', '');
+            } else {
+                log('✅ 已登录，可以执行删除测试', 'success');
+            }
+            log('📋 点击下方按钮，输入帖子ID进行删除测试', '');
+
+            document.getElementById('deleteBtn').addEventListener('click', testDelete);
+        })();
+    </script>
+</body>
+</html>
