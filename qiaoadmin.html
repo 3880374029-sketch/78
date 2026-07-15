@@ -6,7 +6,7 @@
     <title>管理后台 - 窍某论坛</title>
     <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' https://cdn.jsdelivr.net https://unpkg.com 'unsafe-inline'; connect-src 'self' https://bkvsceiezbyexzqpvblj.supabase.co; img-src 'self' data: https://ui-avatars.com https://bkvsceiezbyexzqpvblj.supabase.co; style-src 'self' 'unsafe-inline';">
     <script>
-        const ADMIN_CACHE_VERSION = 'v4.0';
+        const ADMIN_CACHE_VERSION = 'v5.0';
         if (localStorage.getItem('admin_cache_version') !== ADMIN_CACHE_VERSION) {
             localStorage.removeItem('admin_token');
             localStorage.setItem('admin_cache_version', ADMIN_CACHE_VERSION);
@@ -191,7 +191,7 @@
 
 <script>
     // =============================================================
-    // 后台主程序（使用普通 anon 密钥，依赖 RLS 策略）
+    // 后台主程序（依赖关闭的 RLS，无需额外配置）
     // =============================================================
     function startAdmin(supabase) {
         if (window._adminStarted) {
@@ -234,7 +234,7 @@
             t._hide = setTimeout(() => { t.className = 'toast'; }, 4000);
         }
 
-        // ---- 认证（使用 anonClient） ----
+        // ---- 认证 ----
         async function fetchWithAuth(url, options) {
             const headers = options.headers || {};
             if (accessToken) headers['Authorization'] = 'Bearer ' + accessToken;
@@ -284,8 +284,7 @@
             return data && data.length > 0 ? data[0] : null;
         }
 
-        // ---- API 调用（全部使用 sb，即 anonClient） ----
-        // 由于 RLS 策略已赋予管理员权限，所有操作将正常进行
+        // ---- API 调用（全部使用 sb） ----
         async function deletePost(postId) {
             const { error } = await sb.from('posts').delete().eq('id', postId);
             if (error) throw new Error(error.message);
@@ -299,10 +298,8 @@
             if (error) throw new Error(error.message);
         }
         async function deleteUser(userId) {
-            // 删除关联数据
             await sb.from('comments').delete().eq('user_id', userId);
             await sb.from('posts').delete().eq('author_id', userId);
-            // 删除 profile
             const { error: profileError } = await sb.from('profiles').delete().eq('id', userId);
             if (profileError) throw new Error(profileError.message);
         }
