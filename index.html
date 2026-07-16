@@ -6,7 +6,7 @@
     <title>窍某论坛</title>
     <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' https://cdn.jsdelivr.net https://unpkg.com 'unsafe-inline'; connect-src 'self' https://bkvsceiezbyexzqpvblj.supabase.co; img-src 'self' data: https://ui-avatars.com https://bkvsceiezbyexzqpvblj.supabase.co; style-src 'self' 'unsafe-inline';">
     <script>
-        const CACHE_VERSION = 'v5.0';
+        const CACHE_VERSION = 'v5.1'; // 版本号递增，强制清除缓存
         if (localStorage.getItem('forum_cache_version') !== CACHE_VERSION) {
             localStorage.clear();
             localStorage.setItem('forum_cache_version', CACHE_VERSION);
@@ -52,7 +52,7 @@
         })();
     </script>
     <style>
-        /* ===== 完整样式（与原始代码完全一致） ===== */
+        /* ===== 完整样式（与原始代码一致） ===== */
         * {
             margin: 0;
             padding: 0;
@@ -967,7 +967,7 @@
 
     <script>
         // =============================================================
-        // ================ 全局状态 & 工具函数 ========================
+        // ================ 全局状态 & 安全工具 ========================
         // =============================================================
         let currentUser = null,
             userProfile = null,
@@ -986,13 +986,12 @@
         let sb, SUPABASE_URL, SUPABASE_ANON_KEY;
         let isDarkTheme = true;
 
-        // ---- 安全工具函数 ----
+        // 安全转义函数
         function escapeHtml(t) { if (!t) return ''; const d = document.createElement('div');
             d.textContent = t; return d.innerHTML; }
 
         function nl2br(t) { if (!t) return ''; return escapeHtml(t).replace(/\n/g, '<br>'); }
 
-        // 转义 JavaScript 字符串中的特殊字符，用于安全地嵌入 onclick 等属性
         function escapeJsString(str) {
             if (!str) return '';
             return str.replace(/\\/g, '\\\\')
@@ -1086,7 +1085,6 @@
                     'Content-Type': 'application/json' } }); return await handleResponse(resp); }
 
         async function fetchComments(postId) {
-            // 使用 encodeURIComponent 防止注入
             const safeId = encodeURIComponent(postId);
             const resp = await fetch(SUPABASE_URL + `/rest/v1/comments?post_id=eq.${safeId}&order=created_at.asc`, { headers: {
                     'apikey': SUPABASE_ANON_KEY, 'Content-Type': 'application/json' } });
@@ -1194,7 +1192,7 @@
         // ================ 核心业务函数 ================================
         // =============================================================
 
-        // ---- 加载帖子 ----
+        // ---- 加载帖子（增强错误显示） ----
         async function loadPosts(category, search) {
             try {
                 let posts = await fetchPosts();
@@ -1212,11 +1210,22 @@
                 updateStats(posts);
                 loadHotPosts(posts);
                 loadTags(posts);
-            } catch (e) { console.error('加载帖子失败', e);
-                showToast('加载帖子失败: ' + e.message, true); }
+            } catch (e) {
+                console.error('加载帖子失败', e);
+                showToast('加载帖子失败: ' + e.message, true);
+                const container = document.getElementById('postList');
+                container.innerHTML = `
+                    <div class="empty-state" style="border-color:#ef4444;">
+                        <h3>⚠️ 加载失败</h3>
+                        <p style="color:#ef4444;">${escapeHtml(e.message)}</p>
+                        <p style="color:rgba(255,255,255,0.4);font-size:.9rem;margin-top:8px;">请检查控制台（F12）获取更多信息，或联系管理员。</p>
+                        <button class="btn" onclick="location.reload()">🔄 刷新重试</button>
+                    </div>
+                `;
+            }
         }
 
-        // ---- 渲染帖子列表（修复 XSS） ----
+        // ---- 渲染帖子列表（安全） ----
         function renderPosts(posts) {
             const container = document.getElementById('postList');
             if (!posts || posts.length === 0) {
@@ -1236,7 +1245,6 @@
                 const catName = catMap[post.category] || post.category || '综合';
                 const badgeClass = post.category || 'tech';
                 const isPinned = post.pinned ? '<span class="pin-icon">📌</span>' : '';
-                // ---- 安全渲染标签（onclick 内使用 escapeJsString） ----
                 let tagsHtml = '';
                 if (post.tags) {
                     const tags = post.tags.split(',').filter(t => t.trim());
@@ -1453,7 +1461,7 @@
             }
         }
 
-        // ---- 显示帖子详情（修复 XSS） ----
+        // ---- 显示帖子详情 ----
         async function showPost(postId) {
             try {
                 const posts = await fetchPosts();
@@ -1469,13 +1477,12 @@
                 showToast('加载失败', true); }
         }
 
-        // ---- 渲染帖子详情（修复 XSS） ----
+        // ---- 渲染帖子详情（安全） ----
         function renderPostDetail(post, comments) {
             const container = document.getElementById('postDetail');
             const avatar = getAvatarUrl({ username: post.author_name || '匿名', avatar_url: post.author_avatar });
             const catMap = { tech: '技术', life: '生活', career: '职业', topic: '话题' };
             const catName = catMap[post.category] || post.category || '综合';
-            // 安全渲染标签
             let tagsHtml = '';
             if (post.tags) {
                 const tags = post.tags.split(',').filter(t => t.trim());
@@ -2012,7 +2019,7 @@
                 showToast('保存失败: ' + e.message, true); }
         }
 
-        // ---- 通知 ----
+        // ---- 通知（修复 400 错误：优雅降级） ----
         async function openNotificationPanel() {
             if (!currentUser) { showToast('请先登录', true); return; }
             document.getElementById('notificationModal').classList.add('active');
@@ -2030,7 +2037,11 @@
             try {
                 const { data, error } = await sb.from('notifications').select('*').eq('user_id', currentUser.id)
                     .order('created_at', { ascending: false }).limit(20);
-                if (error) throw error;
+                if (error) {
+                    console.warn('通知表查询失败，可能未创建', error);
+                    container.innerHTML = '<p style="color:rgba(255,255,255,0.3);">通知功能暂不可用（表不存在）</p>';
+                    return;
+                }
                 if (!data || data.length === 0) {
                     container.innerHTML = '<p style="color:rgba(255,255,255,0.3);">暂无通知</p>';
                     return;
@@ -2047,11 +2058,15 @@
               `;
                 });
                 container.innerHTML = html;
-                await sb.from('notifications').update({ read: true }).eq('user_id', currentUser.id).eq('read', false);
+                // 标记已读（如果表存在）
+                await sb.from('notifications').update({ read: true }).eq('user_id', currentUser.id).eq('read', false)
+                    .catch(() => {});
                 unreadCount = 0;
                 updateUnreadBadge();
-            } catch (e) { console.error('加载通知失败', e);
-                container.innerHTML = '<p style="color:rgba(255,255,255,0.3);">加载失败</p>'; }
+            } catch (e) {
+                console.warn('加载通知失败', e);
+                container.innerHTML = '<p style="color:rgba(255,255,255,0.3);">加载失败</p>';
+            }
         }
 
         async function markNotificationRead(id) {
@@ -2061,35 +2076,7 @@
             } catch (e) { console.warn('标记已读失败', e); }
         }
 
-        // ---- 更新UI ----
-        function updateUI() {
-            const loginBtn = document.getElementById('loginBtn');
-            const userAvatar = document.getElementById('userAvatar');
-            const userName = document.getElementById('userName');
-            const logoutBtn = document.getElementById('logoutBtn');
-            const profileLink = document.getElementById('profileLink');
-            if (currentUser && userProfile) {
-                loginBtn.classList.add('hidden');
-                userAvatar.classList.remove('hidden');
-                userName.classList.remove('hidden');
-                logoutBtn.classList.remove('hidden');
-                profileLink.classList.remove('hidden');
-                userAvatar.src = userProfile.avatar_url || getAvatarUrl({ username: userProfile.username, avatar_url: null });
-                userName.textContent = userProfile.username || '用户';
-                document.getElementById('myChocolates').textContent = userProfile.chocolates || 0;
-                document.getElementById('myTotalPoints').textContent = userProfile.points || 0;
-            } else {
-                loginBtn.classList.remove('hidden');
-                userAvatar.classList.add('hidden');
-                userName.classList.add('hidden');
-                logoutBtn.classList.add('hidden');
-                profileLink.classList.add('hidden');
-                document.getElementById('myChocolates').textContent = '0';
-                document.getElementById('myTotalPoints').textContent = '0';
-            }
-            updateUnreadBadge();
-        }
-
+        // ---- 更新通知徽章（修复 400 错误） ----
         async function updateUnreadBadge() {
             if (!currentUser) {
                 document.getElementById('notifCount').classList.add('hidden');
@@ -2098,7 +2085,12 @@
             try {
                 const { data, error } = await sb.from('notifications').select('id', { count: 'exact', head: true })
                     .eq('user_id', currentUser.id).eq('read', false);
-                if (error) throw error;
+                if (error) {
+                    // 表不存在或字段错误，静默隐藏角标
+                    console.warn('通知查询失败，可能表不存在或字段错误', error);
+                    document.getElementById('notifCount').classList.add('hidden');
+                    return;
+                }
                 unreadCount = data?.count || 0;
                 const badge = document.getElementById('notifCount');
                 if (unreadCount > 0) {
@@ -2107,7 +2099,10 @@
                 } else {
                     badge.classList.add('hidden');
                 }
-            } catch (e) { console.warn('更新通知徽章失败', e); }
+            } catch (e) {
+                console.warn('更新通知徽章失败', e);
+                document.getElementById('notifCount').classList.add('hidden');
+            }
         }
 
         // ---- 话题 ----
@@ -2148,7 +2143,8 @@
                         const { data: follows } = await sb.from('follows').select('following_id').eq('follower_id',
                             currentUser.id);
                         if (follows) follows.forEach(f => followingMap.set(f.following_id, true));
-                        updateUnreadBadge();
+                        // 通知查询失败不会影响主流程
+                        await updateUnreadBadge().catch(() => {});
                         await getTasks(currentUser.id);
                     } catch (e) { console.warn('自动登录恢复失败', e);
                         localStorage.removeItem('sb_token');
