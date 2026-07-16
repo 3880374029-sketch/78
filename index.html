@@ -6,7 +6,7 @@
     <title>窍某论坛</title>
     <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' https://cdn.jsdelivr.net https://unpkg.com 'unsafe-inline'; connect-src 'self' https://bkvsceiezbyexzqpvblj.supabase.co; img-src 'self' data: https://ui-avatars.com https://bkvsceiezbyexzqpvblj.supabase.co; style-src 'self' 'unsafe-inline';">
     <script>
-        const CACHE_VERSION = 'v5.1'; // 版本号递增，强制清除缓存
+        const CACHE_VERSION = 'v5.2';
         if (localStorage.getItem('forum_cache_version') !== CACHE_VERSION) {
             localStorage.clear();
             localStorage.setItem('forum_cache_version', CACHE_VERSION);
@@ -52,7 +52,7 @@
         })();
     </script>
     <style>
-        /* ===== 完整样式（与原始代码一致） ===== */
+        /* 完整样式（与之前一致） */
         * {
             margin: 0;
             padding: 0;
@@ -2019,7 +2019,9 @@
                 showToast('保存失败: ' + e.message, true); }
         }
 
-        // ---- 通知（修复 400 错误：优雅降级） ----
+        // =============================================================
+        // ================ 通知（修复 400 错误，容错处理） ============
+        // =============================================================
         async function openNotificationPanel() {
             if (!currentUser) { showToast('请先登录', true); return; }
             document.getElementById('notificationModal').classList.add('active');
@@ -2058,7 +2060,6 @@
               `;
                 });
                 container.innerHTML = html;
-                // 标记已读（如果表存在）
                 await sb.from('notifications').update({ read: true }).eq('user_id', currentUser.id).eq('read', false)
                     .catch(() => {});
                 unreadCount = 0;
@@ -2086,7 +2087,6 @@
                 const { data, error } = await sb.from('notifications').select('id', { count: 'exact', head: true })
                     .eq('user_id', currentUser.id).eq('read', false);
                 if (error) {
-                    // 表不存在或字段错误，静默隐藏角标
                     console.warn('通知查询失败，可能表不存在或字段错误', error);
                     document.getElementById('notifCount').classList.add('hidden');
                     return;
@@ -2127,7 +2127,40 @@
                 showToast('创建失败: ' + e.message, true); }
         }
 
-        // ---- 初始化 ----
+        // =============================================================
+        // ================ UI 更新（提前定义，确保 init 可调用） ======
+        // =============================================================
+        function updateUI() {
+            const loginBtn = document.getElementById('loginBtn');
+            const userAvatar = document.getElementById('userAvatar');
+            const userName = document.getElementById('userName');
+            const logoutBtn = document.getElementById('logoutBtn');
+            const profileLink = document.getElementById('profileLink');
+            if (currentUser && userProfile) {
+                loginBtn.classList.add('hidden');
+                userAvatar.classList.remove('hidden');
+                userName.classList.remove('hidden');
+                logoutBtn.classList.remove('hidden');
+                profileLink.classList.remove('hidden');
+                userAvatar.src = userProfile.avatar_url || getAvatarUrl({ username: userProfile.username, avatar_url: null });
+                userName.textContent = userProfile.username || '用户';
+                document.getElementById('myChocolates').textContent = userProfile.chocolates || 0;
+                document.getElementById('myTotalPoints').textContent = userProfile.points || 0;
+            } else {
+                loginBtn.classList.remove('hidden');
+                userAvatar.classList.add('hidden');
+                userName.classList.add('hidden');
+                logoutBtn.classList.add('hidden');
+                profileLink.classList.add('hidden');
+                document.getElementById('myChocolates').textContent = '0';
+                document.getElementById('myTotalPoints').textContent = '0';
+            }
+            updateUnreadBadge();
+        }
+
+        // =============================================================
+        // ================ 初始化 ======================================
+        // =============================================================
         async function init() {
             await handleOAuthCallback();
             const token = localStorage.getItem('sb_token');
@@ -2143,7 +2176,6 @@
                         const { data: follows } = await sb.from('follows').select('following_id').eq('follower_id',
                             currentUser.id);
                         if (follows) follows.forEach(f => followingMap.set(f.following_id, true));
-                        // 通知查询失败不会影响主流程
                         await updateUnreadBadge().catch(() => {});
                         await getTasks(currentUser.id);
                     } catch (e) { console.warn('自动登录恢复失败', e);
@@ -2215,6 +2247,7 @@
             window.openTasks = openTasks;
             window.closeTasks = closeTasks;
             window.followUser = followUser;
+            window.updateUI = updateUI; // 显式暴露，确保全局可用
 
             init().catch(e => console.error('初始化失败', e));
         }
