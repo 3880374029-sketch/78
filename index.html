@@ -6,7 +6,7 @@
     <title>窍某论坛</title>
     <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' https://cdn.jsdelivr.net https://unpkg.com 'unsafe-inline'; connect-src 'self' https://bkvsceiezbyexzqpvblj.supabase.co; img-src 'self' data: https://ui-avatars.com https://bkvsceiezbyexzqpvblj.supabase.co; style-src 'self' 'unsafe-inline';">
     <script>
-        const CACHE_VERSION = 'v5.5';
+        const CACHE_VERSION = 'v5.6';
         if (localStorage.getItem('forum_cache_version') !== CACHE_VERSION) {
             localStorage.clear();
             localStorage.setItem('forum_cache_version', CACHE_VERSION);
@@ -1007,7 +1007,6 @@
 
         function formatTime(d) { if (!d) return ''; return new Date(d).toLocaleString('zh-CN'); }
 
-        // 头像生成：显示昵称前两个字符
         function getAvatarUrl(user) {
             if (user && user.avatar_url) return user.avatar_url;
             const name = user?.username || user?.email || 'U';
@@ -1668,33 +1667,99 @@
                 showToast('操作失败', true); }
         }
 
-        // ---- 签到（每日一次，含连续签到） ----
+        // ---- 签到（强化版，含唯一约束冲突处理） ----
         async function doCheckin() {
-            if (!currentUser) { showToast('请先登录', true); return; }
+            if (!currentUser) {
+                showToast('请先登录', true);
+                return;
+            }
             try {
                 const today = new Date().toISOString().split('T')[0];
-                const { data, error } = await sb.from('checkins').select('*').eq('user_id', currentUser.id).eq(
-                    'checkin_date', today).maybeSingle();
-                if (data) { showToast('今天已签到', true); return; }
-                await sb.from('checkins').insert({ user_id: currentUser.id, checkin_date: today });
+
+                // 1. 查询今日是否已签到
+                const { data: existing, error: checkError } = await sb
+                    .from('checkins')
+                    .select('id')
+                    .eq('user_id', currentUser.id)
+                    .eq('checkin_date', today)
+                    .maybeSingle();
+
+                if (checkError) {
+                    console.error('查询签到记录失败', checkError);
+                    showToast('签到失败，请重试', true);
+                    return;
+                }
+
+                if (existing) {
+                    showToast('今天已签到，明天再来吧！', false);
+                    return;
+                }
+
+                // 2. 插入签到记录（利用唯一约束保证不重复）
+                const { error: insertError } = await sb
+                    .from('checkins')
+                    .insert({ user_id: currentUser.id, checkin_date: today });
+
+                if (insertError) {
+                    // 如果错误是唯一约束冲突（23505），说明并发导致重复，提示已签到
+                    if (insertError.code === '23505') {
+                        showToast('今天已签到（请勿重复操作）', false);
+                        return;
+                    }
+                    console.error('插入签到记录失败', insertError);
+                    showToast('签到失败，请重试', true);
+                    return;
+                }
+
+                // 3. 计算连续签到天数
                 let streak = (userProfile?.streak || 0) + 1;
                 const yesterday = new Date();
                 yesterday.setDate(yesterday.getDate() - 1);
                 const yStr = yesterday.toISOString().split('T')[0];
-                const { data: yData } = await sb.from('checkins').select('*').eq('user_id', currentUser.id).eq(
-                    'checkin_date', yStr).maybeSingle();
-                if (!yData) streak = 1;
+
+                const { data: yData } = await sb
+                    .from('checkins')
+                    .select('id')
+                    .eq('user_id', currentUser.id)
+                    .eq('checkin_date', yStr)
+                    .maybeSingle();
+
+                if (!yData) {
+                    streak = 1; // 昨天未签到，重置连续天数
+                }
+
+                // 4. 更新用户积分和连续天数
                 const bonus = getLevelInfo(userProfile?.level || 1).signBonus || 2;
-                const points = (userProfile?.points || 0) + bonus;
-                await sb.from('profiles').update({ points: points, streak: streak }).eq('id', currentUser.id);
-                if (userProfile) { userProfile.points = points;
-                    userProfile.streak = streak; }
+                const newPoints = (userProfile?.points || 0) + bonus;
+
+                const { error: updateError } = await sb
+                    .from('profiles')
+                    .update({ points: newPoints, streak: streak })
+                    .eq('id', currentUser.id);
+
+                if (updateError) {
+                    console.error('更新用户积分失败', updateError);
+                    showToast('签到记录已保存，但积分更新失败，请稍后查看', true);
+                    return;
+                }
+
+                // 5. 更新本地 userProfile
+                if (userProfile) {
+                    userProfile.points = newPoints;
+                    userProfile.streak = streak;
+                }
+
+                // 6. 更新任务进度（每日签到任务）
                 await updateTaskProgress(currentUser.id, 'daily_checkin', 1);
+
                 showToast(`✅ 签到成功！+${bonus} 积分，连续 ${streak} 天`, false);
                 updateUI();
                 loadPosts(currentCategory, currentSearch);
-            } catch (e) { console.error('签到失败', e);
-                showToast('签到失败: ' + e.message, true); }
+
+            } catch (e) {
+                console.error('签到异常', e);
+                showToast('签到异常: ' + e.message, true);
+            }
         }
 
         // ---- 积分换巧克力 ----
@@ -2308,6 +2373,28 @@
                 }
             }
         });
+
+        // =============================================================
+        // ================ 数据库初始化提示 ============================
+        // =============================================================
+        // 页面加载后检测 checkins 表是否有唯一约束，若缺失则弹出提示
+        setTimeout(async () => {
+            try {
+                // 尝试插入一条测试数据（会被自动回滚，仅用于检测约束）
+                const { error } = await sb.from('checkins').insert({ user_id: '00000000-0000-0000-0000-000000000000', checkin_date: '1970-01-01' });
+                if (error && error.code === '23505') {
+                    // 唯一约束已存在
+                    console.log('✅ checkins 表唯一约束已存在');
+                } else if (error && error.message.includes('duplicate key')) {
+                    console.log('✅ checkins 表唯一约束已存在');
+                } else {
+                    // 如果错误不是唯一约束，可能是其他错误（如外键），但更可能约束不存在
+                    console.warn('⚠️ 未检测到 checkins 表的唯一约束，请执行 SQL: ALTER TABLE checkins ADD CONSTRAINT unique_user_checkin UNIQUE (user_id, checkin_date);');
+                }
+            } catch (e) {
+                // 忽略错误，可能是表不存在等情况
+            }
+        }, 2000);
     </script>
 </body>
 </html>
