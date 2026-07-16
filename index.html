@@ -985,9 +985,9 @@
             lastPublishTime = 0;
         let sb, SUPABASE_URL, SUPABASE_ANON_KEY;
         let isDarkTheme = true;
-        let authorMap = {}; // 作者ID -> 用户名映射
+        let authorMap = {};
 
-        // ---- 安全转义函数（增强型，强制转为字符串） ----
+        // ---- 安全转义函数 ----
         function escapeHtml(t) { if (t == null) return ''; const d = document.createElement('div');
             d.textContent = String(t); return d.innerHTML; }
 
@@ -1007,7 +1007,7 @@
 
         function formatTime(d) { if (!d) return ''; return new Date(d).toLocaleString('zh-CN'); }
 
-        // 头像生成函数：显示昵称前两个字符，便于辨认
+        // 头像生成：显示昵称前两个字符
         function getAvatarUrl(user) {
             if (user && user.avatar_url) return user.avatar_url;
             const name = user?.username || user?.email || 'U';
@@ -1221,7 +1221,6 @@
         // ================ 核心业务函数 ================================
         // =============================================================
 
-        // ---- 工具：安全处理 tags（支持字符串或数组） ----
         function normalizeTags(tags) {
             if (!tags) return [];
             if (Array.isArray(tags)) return tags.filter(t => t && t.trim());
@@ -1229,7 +1228,7 @@
             return [];
         }
 
-        // ---- 加载帖子（增强错误显示 + 作者映射） ----
+        // ---- 加载帖子 ----
         async function loadPosts(category, search) {
             try {
                 let posts = await fetchPosts();
@@ -1263,7 +1262,7 @@
             }
         }
 
-        // ---- 渲染帖子列表（安全 + 作者映射 + 头像显示2字符） ----
+        // ---- 渲染帖子列表 ----
         function renderPosts(posts) {
             const container = document.getElementById('postList');
             if (!posts || posts.length === 0) {
@@ -1277,7 +1276,6 @@
             const sorted = [...pinned, ...normal];
             sorted.forEach((post, idx) => {
                 const displayName = authorMap[post.author_id] || post.author_name || '匿名';
-                // 头像使用映射后的显示名，显示前两个字符
                 const avatar = getAvatarUrl({ username: displayName, avatar_url: post.author_avatar });
                 const commentCount = commentCountMap[post.id] || 0;
                 const excerpt = post.content ? post.content.replace(/<[^>]+>/g, '').substring(0, 120) : '';
@@ -1285,7 +1283,6 @@
                 const catName = catMap[post.category] || post.category || '综合';
                 const badgeClass = post.category || 'tech';
                 const isPinned = post.pinned ? '<span class="pin-icon">📌</span>' : '';
-                // 安全处理标签
                 const tags = normalizeTags(post.tags);
                 let tagsHtml = '';
                 tags.forEach(tag => {
@@ -1518,14 +1515,13 @@
                 showToast('加载失败', true); }
         }
 
-        // ---- 渲染帖子详情（安全 + 作者映射 + 头像2字符） ----
+        // ---- 渲染帖子详情 ----
         function renderPostDetail(post, comments) {
             const container = document.getElementById('postDetail');
             const displayName = authorMap[post.author_id] || post.author_name || '用户';
             const avatar = getAvatarUrl({ username: displayName, avatar_url: post.author_avatar });
             const catMap = { tech: '技术', life: '生活', career: '职业', topic: '话题' };
             const catName = catMap[post.category] || post.category || '综合';
-            // 安全处理标签
             const tags = normalizeTags(post.tags);
             let tagsHtml = '';
             tags.forEach(tag => {
@@ -1672,7 +1668,7 @@
                 showToast('操作失败', true); }
         }
 
-        // ---- 签到 ----
+        // ---- 签到（每日一次，含连续签到） ----
         async function doCheckin() {
             if (!currentUser) { showToast('请先登录', true); return; }
             try {
