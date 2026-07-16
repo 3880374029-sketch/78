@@ -6,7 +6,7 @@
     <title>窍某论坛</title>
     <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' https://cdn.jsdelivr.net https://unpkg.com 'unsafe-inline'; connect-src 'self' https://bkvsceiezbyexzqpvblj.supabase.co; img-src 'self' data: https://ui-avatars.com https://bkvsceiezbyexzqpvblj.supabase.co; style-src 'self' 'unsafe-inline';">
     <script>
-        const CACHE_VERSION = 'v5.6';
+        const CACHE_VERSION = 'v6.1';
         if (localStorage.getItem('forum_cache_version') !== CACHE_VERSION) {
             localStorage.clear();
             localStorage.setItem('forum_cache_version', CACHE_VERSION);
@@ -20,7 +20,6 @@
                 'https://cdnjs.cloudflare.com/ajax/libs/supabase-js/2.39.0/umd/supabase.min.js'
             ];
             let index = 0;
-
             function tryLoad() {
                 if (index >= cdnList.length) {
                     document.body.innerHTML =
@@ -52,7 +51,7 @@
         })();
     </script>
     <style>
-        /* ===== 完整样式 ===== */
+        /* ===== 完整样式（与之前一致） ===== */
         * {
             margin: 0;
             padding: 0;
@@ -941,7 +940,7 @@
         </div>
         <footer>
             <div class="social-links"><a href="#">关于</a><a href="#">帮助</a><a href="#" onclick="showFeedback()">反馈</a><a href="#" onclick="showStatus()">📊 帖子状态</a></div>
-            <p class="footer-status">🔧 帖子重复问题已修复，如有疑问请联系管理员</p>
+            <p class="footer-status">🔧 所有功能已修复，点赞/推荐/点踩/观看量实时更新</p>
             <p style="color:rgba(255,255,255,0.2);font-size:.85rem;margin-top:4px;">© 2026 窍某论坛 · 用 ❤️ 构建</p>
         </footer>
     </div>
@@ -987,7 +986,7 @@
         let isDarkTheme = true;
         let authorMap = {};
 
-        // ---- 安全转义函数 ----
+        // ---- 安全函数 ----
         function escapeHtml(t) { if (t == null) return ''; const d = document.createElement('div');
             d.textContent = String(t); return d.innerHTML; }
 
@@ -1003,8 +1002,6 @@
                 .replace(/\r/g, '\\r');
         }
 
-        function formatDate(d) { if (!d) return ''; return new Date(d).toLocaleDateString('zh-CN'); }
-
         function formatTime(d) { if (!d) return ''; return new Date(d).toLocaleString('zh-CN'); }
 
         function getAvatarUrl(user) {
@@ -1013,138 +1010,180 @@
             return `https://ui-avatars.com/api/?name=${encodeURIComponent(name)}&background=6d5bff&color=fff&size=100&length=2`;
         }
 
-        function showToast(msg, isError) { const t = document.getElementById('toast');
+        function showToast(msg, isError) {
+            const t = document.getElementById('toast');
             t.textContent = msg;
             t.className = 'toast show' + (isError ? ' error' : '');
             clearTimeout(t._hide);
-            t._hide = setTimeout(() => { t.className = 'toast'; }, 4000); }
+            t._hide = setTimeout(() => { t.className = 'toast'; }, 4000);
+        }
 
-        function getLevelInfo(level) { const map = { 1: { name: 'Lv.1', signBonus: 2, canDownvote: false, canRecommend: false,
-                    canCreateChannel: false, isAdmin: false, isOwner: false }, 2: { name: 'Lv.2', signBonus: 4,
-                    canDownvote: false, canRecommend: false, canCreateChannel: false, isAdmin: false, isOwner: false },
-                3: { name: 'Lv.3', signBonus: 6, canDownvote: true, canRecommend: true, canCreateChannel: false,
-                    isAdmin: false, isOwner: false }, 4: { name: 'Lv.4', signBonus: 8, canDownvote: true,
-                    canRecommend: true, canCreateChannel: true, isAdmin: false, isOwner: false }, 5: { name: 'Lv.5',
-                    signBonus: 10, canDownvote: true, canRecommend: true, canCreateChannel: true, isAdmin: true,
-                    isOwner: false }, 6: { name: 'Lv.6', signBonus: 12, canDownvote: true, canRecommend: true,
-                    canCreateChannel: true, isAdmin: true, isOwner: true } }; return map[level] || map[1]; }
+        function getLevelInfo(level) {
+            const map = { 1: { name: 'Lv.1', signBonus: 2 }, 2: { name: 'Lv.2', signBonus: 4 }, 3: { name: 'Lv.3',
+                    signBonus: 6 }, 4: { name: 'Lv.4', signBonus: 8 }, 5: { name: 'Lv.5', signBonus: 10 }, 6: { name: 'Lv.6',
+                    signBonus: 12 } };
+            return map[level] || map[1];
+        }
 
         function showFeedback() { alert('📮 反馈请发送邮件至：3880374029@qq.com\n或者加入QQ群：1062578518'); }
 
-        function showStatus() { alert('✅ 帖子重复问题已通过数据库唯一约束修复。\n如有异常，请刷新页面或联系管理员。'); }
+        function showStatus() { alert('✅ 点赞/推荐/点踩/观看量功能已修复！'); }
 
         // =============================================================
         // ================ 网络请求 ====================================
         // =============================================================
-        async function fetchWithAuth(url, options) { const headers = options.headers || {};
+        async function fetchWithAuth(url, options) {
+            const headers = options.headers || {};
             if (accessToken) headers['Authorization'] = 'Bearer ' + accessToken;
             headers['apikey'] = SUPABASE_ANON_KEY;
             headers['Content-Type'] = headers['Content-Type'] || 'application/json';
             const response = await fetch(url, { ...options, headers });
             if (response.status === 401 && refreshToken) {
-                try { const resp = await fetch(SUPABASE_URL + '/auth/v1/token?grant_type=refresh_token', { method: 'POST',
+                try {
+                    const resp = await fetch(SUPABASE_URL + '/auth/v1/token?grant_type=refresh_token', {
+                        method: 'POST',
                         headers: { 'apikey': SUPABASE_ANON_KEY, 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ refresh_token: refreshToken }) }); if (resp.ok) { const data = await resp
-                            .json();
+                        body: JSON.stringify({ refresh_token: refreshToken })
+                    });
+                    if (resp.ok) {
+                        const data = await resp.json();
                         accessToken = data.access_token;
                         refreshToken = data.refresh_token;
                         localStorage.setItem('sb_token', accessToken);
                         localStorage.setItem('sb_refresh_token', refreshToken);
-                        const retryHeaders = { ...headers, 'Authorization': 'Bearer ' + accessToken };
-                        const retry = await fetch(url, { ...options, headers: retryHeaders }); return retry; } } catch (
-                    e) { console.warn('刷新失败', e); } }
-            return response; }
+                        headers['Authorization'] = 'Bearer ' + accessToken;
+                        const retry = await fetch(url, { ...options, headers });
+                        return retry;
+                    }
+                } catch (e) { console.warn('刷新失败', e); }
+            }
+            return response;
+        }
 
-        async function authFetch(url, options) { const resp = await fetchWithAuth(url, options); if (resp.status === 401) {
+        async function authFetch(url, options) {
+            const resp = await fetchWithAuth(url, options);
+            if (resp.status === 401) {
                 showToast('登录已过期，请重新登录', true);
-                logout(); throw new Error('Unauthorized'); } return resp; }
+                logout();
+                throw new Error('Unauthorized');
+            }
+            return resp;
+        }
 
-        async function handleResponse(res) { const text = await res.text(); let json = null; try { json = JSON.parse(text); }
-            catch (e) {} if (!res.ok) { const msg = json?.error_description || json?.message || json?.error || text ||
-                    '请求失败'; throw new Error(msg); } return json || text; }
+        async function handleResponse(res) {
+            const text = await res.text();
+            let json = null;
+            try { json = JSON.parse(text); } catch (e) {}
+            if (!res.ok) {
+                const msg = json?.error_description || json?.message || json?.error || text || '请求失败';
+                throw new Error(msg);
+            }
+            return json || text;
+        }
 
         // =============================================================
         // ================ API 调用 ====================================
         // =============================================================
-        async function signIn(email, password) { const resp = await fetch(SUPABASE_URL + '/auth/v1/token?grant_type=password',
-                { method: 'POST', headers: { 'apikey': SUPABASE_ANON_KEY, 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ email, password }) }); return await handleResponse(resp); }
-
-        async function signUp(email, password, username) { const resp = await fetch(SUPABASE_URL + '/auth/v1/signup',
-                { method: 'POST', headers: { 'apikey': SUPABASE_ANON_KEY, 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ email, password, data: { username } }) }); return await handleResponse(
-                resp); }
-
-        async function getProfile(userId) { const resp = await authFetch(SUPABASE_URL + '/rest/v1/profiles?id=eq.' +
-                userId, { method: 'GET' }); if (resp.status === 404) return null; const data = await handleResponse(
-                resp); return data && data.length > 0 ? data[0] : null; }
-
-        async function updateProfile(userId, updates) { const resp = await authFetch(SUPABASE_URL + '/rest/v1/profiles?id=eq.' +
-                userId, { method: 'PATCH', body: JSON.stringify(updates) }); return await handleResponse(resp); }
-
-        async function upsertProfile(data) { const resp = await authFetch(SUPABASE_URL + '/rest/v1/profiles', { method: 'POST',
-                body: JSON.stringify(data) }); return await handleResponse(resp); }
-
-        async function fetchPosts() { const resp = await fetch(SUPABASE_URL +
-            '/rest/v1/posts?order=created_at.desc', { headers: { 'apikey': SUPABASE_ANON_KEY,
-                    'Content-Type': 'application/json' } }); return await handleResponse(resp); }
-
-        async function fetchComments(postId) {
-            const safeId = encodeURIComponent(postId);
-            const resp = await fetch(SUPABASE_URL + `/rest/v1/comments?post_id=eq.${safeId}&order=created_at.asc`, { headers: {
-                    'apikey': SUPABASE_ANON_KEY, 'Content-Type': 'application/json' } });
+        async function signIn(email, password) {
+            const resp = await fetch(SUPABASE_URL + '/auth/v1/token?grant_type=password', {
+                method: 'POST',
+                headers: { 'apikey': SUPABASE_ANON_KEY, 'Content-Type': 'application/json' },
+                body: JSON.stringify({ email, password })
+            });
             return await handleResponse(resp);
         }
 
-        async function createComment(data) { const resp = await authFetch(SUPABASE_URL + '/rest/v1/comments', { method: 'POST',
-                body: JSON.stringify(data) }); return await handleResponse(resp); }
+        async function signUp(email, password, username) {
+            const resp = await fetch(SUPABASE_URL + '/auth/v1/signup', {
+                method: 'POST',
+                headers: { 'apikey': SUPABASE_ANON_KEY, 'Content-Type': 'application/json' },
+                body: JSON.stringify({ email, password, data: { username } })
+            });
+            return await handleResponse(resp);
+        }
 
-        async function createPost(data) { const resp = await authFetch(SUPABASE_URL + '/rest/v1/posts', { method: 'POST',
-                body: JSON.stringify(data) }); return await handleResponse(resp); }
+        async function getProfile(userId) {
+            const resp = await authFetch(SUPABASE_URL + '/rest/v1/profiles?id=eq.' + userId, { method: 'GET' });
+            if (resp.status === 404) return null;
+            const data = await handleResponse(resp);
+            return data && data.length > 0 ? data[0] : null;
+        }
 
-        async function fetchTopics() { const resp = await fetch(SUPABASE_URL + '/rest/v1/topics?order=name.asc',
-                { headers: { 'apikey': SUPABASE_ANON_KEY, 'Content-Type': 'application/json' } }); return await handleResponse(
-                resp); }
+        async function upsertProfile(data) {
+            const resp = await authFetch(SUPABASE_URL + '/rest/v1/profiles', { method: 'POST', body: JSON.stringify(data) });
+            return await handleResponse(resp);
+        }
 
-        async function createTopicAPI(name) { if (!currentUser) throw new Error('请先登录'); const resp = await authFetch(
-                SUPABASE_URL + '/rest/v1/topics', { method: 'POST', body: JSON.stringify({ name }) }); return await handleResponse(
-                resp); }
+        async function fetchPosts() {
+            const resp = await fetch(SUPABASE_URL + '/rest/v1/posts?order=created_at.desc', {
+                headers: { 'apikey': SUPABASE_ANON_KEY, 'Content-Type': 'application/json' }
+            });
+            return await handleResponse(resp);
+        }
 
-        async function fetchCommentCounts() { const resp = await fetch(SUPABASE_URL + '/rest/v1/comments?select=post_id',
-                { headers: { 'apikey': SUPABASE_ANON_KEY, 'Content-Type': 'application/json' } }); const data =
-                await handleResponse(resp); if (!data || !Array.isArray(data)) return {}; const map = {};
-            data.forEach(c => { const pid = c.post_id; if (pid) map[pid] = (map[pid] || 0) + 1; }); return map; }
+        async function fetchComments(postId) {
+            const safeId = encodeURIComponent(postId);
+            const resp = await fetch(SUPABASE_URL + `/rest/v1/comments?post_id=eq.${safeId}&order=created_at.asc`, {
+                headers: { 'apikey': SUPABASE_ANON_KEY, 'Content-Type': 'application/json' }
+            });
+            return await handleResponse(resp);
+        }
 
-        // =============================================================
-        // ================ 作者映射 ====================================
-        // =============================================================
+        async function createComment(data) {
+            const resp = await authFetch(SUPABASE_URL + '/rest/v1/comments', { method: 'POST', body: JSON.stringify(data) });
+            return await handleResponse(resp);
+        }
+
+        async function createPost(data) {
+            const resp = await authFetch(SUPABASE_URL + '/rest/v1/posts', { method: 'POST', body: JSON.stringify(data) });
+            return await handleResponse(resp);
+        }
+
+        async function fetchTopics() {
+            const resp = await fetch(SUPABASE_URL + '/rest/v1/topics?order=name.asc', {
+                headers: { 'apikey': SUPABASE_ANON_KEY, 'Content-Type': 'application/json' }
+            });
+            return await handleResponse(resp);
+        }
+
+        async function createTopicAPI(name) {
+            if (!currentUser) throw new Error('请先登录');
+            const resp = await authFetch(SUPABASE_URL + '/rest/v1/topics', { method: 'POST', body: JSON.stringify({ name }) });
+            return await handleResponse(resp);
+        }
+
+        async function fetchCommentCounts() {
+            const resp = await fetch(SUPABASE_URL + '/rest/v1/comments?select=post_id', {
+                headers: { 'apikey': SUPABASE_ANON_KEY, 'Content-Type': 'application/json' }
+            });
+            const data = await handleResponse(resp);
+            if (!data || !Array.isArray(data)) return {};
+            const map = {};
+            data.forEach(c => { const pid = c.post_id; if (pid) map[pid] = (map[pid] || 0) + 1; });
+            return map;
+        }
+
+        // ===== 作者映射 =====
         async function fetchAuthors(posts) {
             if (!posts || posts.length === 0) return;
             const ids = [...new Set(posts.map(p => p.author_id).filter(id => id))];
             if (ids.length === 0) return;
-            const { data, error } = await sb
-                .from('profiles')
-                .select('id, username')
-                .in('id', ids);
-            if (error) {
-                console.warn('获取作者信息失败', error);
-                return;
-            }
-            data.forEach(profile => {
-                authorMap[profile.id] = profile.username || '用户';
-            });
-            ids.forEach(id => {
-                if (!authorMap[id]) authorMap[id] = '用户';
-            });
+            try {
+                const { data, error } = await sb
+                    .from('profiles')
+                    .select('id, username')
+                    .in('id', ids);
+                if (error) { console.warn('获取作者信息失败', error); return; }
+                data.forEach(profile => { authorMap[profile.id] = profile.username || '用户'; });
+                ids.forEach(id => { if (!authorMap[id]) authorMap[id] = '用户'; });
+            } catch (e) { console.warn('fetchAuthors异常', e); }
         }
 
-        // =============================================================
-        // ================ 任务系统 ====================================
-        // =============================================================
+        // ===== 任务系统 =====
         async function getTasks(userId) {
             const today = new Date().toISOString().split('T')[0];
             const { data, error } = await sb.from('user_tasks').select('*').eq('user_id', userId).eq('reset_date',
-                today);
+            today);
             if (error) return [];
             const defaultTasks = [
                 { task_type: 'daily_post', target: 1, progress: 0, completed: false },
@@ -1158,8 +1197,7 @@
             for (let t of missing) {
                 await sb.from('user_tasks').insert({ user_id: userId, task_type: t.task_type, target: t.target,
                     progress: 0, completed: false, reset_date: today });
-                data.push({ ...t, id: null, user_id: userId, reset_date: today, last_updated: new Date()
-                    .toISOString() });
+                data.push({ ...t, id: null, user_id: userId, reset_date: today, last_updated: new Date().toISOString() });
             }
             return data;
         }
@@ -1174,8 +1212,7 @@
             await sb.from('user_tasks').update({ progress: newProgress, completed: completed, last_updated: new Date()
                     .toISOString() }).eq('id', data.id);
             if (completed) {
-                const rewards = { daily_post: 3, daily_comment: 2, daily_like: 1, daily_recommend: 2,
-                daily_checkin: 5 };
+                const rewards = { daily_post: 3, daily_comment: 2, daily_like: 1, daily_recommend: 2, daily_checkin: 5 };
                 const bonus = rewards[taskType] || 0;
                 if (bonus > 0) {
                     const { data: prof } = await sb.from('profiles').select('points').eq('id', userId).single();
@@ -1196,8 +1233,7 @@
             const tasks = await getTasks(currentUser.id);
             const taskNames = { daily_post: '📝 发布帖子', daily_comment: '💬 评论', daily_like: '❤️ 点赞',
                 daily_recommend: '👍 推荐', daily_checkin: '✅ 签到' };
-            const taskRewards = { daily_post: 3, daily_comment: 2, daily_like: 1, daily_recommend: 2,
-            daily_checkin: 5 };
+            const taskRewards = { daily_post: 3, daily_comment: 2, daily_like: 1, daily_recommend: 2, daily_checkin: 5 };
             let html = '';
             tasks.forEach(t => {
                 const name = taskNames[t.task_type] || t.task_type;
@@ -1216,10 +1252,7 @@
 
         function closeTasks() { document.getElementById('tasksModal').classList.remove('active'); }
 
-        // =============================================================
-        // ================ 核心业务函数 ================================
-        // =============================================================
-
+        // ===== 标签工具 =====
         function normalizeTags(tags) {
             if (!tags) return [];
             if (Array.isArray(tags)) return tags.filter(t => t && t.trim());
@@ -1227,7 +1260,9 @@
             return [];
         }
 
-        // ---- 加载帖子 ----
+        // =============================================================
+        // ================ 加载和渲染帖子 ==============================
+        // =============================================================
         async function loadPosts(category, search) {
             try {
                 let posts = await fetchPosts();
@@ -1249,19 +1284,16 @@
             } catch (e) {
                 console.error('加载帖子失败', e);
                 showToast('加载帖子失败: ' + e.message, true);
-                const container = document.getElementById('postList');
-                container.innerHTML = `
+                document.getElementById('postList').innerHTML = `
                     <div class="empty-state" style="border-color:#ef4444;">
                         <h3>⚠️ 加载失败</h3>
                         <p style="color:#ef4444;">${escapeHtml(e.message)}</p>
-                        <p style="color:rgba(255,255,255,0.4);font-size:.9rem;margin-top:8px;">请检查控制台（F12）获取更多信息，或联系管理员。</p>
                         <button class="btn" onclick="location.reload()">🔄 刷新重试</button>
                     </div>
                 `;
             }
         }
 
-        // ---- 渲染帖子列表 ----
         function renderPosts(posts) {
             const container = document.getElementById('postList');
             if (!posts || posts.length === 0) {
@@ -1304,9 +1336,9 @@
                 <div class="post-excerpt">${escapeHtml(excerpt)}${excerpt.length>=120?'...':''}</div>
                 <div class="post-footer">
                   <span>💬 ${commentCount}</span>
-                  <span>❤️ ${post.likes||0}</span>
-                  <span>👍 ${post.recommends||0}</span>
-                  <span>👎 ${post.downvotes||0}</span>
+                  <span class="like-btn" onclick="handleLike('${safePostId}')">❤️ ${post.likes||0}</span>
+                  <span class="recommend-btn" onclick="handleRecommend('${safePostId}')">👍 ${post.recommends||0}</span>
+                  <span class="downvote-btn" onclick="handleDownvote('${safePostId}')">👎 ${post.downvotes||0}</span>
                   <span>👁️ ${post.views||0}</span>
                   <span>🍫 ${post.chocolate_count||0}</span>
                   <span style="margin-left:auto;color:rgba(255,255,255,0.2);font-size:.7rem;">#${idx+1}</span>
@@ -1317,7 +1349,6 @@
             container.innerHTML = html;
         }
 
-        // ---- 更新统计 ----
         function updateStats(posts) {
             document.getElementById('statPosts').textContent = posts ? posts.length : 0;
             const totalComments = Object.values(commentCountMap).reduce((a, b) => a + b, 0);
@@ -1334,13 +1365,10 @@
             }
         }
 
-        // ---- 加载热门 ----
         function loadHotPosts(posts) {
             const container = document.getElementById('hotItems');
-            if (!posts || posts.length === 0) {
-                container.innerHTML = '<p style="color:rgba(255,255,255,0.3);font-size:.9rem;">暂无热门</p>';
-                return;
-            }
+            if (!posts || posts.length === 0) { container.innerHTML =
+                    '<p style="color:rgba(255,255,255,0.3);font-size:.9rem;">暂无热门</p>'; return; }
             const sorted = [...posts].sort((a, b) => ((b.likes || 0) + (b.recommends || 0) * 2) - ((a.likes || 0) + (a
                 .recommends || 0) * 2));
             const top = sorted.slice(0, 5);
@@ -1353,26 +1381,18 @@
             container.innerHTML = html;
         }
 
-        // ---- 加载标签 ----
         function loadTags(posts) {
             const container = document.getElementById('tagList');
-            if (!posts || posts.length === 0) {
-                container.innerHTML = '<p style="color:rgba(255,255,255,0.3);font-size:.9rem;">暂无标签</p>';
-                return;
-            }
+            if (!posts || posts.length === 0) { container.innerHTML =
+                    '<p style="color:rgba(255,255,255,0.3);font-size:.9rem;">暂无标签</p>'; return; }
             const tagMap = {};
             posts.forEach(p => {
                 const tags = normalizeTags(p.tags);
-                tags.forEach(t => {
-                    const key = t.trim();
-                    if (key) tagMap[key] = (tagMap[key] || 0) + 1;
-                });
+                tags.forEach(t => { const key = t.trim(); if (key) tagMap[key] = (tagMap[key] || 0) + 1; });
             });
             const sorted = Object.entries(tagMap).sort((a, b) => b[1] - a[1]).slice(0, 15);
-            if (sorted.length === 0) {
-                container.innerHTML = '<p style="color:rgba(255,255,255,0.3);font-size:.9rem;">暂无标签</p>';
-                return;
-            }
+            if (sorted.length === 0) { container.innerHTML =
+                    '<p style="color:rgba(255,255,255,0.3);font-size:.9rem;">暂无标签</p>'; return; }
             let html = '';
             sorted.forEach(([tag, count]) => {
                 const safeTag = escapeJsString(tag);
@@ -1381,128 +1401,100 @@
             container.innerHTML = html;
         }
 
-        // ---- 加载话题 ----
-        async function loadTopics() {
-            try {
-                const topics = await fetchTopics();
-                topicsCache = topics;
-                const nav = document.getElementById('boardNav');
-                const existing = nav.querySelectorAll('.board-btn[data-category="topic"]');
-                for (let i = 1; i < existing.length; i++) {
-                    existing[i].remove();
-                }
-                const topicBtn = nav.querySelector('.board-btn[data-category="topic"]');
-                if (topicBtn) {
-                    topics.forEach(t => {
-                        const btn = document.createElement('button');
-                        btn.className = 'board-btn';
-                        btn.dataset.category = 'topic_' + t.id;
-                        btn.textContent = '#' + escapeHtml(t.name);
-                        btn.onclick = function() { setCategory('topic_' + t.id); };
-                        nav.insertBefore(btn, topicBtn.nextSibling);
-                    });
-                }
-            } catch (e) { console.warn('加载话题失败', e); }
-        }
-
-        // ---- 设置分类 ----
-        function setCategory(category) {
-            currentCategory = category;
-            document.querySelectorAll('.board-nav .board-btn').forEach(b => b.classList.remove('active'));
-            const btns = document.querySelectorAll('.board-nav .board-btn');
-            btns.forEach(b => {
-                const cat = b.dataset.category;
-                if (cat === category) b.classList.add('active');
-                if (category.startsWith('topic_') && cat === 'topic') b.classList.add('active');
-                if (category === 'topic' && cat === 'topic') b.classList.add('active');
-            });
-            let cat = category;
-            if (category.startsWith('topic_')) {
-                const id = category.replace('topic_', '');
-                const topic = topicsCache.find(t => t.id == id);
-                if (topic) {
-                    loadPosts('all', topic.name);
-                    return;
-                }
-            }
-            loadPosts(cat, currentSearch);
-        }
-
-        // ---- 搜索 ----
-        function searchPosts() {
-            const input = document.getElementById('searchInput');
-            currentSearch = input.value.trim();
-            loadPosts(currentCategory, currentSearch);
-        }
-
-        function searchByTag(tag) {
-            document.getElementById('searchInput').value = '#' + tag;
-            currentSearch = '#' + tag;
-            loadPosts(currentCategory, currentSearch);
-        }
-
-        // ---- 切换发布表单 ----
-        function togglePublish() {
-            const form = document.getElementById('publishForm');
-            if (form.style.display === 'block') {
-                form.style.display = 'none';
-            } else {
-                if (!currentUser) { showToast('请先登录', true); return; }
-                form.style.display = 'block';
-                document.getElementById('publishTitle').focus();
-            }
-        }
-
-        // ---- 发布帖子 ----
-        async function publishPost() {
+        // =============================================================
+        // ================ 帖子交互（点赞/推荐/点踩/观看） =============
+        // =============================================================
+        async function handleLike(postId) {
             if (!currentUser) { showToast('请先登录', true); return; }
-            const title = document.getElementById('publishTitle').value.trim();
-            const content = document.getElementById('publishContent').value.trim();
-            const category = document.getElementById('publishCategory').value;
-            const tags = document.getElementById('publishTags').value.trim();
-            if (!title) { showToast('请输入标题', true); return; }
-            if (!content) { showToast('请输入内容', true); return; }
-            if (publishLock) { showToast('请勿频繁发布', true); return; }
-            const now = Date.now();
-            if (now - lastPublishTime < 3000) { showToast('请稍后再发布', true); return; }
-            publishLock = true;
-            lastPublishTime = now;
             try {
-                const data = {
-                    title: title,
-                    content: content,
-                    category: category,
-                    author_id: currentUser.id,
-                    author_name: userProfile?.username || '匿名',
-                    author_avatar: userProfile?.avatar_url || null,
-                    author_level: userProfile?.level || 1,
-                    tags: tags || null,
-                    created_at: new Date().toISOString()
-                };
-                await createPost(data);
-                showToast('✅ 发布成功！', false);
-                document.getElementById('publishForm').style.display = 'none';
-                document.getElementById('publishTitle').value = '';
-                document.getElementById('publishContent').value = '';
-                document.getElementById('publishTags').value = '';
-                await updateTaskProgress(currentUser.id, 'daily_post', 1);
-                await loadPosts(currentCategory, currentSearch);
+                // 先获取当前帖子数据
+                const resp = await authFetch(SUPABASE_URL + `/rest/v1/posts?id=eq.${encodeURIComponent(postId)}&select=likes`, { method: 'GET' });
+                const data = await handleResponse(resp);
+                if (!data || data.length === 0) throw new Error('帖子不存在');
+                const currentLikes = data[0].likes || 0;
+                const newLikes = currentLikes + 1;
+                await authFetch(SUPABASE_URL + `/rest/v1/posts?id=eq.${encodeURIComponent(postId)}`, {
+                    method: 'PATCH',
+                    body: JSON.stringify({ likes: newLikes })
+                });
+                await updateTaskProgress(currentUser.id, 'daily_like', 1);
+                // 刷新当前视图
+                if (currentPostId) {
+                    await showPost(currentPostId);
+                } else {
+                    await loadPosts(currentCategory, currentSearch);
+                }
             } catch (e) {
-                console.error('发布失败', e);
-                showToast('发布失败: ' + e.message, true);
-            } finally {
-                publishLock = false;
+                console.error('点赞失败', e);
+                showToast('点赞失败: ' + e.message, true);
             }
         }
 
-        // ---- 显示帖子详情 ----
+        async function handleRecommend(postId) {
+            if (!currentUser) { showToast('请先登录', true); return; }
+            try {
+                const resp = await authFetch(SUPABASE_URL + `/rest/v1/posts?id=eq.${encodeURIComponent(postId)}&select=recommends`, { method: 'GET' });
+                const data = await handleResponse(resp);
+                if (!data || data.length === 0) throw new Error('帖子不存在');
+                const current = data[0].recommends || 0;
+                const newVal = current + 1;
+                await authFetch(SUPABASE_URL + `/rest/v1/posts?id=eq.${encodeURIComponent(postId)}`, {
+                    method: 'PATCH',
+                    body: JSON.stringify({ recommends: newVal })
+                });
+                await updateTaskProgress(currentUser.id, 'daily_recommend', 1);
+                if (currentPostId) {
+                    await showPost(currentPostId);
+                } else {
+                    await loadPosts(currentCategory, currentSearch);
+                }
+            } catch (e) {
+                console.error('推荐失败', e);
+                showToast('推荐失败: ' + e.message, true);
+            }
+        }
+
+        async function handleDownvote(postId) {
+            if (!currentUser) { showToast('请先登录', true); return; }
+            try {
+                const resp = await authFetch(SUPABASE_URL + `/rest/v1/posts?id=eq.${encodeURIComponent(postId)}&select=downvotes`, { method: 'GET' });
+                const data = await handleResponse(resp);
+                if (!data || data.length === 0) throw new Error('帖子不存在');
+                const current = data[0].downvotes || 0;
+                const newVal = current + 1;
+                await authFetch(SUPABASE_URL + `/rest/v1/posts?id=eq.${encodeURIComponent(postId)}`, {
+                    method: 'PATCH',
+                    body: JSON.stringify({ downvotes: newVal })
+                });
+                if (currentPostId) {
+                    await showPost(currentPostId);
+                } else {
+                    await loadPosts(currentCategory, currentSearch);
+                }
+            } catch (e) {
+                console.error('点踩失败', e);
+                showToast('点踩失败: ' + e.message, true);
+            }
+        }
+
+        // 观看量在 showPost 中增加
         async function showPost(postId) {
             try {
+                // 先增加观看量
+                const resp = await authFetch(SUPABASE_URL + `/rest/v1/posts?id=eq.${encodeURIComponent(postId)}&select=views`, { method: 'GET' });
+                const data = await handleResponse(resp);
+                if (!data || data.length === 0) { showToast('帖子不存在', true); return; }
+                const currentViews = data[0].views || 0;
+                await authFetch(SUPABASE_URL + `/rest/v1/posts?id=eq.${encodeURIComponent(postId)}`, {
+                    method: 'PATCH',
+                    body: JSON.stringify({ views: currentViews + 1 })
+                });
+
+                // 获取完整帖子信息和评论
                 const posts = await fetchPosts();
                 const post = posts.find(p => p.id == postId);
                 if (!post) { showToast('帖子不存在', true); return; }
                 currentPostId = postId;
-                await sb.from('posts').update({ views: (post.views || 0) + 1 }).eq('id', postId);
                 document.getElementById('postList').style.display = 'none';
                 document.getElementById('postDetail').style.display = 'block';
                 const comments = await fetchComments(postId);
@@ -1510,11 +1502,12 @@
                     await fetchAuthors([post]);
                 }
                 renderPostDetail(post, comments);
-            } catch (e) { console.error('加载帖子详情失败', e);
-                showToast('加载失败', true); }
+            } catch (e) {
+                console.error('加载帖子详情失败', e);
+                showToast('加载失败', true);
+            }
         }
 
-        // ---- 渲染帖子详情 ----
         function renderPostDetail(post, comments) {
             const container = document.getElementById('postDetail');
             const displayName = authorMap[post.author_id] || post.author_name || '用户';
@@ -1580,7 +1573,6 @@
             container.innerHTML = html;
         }
 
-        // ---- 返回列表 ----
         function backToList() {
             document.getElementById('postDetail').style.display = 'none';
             document.getElementById('postList').style.display = 'block';
@@ -1588,7 +1580,6 @@
             loadPosts(currentCategory, currentSearch);
         }
 
-        // ---- 发布评论 ----
         async function publishComment(postId) {
             if (!currentUser) { showToast('请先登录', true); return; }
             const content = document.getElementById('commentInput').value.trim();
@@ -1607,166 +1598,77 @@
                 document.getElementById('commentInput').value = '';
                 await updateTaskProgress(currentUser.id, 'daily_comment', 1);
                 await showPost(postId);
-            } catch (e) { console.error('评论失败', e);
-                showToast('评论失败: ' + e.message, true); }
-        }
-
-        // ---- 点赞 ----
-        async function handleLike(postId) {
-            if (!currentUser) { showToast('请先登录', true); return; }
-            try {
-                const posts = await fetchPosts();
-                const post = posts.find(p => p.id == postId);
-                if (!post) return;
-                const newLikes = (post.likes || 0) + 1;
-                await sb.from('posts').update({ likes: newLikes }).eq('id', postId);
-                await updateTaskProgress(currentUser.id, 'daily_like', 1);
-                if (currentPostId == postId) {
-                    await showPost(postId);
-                } else {
-                    await loadPosts(currentCategory, currentSearch);
-                }
-            } catch (e) { console.error('点赞失败', e);
-                showToast('操作失败', true); }
-        }
-
-        // ---- 推荐 ----
-        async function handleRecommend(postId) {
-            if (!currentUser) { showToast('请先登录', true); return; }
-            try {
-                const posts = await fetchPosts();
-                const post = posts.find(p => p.id == postId);
-                if (!post) return;
-                const newRecommends = (post.recommends || 0) + 1;
-                await sb.from('posts').update({ recommends: newRecommends }).eq('id', postId);
-                await updateTaskProgress(currentUser.id, 'daily_recommend', 1);
-                if (currentPostId == postId) {
-                    await showPost(postId);
-                } else {
-                    await loadPosts(currentCategory, currentSearch);
-                }
-            } catch (e) { console.error('推荐失败', e);
-                showToast('操作失败', true); }
-        }
-
-        // ---- 点踩 ----
-        async function handleDownvote(postId) {
-            if (!currentUser) { showToast('请先登录', true); return; }
-            try {
-                const posts = await fetchPosts();
-                const post = posts.find(p => p.id == postId);
-                if (!post) return;
-                const newDownvotes = (post.downvotes || 0) + 1;
-                await sb.from('posts').update({ downvotes: newDownvotes }).eq('id', postId);
-                if (currentPostId == postId) {
-                    await showPost(postId);
-                } else {
-                    await loadPosts(currentCategory, currentSearch);
-                }
-            } catch (e) { console.error('点踩失败', e);
-                showToast('操作失败', true); }
-        }
-
-        // ---- 签到（强化版，含唯一约束冲突处理） ----
-        async function doCheckin() {
-            if (!currentUser) {
-                showToast('请先登录', true);
-                return;
+            } catch (e) {
+                console.error('评论失败', e);
+                showToast('评论失败: ' + e.message, true);
             }
+        }
+
+        // =============================================================
+        // ================ 其他功能（签到、兑换、商城等） ==============
+        // =============================================================
+        // 签到（使用 authFetch 修复 403）
+        async function doCheckin() {
+            if (!currentUser) { showToast('请先登录', true); return; }
             try {
                 const today = new Date().toISOString().split('T')[0];
-
-                // 1. 查询今日是否已签到
-                const { data: existing, error: checkError } = await sb
-                    .from('checkins')
-                    .select('id')
-                    .eq('user_id', currentUser.id)
-                    .eq('checkin_date', today)
-                    .maybeSingle();
-
-                if (checkError) {
-                    console.error('查询签到记录失败', checkError);
-                    showToast('签到失败，请重试', true);
+                // 查询今日是否已签到
+                const checkResp = await authFetch(
+                    SUPABASE_URL + `/rest/v1/checkins?user_id=eq.${encodeURIComponent(currentUser.id)}&checkin_date=eq.${encodeURIComponent(today)}&select=id`,
+                    { method: 'GET' }
+                );
+                if (checkResp.status === 403) {
+                    showToast('权限不足，请确保已登录并配置RLS策略', true);
                     return;
                 }
-
-                if (existing) {
+                const existing = await handleResponse(checkResp);
+                if (existing && existing.length > 0) {
                     showToast('今天已签到，明天再来吧！', false);
                     return;
                 }
-
-                // 2. 插入签到记录（利用唯一约束保证不重复）
-                const { error: insertError } = await sb
-                    .from('checkins')
-                    .insert({ user_id: currentUser.id, checkin_date: today });
-
-                if (insertError) {
-                    // 如果错误是唯一约束冲突（23505），说明并发导致重复，提示已签到
-                    if (insertError.code === '23505') {
-                        showToast('今天已签到（请勿重复操作）', false);
-                        return;
-                    }
-                    console.error('插入签到记录失败', insertError);
-                    showToast('签到失败，请重试', true);
+                // 插入签到
+                const insertResp = await authFetch(SUPABASE_URL + '/rest/v1/checkins', {
+                    method: 'POST',
+                    body: JSON.stringify({ user_id: currentUser.id, checkin_date: today })
+                });
+                if (insertResp.status === 409 || insertResp.status === 400) {
+                    showToast('今天已签到（重复操作）', false);
                     return;
                 }
-
-                // 3. 计算连续签到天数
+                await handleResponse(insertResp);
+                // 连续签到
                 let streak = (userProfile?.streak || 0) + 1;
                 const yesterday = new Date();
                 yesterday.setDate(yesterday.getDate() - 1);
                 const yStr = yesterday.toISOString().split('T')[0];
-
-                const { data: yData } = await sb
-                    .from('checkins')
-                    .select('id')
-                    .eq('user_id', currentUser.id)
-                    .eq('checkin_date', yStr)
-                    .maybeSingle();
-
-                if (!yData) {
-                    streak = 1; // 昨天未签到，重置连续天数
-                }
-
-                // 4. 更新用户积分和连续天数
+                const yCheck = await authFetch(
+                    SUPABASE_URL + `/rest/v1/checkins?user_id=eq.${encodeURIComponent(currentUser.id)}&checkin_date=eq.${encodeURIComponent(yStr)}&select=id`,
+                    { method: 'GET' }
+                );
+                const yData = await handleResponse(yCheck);
+                if (!yData || yData.length === 0) streak = 1;
+                // 更新积分
                 const bonus = getLevelInfo(userProfile?.level || 1).signBonus || 2;
                 const newPoints = (userProfile?.points || 0) + bonus;
-
-                const { error: updateError } = await sb
-                    .from('profiles')
-                    .update({ points: newPoints, streak: streak })
-                    .eq('id', currentUser.id);
-
-                if (updateError) {
-                    console.error('更新用户积分失败', updateError);
-                    showToast('签到记录已保存，但积分更新失败，请稍后查看', true);
-                    return;
-                }
-
-                // 5. 更新本地 userProfile
-                if (userProfile) {
-                    userProfile.points = newPoints;
-                    userProfile.streak = streak;
-                }
-
-                // 6. 更新任务进度（每日签到任务）
+                await authFetch(SUPABASE_URL + `/rest/v1/profiles?id=eq.${encodeURIComponent(currentUser.id)}`, {
+                    method: 'PATCH',
+                    body: JSON.stringify({ points: newPoints, streak })
+                });
+                if (userProfile) { userProfile.points = newPoints;
+                    userProfile.streak = streak; }
                 await updateTaskProgress(currentUser.id, 'daily_checkin', 1);
-
                 showToast(`✅ 签到成功！+${bonus} 积分，连续 ${streak} 天`, false);
                 updateUI();
                 loadPosts(currentCategory, currentSearch);
-
             } catch (e) {
                 console.error('签到异常', e);
                 showToast('签到异常: ' + e.message, true);
             }
         }
 
-        // ---- 积分换巧克力 ----
-        function openExchange() {
-            if (!currentUser) { showToast('请先登录', true); return; }
-            document.getElementById('exchangeModal').classList.add('active');
-        }
+        // 积分兑换、商城、投巧克力、关注等函数（保持与之前一致）
+        function openExchange() { if (!currentUser) { showToast('请先登录', true); return; } document.getElementById(
+                'exchangeModal').classList.add('active'); }
 
         function closeExchange() { document.getElementById('exchangeModal').classList.remove('active'); }
 
@@ -1779,8 +1681,10 @@
             try {
                 const newPoints = (userProfile?.points || 0) - cost;
                 const newChocolates = (userProfile?.chocolates || 0) + count;
-                await sb.from('profiles').update({ points: newPoints, chocolates: newChocolates }).eq('id', currentUser
-                    .id);
+                await authFetch(SUPABASE_URL + `/rest/v1/profiles?id=eq.${encodeURIComponent(currentUser.id)}`, {
+                    method: 'PATCH',
+                    body: JSON.stringify({ points: newPoints, chocolates: newChocolates })
+                });
                 if (userProfile) { userProfile.points = newPoints;
                     userProfile.chocolates = newChocolates; }
                 showToast(`🍫 兑换成功！+${count} 巧克力`, false);
@@ -1790,11 +1694,8 @@
                 showToast('兑换失败', true); }
         }
 
-        // ---- 商城 ----
-        function openShop() {
-            if (!currentUser) { showToast('请先登录', true); return; }
-            document.getElementById('shopModal').classList.add('active');
-        }
+        function openShop() { if (!currentUser) { showToast('请先登录', true); return; } document.getElementById('shopModal')
+                .classList.add('active'); }
 
         function closeShop() { document.getElementById('shopModal').classList.remove('active'); }
 
@@ -1803,10 +1704,13 @@
             if ((userProfile?.chocolates || 0) < cost) { showToast('🍫 巧克力不足', true); return; }
             try {
                 const newChocolates = (userProfile?.chocolates || 0) - cost;
-                await sb.from('profiles').update({ chocolates: newChocolates }).eq('id', currentUser.id);
+                await authFetch(SUPABASE_URL + `/rest/v1/profiles?id=eq.${encodeURIComponent(currentUser.id)}`, {
+                    method: 'PATCH',
+                    body: JSON.stringify({ chocolates: newChocolates })
+                });
                 if (userProfile) userProfile.chocolates = newChocolates;
                 const purchased = JSON.parse(localStorage.getItem('purchased_items') || '[]');
-                purchased.push({ item: item, time: new Date().toISOString() });
+                purchased.push({ item, time: new Date().toISOString() });
                 localStorage.setItem('purchased_items', JSON.stringify(purchased));
                 showToast(`🎉 成功购买 ${escapeHtml(item)}！`, false);
                 updateUI();
@@ -1816,7 +1720,6 @@
                 showToast('购买失败', true); }
         }
 
-        // ---- 投巧克力 ----
         let giveTargetId = null,
             giveTargetName = '';
 
@@ -1838,12 +1741,18 @@
             if ((userProfile?.chocolates || 0) < count) { showToast('🍫 巧克力不足', true); return; }
             try {
                 const newSelf = (userProfile?.chocolates || 0) - count;
-                await sb.from('profiles').update({ chocolates: newSelf }).eq('id', currentUser.id);
+                await authFetch(SUPABASE_URL + `/rest/v1/profiles?id=eq.${encodeURIComponent(currentUser.id)}`, {
+                    method: 'PATCH',
+                    body: JSON.stringify({ chocolates: newSelf })
+                });
                 if (userProfile) userProfile.chocolates = newSelf;
                 const { data: targetProf } = await sb.from('profiles').select('chocolates').eq('id', giveTargetId)
                     .single();
                 const newTarget = (targetProf?.chocolates || 0) + count;
-                await sb.from('profiles').update({ chocolates: newTarget }).eq('id', giveTargetId);
+                await authFetch(SUPABASE_URL + `/rest/v1/profiles?id=eq.${encodeURIComponent(giveTargetId)}`, {
+                    method: 'PATCH',
+                    body: JSON.stringify({ chocolates: newTarget })
+                });
                 showToast(`🍫 成功送给 ${escapeHtml(giveTargetName)} ${count} 块巧克力！`, false);
                 closeGiveChocolate();
                 updateUI();
@@ -1852,17 +1761,19 @@
                 showToast('操作失败', true); }
         }
 
-        // ---- 关注用户 ----
         async function followUser(userId) {
             if (!currentUser) { showToast('请先登录', true); return; }
             if (userId === currentUser.id) { showToast('不能关注自己', true); return; }
             try {
                 if (followingMap.has(userId)) {
-                    await sb.from('follows').delete().eq('follower_id', currentUser.id).eq('following_id', userId);
+                    await authFetch(SUPABASE_URL + `/rest/v1/follows?follower_id=eq.${encodeURIComponent(currentUser.id)}&following_id=eq.${encodeURIComponent(userId)}`, { method: 'DELETE' });
                     followingMap.delete(userId);
                     showToast('已取消关注', false);
                 } else {
-                    await sb.from('follows').insert({ follower_id: currentUser.id, following_id: userId });
+                    await authFetch(SUPABASE_URL + '/rest/v1/follows', {
+                        method: 'POST',
+                        body: JSON.stringify({ follower_id: currentUser.id, following_id: userId })
+                    });
                     followingMap.set(userId, true);
                     showToast('关注成功', false);
                 }
@@ -1872,44 +1783,137 @@
                 showToast('操作失败', true); }
         }
 
-        // ---- 主题切换 ----
-        function toggleTheme() {
-            isDarkTheme = !isDarkTheme;
-            const body = document.body;
-            if (isDarkTheme) {
-                body.style.background = '#0b0e1a';
-                body.style.color = '#e8edf5';
-                document.getElementById('themeToggle').textContent = '🌙';
-                document.querySelectorAll('.post-card, .post-detail, .hot-list, .publish-form, .modal-box').forEach(el => {
-                    el.style.background = '';
-                    el.style.color = '';
-                });
-            } else {
-                body.style.background = '#f0f2f5';
-                body.style.color = '#1a1a2e';
-                document.getElementById('themeToggle').textContent = '☀️';
-                document.querySelectorAll('.post-card, .post-detail, .hot-list, .publish-form, .modal-box').forEach(el => {
-                    el.style.background = 'rgba(255,255,255,0.8)';
-                    el.style.color = '#1a1a2e';
-                });
+        // =============================================================
+        // ================ 话题、分类、搜索 ============================
+        // =============================================================
+        async function loadTopics() {
+            try {
+                const topics = await fetchTopics();
+                topicsCache = topics;
+                const nav = document.getElementById('boardNav');
+                const existing = nav.querySelectorAll('.board-btn[data-category="topic"]');
+                for (let i = 1; i < existing.length; i++) existing[i].remove();
+                const topicBtn = nav.querySelector('.board-btn[data-category="topic"]');
+                if (topicBtn) {
+                    topics.forEach(t => {
+                        const btn = document.createElement('button');
+                        btn.className = 'board-btn';
+                        btn.dataset.category = 'topic_' + t.id;
+                        btn.textContent = '#' + escapeHtml(t.name);
+                        btn.onclick = function() { setCategory('topic_' + t.id); };
+                        nav.insertBefore(btn, topicBtn.nextSibling);
+                    });
+                }
+            } catch (e) { console.warn('加载话题失败', e); }
+        }
+
+        function setCategory(category) {
+            currentCategory = category;
+            document.querySelectorAll('.board-nav .board-btn').forEach(b => b.classList.remove('active'));
+            const btns = document.querySelectorAll('.board-nav .board-btn');
+            btns.forEach(b => {
+                const cat = b.dataset.category;
+                if (cat === category) b.classList.add('active');
+                if (category.startsWith('topic_') && cat === 'topic') b.classList.add('active');
+                if (category === 'topic' && cat === 'topic') b.classList.add('active');
+            });
+            let cat = category;
+            if (category.startsWith('topic_')) {
+                const id = category.replace('topic_', '');
+                const topic = topicsCache.find(t => t.id == id);
+                if (topic) { loadPosts('all', topic.name); return; }
+            }
+            loadPosts(cat, currentSearch);
+        }
+
+        function searchPosts() {
+            const input = document.getElementById('searchInput');
+            currentSearch = input.value.trim();
+            loadPosts(currentCategory, currentSearch);
+        }
+
+        function searchByTag(tag) {
+            document.getElementById('searchInput').value = '#' + tag;
+            currentSearch = '#' + tag;
+            loadPosts(currentCategory, currentSearch);
+        }
+
+        // =============================================================
+        // ================ 发布帖子 ====================================
+        // =============================================================
+        function togglePublish() {
+            const form = document.getElementById('publishForm');
+            if (form.style.display === 'block') { form.style.display = 'none'; } else {
+                if (!currentUser) { showToast('请先登录', true); return; }
+                form.style.display = 'block';
+                document.getElementById('publishTitle').focus();
             }
         }
 
-        // ---- 模态框 ----
-        function openModal() { document.getElementById('authModal').classList.add('active'); }
-
-        function closeModal() { document.getElementById('authModal').classList.remove('active'); }
-
-        function switchTab(tab) {
-            document.querySelectorAll('.modal-tabs button').forEach(b => b.classList.remove('active'));
-            document.querySelector(`.modal-tabs button[data-tab="${tab}"]`).classList.add('active');
-            document.getElementById('loginForm').classList.toggle('active', tab === 'login');
-            document.getElementById('registerForm').classList.toggle('active', tab === 'register');
-            document.getElementById('modalTitle').textContent = tab === 'login' ? '欢迎回来' : '创建账号';
-            document.getElementById('modalSub').textContent = tab === 'login' ? '登录你的账号' : '注册新账号';
+        async function publishPost() {
+            if (!currentUser) { showToast('请先登录', true); return; }
+            const title = document.getElementById('publishTitle').value.trim();
+            const content = document.getElementById('publishContent').value.trim();
+            const category = document.getElementById('publishCategory').value;
+            const tags = document.getElementById('publishTags').value.trim();
+            if (!title) { showToast('请输入标题', true); return; }
+            if (!content) { showToast('请输入内容', true); return; }
+            if (publishLock) { showToast('请勿频繁发布', true); return; }
+            const now = Date.now();
+            if (now - lastPublishTime < 3000) { showToast('请稍后再发布', true); return; }
+            publishLock = true;
+            lastPublishTime = now;
+            try {
+                const data = {
+                    title,
+                    content,
+                    category,
+                    author_id: currentUser.id,
+                    author_name: userProfile?.username || '匿名',
+                    author_avatar: userProfile?.avatar_url || null,
+                    author_level: userProfile?.level || 1,
+                    tags: tags || null,
+                    created_at: new Date().toISOString()
+                };
+                await createPost(data);
+                showToast('✅ 发布成功！', false);
+                document.getElementById('publishForm').style.display = 'none';
+                document.getElementById('publishTitle').value = '';
+                document.getElementById('publishContent').value = '';
+                document.getElementById('publishTags').value = '';
+                await updateTaskProgress(currentUser.id, 'daily_post', 1);
+                await loadPosts(currentCategory, currentSearch);
+            } catch (e) {
+                console.error('发布失败', e);
+                showToast('发布失败: ' + e.message, true);
+            } finally { publishLock = false; }
         }
 
-        // ---- 认证 ----
+        // =============================================================
+        // ================ 话题创建 ====================================
+        // =============================================================
+        function openNewTopic() { if (!currentUser) { showToast('请先登录', true); return; } document.getElementById(
+                'topicModal').classList.add('active'); }
+
+        function closeTopicModal() { document.getElementById('topicModal').classList.remove('active'); }
+
+        async function createTopic() {
+            if (!currentUser) { showToast('请先登录', true); return; }
+            const name = document.getElementById('topicNameInput').value.trim();
+            if (!name) { showToast('请输入话题名称', true); return; }
+            try {
+                await createTopicAPI(name);
+                showToast('✅ 话题创建成功', false);
+                document.getElementById('topicNameInput').value = '';
+                closeTopicModal();
+                await loadTopics();
+            } catch (e) { console.error('创建话题失败', e);
+                showToast('创建失败: ' + e.message, true); }
+        }
+
+        // =============================================================
+        // ================ 认证 ========================================
+        // =============================================================
         async function handleLogin(e) {
             e.preventDefault();
             const email = document.getElementById('loginEmail').value.trim();
@@ -1927,7 +1931,7 @@
                     userProfile = await getProfile(user.id);
                     if (!userProfile) {
                         await upsertProfile({ id: user.id, username: user.user_metadata?.username || email.split('@')[0],
-                            email: email, points: 0, chocolates: 0, level: 1, streak: 0 });
+                            email, points: 0, chocolates: 0, level: 1, streak: 0 });
                         userProfile = await getProfile(user.id);
                     }
                     showToast('✅ 登录成功', false);
@@ -1967,7 +1971,7 @@
 
         async function handleSocialLogin(provider) {
             try {
-                const { data, error } = await sb.auth.signInWithOAuth({ provider: provider });
+                const { data, error } = await sb.auth.signInWithOAuth({ provider });
                 if (error) throw error;
                 showToast(`正在跳转到 ${provider} 登录...`, false);
             } catch (e) { console.error('社交登录失败', e);
@@ -1990,7 +1994,6 @@
             loadPosts(currentCategory, currentSearch);
         }
 
-        // ---- OAuth回调处理 ----
         async function handleOAuthCallback() {
             const url = new URL(window.location.href);
             if (url.hash && url.hash.includes('access_token')) {
@@ -2026,12 +2029,12 @@
             }
         }
 
-        // ---- 个人中心 ----
-        function openProfile() {
-            if (!currentUser) { showToast('请先登录', true); return; }
-            document.getElementById('profileModal').classList.add('active');
-            renderProfile();
-        }
+        // =============================================================
+        // ================ 个人中心 ====================================
+        // =============================================================
+        function openProfile() { if (!currentUser) { showToast('请先登录', true); return; } document.getElementById(
+                'profileModal').classList.add('active');
+            renderProfile(); }
 
         function closeProfile() { document.getElementById('profileModal').classList.remove('active'); }
 
@@ -2047,7 +2050,6 @@
             const avatar = userProfile.avatar_url || getAvatarUrl({ username: userProfile.username, avatar_url: null });
             document.getElementById('profileAvatarPreview').src = avatar;
             document.getElementById('profileNameInput').value = userProfile.username || '';
-            const nextLevel = level + 1;
             const expNeeded = level * 50;
             const exp = userProfile.points || 0;
             const progress = Math.min(100, (exp / expNeeded) * 100);
@@ -2096,7 +2098,10 @@
                 if (error) throw error;
                 const { data: urlData } = sb.storage.from('avatars').getPublicUrl(fileName);
                 const avatarUrl = urlData.publicUrl;
-                await sb.from('profiles').update({ avatar_url: avatarUrl }).eq('id', currentUser.id);
+                await authFetch(SUPABASE_URL + `/rest/v1/profiles?id=eq.${encodeURIComponent(currentUser.id)}`, {
+                    method: 'PATCH',
+                    body: JSON.stringify({ avatar_url: avatarUrl })
+                });
                 if (userProfile) userProfile.avatar_url = avatarUrl;
                 showToast('✅ 头像上传成功', false);
                 renderProfile();
@@ -2111,7 +2116,10 @@
             const name = document.getElementById('profileNameInput').value.trim();
             if (!name) { showToast('昵称不能为空', true); return; }
             try {
-                await sb.from('profiles').update({ username: name }).eq('id', currentUser.id);
+                await authFetch(SUPABASE_URL + `/rest/v1/profiles?id=eq.${encodeURIComponent(currentUser.id)}`, {
+                    method: 'PATCH',
+                    body: JSON.stringify({ username: name })
+                });
                 if (userProfile) userProfile.username = name;
                 showToast('✅ 保存成功', false);
                 renderProfile();
@@ -2122,7 +2130,7 @@
         }
 
         // =============================================================
-        // ================ 通知（容错） ================================
+        // ================ 通知 ========================================
         // =============================================================
         async function openNotificationPanel() {
             if (!currentUser) { showToast('请先登录', true); return; }
@@ -2179,7 +2187,6 @@
             } catch (e) { console.warn('标记已读失败', e); }
         }
 
-        // ---- 更新通知徽章（容错） ----
         async function updateUnreadBadge() {
             if (!currentUser) {
                 document.getElementById('notifCount').classList.add('hidden');
@@ -2205,28 +2212,6 @@
                 console.warn('更新通知徽章失败', e);
                 document.getElementById('notifCount').classList.add('hidden');
             }
-        }
-
-        // ---- 话题 ----
-        function openNewTopic() {
-            if (!currentUser) { showToast('请先登录', true); return; }
-            document.getElementById('topicModal').classList.add('active');
-        }
-
-        function closeTopicModal() { document.getElementById('topicModal').classList.remove('active'); }
-
-        async function createTopic() {
-            if (!currentUser) { showToast('请先登录', true); return; }
-            const name = document.getElementById('topicNameInput').value.trim();
-            if (!name) { showToast('请输入话题名称', true); return; }
-            try {
-                await createTopicAPI(name);
-                showToast('✅ 话题创建成功', false);
-                document.getElementById('topicNameInput').value = '';
-                closeTopicModal();
-                await loadTopics();
-            } catch (e) { console.error('创建话题失败', e);
-                showToast('创建失败: ' + e.message, true); }
         }
 
         // =============================================================
@@ -2258,6 +2243,47 @@
                 document.getElementById('myTotalPoints').textContent = '0';
             }
             updateUnreadBadge();
+        }
+
+        // =============================================================
+        // ================ 模态框控制 ==================================
+        // =============================================================
+        function openModal() { document.getElementById('authModal').classList.add('active'); }
+
+        function closeModal() { document.getElementById('authModal').classList.remove('active'); }
+
+        function switchTab(tab) {
+            document.querySelectorAll('.modal-tabs button').forEach(b => b.classList.remove('active'));
+            document.querySelector(`.modal-tabs button[data-tab="${tab}"]`).classList.add('active');
+            document.getElementById('loginForm').classList.toggle('active', tab === 'login');
+            document.getElementById('registerForm').classList.toggle('active', tab === 'register');
+            document.getElementById('modalTitle').textContent = tab === 'login' ? '欢迎回来' : '创建账号';
+            document.getElementById('modalSub').textContent = tab === 'login' ? '登录你的账号' : '注册新账号';
+        }
+
+        // =============================================================
+        // ================ 主题切换 ====================================
+        // =============================================================
+        function toggleTheme() {
+            isDarkTheme = !isDarkTheme;
+            const body = document.body;
+            if (isDarkTheme) {
+                body.style.background = '#0b0e1a';
+                body.style.color = '#e8edf5';
+                document.getElementById('themeToggle').textContent = '🌙';
+                document.querySelectorAll('.post-card, .post-detail, .hot-list, .publish-form, .modal-box').forEach(el => {
+                    el.style.background = '';
+                    el.style.color = '';
+                });
+            } else {
+                body.style.background = '#f0f2f5';
+                body.style.color = '#1a1a2e';
+                document.getElementById('themeToggle').textContent = '☀️';
+                document.querySelectorAll('.post-card, .post-detail, .hot-list, .publish-form, .modal-box').forEach(el => {
+                    el.style.background = 'rgba(255,255,255,0.8)';
+                    el.style.color = '#1a1a2e';
+                });
+            }
         }
 
         // =============================================================
@@ -2297,16 +2323,14 @@
         // ================ 启动应用 ====================================
         // =============================================================
         function startApp(supabase) {
-            if (window._appStarted) { console.log('App 已启动，跳过重复初始化'); return; }
+            if (window._appStarted) { console.log('App 已启动'); return; }
             window._appStarted = true;
             SUPABASE_URL = 'https://bkvsceiezbyexzqpvblj.supabase.co';
             SUPABASE_ANON_KEY =
                 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJrdnNjZWllemJ5ZXh6cXB2YmxqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODM3MDk1MzIsImV4cCI6MjA5OTI4NTUzMn0.1h4Yp8YaJdMMOQW8N2zqvJi6QrxHPncBFMK9LjdmZ6E';
             sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-            // 暴露全局函数
-            window.showFeedback = showFeedback;
-            window.showStatus = showStatus;
+            // 暴露全局
             window.doCheckin = doCheckin;
             window.openExchange = openExchange;
             window.doExchange = doExchange;
@@ -2354,16 +2378,13 @@
             init().catch(e => console.error('初始化失败', e));
         }
 
-        // 模态框点击外部关闭
+        // =============================================================
+        // ================ 事件绑定 ====================================
+        // =============================================================
         document.querySelectorAll('.modal').forEach(m => {
-            m.addEventListener('click', function(e) {
-                if (e.target === this) {
-                    this.classList.remove('active');
-                }
-            });
+            m.addEventListener('click', function(e) { if (e.target === this) this.classList.remove('active'); });
         });
 
-        // 回车提交评论
         document.addEventListener('keydown', function(e) {
             if (e.key === 'Enter' && e.ctrlKey) {
                 const commentInput = document.getElementById('commentInput');
@@ -2373,28 +2394,6 @@
                 }
             }
         });
-
-        // =============================================================
-        // ================ 数据库初始化提示 ============================
-        // =============================================================
-        // 页面加载后检测 checkins 表是否有唯一约束，若缺失则弹出提示
-        setTimeout(async () => {
-            try {
-                // 尝试插入一条测试数据（会被自动回滚，仅用于检测约束）
-                const { error } = await sb.from('checkins').insert({ user_id: '00000000-0000-0000-0000-000000000000', checkin_date: '1970-01-01' });
-                if (error && error.code === '23505') {
-                    // 唯一约束已存在
-                    console.log('✅ checkins 表唯一约束已存在');
-                } else if (error && error.message.includes('duplicate key')) {
-                    console.log('✅ checkins 表唯一约束已存在');
-                } else {
-                    // 如果错误不是唯一约束，可能是其他错误（如外键），但更可能约束不存在
-                    console.warn('⚠️ 未检测到 checkins 表的唯一约束，请执行 SQL: ALTER TABLE checkins ADD CONSTRAINT unique_user_checkin UNIQUE (user_id, checkin_date);');
-                }
-            } catch (e) {
-                // 忽略错误，可能是表不存在等情况
-            }
-        }, 2000);
     </script>
 </body>
 </html>
