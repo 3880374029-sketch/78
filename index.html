@@ -6,7 +6,7 @@
     <title>窍某论坛</title>
     <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' https://cdn.jsdelivr.net https://unpkg.com 'unsafe-inline'; connect-src 'self' https://bkvsceiezbyexzqpvblj.supabase.co; img-src 'self' data: https://ui-avatars.com https://bkvsceiezbyexzqpvblj.supabase.co; style-src 'self' 'unsafe-inline';">
     <script>
-        const CACHE_VERSION = 'v5.2';
+        const CACHE_VERSION = 'v5.3';
         if (localStorage.getItem('forum_cache_version') !== CACHE_VERSION) {
             localStorage.clear();
             localStorage.setItem('forum_cache_version', CACHE_VERSION);
@@ -52,7 +52,7 @@
         })();
     </script>
     <style>
-        /* 完整样式（与之前一致） */
+        /* ===== 完整样式（与原代码一致） ===== */
         * {
             margin: 0;
             padding: 0;
@@ -986,14 +986,15 @@
         let sb, SUPABASE_URL, SUPABASE_ANON_KEY;
         let isDarkTheme = true;
 
-        // 安全转义函数
-        function escapeHtml(t) { if (!t) return ''; const d = document.createElement('div');
-            d.textContent = t; return d.innerHTML; }
+        // ---- 安全转义函数（增强型，强制转为字符串） ----
+        function escapeHtml(t) { if (t == null) return ''; const d = document.createElement('div');
+            d.textContent = String(t); return d.innerHTML; }
 
-        function nl2br(t) { if (!t) return ''; return escapeHtml(t).replace(/\n/g, '<br>'); }
+        function nl2br(t) { if (t == null) return ''; return escapeHtml(String(t)).replace(/\n/g, '<br>'); }
 
         function escapeJsString(str) {
-            if (!str) return '';
+            if (str == null) return '';
+            str = String(str);
             return str.replace(/\\/g, '\\\\')
                 .replace(/'/g, "\\'")
                 .replace(/"/g, '\\"')
@@ -1225,6 +1226,14 @@
             }
         }
 
+        // ---- 工具：安全处理 tags（支持字符串或数组） ----
+        function normalizeTags(tags) {
+            if (!tags) return [];
+            if (Array.isArray(tags)) return tags.filter(t => t && t.trim());
+            if (typeof tags === 'string') return tags.split(',').filter(t => t.trim());
+            return [];
+        }
+
         // ---- 渲染帖子列表（安全） ----
         function renderPosts(posts) {
             const container = document.getElementById('postList');
@@ -1245,15 +1254,14 @@
                 const catName = catMap[post.category] || post.category || '综合';
                 const badgeClass = post.category || 'tech';
                 const isPinned = post.pinned ? '<span class="pin-icon">📌</span>' : '';
+                // 安全处理标签
+                const tags = normalizeTags(post.tags);
                 let tagsHtml = '';
-                if (post.tags) {
-                    const tags = post.tags.split(',').filter(t => t.trim());
-                    tags.forEach(tag => {
-                        const safeTag = escapeJsString(tag.trim());
-                        const displayTag = escapeHtml(tag.trim());
-                        tagsHtml += `<span class="tag-item" onclick="searchByTag('${safeTag}')">#${displayTag}</span>`;
-                    });
-                }
+                tags.forEach(tag => {
+                    const safeTag = escapeJsString(tag.trim());
+                    const displayTag = escapeHtml(tag.trim());
+                    tagsHtml += `<span class="tag-item" onclick="searchByTag('${safeTag}')">#${displayTag}</span>`;
+                });
                 const safePostId = escapeJsString(post.id);
                 html += `
               <div class="post-card" data-id="${escapeHtml(post.id)}">
@@ -1327,12 +1335,11 @@
             }
             const tagMap = {};
             posts.forEach(p => {
-                if (p.tags) {
-                    p.tags.split(',').filter(t => t.trim()).forEach(t => {
-                        const key = t.trim();
-                        tagMap[key] = (tagMap[key] || 0) + 1;
-                    });
-                }
+                const tags = normalizeTags(p.tags);
+                tags.forEach(t => {
+                    const key = t.trim();
+                    if (key) tagMap[key] = (tagMap[key] || 0) + 1;
+                });
             });
             const sorted = Object.entries(tagMap).sort((a, b) => b[1] - a[1]).slice(0, 15);
             if (sorted.length === 0) {
@@ -1483,14 +1490,13 @@
             const avatar = getAvatarUrl({ username: post.author_name || '匿名', avatar_url: post.author_avatar });
             const catMap = { tech: '技术', life: '生活', career: '职业', topic: '话题' };
             const catName = catMap[post.category] || post.category || '综合';
+            // 安全处理标签
+            const tags = normalizeTags(post.tags);
             let tagsHtml = '';
-            if (post.tags) {
-                const tags = post.tags.split(',').filter(t => t.trim());
-                tags.forEach(tag => {
-                    const safeTag = escapeJsString(tag.trim());
-                    tagsHtml += `<span class="tag-item" onclick="searchByTag('${safeTag}')">#${escapeHtml(tag.trim())}</span>`;
-                });
-            }
+            tags.forEach(tag => {
+                const safeTag = escapeJsString(tag.trim());
+                tagsHtml += `<span class="tag-item" onclick="searchByTag('${safeTag}')">#${escapeHtml(tag.trim())}</span>`;
+            });
             const levelName = getLevelInfo(post.author_level || 1).name;
             const safePostId = escapeJsString(post.id);
             const safeAuthorId = escapeJsString(post.author_id);
@@ -2020,7 +2026,7 @@
         }
 
         // =============================================================
-        // ================ 通知（修复 400 错误，容错处理） ============
+        // ================ 通知（容错） ================================
         // =============================================================
         async function openNotificationPanel() {
             if (!currentUser) { showToast('请先登录', true); return; }
@@ -2077,7 +2083,7 @@
             } catch (e) { console.warn('标记已读失败', e); }
         }
 
-        // ---- 更新通知徽章（修复 400 错误） ----
+        // ---- 更新通知徽章（容错） ----
         async function updateUnreadBadge() {
             if (!currentUser) {
                 document.getElementById('notifCount').classList.add('hidden');
@@ -2128,7 +2134,7 @@
         }
 
         // =============================================================
-        // ================ UI 更新（提前定义，确保 init 可调用） ======
+        // ================ UI 更新 ====================================
         // =============================================================
         function updateUI() {
             const loginBtn = document.getElementById('loginBtn');
@@ -2247,7 +2253,7 @@
             window.openTasks = openTasks;
             window.closeTasks = closeTasks;
             window.followUser = followUser;
-            window.updateUI = updateUI; // 显式暴露，确保全局可用
+            window.updateUI = updateUI;
 
             init().catch(e => console.error('初始化失败', e));
         }
