@@ -52,6 +52,7 @@
         })();
     </script>
     <style>
+        /* ===== 完整样式（与原始代码完全一致） ===== */
         * {
             margin: 0;
             padding: 0;
@@ -966,7 +967,7 @@
 
     <script>
         // =============================================================
-        // 全局状态
+        // ================ 全局状态 & 工具函数 ========================
         // =============================================================
         let currentUser = null,
             userProfile = null,
@@ -985,13 +986,21 @@
         let sb, SUPABASE_URL, SUPABASE_ANON_KEY;
         let isDarkTheme = true;
 
-        // =============================================================
-        // 工具函数
-        // =============================================================
+        // ---- 安全工具函数 ----
         function escapeHtml(t) { if (!t) return ''; const d = document.createElement('div');
             d.textContent = t; return d.innerHTML; }
 
         function nl2br(t) { if (!t) return ''; return escapeHtml(t).replace(/\n/g, '<br>'); }
+
+        // 转义 JavaScript 字符串中的特殊字符，用于安全地嵌入 onclick 等属性
+        function escapeJsString(str) {
+            if (!str) return '';
+            return str.replace(/\\/g, '\\\\')
+                .replace(/'/g, "\\'")
+                .replace(/"/g, '\\"')
+                .replace(/\n/g, '\\n')
+                .replace(/\r/g, '\\r');
+        }
 
         function formatDate(d) { if (!d) return ''; return new Date(d).toLocaleDateString('zh-CN'); }
 
@@ -1021,7 +1030,7 @@
         function showStatus() { alert('✅ 帖子重复问题已通过数据库唯一约束修复。\n如有异常，请刷新页面或联系管理员。'); }
 
         // =============================================================
-        // 网络请求
+        // ================ 网络请求 ====================================
         // =============================================================
         async function fetchWithAuth(url, options) { const headers = options.headers || {};
             if (accessToken) headers['Authorization'] = 'Bearer ' + accessToken;
@@ -1051,7 +1060,7 @@
                     '请求失败'; throw new Error(msg); } return json || text; }
 
         // =============================================================
-        // API 调用
+        // ================ API 调用 ====================================
         // =============================================================
         async function signIn(email, password) { const resp = await fetch(SUPABASE_URL + '/auth/v1/token?grant_type=password',
                 { method: 'POST', headers: { 'apikey': SUPABASE_ANON_KEY, 'Content-Type': 'application/json' },
@@ -1076,9 +1085,13 @@
             '/rest/v1/posts?order=created_at.desc', { headers: { 'apikey': SUPABASE_ANON_KEY,
                     'Content-Type': 'application/json' } }); return await handleResponse(resp); }
 
-        async function fetchComments(postId) { const resp = await fetch(SUPABASE_URL +
-            `/rest/v1/comments?post_id=eq.${postId}&order=created_at.asc`, { headers: { 'apikey': SUPABASE_ANON_KEY,
-                    'Content-Type': 'application/json' } }); return await handleResponse(resp); }
+        async function fetchComments(postId) {
+            // 使用 encodeURIComponent 防止注入
+            const safeId = encodeURIComponent(postId);
+            const resp = await fetch(SUPABASE_URL + `/rest/v1/comments?post_id=eq.${safeId}&order=created_at.asc`, { headers: {
+                    'apikey': SUPABASE_ANON_KEY, 'Content-Type': 'application/json' } });
+            return await handleResponse(resp);
+        }
 
         async function createComment(data) { const resp = await authFetch(SUPABASE_URL + '/rest/v1/comments', { method: 'POST',
                 body: JSON.stringify(data) }); return await handleResponse(resp); }
@@ -1100,7 +1113,7 @@
             data.forEach(c => { const pid = c.post_id; if (pid) map[pid] = (map[pid] || 0) + 1; }); return map; }
 
         // =============================================================
-        // 任务系统
+        // ================ 任务系统 ====================================
         // =============================================================
         async function getTasks(userId) {
             const today = new Date().toISOString().split('T')[0];
@@ -1166,7 +1179,7 @@
                 const statusClass = t.completed ? 'done' : 'pending';
                 const reward = taskRewards[t.task_type] || 0;
                 html +=
-                    `<div class="task-item"><span class="task-name">${name}</span><span class="task-progress">${progress}</span><span class="task-status ${statusClass}">${t.completed?'✅ ':'⏳ '}${reward}分</span></div>`;
+                    `<div class="task-item"><span class="task-name">${escapeHtml(name)}</span><span class="task-progress">${escapeHtml(progress)}</span><span class="task-status ${statusClass}">${t.completed?'✅ ':'⏳ '}${reward}分</span></div>`;
             });
             document.getElementById('tasksList').innerHTML = html;
         }
@@ -1178,7 +1191,7 @@
         function closeTasks() { document.getElementById('tasksModal').classList.remove('active'); }
 
         // =============================================================
-        // 核心业务函数（补充完整）
+        // ================ 核心业务函数 ================================
         // =============================================================
 
         // ---- 加载帖子 ----
@@ -1203,7 +1216,7 @@
                 showToast('加载帖子失败: ' + e.message, true); }
         }
 
-        // ---- 渲染帖子列表 ----
+        // ---- 渲染帖子列表（修复 XSS） ----
         function renderPosts(posts) {
             const container = document.getElementById('postList');
             if (!posts || posts.length === 0) {
@@ -1212,7 +1225,6 @@
                 return;
             }
             let html = '';
-            // 置顶优先
             const pinned = posts.filter(p => p.pinned);
             const normal = posts.filter(p => !p.pinned);
             const sorted = [...pinned, ...normal];
@@ -1224,18 +1236,26 @@
                 const catName = catMap[post.category] || post.category || '综合';
                 const badgeClass = post.category || 'tech';
                 const isPinned = post.pinned ? '<span class="pin-icon">📌</span>' : '';
-                const tagsHtml = post.tags ? post.tags.split(',').filter(t => t.trim()).map(t =>
-                    `<span class="tag-item" onclick="searchByTag('${t.trim()}')">#${t.trim()}</span>`).join('') :
-                    '';
+                // ---- 安全渲染标签（onclick 内使用 escapeJsString） ----
+                let tagsHtml = '';
+                if (post.tags) {
+                    const tags = post.tags.split(',').filter(t => t.trim());
+                    tags.forEach(tag => {
+                        const safeTag = escapeJsString(tag.trim());
+                        const displayTag = escapeHtml(tag.trim());
+                        tagsHtml += `<span class="tag-item" onclick="searchByTag('${safeTag}')">#${displayTag}</span>`;
+                    });
+                }
+                const safePostId = escapeJsString(post.id);
                 html += `
-              <div class="post-card" data-id="${post.id}">
-                <div class="post-title" onclick="showPost('${post.id}')">${isPinned}${escapeHtml(post.title)}</div>
+              <div class="post-card" data-id="${escapeHtml(post.id)}">
+                <div class="post-title" onclick="showPost('${safePostId}')">${isPinned}${escapeHtml(post.title)}</div>
                 <div class="post-meta">
-                  <img class="author-avatar" src="${avatar}" alt="avatar" onerror="this.src='https://ui-avatars.com/api/?name=U&background=6d5bff&color=fff&size=100'">
+                  <img class="author-avatar" src="${escapeHtml(avatar)}" alt="avatar" onerror="this.src='https://ui-avatars.com/api/?name=U&background=6d5bff&color=fff&size=100'">
                   <span class="author">${escapeHtml(post.author_name||'匿名')}</span>
-                  <span class="level-badge">${getLevelInfo(post.author_level||1).name}</span>
-                  <span>${formatTime(post.created_at)}</span>
-                  <span class="badge ${badgeClass}">${catName}</span>
+                  <span class="level-badge">${escapeHtml(getLevelInfo(post.author_level||1).name)}</span>
+                  <span>${escapeHtml(formatTime(post.created_at))}</span>
+                  <span class="badge ${escapeHtml(badgeClass)}">${escapeHtml(catName)}</span>
                   ${tagsHtml}
                 </div>
                 <div class="post-excerpt">${escapeHtml(excerpt)}${excerpt.length>=120?'...':''}</div>
@@ -1259,15 +1279,12 @@
             document.getElementById('statPosts').textContent = posts ? posts.length : 0;
             const totalComments = Object.values(commentCountMap).reduce((a, b) => a + b, 0);
             document.getElementById('statComments').textContent = totalComments;
-            // 用户数从 profiles 获取
             sb.from('profiles').select('id', { count: 'exact', head: true }).then(({ count }) => {
                 if (count !== null) document.getElementById('statUsers').textContent = count;
             }).catch(() => {});
-            // 今日帖子
             const today = new Date().toISOString().split('T')[0];
             const todayPosts = posts ? posts.filter(p => p.created_at && p.created_at.startsWith(today)) : [];
             document.getElementById('statToday').textContent = todayPosts.length;
-            // 更新用户相关
             if (currentUser && userProfile) {
                 document.getElementById('myChocolates').textContent = userProfile.chocolates || 0;
                 document.getElementById('myTotalPoints').textContent = userProfile.points || 0;
@@ -1286,8 +1303,9 @@
             const top = sorted.slice(0, 5);
             let html = '';
             top.forEach((p, i) => {
+                const safeId = escapeJsString(p.id);
                 html +=
-                    `<div class="hot-item"><a href="#" onclick="showPost('${p.id}')"><span><span class="hot-num">${i+1}</span>${escapeHtml(p.title)}</span><span style="color:rgba(255,255,255,0.3);">🔥 ${(p.likes||0)+(p.recommends||0)*2}</span></a></div>`;
+                    `<div class="hot-item"><a href="#" onclick="showPost('${safeId}')"><span><span class="hot-num">${i+1}</span>${escapeHtml(p.title)}</span><span style="color:rgba(255,255,255,0.3);">🔥 ${(p.likes||0)+(p.recommends||0)*2}</span></a></div>`;
             });
             container.innerHTML = html;
         }
@@ -1315,7 +1333,8 @@
             }
             let html = '';
             sorted.forEach(([tag, count]) => {
-                html += `<span class="tag-item" onclick="searchByTag('${tag}')">#${tag} (${count})</span>`;
+                const safeTag = escapeJsString(tag);
+                html += `<span class="tag-item" onclick="searchByTag('${safeTag}')">#${escapeHtml(tag)} (${count})</span>`;
             });
             container.innerHTML = html;
         }
@@ -1325,22 +1344,18 @@
             try {
                 const topics = await fetchTopics();
                 topicsCache = topics;
-                // 更新话题按钮
                 const nav = document.getElementById('boardNav');
-                // 移除已有的话题按钮（除了"话题"按钮本身）
                 const existing = nav.querySelectorAll('.board-btn[data-category="topic"]');
-                // 只保留第一个"话题"按钮，其他的移除
                 for (let i = 1; i < existing.length; i++) {
                     existing[i].remove();
                 }
-                // 在"话题"按钮后面插入自定义话题
                 const topicBtn = nav.querySelector('.board-btn[data-category="topic"]');
                 if (topicBtn) {
                     topics.forEach(t => {
                         const btn = document.createElement('button');
                         btn.className = 'board-btn';
                         btn.dataset.category = 'topic_' + t.id;
-                        btn.textContent = '#' + t.name;
+                        btn.textContent = '#' + escapeHtml(t.name);
                         btn.onclick = function() { setCategory('topic_' + t.id); };
                         nav.insertBefore(btn, topicBtn.nextSibling);
                     });
@@ -1356,17 +1371,14 @@
             btns.forEach(b => {
                 const cat = b.dataset.category;
                 if (cat === category) b.classList.add('active');
-                // 处理话题子分类
                 if (category.startsWith('topic_') && cat === 'topic') b.classList.add('active');
                 if (category === 'topic' && cat === 'topic') b.classList.add('active');
             });
-            // 如果是话题子分类，过滤
             let cat = category;
             if (category.startsWith('topic_')) {
                 const id = category.replace('topic_', '');
                 const topic = topicsCache.find(t => t.id == id);
                 if (topic) {
-                    // 按话题名称过滤帖子（通过标签或内容）
                     loadPosts('all', topic.name);
                     return;
                 }
@@ -1425,15 +1437,13 @@
                     tags: tags || null,
                     created_at: new Date().toISOString()
                 };
-                const result = await createPost(data);
+                await createPost(data);
                 showToast('✅ 发布成功！', false);
                 document.getElementById('publishForm').style.display = 'none';
                 document.getElementById('publishTitle').value = '';
                 document.getElementById('publishContent').value = '';
                 document.getElementById('publishTags').value = '';
-                // 更新任务进度
                 await updateTaskProgress(currentUser.id, 'daily_post', 1);
-                // 刷新列表
                 await loadPosts(currentCategory, currentSearch);
             } catch (e) {
                 console.error('发布失败', e);
@@ -1443,14 +1453,13 @@
             }
         }
 
-        // ---- 显示帖子详情 ----
+        // ---- 显示帖子详情（修复 XSS） ----
         async function showPost(postId) {
             try {
                 const posts = await fetchPosts();
                 const post = posts.find(p => p.id == postId);
                 if (!post) { showToast('帖子不存在', true); return; }
                 currentPostId = postId;
-                // 增加浏览量
                 await sb.from('posts').update({ views: (post.views || 0) + 1 }).eq('id', postId);
                 document.getElementById('postList').style.display = 'none';
                 document.getElementById('postDetail').style.display = 'block';
@@ -1460,36 +1469,47 @@
                 showToast('加载失败', true); }
         }
 
-        // ---- 渲染帖子详情 ----
+        // ---- 渲染帖子详情（修复 XSS） ----
         function renderPostDetail(post, comments) {
             const container = document.getElementById('postDetail');
             const avatar = getAvatarUrl({ username: post.author_name || '匿名', avatar_url: post.author_avatar });
             const catMap = { tech: '技术', life: '生活', career: '职业', topic: '话题' };
             const catName = catMap[post.category] || post.category || '综合';
-            const tagsHtml = post.tags ? post.tags.split(',').filter(t => t.trim()).map(t =>
-                `<span class="tag-item" onclick="searchByTag('${t.trim()}')">#${t.trim()}</span>`).join('') : '';
+            // 安全渲染标签
+            let tagsHtml = '';
+            if (post.tags) {
+                const tags = post.tags.split(',').filter(t => t.trim());
+                tags.forEach(tag => {
+                    const safeTag = escapeJsString(tag.trim());
+                    tagsHtml += `<span class="tag-item" onclick="searchByTag('${safeTag}')">#${escapeHtml(tag.trim())}</span>`;
+                });
+            }
             const levelName = getLevelInfo(post.author_level || 1).name;
+            const safePostId = escapeJsString(post.id);
+            const safeAuthorId = escapeJsString(post.author_id);
+            const safeAuthorName = escapeJsString(post.author_name || '用户');
+
             let html = `
             <div class="post-detail">
               <button class="back-btn" onclick="backToList()">← 返回列表</button>
               <h2 style="font-size:1.5rem;margin-bottom:8px;">${escapeHtml(post.title)}</h2>
               <div class="post-author-info">
-                <img src="${avatar}" alt="avatar" onerror="this.src='https://ui-avatars.com/api/?name=U&background=6d5bff&color=fff&size=100'">
+                <img src="${escapeHtml(avatar)}" alt="avatar" onerror="this.src='https://ui-avatars.com/api/?name=U&background=6d5bff&color=fff&size=100'">
                 <span class="author-name">${escapeHtml(post.author_name||'匿名')}</span>
-                <span class="level-badge" style="background:#fbbf24;color:#1a1a2e;padding:0 8px;border-radius:12px;font-size:.7rem;font-weight:bold;">${levelName}</span>
-                <span class="post-time">${formatTime(post.created_at)}</span>
-                <span class="badge ${post.category||'tech'}">${catName}</span>
+                <span class="level-badge" style="background:#fbbf24;color:#1a1a2e;padding:0 8px;border-radius:12px;font-size:.7rem;font-weight:bold;">${escapeHtml(levelName)}</span>
+                <span class="post-time">${escapeHtml(formatTime(post.created_at))}</span>
+                <span class="badge ${escapeHtml(post.category||'tech')}">${escapeHtml(catName)}</span>
                 ${tagsHtml}
               </div>
               <div class="post-body">${nl2br(post.content)}</div>
               <div class="post-actions">
-                <span class="like-btn" onclick="handleLike('${post.id}')">❤️ ${post.likes||0}</span>
-                <span class="recommend-btn" onclick="handleRecommend('${post.id}')">👍 ${post.recommends||0}</span>
-                <span class="downvote-btn" onclick="handleDownvote('${post.id}')">👎 ${post.downvotes||0}</span>
+                <span class="like-btn" onclick="handleLike('${safePostId}')">❤️ ${post.likes||0}</span>
+                <span class="recommend-btn" onclick="handleRecommend('${safePostId}')">👍 ${post.recommends||0}</span>
+                <span class="downvote-btn" onclick="handleDownvote('${safePostId}')">👎 ${post.downvotes||0}</span>
                 <span>👁️ ${post.views||0}</span>
                 <span>🍫 ${post.chocolate_count||0}</span>
-                <button class="btn-sm" onclick="openGiveChocolate('${post.author_id}','${post.author_name||'用户'}')">🍫 投巧克力</button>
-                ${currentUser && currentUser.id !== post.author_id ? `<button class="btn-sm" onclick="followUser('${post.author_id}')">${followingMap.has(post.author_id)?'✅ 已关注':'➕ 关注'}</button>` : ''}
+                <button class="btn-sm" onclick="openGiveChocolate('${safeAuthorId}','${safeAuthorName}')">🍫 投巧克力</button>
+                ${currentUser && currentUser.id !== post.author_id ? `<button class="btn-sm" onclick="followUser('${safeAuthorId}')">${followingMap.has(post.author_id)?'✅ 已关注':'➕ 关注'}</button>` : ''}
               </div>
               <div style="margin-top:20px;">
                 <h3 style="margin-bottom:12px;">💬 评论 (${comments?comments.length:0})</h3>
@@ -1497,9 +1517,9 @@
                   ${comments && comments.length>0 ? comments.map(c => `
                     <div class="reply-item">
                       <div class="reply-author-info">
-                        <img src="${getAvatarUrl({username:c.author_name||'匿名',avatar_url:c.author_avatar})}" alt="avatar" onerror="this.src='https://ui-avatars.com/api/?name=U&background=6d5bff&color=fff&size=100'">
+                        <img src="${escapeHtml(getAvatarUrl({username:c.author_name||'匿名',avatar_url:c.author_avatar}))}" alt="avatar" onerror="this.src='https://ui-avatars.com/api/?name=U&background=6d5bff&color=fff&size=100'">
                         <span class="reply-author">${escapeHtml(c.author_name||'匿名')}</span>
-                        <span class="reply-time">${formatTime(c.created_at)}</span>
+                        <span class="reply-time">${escapeHtml(formatTime(c.created_at))}</span>
                       </div>
                       <div class="reply-content">${nl2br(c.content)}</div>
                     </div>
@@ -1508,7 +1528,7 @@
                 ${currentUser ? `
                   <div style="margin-top:16px;">
                     <textarea id="commentInput" placeholder="写评论..." rows="3" style="width:100%;padding:10px;border-radius:12px;border:1px solid #444;background:rgba(255,255,255,0.05);color:#e8edf5;"></textarea>
-                    <button class="btn" onclick="publishComment('${post.id}')" style="margin-top:8px;">发表评论</button>
+                    <button class="btn" onclick="publishComment('${safePostId}')" style="margin-top:8px;">发表评论</button>
                   </div>
                 ` : '<p style="color:rgba(255,255,255,0.3);margin-top:12px;">请登录后评论</p>'}
               </div>
@@ -1543,7 +1563,6 @@
                 showToast('✅ 评论成功', false);
                 document.getElementById('commentInput').value = '';
                 await updateTaskProgress(currentUser.id, 'daily_comment', 1);
-                // 刷新详情
                 await showPost(postId);
             } catch (e) { console.error('评论失败', e);
                 showToast('评论失败: ' + e.message, true); }
@@ -1559,7 +1578,6 @@
                 const newLikes = (post.likes || 0) + 1;
                 await sb.from('posts').update({ likes: newLikes }).eq('id', postId);
                 await updateTaskProgress(currentUser.id, 'daily_like', 1);
-                // 刷新当前视图
                 if (currentPostId == postId) {
                     await showPost(postId);
                 } else {
@@ -1614,11 +1632,8 @@
                 const { data, error } = await sb.from('checkins').select('*').eq('user_id', currentUser.id).eq(
                     'checkin_date', today).maybeSingle();
                 if (data) { showToast('今天已签到', true); return; }
-                // 记录签到
                 await sb.from('checkins').insert({ user_id: currentUser.id, checkin_date: today });
-                // 计算连续签到
                 let streak = (userProfile?.streak || 0) + 1;
-                // 检查昨天是否签到
                 const yesterday = new Date();
                 yesterday.setDate(yesterday.getDate() - 1);
                 const yStr = yesterday.toISOString().split('T')[0];
@@ -1681,14 +1696,13 @@
                 const newChocolates = (userProfile?.chocolates || 0) - cost;
                 await sb.from('profiles').update({ chocolates: newChocolates }).eq('id', currentUser.id);
                 if (userProfile) userProfile.chocolates = newChocolates;
-                // 记录购买（简单实现）
                 const purchased = JSON.parse(localStorage.getItem('purchased_items') || '[]');
                 purchased.push({ item: item, time: new Date().toISOString() });
                 localStorage.setItem('purchased_items', JSON.stringify(purchased));
-                showToast(`🎉 成功购买 ${item}！`, false);
+                showToast(`🎉 成功购买 ${escapeHtml(item)}！`, false);
                 updateUI();
                 document.getElementById('shopMsg').innerHTML =
-                    `<p style="color:#6ee7b7;">✅ 已购买 ${item}，在个人中心查看</p>`;
+                    `<p style="color:#6ee7b7;">✅ 已购买 ${escapeHtml(item)}，在个人中心查看</p>`;
             } catch (e) { console.error('购买失败', e);
                 showToast('购买失败', true); }
         }
@@ -1714,19 +1728,16 @@
             if (count <= 0) { showToast('请输入有效数量', true); return; }
             if ((userProfile?.chocolates || 0) < count) { showToast('🍫 巧克力不足', true); return; }
             try {
-                // 扣减自己的巧克力
                 const newSelf = (userProfile?.chocolates || 0) - count;
                 await sb.from('profiles').update({ chocolates: newSelf }).eq('id', currentUser.id);
                 if (userProfile) userProfile.chocolates = newSelf;
-                // 增加对方的巧克力
                 const { data: targetProf } = await sb.from('profiles').select('chocolates').eq('id', giveTargetId)
                     .single();
                 const newTarget = (targetProf?.chocolates || 0) + count;
                 await sb.from('profiles').update({ chocolates: newTarget }).eq('id', giveTargetId);
-                showToast(`🍫 成功送给 ${giveTargetName} ${count} 块巧克力！`, false);
+                showToast(`🍫 成功送给 ${escapeHtml(giveTargetName)} ${count} 块巧克力！`, false);
                 closeGiveChocolate();
                 updateUI();
-                // 刷新当前详情
                 if (currentPostId) await showPost(currentPostId);
             } catch (e) { console.error('送巧克力失败', e);
                 showToast('操作失败', true); }
@@ -1738,7 +1749,6 @@
             if (userId === currentUser.id) { showToast('不能关注自己', true); return; }
             try {
                 if (followingMap.has(userId)) {
-                    // 取消关注
                     await sb.from('follows').delete().eq('follower_id', currentUser.id).eq('following_id', userId);
                     followingMap.delete(userId);
                     showToast('已取消关注', false);
@@ -1761,21 +1771,17 @@
                 body.style.background = '#0b0e1a';
                 body.style.color = '#e8edf5';
                 document.getElementById('themeToggle').textContent = '🌙';
+                document.querySelectorAll('.post-card, .post-detail, .hot-list, .publish-form, .modal-box').forEach(el => {
+                    el.style.background = '';
+                    el.style.color = '';
+                });
             } else {
                 body.style.background = '#f0f2f5';
                 body.style.color = '#1a1a2e';
                 document.getElementById('themeToggle').textContent = '☀️';
-                // 额外调整卡片样式
                 document.querySelectorAll('.post-card, .post-detail, .hot-list, .publish-form, .modal-box').forEach(el => {
                     el.style.background = 'rgba(255,255,255,0.8)';
                     el.style.color = '#1a1a2e';
-                });
-            }
-            // 切换回来时重置
-            if (isDarkTheme) {
-                document.querySelectorAll('.post-card, .post-detail, .hot-list, .publish-form, .modal-box').forEach(el => {
-                    el.style.background = '';
-                    el.style.color = '';
                 });
             }
         }
@@ -1811,7 +1817,6 @@
                     localStorage.setItem('sb_user', JSON.stringify(user));
                     userProfile = await getProfile(user.id);
                     if (!userProfile) {
-                        // 创建profile
                         await upsertProfile({ id: user.id, username: user.user_metadata?.username || email.split('@')[0],
                             email: email, points: 0, chocolates: 0, level: 1, streak: 0 });
                         userProfile = await getProfile(user.id);
@@ -1821,7 +1826,6 @@
                     updateUI();
                     await loadPosts(currentCategory, currentSearch);
                     await loadTopics();
-                    // 初始化任务
                     await getTasks(user.id);
                 } else {
                     showToast('登录失败', true);
@@ -1857,7 +1861,6 @@
                 const { data, error } = await sb.auth.signInWithOAuth({ provider: provider });
                 if (error) throw error;
                 showToast(`正在跳转到 ${provider} 登录...`, false);
-                // OAuth 回调会在 init 中处理
             } catch (e) { console.error('社交登录失败', e);
                 showToast('社交登录失败: ' + e.message, true); }
         }
@@ -1907,7 +1910,6 @@
                             await loadPosts(currentCategory, currentSearch);
                             await loadTopics();
                             await getTasks(currentUser.id);
-                            // 清除hash
                             window.history.replaceState({}, document.title, window.location.pathname);
                         }
                     }
@@ -1926,8 +1928,8 @@
 
         async function renderProfile() {
             if (!currentUser || !userProfile) return;
-            document.getElementById('profileDisplayName').textContent = userProfile.username || '用户';
-            document.getElementById('profileEmail').textContent = currentUser.email || '';
+            document.getElementById('profileDisplayName').textContent = escapeHtml(userProfile.username || '用户');
+            document.getElementById('profileEmail').textContent = escapeHtml(currentUser.email || '');
             document.getElementById('profilePoints').textContent = userProfile.points || 0;
             document.getElementById('profileChocolates').textContent = userProfile.chocolates || 0;
             document.getElementById('profileStreak').textContent = userProfile.streak || 0;
@@ -1936,39 +1938,35 @@
             const avatar = userProfile.avatar_url || getAvatarUrl({ username: userProfile.username, avatar_url: null });
             document.getElementById('profileAvatarPreview').src = avatar;
             document.getElementById('profileNameInput').value = userProfile.username || '';
-            // 等级进度
             const nextLevel = level + 1;
             const expNeeded = level * 50;
             const exp = userProfile.points || 0;
             const progress = Math.min(100, (exp / expNeeded) * 100);
             document.getElementById('levelProgressBar').style.width = progress + '%';
             document.getElementById('levelProgressText').textContent = `${exp} / ${expNeeded}`;
-            // 统计
             const posts = await fetchPosts();
             const myPosts = posts.filter(p => p.author_id === currentUser.id);
             document.getElementById('statPostsCount').textContent = myPosts.length;
             const comments = await sb.from('comments').select('id', { count: 'exact', head: true }).eq('author_id',
                 currentUser.id);
             document.getElementById('statCommentsCount').textContent = comments.count || 0;
-            // 获赞数
             let likesReceived = 0;
             myPosts.forEach(p => { likesReceived += (p.likes || 0); });
             document.getElementById('statLikesReceived').textContent = likesReceived;
-            // 关注/粉丝
             const { data: following } = await sb.from('follows').select('id', { count: 'exact', head: true }).eq(
                 'follower_id', currentUser.id);
             document.getElementById('statFollowing').textContent = following?.count || 0;
             const { data: followers } = await sb.from('follows').select('id', { count: 'exact', head: true }).eq(
                 'following_id', currentUser.id);
             document.getElementById('statFollowers').textContent = followers?.count || 0;
-            // 我的帖子
             let myPostsHtml = '';
             if (myPosts.length === 0) {
                 myPostsHtml = '<p style="color:rgba(255,255,255,0.3);">暂无帖子</p>';
             } else {
                 myPosts.slice(0, 10).forEach(p => {
+                    const safeId = escapeJsString(p.id);
                     myPostsHtml +=
-                        `<div class="mini-post" onclick="showPost('${p.id}')"><div class="mp-title">${escapeHtml(p.title)}</div><div class="mp-meta">${formatTime(p.created_at)} · 💬 ${commentCountMap[p.id]||0}</div></div>`;
+                        `<div class="mini-post" onclick="showPost('${safeId}')"><div class="mp-title">${escapeHtml(p.title)}</div><div class="mp-meta">${escapeHtml(formatTime(p.created_at))} · 💬 ${commentCountMap[p.id]||0}</div></div>`;
                 });
                 if (myPosts.length > 10) {
                     myPostsHtml +=
@@ -1994,7 +1992,6 @@
                 showToast('✅ 头像上传成功', false);
                 renderProfile();
                 updateUI();
-                // 刷新帖子列表
                 await loadPosts(currentCategory, currentSearch);
             } catch (e) { console.error('上传头像失败', e);
                 showToast('上传失败: ' + e.message, true); }
@@ -2041,15 +2038,15 @@
                 let html = '';
                 data.forEach(n => {
                     const isRead = n.read ? 'opacity:0.5;' : '';
+                    const safeId = escapeJsString(n.id);
                     html += `
-                <div style="padding:10px 0;border-bottom:1px solid rgba(255,255,255,0.05);${isRead}" onclick="markNotificationRead('${n.id}')">
+                <div style="padding:10px 0;border-bottom:1px solid rgba(255,255,255,0.05);${isRead}" onclick="markNotificationRead('${safeId}')">
                   <div style="font-size:.9rem;">${escapeHtml(n.content)}</div>
-                  <div style="font-size:.7rem;color:rgba(255,255,255,0.3);">${formatTime(n.created_at)}</div>
+                  <div style="font-size:.7rem;color:rgba(255,255,255,0.3);">${escapeHtml(formatTime(n.created_at))}</div>
                 </div>
               `;
                 });
                 container.innerHTML = html;
-                // 标记已读
                 await sb.from('notifications').update({ read: true }).eq('user_id', currentUser.id).eq('read', false);
                 unreadCount = 0;
                 updateUnreadBadge();
@@ -2090,7 +2087,6 @@
                 document.getElementById('myChocolates').textContent = '0';
                 document.getElementById('myTotalPoints').textContent = '0';
             }
-            // 更新通知徽章
             updateUnreadBadge();
         }
 
@@ -2168,7 +2164,7 @@
         }
 
         // =============================================================
-        // 启动应用
+        // ================ 启动应用 ====================================
         // =============================================================
         function startApp(supabase) {
             if (window._appStarted) { console.log('App 已启动，跳过重复初始化'); return; }
@@ -2224,7 +2220,6 @@
             window.closeTasks = closeTasks;
             window.followUser = followUser;
 
-            // 启动
             init().catch(e => console.error('初始化失败', e));
         }
 
