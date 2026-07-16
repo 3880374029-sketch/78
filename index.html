@@ -6,7 +6,7 @@
     <title>窍某论坛</title>
     <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' https://cdn.jsdelivr.net https://unpkg.com 'unsafe-inline'; connect-src 'self' https://bkvsceiezbyexzqpvblj.supabase.co; img-src 'self' data: https://ui-avatars.com https://bkvsceiezbyexzqpvblj.supabase.co; style-src 'self' 'unsafe-inline';">
     <script>
-        const CACHE_VERSION = 'v5.4';
+        const CACHE_VERSION = 'v5.5';
         if (localStorage.getItem('forum_cache_version') !== CACHE_VERSION) {
             localStorage.clear();
             localStorage.setItem('forum_cache_version', CACHE_VERSION);
@@ -985,7 +985,7 @@
             lastPublishTime = 0;
         let sb, SUPABASE_URL, SUPABASE_ANON_KEY;
         let isDarkTheme = true;
-        let authorMap = {}; // 新增：作者ID -> 用户名映射
+        let authorMap = {}; // 作者ID -> 用户名映射
 
         // ---- 安全转义函数（增强型，强制转为字符串） ----
         function escapeHtml(t) { if (t == null) return ''; const d = document.createElement('div');
@@ -1007,8 +1007,12 @@
 
         function formatTime(d) { if (!d) return ''; return new Date(d).toLocaleString('zh-CN'); }
 
-        function getAvatarUrl(user) { if (user && user.avatar_url) return user.avatar_url; const name = user?.username || user
-                ?.email || 'U'; return `https://ui-avatars.com/api/?name=${encodeURIComponent(name)}&background=6d5bff&color=fff&size=100`; }
+        // 头像生成函数：显示昵称前两个字符，便于辨认
+        function getAvatarUrl(user) {
+            if (user && user.avatar_url) return user.avatar_url;
+            const name = user?.username || user?.email || 'U';
+            return `https://ui-avatars.com/api/?name=${encodeURIComponent(name)}&background=6d5bff&color=fff&size=100&length=2`;
+        }
 
         function showToast(msg, isError) { const t = document.getElementById('toast');
             t.textContent = msg;
@@ -1238,7 +1242,6 @@
                         .includes(s)));
                 }
                 postsCache = posts;
-                // 获取所有作者的昵称
                 await fetchAuthors(posts);
                 commentCountMap = await fetchCommentCounts();
                 renderPosts(posts);
@@ -1260,7 +1263,7 @@
             }
         }
 
-        // ---- 渲染帖子列表（安全 + 作者映射） ----
+        // ---- 渲染帖子列表（安全 + 作者映射 + 头像显示2字符） ----
         function renderPosts(posts) {
             const container = document.getElementById('postList');
             if (!posts || posts.length === 0) {
@@ -1273,7 +1276,9 @@
             const normal = posts.filter(p => !p.pinned);
             const sorted = [...pinned, ...normal];
             sorted.forEach((post, idx) => {
-                const avatar = getAvatarUrl({ username: post.author_name || '匿名', avatar_url: post.author_avatar });
+                const displayName = authorMap[post.author_id] || post.author_name || '匿名';
+                // 头像使用映射后的显示名，显示前两个字符
+                const avatar = getAvatarUrl({ username: displayName, avatar_url: post.author_avatar });
                 const commentCount = commentCountMap[post.id] || 0;
                 const excerpt = post.content ? post.content.replace(/<[^>]+>/g, '').substring(0, 120) : '';
                 const catMap = { tech: '技术', life: '生活', career: '职业', topic: '话题' };
@@ -1289,13 +1294,11 @@
                     tagsHtml += `<span class="tag-item" onclick="searchByTag('${safeTag}')">#${displayTag}</span>`;
                 });
                 const safePostId = escapeJsString(post.id);
-                // 作者名映射
-                const displayName = authorMap[post.author_id] || post.author_name || '匿名';
                 html += `
               <div class="post-card" data-id="${escapeHtml(post.id)}">
                 <div class="post-title" onclick="showPost('${safePostId}')">${isPinned}${escapeHtml(post.title)}</div>
                 <div class="post-meta">
-                  <img class="author-avatar" src="${escapeHtml(avatar)}" alt="avatar" onerror="this.src='https://ui-avatars.com/api/?name=U&background=6d5bff&color=fff&size=100'">
+                  <img class="author-avatar" src="${escapeHtml(avatar)}" alt="avatar" onerror="this.src='https://ui-avatars.com/api/?name=U&background=6d5bff&color=fff&size=100&length=2'">
                   <span class="author">${escapeHtml(displayName)}</span>
                   <span class="level-badge">${escapeHtml(getLevelInfo(post.author_level||1).name)}</span>
                   <span>${escapeHtml(formatTime(post.created_at))}</span>
@@ -1507,7 +1510,6 @@
                 document.getElementById('postList').style.display = 'none';
                 document.getElementById('postDetail').style.display = 'block';
                 const comments = await fetchComments(postId);
-                // 确保该作者在映射中（如果尚未缓存）
                 if (!authorMap[post.author_id]) {
                     await fetchAuthors([post]);
                 }
@@ -1516,10 +1518,11 @@
                 showToast('加载失败', true); }
         }
 
-        // ---- 渲染帖子详情（安全 + 作者映射） ----
+        // ---- 渲染帖子详情（安全 + 作者映射 + 头像2字符） ----
         function renderPostDetail(post, comments) {
             const container = document.getElementById('postDetail');
-            const avatar = getAvatarUrl({ username: post.author_name || '匿名', avatar_url: post.author_avatar });
+            const displayName = authorMap[post.author_id] || post.author_name || '用户';
+            const avatar = getAvatarUrl({ username: displayName, avatar_url: post.author_avatar });
             const catMap = { tech: '技术', life: '生活', career: '职业', topic: '话题' };
             const catName = catMap[post.category] || post.category || '综合';
             // 安全处理标签
@@ -1532,8 +1535,6 @@
             const levelName = getLevelInfo(post.author_level || 1).name;
             const safePostId = escapeJsString(post.id);
             const safeAuthorId = escapeJsString(post.author_id);
-            // 作者名映射
-            const displayName = authorMap[post.author_id] || post.author_name || '用户';
             const safeAuthorName = escapeJsString(displayName);
 
             let html = `
@@ -1541,7 +1542,7 @@
               <button class="back-btn" onclick="backToList()">← 返回列表</button>
               <h2 style="font-size:1.5rem;margin-bottom:8px;">${escapeHtml(post.title)}</h2>
               <div class="post-author-info">
-                <img src="${escapeHtml(avatar)}" alt="avatar" onerror="this.src='https://ui-avatars.com/api/?name=U&background=6d5bff&color=fff&size=100'">
+                <img src="${escapeHtml(avatar)}" alt="avatar" onerror="this.src='https://ui-avatars.com/api/?name=U&background=6d5bff&color=fff&size=100&length=2'">
                 <span class="author-name">${escapeHtml(displayName)}</span>
                 <span class="level-badge" style="background:#fbbf24;color:#1a1a2e;padding:0 8px;border-radius:12px;font-size:.7rem;font-weight:bold;">${escapeHtml(levelName)}</span>
                 <span class="post-time">${escapeHtml(formatTime(post.created_at))}</span>
@@ -1564,7 +1565,7 @@
                   ${comments && comments.length>0 ? comments.map(c => `
                     <div class="reply-item">
                       <div class="reply-author-info">
-                        <img src="${escapeHtml(getAvatarUrl({username:c.author_name||'匿名',avatar_url:c.author_avatar}))}" alt="avatar" onerror="this.src='https://ui-avatars.com/api/?name=U&background=6d5bff&color=fff&size=100'">
+                        <img src="${escapeHtml(getAvatarUrl({username:c.author_name||'匿名',avatar_url:c.author_avatar}))}" alt="avatar" onerror="this.src='https://ui-avatars.com/api/?name=U&background=6d5bff&color=fff&size=100&length=2'">
                         <span class="reply-author">${escapeHtml(c.author_name||'匿名')}</span>
                         <span class="reply-time">${escapeHtml(formatTime(c.created_at))}</span>
                       </div>
