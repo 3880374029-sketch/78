@@ -9,7 +9,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400;14..32,500;14..32,600;14..32,700&display=swap" rel="stylesheet">
     <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' https://cdn.jsdelivr.net https://unpkg.com 'unsafe-inline'; connect-src 'self' https://bkvsceiezbyexzqpvblj.supabase.co; img-src 'self' data: https://ui-avatars.com https://bkvsceiezbyexzqpvblj.supabase.co; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com;">
     <script>
-        const CACHE_VERSION = 'v7.4';
+        const CACHE_VERSION = 'v7.5';
         if (localStorage.getItem('forum_cache_version') !== CACHE_VERSION) {
             localStorage.clear();
             localStorage.setItem('forum_cache_version', CACHE_VERSION);
@@ -226,6 +226,20 @@
         ::-webkit-scrollbar-track { background:rgba(255,255,255,0.02); border-radius:10px; }
         ::-webkit-scrollbar-thumb { background:rgba(124,106,255,0.4); border-radius:10px; }
         ::-webkit-scrollbar-thumb:hover { background:rgba(124,106,255,0.6); }
+
+        /* ===== 自定义标记样式 ===== */
+        .rainbow-text {
+            background: linear-gradient(to right, #f00, #ff7f00, #ff0, #0f0, #00f, #4b0082, #8b00ff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            display: inline-block;
+        }
+        .big-text {
+            font-size: 2.2em;
+            font-weight: 700;
+            display: inline-block;
+        }
     </style>
 </head>
 <body>
@@ -291,7 +305,7 @@
         </div>
         <footer>
             <div class="social-links"><a href="#">关于</a><a href="#">帮助</a><a href="#" onclick="showFeedback()">反馈</a><a href="#" onclick="showStatus()">📊 帖子状态</a></div>
-            <p class="footer-status">🔧 完全版 · 互斥点赞/推荐/点踩 · 所有模态框已补全</p>
+            <p class="footer-status">🔧 完全版 · 互斥点赞/推荐/点踩 · 所有模态框已补全 · 支持彩虹/大字/表情标记</p>
             <p style="color:rgba(255,255,255,0.2);font-size:.85rem;margin-top:4px;">© 2026 窍某论坛 · 用 ❤️ 构建</p>
         </footer>
     </div>
@@ -354,7 +368,6 @@
         let favoriteMap = new Map();
         let commentLikeMap = new Map();
         let userPostActions = new Map();
-        // 操作锁，防止并发
         let actionLocks = new Set();
 
         // ---- 安全函数 ----
@@ -398,7 +411,48 @@
 
         function showFeedback() { alert('📮 反馈请发送邮件至：3880374029@qq.com\n或者加入QQ群：1062578518'); }
 
-        function showStatus() { alert('✅ 完全版，所有功能正常'); }
+        function showStatus() { alert('✅ 完全版，所有功能正常，支持彩虹/大字/表情标记'); }
+
+        // =============================================================
+        // ================ 自定义标记解析 =============================
+        // =============================================================
+        function parseCustomMarkup(text) {
+            if (!text) return '';
+
+            // 1. 彩色文本：$\colour xxx$  -> <span class="rainbow-text">xxx</span>
+            let result = text.replace(/\$\\colour\s+(.*?)\$/g, (match, content) => {
+                const safe = escapeHtml(content);
+                return `<span class="rainbow-text">${safe}</span>`;
+            });
+
+            // 2. 大号文本：$\big xxx$  -> <span class="big-text">xxx</span>
+            result = result.replace(/\$\\big\s+(.*?)\$/g, (match, content) => {
+                const safe = escapeHtml(content);
+                return `<span class="big-text">${safe}</span>`;
+            });
+
+            // 3. 表情短代码：[#happy] 等
+            const emojiMap = {
+                'happy': '😄',
+                'happyn': '😁',
+                'why': '🤔',
+                'sad': '😢',
+                'love': '❤️',
+                'cool': '😎',
+                'angry': '😡',
+                'cry': '😭',
+                'laugh': '😂'
+            };
+            result = result.replace(/\[#(.*?)\]/g, (match, key) => {
+                const emoji = emojiMap[key.trim()] || '❓';
+                return emoji;
+            });
+
+            // 换行转 <br>
+            result = result.replace(/\n/g, '<br>');
+
+            return result;
+        }
 
         // =============================================================
         // ================ 网络请求 ====================================
@@ -941,10 +995,8 @@
         // =============================================================
         // ================ 核心：互斥点赞/推荐/点踩 ====================
         // =============================================================
-        // 通用操作函数
         async function performAction(postId, actionType, fieldName, increment, taskType) {
             if (!currentUser) { showToast('请先登录', true); return; }
-            // 加锁，防止并发
             const lockKey = `${postId}_${actionType}`;
             if (actionLocks.has(lockKey)) {
                 showToast('操作进行中，请稍候...', false);
@@ -952,7 +1004,6 @@
             }
             actionLocks.add(lockKey);
             try {
-                // 1. 获取当前帖子数据
                 const resp = await authFetch(SUPABASE_URL + `/rest/v1/posts?id=eq.${encodeURIComponent(postId)}&select=likes,recommends,downvotes`, { method: 'GET' });
                 const data = await handleResponse(resp);
                 if (!data || data.length === 0) throw new Error('帖子不存在');
@@ -961,7 +1012,6 @@
                 let newRecommends = post.recommends || 0;
                 let newDownvotes = post.downvotes || 0;
 
-                // 2. 查询用户现有操作
                 const { data: actions, error } = await sb
                     .from('user_post_actions')
                     .select('action_type')
@@ -974,15 +1024,12 @@
                 const hasRecommend = actionTypes.includes('recommend');
                 const hasDownvote = actionTypes.includes('downvote');
 
-                // 3. 根据操作类型处理
                 if (hasAction) {
-                    // 取消操作
                     if (actionType === 'like') newLikes -= 1;
                     else if (actionType === 'recommend') newRecommends -= 1;
                     else if (actionType === 'downvote') newDownvotes -= 1;
                     await sb.from('user_post_actions').delete().eq('user_id', currentUser.id).eq('post_id', postId).eq('action_type', actionType);
                 } else {
-                    // 添加操作，先处理互斥
                     if (actionType === 'like') {
                         if (hasRecommend) { newRecommends -= 1;
                             await sb.from('user_post_actions').delete().eq('user_id', currentUser.id).eq('post_id', postId).eq('action_type', 'recommend'); }
@@ -1002,25 +1049,21 @@
                             await sb.from('user_post_actions').delete().eq('user_id', currentUser.id).eq('post_id', postId).eq('action_type', 'recommend'); }
                         newDownvotes += 1;
                     }
-                    // 插入新记录（使用 onConflict 避免 409）
                     await sb.from('user_post_actions').insert({
                         user_id: currentUser.id,
                         post_id: postId,
                         action_type: actionType
                     }, { onConflict: 'user_id, post_id, action_type' });
-                    // 更新任务进度（点赞和推荐算进度）
                     if (taskType) {
                         await updateTaskProgress(currentUser.id, taskType, 1);
                     }
                 }
 
-                // 4. 更新帖子计数
                 await authFetch(SUPABASE_URL + `/rest/v1/posts?id=eq.${encodeURIComponent(postId)}`, {
                     method: 'PATCH',
                     body: JSON.stringify({ likes: newLikes, recommends: newRecommends, downvotes: newDownvotes })
                 });
 
-                // 5. 刷新视图
                 if (currentPostId) {
                     await showPost(currentPostId);
                 } else {
@@ -1034,7 +1077,6 @@
             }
         }
 
-        // 包装函数
         async function handleLike(postId) {
             await performAction(postId, 'like', 'likes', 1, 'daily_like');
         }
@@ -1103,6 +1145,9 @@
             const recommendClass = actions.recommended ? 'active' : '';
             const downvoteClass = actions.downvoted ? 'active' : '';
 
+            // 使用 parseCustomMarkup 处理帖子内容
+            const parsedContent = parseCustomMarkup(post.content);
+
             let html = `
             <div class="post-detail">
               <button class="back-btn" onclick="backToList()">← 返回列表</button>
@@ -1116,7 +1161,7 @@
                 ${tagsHtml}
                 ${isAuthor ? `<span style="color:#fcd34d;font-size:.7rem;">✏️ 作者</span>` : ''}
               </div>
-              <div class="post-body">${nl2br(post.content)}</div>
+              <div class="post-body">${parsedContent}</div>
               <div class="post-actions">
                 <span class="like-btn ${likeClass}" onclick="handleLike('${safePostId}')">❤️ ${post.likes||0}</span>
                 <span class="recommend-btn ${recommendClass}" onclick="handleRecommend('${safePostId}')">👍 ${post.recommends||0}</span>
