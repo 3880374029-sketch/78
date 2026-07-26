@@ -3,10 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
-    <title>窍某论坛</title>
+    <title>窍某论坛 · 焕新版</title>
     <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' https://cdn.jsdelivr.net https://unpkg.com 'unsafe-inline'; connect-src 'self' https://bkvsceiezbyexzqpvblj.supabase.co; img-src 'self' data: https://ui-avatars.com https://bkvsceiezbyexzqpvblj.supabase.co; style-src 'self' 'unsafe-inline';">
     <script>
-        const CACHE_VERSION = 'v6.1';
+        const CACHE_VERSION = 'v7.0';
         if (localStorage.getItem('forum_cache_version') !== CACHE_VERSION) {
             localStorage.clear();
             localStorage.setItem('forum_cache_version', CACHE_VERSION);
@@ -20,6 +20,7 @@
                 'https://cdnjs.cloudflare.com/ajax/libs/supabase-js/2.39.0/umd/supabase.min.js'
             ];
             let index = 0;
+
             function tryLoad() {
                 if (index >= cdnList.length) {
                     document.body.innerHTML =
@@ -51,7 +52,7 @@
         })();
     </script>
     <style>
-        /* ===== 完整样式（与之前一致） ===== */
+        /* ===== 完整样式（与之前一致 + 新增） ===== */
         * {
             margin: 0;
             padding: 0;
@@ -63,6 +64,7 @@
             font-family: 'Segoe UI', sans-serif;
             padding: 12px;
             line-height: 1.6;
+            transition: background .3s, color .3s;
         }
         .container {
             max-width: 1200px;
@@ -137,6 +139,32 @@
         }
         .btn-outline:hover {
             background: rgba(255, 255, 255, 0.05);
+        }
+        .btn-danger {
+            background: linear-gradient(135deg, #ef4444, #dc2626);
+        }
+        .btn-danger:hover {
+            transform: scale(1.04);
+        }
+        .btn-success {
+            background: linear-gradient(135deg, #22c55e, #16a34a);
+        }
+        .btn-success:hover {
+            transform: scale(1.04);
+        }
+        .btn-sm {
+            background: rgba(255, 255, 255, 0.06);
+            border: 1px solid #444;
+            color: #e8edf5;
+            padding: 2px 10px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: .7rem;
+            min-height: 28px;
+            min-width: 28px;
+        }
+        .btn-sm:hover {
+            background: rgba(255, 255, 255, 0.12);
         }
         .auth-section {
             display: flex;
@@ -299,7 +327,8 @@
         }
         .post-card .post-footer .like-btn,
         .post-card .post-footer .recommend-btn,
-        .post-card .post-footer .downvote-btn {
+        .post-card .post-footer .downvote-btn,
+        .post-card .post-footer .fav-btn {
             cursor: pointer;
             user-select: none;
             margin-right: 8px;
@@ -390,7 +419,8 @@
         }
         .post-detail .post-actions .like-btn,
         .post-detail .post-actions .recommend-btn,
-        .post-detail .post-actions .downvote-btn {
+        .post-detail .post-actions .downvote-btn,
+        .post-detail .post-actions .fav-btn {
             cursor: pointer;
             user-select: none;
             margin-right: 10px;
@@ -423,6 +453,19 @@
         .reply-item .reply-content {
             margin: 4px 0 0;
             color: rgba(255, 255, 255, 0.65);
+        }
+        .reply-item .reply-actions {
+            margin-top: 4px;
+            display: flex;
+            gap: 12px;
+            font-size: .75rem;
+            color: rgba(255, 255, 255, 0.3);
+        }
+        .reply-item .reply-actions .comment-like-btn {
+            cursor: pointer;
+        }
+        .reply-item .reply-actions .comment-like-btn:hover {
+            color: #a5b4fc;
         }
         .publish-form {
             display: none;
@@ -509,6 +552,7 @@
             max-height: 90vh;
             overflow-y: auto;
             position: relative;
+            transition: background .3s;
         }
         .modal-box .close {
             position: absolute;
@@ -735,6 +779,7 @@
             z-index: 1000;
             display: none;
             max-width: 90%;
+            transition: background .3s;
         }
         .toast.show {
             display: block;
@@ -769,18 +814,6 @@
             font-size: 11px;
             min-width: 18px;
             text-align: center;
-        }
-        .btn-sm {
-            background: rgba(255, 255, 255, 0.06);
-            border: 1px solid #444;
-            color: #e8edf5;
-            padding: 2px 10px;
-            border-radius: 20px;
-            cursor: pointer;
-            font-size: .7rem;
-        }
-        .btn-sm:hover {
-            background: rgba(255, 255, 255, 0.12);
         }
         .tag-item {
             display: inline-block;
@@ -860,6 +893,57 @@
         .task-item .task-status.pending {
             color: #ef4444;
         }
+        .edit-area {
+            display: none;
+            margin: 12px 0;
+            padding: 16px;
+            background: rgba(255, 255, 255, 0.04);
+            border-radius: 12px;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+        }
+        .edit-area.active {
+            display: block;
+        }
+        .msg-item {
+            padding: 10px 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        }
+        .msg-item .msg-sender {
+            color: #a5b4fc;
+            font-weight: 600;
+        }
+        .msg-item .msg-time {
+            color: rgba(255, 255, 255, 0.3);
+            font-size: .7rem;
+            margin-left: 10px;
+        }
+        .msg-item .msg-content {
+            color: rgba(255, 255, 255, 0.7);
+            margin-top: 2px;
+        }
+        .msg-item .msg-unread {
+            background: rgba(109, 91, 255, 0.15);
+            border-left: 3px solid #6d5bff;
+            padding-left: 10px;
+        }
+        .fav-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 6px 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            cursor: pointer;
+        }
+        .fav-item:hover {
+            color: #a5b4fc;
+        }
+        .fav-item .fav-title {
+            font-size: .9rem;
+        }
+        .fav-item .fav-meta {
+            font-size: .7rem;
+            color: rgba(255, 255, 255, 0.3);
+        }
         @media (max-width:768px) {
             .main-layout {
                 flex-direction: column;
@@ -886,12 +970,13 @@
 <body>
     <div class="container">
         <header>
-            <h1>💡 窍某论坛</h1>
+            <h1>💡 窍某论坛 · 焕新</h1>
             <div class="nav-controls">
                 <input class="search-box" id="searchInput" placeholder="搜索帖子..." oninput="searchPosts()">
                 <button class="btn btn-outline" id="themeToggle" onclick="toggleTheme()">🌙</button>
                 <button class="btn" onclick="togglePublish()">✏️ 发布</button>
                 <span class="notification-badge" id="notificationBell" onclick="openNotificationPanel()">🔔 <span class="count hidden" id="notifCount">0</span></span>
+                <button class="btn btn-outline" onclick="openMessages()" title="私信">💬</button>
                 <div class="auth-section">
                     <button class="btn" id="loginBtn" onclick="openModal()">登录</button>
                     <img class="user-avatar hidden" id="userAvatar" alt="avatar">
@@ -908,6 +993,7 @@
             <span>🔥 今日 <strong id="statToday">0</strong></span>
             <span>🍫 我的巧克力 <strong id="myChocolates">0</strong></span>
             <span>⭐ 积分 <strong id="myTotalPoints">0</strong></span>
+            <span>❤️ 收藏 <strong id="myFavCount">0</strong></span>
         </div>
         <div class="main-layout">
             <div class="main-content">
@@ -919,6 +1005,7 @@
                     <button class="board-btn" data-category="topic" onclick="setCategory('topic')">话题</button>
                     <button class="board-btn" onclick="openNewTopic()">➕ 话题</button>
                     <button class="board-btn" onclick="openShop()" style="background:#d4a373;color:#1a1a2e;">🍫 商城</button>
+                    <button class="board-btn" onclick="openFavorites()" style="background:#fbbf24;color:#1a1a2e;">❤️ 收藏</button>
                 </div>
                 <div class="publish-form" id="publishForm">
                     <select id="publishCategory"><option value="tech">技术</option><option value="life">生活</option><option value="career">职业</option><option value="topic">话题</option></select>
@@ -940,33 +1027,46 @@
         </div>
         <footer>
             <div class="social-links"><a href="#">关于</a><a href="#">帮助</a><a href="#" onclick="showFeedback()">反馈</a><a href="#" onclick="showStatus()">📊 帖子状态</a></div>
-            <p class="footer-status">🔧 所有功能已修复，点赞/推荐/点踩/观看量实时更新</p>
+            <p class="footer-status">🔧 焕新版 · 支持编辑/删除 · 评论点赞 · 收藏 · 私信</p>
             <p style="color:rgba(255,255,255,0.2);font-size:.85rem;margin-top:4px;">© 2026 窍某论坛 · 用 ❤️ 构建</p>
         </footer>
     </div>
 
-    <!-- 模态框 -->
+    <!-- 模态框：认证 -->
     <div class="modal" id="authModal"><div class="modal-box"><span class="close" onclick="closeModal()">&times;</span><h2 id="modalTitle" style="margin-bottom:4px;">欢迎回来</h2><p id="modalSub" style="color:rgba(255,255,255,0.4);margin-bottom:16px;">登录你的账号</p><div class="modal-tabs"><button class="active" data-tab="login" onclick="switchTab('login')">登录</button><button data-tab="register" onclick="switchTab('register')">注册</button></div><form id="loginForm" class="auth-form active" onsubmit="handleLogin(event)"><input type="email" id="loginEmail" placeholder="邮箱" required><input type="password" id="loginPassword" placeholder="密码" required><button class="btn" type="submit">登录</button><div class="divider">或</div><button class="social-btn google-btn" type="button" onclick="handleSocialLogin('google')">继续用 Google 登录</button><button class="social-btn github-btn" type="button" onclick="handleSocialLogin('github')">继续用 GitHub 登录</button><div class="auth-switch">还没有账号？ <a onclick="switchTab('register')">立即注册</a></div></form><form id="registerForm" class="auth-form" onsubmit="handleRegister(event)"><input type="text" id="regName" placeholder="昵称" required><input type="email" id="regEmail" placeholder="邮箱" required><input type="password" id="regPassword" placeholder="密码（至少6位）" required><input type="password" id="regConfirm" placeholder="确认密码" required><button class="btn" type="submit">注册</button><div class="divider">或</div><button class="social-btn google-btn" type="button" onclick="handleSocialLogin('google')">用 Google 注册</button><button class="social-btn github-btn" type="button" onclick="handleSocialLogin('github')">用 GitHub 注册</button><div class="auth-switch">已有账号？ <a onclick="switchTab('login')">去登录</a></div></form></div></div>
 
+    <!-- 模态框：个人中心 -->
     <div class="modal" id="profileModal"><div class="modal-box"><span class="close" onclick="closeProfile()">&times;</span><h2 style="margin-bottom:16px;">👤 个人中心</h2><div class="profile-header"><div class="profile-upload-btn"><img class="profile-avatar-large" id="profileAvatarPreview" alt="avatar"><input type="file" accept="image/*" onchange="uploadAvatar(event)"></div><div class="profile-info"><h2 id="profileDisplayName">用户</h2><div class="email" id="profileEmail">email@example.com</div><div style="display:flex;gap:12px;flex-wrap:wrap;margin-top:4px;"><span>⭐ 积分 <strong id="profilePoints">0</strong></span><span>📊 <strong id="profileLevel">Lv.1</strong></span><span>🍫 巧克力 <strong id="profileChocolates">0</strong></span><span>🔥 连续签到 <strong id="profileStreak">0</strong> 天</span></div></div></div><div class="level-progress"><div class="bar" id="levelProgressBar"></div></div><div style="text-align:right;font-size:.8rem;color:rgba(255,255,255,0.3);" id="levelProgressText">0 / 50</div><div class="stats-grid"><div class="stat-item"><div class="num" id="statPostsCount">0</div><div class="label">帖子</div></div><div class="stat-item"><div class="num" id="statCommentsCount">0</div><div class="label">评论</div></div><div class="stat-item"><div class="num" id="statLikesReceived">0</div><div class="label">获赞</div></div><div class="stat-item"><div class="num" id="statFollowing">0</div><div class="label">关注</div></div><div class="stat-item"><div class="num" id="statFollowers">0</div><div class="label">粉丝</div></div></div><div class="profile-form"><div class="form-group"><label>昵称</label><input id="profileNameInput" placeholder="修改昵称" maxlength="30"></div><button class="btn" onclick="saveProfile()">保存修改</button><div id="profileMsg" style="margin-top:8px;"></div></div><h3 style="margin:20px 0 12px;">📝 我的帖子</h3><div class="my-posts-list" id="myPostsList"></div></div></div>
 
+    <!-- 模态框：通知 -->
     <div class="modal" id="notificationModal"><div class="modal-box"><span class="close" onclick="closeNotificationPanel()">&times;</span><h2 style="margin-bottom:16px;">🔔 通知</h2><div id="notificationList"><p style="color:rgba(255,255,255,0.3);">加载中...</p></div></div></div>
 
+    <!-- 模态框：话题 -->
     <div class="modal" id="topicModal"><div class="modal-box"><span class="close" onclick="closeTopicModal()">&times;</span><h2 style="margin-bottom:16px;">📂 创建新话题</h2><input id="topicNameInput" placeholder="话题名称" maxlength="30"><button class="btn" style="margin-top:12px;" onclick="createTopic()">创建</button><div id="topicMsg" style="margin-top:8px;"></div></div></div>
 
+    <!-- 模态框：商城 -->
     <div class="modal" id="shopModal"><div class="modal-box"><span class="close" onclick="closeShop()">&times;</span><h2 style="margin-bottom:16px;">🍫 巧克力商城</h2><p style="color:rgba(255,255,255,0.4);margin-bottom:16px;">用巧克力兑换炫酷装扮</p><div id="shopItems"><div class="shop-item"><span class="name">🌈 彩虹头像框</span><span class="price">🍫 5</span><button class="btn-sm" onclick="buyItem('头像框',5)">购买</button></div><div class="shop-item"><span class="name">✨ 金色昵称</span><span class="price">🍫 10</span><button class="btn-sm" onclick="buyItem('金色昵称',10)">购买</button></div><div class="shop-item"><span class="name">👑 皇冠标识</span><span class="price">🍫 20</span><button class="btn-sm" onclick="buyItem('皇冠标识',20)">购买</button></div><div class="shop-item"><span class="name">💎 钻石边框</span><span class="price">🍫 50</span><button class="btn-sm" onclick="buyItem('钻石边框',50)">购买</button></div></div><div id="shopMsg" style="margin-top:8px;"></div></div></div>
 
+    <!-- 模态框：积分兑换 -->
     <div class="modal" id="exchangeModal"><div class="modal-box"><span class="close" onclick="closeExchange()">&times;</span><h2 style="margin-bottom:16px;">🍫 积分换巧克力</h2><p>50 积分 = 1 巧克力</p><input type="number" id="exchangeCount" placeholder="数量" min="1" value="1" style="width:100%;padding:8px;border-radius:8px;border:1px solid #444;background:rgba(255,255,255,0.05);color:#fff;"><button class="btn" onclick="doExchange()" style="width:100%;margin-top:12px;">兑换</button><div id="exchangeMsg" style="margin-top:8px;"></div></div></div>
 
+    <!-- 模态框：投巧克力 -->
     <div class="modal" id="giveChocolateModal"><div class="modal-box"><span class="close" onclick="closeGiveChocolate()">&times;</span><h2 style="margin-bottom:16px;">🍫 投巧克力</h2><p id="giveTarget">给用户：</p><input type="number" id="giveCount" placeholder="数量" min="1" value="1" style="width:100%;padding:8px;border-radius:8px;border:1px solid #444;background:rgba(255,255,255,0.05);color:#fff;"><button class="btn" onclick="doGiveChocolate()" style="width:100%;margin-top:12px;">送出</button><div id="giveMsg" style="margin-top:8px;"></div></div></div>
 
+    <!-- 模态框：任务 -->
     <div class="modal" id="tasksModal"><div class="modal-box"><span class="close" onclick="closeTasks()">&times;</span><h2 style="margin-bottom:16px;">📋 积分任务</h2><p style="color:rgba(255,255,255,0.4);margin-bottom:16px;">完成每日任务获得额外积分</p><div id="tasksList"><p style="color:rgba(255,255,255,0.3);">加载中...</p></div></div></div>
+
+    <!-- 模态框：私信 -->
+    <div class="modal" id="messagesModal"><div class="modal-box"><span class="close" onclick="closeMessages()">&times;</span><h2 style="margin-bottom:16px;">💬 私信</h2><div id="messageList"><p style="color:rgba(255,255,255,0.3);">加载中...</p></div><div style="margin-top:16px;display:flex;gap:8px;flex-wrap:wrap;"><input id="msgRecipient" placeholder="收件人昵称" style="flex:1;min-width:120px;"><input id="msgContent" placeholder="消息内容" style="flex:2;min-width:150px;"><button class="btn" onclick="sendMessage()">发送</button></div></div></div>
+
+    <!-- 模态框：收藏列表 -->
+    <div class="modal" id="favoritesModal"><div class="modal-box"><span class="close" onclick="closeFavorites()">&times;</span><h2 style="margin-bottom:16px;">❤️ 我的收藏</h2><div id="favoritesList"><p style="color:rgba(255,255,255,0.3);">加载中...</p></div></div></div>
 
     <div class="toast" id="toast"></div>
 
     <script>
         // =============================================================
-        // ================ 全局状态 & 安全工具 ========================
+        // ================ 全局状态 ====================================
         // =============================================================
         let currentUser = null,
             userProfile = null,
@@ -985,6 +1085,8 @@
         let sb, SUPABASE_URL, SUPABASE_ANON_KEY;
         let isDarkTheme = true;
         let authorMap = {};
+        let favoriteMap = new Map();
+        let commentLikeMap = new Map();
 
         // ---- 安全函数 ----
         function escapeHtml(t) { if (t == null) return ''; const d = document.createElement('div');
@@ -1027,7 +1129,7 @@
 
         function showFeedback() { alert('📮 反馈请发送邮件至：3880374029@qq.com\n或者加入QQ群：1062578518'); }
 
-        function showStatus() { alert('✅ 点赞/推荐/点踩/观看量功能已修复！'); }
+        function showStatus() { alert('✅ 焕新版功能：编辑/删除 · 评论点赞 · 收藏 · 私信'); }
 
         // =============================================================
         // ================ 网络请求 ====================================
@@ -1163,7 +1265,7 @@
             return map;
         }
 
-        // ===== 作者映射 =====
+        // ---- 作者映射 ----
         async function fetchAuthors(posts) {
             if (!posts || posts.length === 0) return;
             const ids = [...new Set(posts.map(p => p.author_id).filter(id => id))];
@@ -1179,7 +1281,7 @@
             } catch (e) { console.warn('fetchAuthors异常', e); }
         }
 
-        // ===== 任务系统 =====
+        // ---- 任务系统 ----
         async function getTasks(userId) {
             const today = new Date().toISOString().split('T')[0];
             const { data, error } = await sb.from('user_tasks').select('*').eq('user_id', userId).eq('reset_date',
@@ -1252,12 +1354,285 @@
 
         function closeTasks() { document.getElementById('tasksModal').classList.remove('active'); }
 
-        // ===== 标签工具 =====
+        // ---- 标签工具 ----
         function normalizeTags(tags) {
             if (!tags) return [];
             if (Array.isArray(tags)) return tags.filter(t => t && t.trim());
             if (typeof tags === 'string') return tags.split(',').filter(t => t.trim());
             return [];
+        }
+
+        // =============================================================
+        // ================ 收藏功能 ====================================
+        // =============================================================
+        async function toggleFavorite(postId) {
+            if (!currentUser) { showToast('请先登录', true); return; }
+            try {
+                const exists = favoriteMap.get(postId);
+                if (exists) {
+                    await authFetch(SUPABASE_URL + `/rest/v1/favorites?user_id=eq.${encodeURIComponent(currentUser.id)}&post_id=eq.${encodeURIComponent(postId)}`, { method: 'DELETE' });
+                    favoriteMap.delete(postId);
+                    showToast('已取消收藏', false);
+                } else {
+                    await authFetch(SUPABASE_URL + '/rest/v1/favorites', {
+                        method: 'POST',
+                        body: JSON.stringify({ user_id: currentUser.id, post_id: postId })
+                    });
+                    favoriteMap.set(postId, true);
+                    showToast('❤️ 收藏成功', false);
+                }
+                updateUI();
+                if (currentPostId) await showPost(currentPostId);
+                else await loadPosts(currentCategory, currentSearch);
+            } catch (e) { console.error('收藏操作失败', e);
+                showToast('操作失败', true); }
+        }
+
+        async function loadFavorites() {
+            if (!currentUser) return;
+            try {
+                const { data, error } = await sb.from('favorites').select('post_id').eq('user_id', currentUser.id);
+                if (error) return;
+                favoriteMap.clear();
+                data.forEach(f => favoriteMap.set(f.post_id, true));
+                document.getElementById('myFavCount').textContent = data.length;
+            } catch (e) { console.warn('加载收藏失败', e); }
+        }
+
+        async function openFavorites() {
+            if (!currentUser) { showToast('请先登录', true); return; }
+            document.getElementById('favoritesModal').classList.add('active');
+            await renderFavorites();
+        }
+
+        function closeFavorites() { document.getElementById('favoritesModal').classList.remove('active'); }
+
+        async function renderFavorites() {
+            const container = document.getElementById('favoritesList');
+            if (!currentUser) { container.innerHTML = '<p style="color:rgba(255,255,255,0.3);">请先登录</p>'; return; }
+            try {
+                const { data, error } = await sb.from('favorites').select('post_id').eq('user_id', currentUser.id);
+                if (error) throw error;
+                if (!data || data.length === 0) {
+                    container.innerHTML = '<p style="color:rgba(255,255,255,0.3);">暂无收藏</p>';
+                    return;
+                }
+                const postIds = data.map(f => f.post_id);
+                const posts = await fetchPosts();
+                const favPosts = posts.filter(p => postIds.includes(p.id));
+                if (favPosts.length === 0) {
+                    container.innerHTML = '<p style="color:rgba(255,255,255,0.3);">暂无收藏</p>';
+                    return;
+                }
+                let html = '';
+                favPosts.forEach(p => {
+                    const safeId = escapeJsString(p.id);
+                    html +=
+                        `<div class="fav-item" onclick="showPost('${safeId}')"><span class="fav-title">${escapeHtml(p.title)}</span><span class="fav-meta">${escapeHtml(formatTime(p.created_at))}</span></div>`;
+                });
+                container.innerHTML = html;
+            } catch (e) { console.error('加载收藏失败', e);
+                container.innerHTML = '<p style="color:rgba(255,255,255,0.3);">加载失败</p>'; }
+        }
+
+        // =============================================================
+        // ================ 评论点赞 ====================================
+        // =============================================================
+        async function toggleCommentLike(commentId) {
+            if (!currentUser) { showToast('请先登录', true); return; }
+            try {
+                const key = commentId;
+                const exists = commentLikeMap.get(key);
+                if (exists) {
+                    await authFetch(SUPABASE_URL + `/rest/v1/comment_likes?user_id=eq.${encodeURIComponent(currentUser.id)}&comment_id=eq.${encodeURIComponent(commentId)}`, { method: 'DELETE' });
+                    commentLikeMap.delete(key);
+                } else {
+                    await authFetch(SUPABASE_URL + '/rest/v1/comment_likes', {
+                        method: 'POST',
+                        body: JSON.stringify({ user_id: currentUser.id, comment_id: commentId })
+                    });
+                    commentLikeMap.set(key, true);
+                    await updateTaskProgress(currentUser.id, 'daily_like', 1);
+                }
+                if (currentPostId) await showPost(currentPostId);
+            } catch (e) { console.error('评论点赞失败', e);
+                showToast('操作失败', true); }
+        }
+
+        async function loadCommentLikes(comments) {
+            if (!currentUser || !comments || comments.length === 0) return;
+            try {
+                const ids = comments.map(c => c.id);
+                const { data, error } = await sb.from('comment_likes').select('comment_id').eq('user_id', currentUser.id)
+                    .in('comment_id', ids);
+                if (error) return;
+                commentLikeMap.clear();
+                data.forEach(d => commentLikeMap.set(d.comment_id, true));
+            } catch (e) { console.warn('加载评论点赞状态失败', e); }
+        }
+
+        // =============================================================
+        // ================ 私信系统 ====================================
+        // =============================================================
+        async function openMessages() {
+            if (!currentUser) { showToast('请先登录', true); return; }
+            document.getElementById('messagesModal').classList.add('active');
+            await renderMessages();
+        }
+
+        function closeMessages() { document.getElementById('messagesModal').classList.remove('active'); }
+
+        async function renderMessages() {
+            const container = document.getElementById('messageList');
+            if (!currentUser) { container.innerHTML = '<p style="color:rgba(255,255,255,0.3);">请先登录</p>'; return; }
+            try {
+                const { data, error } = await sb.from('messages')
+                    .select('*')
+                    .or(`sender_id.eq.${currentUser.id},receiver_id.eq.${currentUser.id}`)
+                    .order('created_at', { ascending: false })
+                    .limit(50);
+                if (error) throw error;
+                if (!data || data.length === 0) {
+                    container.innerHTML = '<p style="color:rgba(255,255,255,0.3);">暂无私信</p>';
+                    return;
+                }
+                // 获取发送者信息
+                const senderIds = [...new Set(data.map(m => m.sender_id))];
+                const { data: profiles } = await sb.from('profiles').select('id, username').in('id', senderIds);
+                const nameMap = {};
+                profiles.forEach(p => nameMap[p.id] = p.username || '用户');
+                let html = '';
+                data.forEach(m => {
+                    const isUnread = !m.read && m.receiver_id === currentUser.id;
+                    const senderName = nameMap[m.sender_id] || '未知';
+                    const isMine = m.sender_id === currentUser.id;
+                    html += `
+                <div class="msg-item ${isUnread?'msg-unread':''}">
+                  <span class="msg-sender">${isMine?'我':escapeHtml(senderName)}</span>
+                  <span class="msg-time">${escapeHtml(formatTime(m.created_at))}</span>
+                  <div class="msg-content">${escapeHtml(m.content)}</div>
+                  ${isUnread?`<button class="btn-sm" onclick="markMessageRead('${escapeJsString(m.id)}')">标记已读</button>`:''}
+                </div>
+              `;
+                });
+                container.innerHTML = html;
+                // 标记所有收到的消息为已读
+                await sb.from('messages').update({ read: true }).eq('receiver_id', currentUser.id).eq('read', false);
+            } catch (e) { console.error('加载私信失败', e);
+                container.innerHTML = '<p style="color:rgba(255,255,255,0.3);">加载失败</p>'; }
+        }
+
+        async function sendMessage() {
+            if (!currentUser) { showToast('请先登录', true); return; }
+            const recipient = document.getElementById('msgRecipient').value.trim();
+            const content = document.getElementById('msgContent').value.trim();
+            if (!recipient) { showToast('请输入收件人昵称', true); return; }
+            if (!content) { showToast('请输入消息内容', true); return; }
+            try {
+                // 查找收件人
+                const { data: profiles, error } = await sb.from('profiles').select('id').eq('username', recipient).limit(1);
+                if (error || !profiles || profiles.length === 0) {
+                    showToast('未找到该用户', true);
+                    return;
+                }
+                const receiverId = profiles[0].id;
+                if (receiverId === currentUser.id) { showToast('不能给自己发私信', true); return; }
+                await authFetch(SUPABASE_URL + '/rest/v1/messages', {
+                    method: 'POST',
+                    body: JSON.stringify({
+                        sender_id: currentUser.id,
+                        receiver_id: receiverId,
+                        content: content,
+                        read: false
+                    })
+                });
+                showToast('✅ 私信发送成功', false);
+                document.getElementById('msgContent').value = '';
+                await renderMessages();
+                // 通知收件人（通过通知表）
+                await sb.from('notifications').insert({
+                    user_id: receiverId,
+                    content: `📩 来自 ${userProfile?.username||'用户'} 的私信`,
+                    read: false
+                });
+            } catch (e) { console.error('发送私信失败', e);
+                showToast('发送失败: ' + e.message, true); }
+        }
+
+        async function markMessageRead(msgId) {
+            try {
+                await sb.from('messages').update({ read: true }).eq('id', msgId);
+                await renderMessages();
+            } catch (e) { console.warn('标记已读失败', e); }
+        }
+
+        // =============================================================
+        // ================ 帖子编辑/删除 ================================
+        // =============================================================
+        function showEditForm(post) {
+            const container = document.getElementById('postDetail');
+            let editArea = container.querySelector('.edit-area');
+            if (!editArea) {
+                editArea = document.createElement('div');
+                editArea.className = 'edit-area';
+                editArea.innerHTML = `
+              <input id="editTitle" placeholder="标题" maxlength="100" style="margin-bottom:8px;">
+              <textarea id="editContent" placeholder="内容" rows="5" style="margin-bottom:8px;"></textarea>
+              <button class="btn btn-success" onclick="saveEdit()">💾 保存</button>
+              <button class="btn btn-outline" onclick="cancelEdit()">取消</button>
+              <div id="editMsg" style="margin-top:8px;"></div>
+            `;
+                container.appendChild(editArea);
+            }
+            document.getElementById('editTitle').value = post.title || '';
+            document.getElementById('editContent').value = post.content || '';
+            editArea.classList.add('active');
+            editArea.dataset.postId = post.id;
+        }
+
+        function cancelEdit() {
+            const editArea = document.querySelector('.edit-area');
+            if (editArea) editArea.classList.remove('active');
+        }
+
+        async function saveEdit() {
+            const editArea = document.querySelector('.edit-area');
+            if (!editArea || !editArea.classList.contains('active')) return;
+            const postId = editArea.dataset.postId;
+            const title = document.getElementById('editTitle').value.trim();
+            const content = document.getElementById('editContent').value.trim();
+            if (!title) { showToast('标题不能为空', true); return; }
+            if (!content) { showToast('内容不能为空', true); return; }
+            try {
+                await authFetch(SUPABASE_URL + `/rest/v1/posts?id=eq.${encodeURIComponent(postId)}`, {
+                    method: 'PATCH',
+                    body: JSON.stringify({ title, content })
+                });
+                showToast('✅ 帖子已更新', false);
+                cancelEdit();
+                await showPost(postId);
+                await loadPosts(currentCategory, currentSearch);
+            } catch (e) { console.error('保存失败', e);
+                showToast('保存失败: ' + e.message, true); }
+        }
+
+        async function deletePost(postId) {
+            if (!currentUser) { showToast('请先登录', true); return; }
+            if (!confirm('确定要删除这篇帖子吗？此操作不可恢复！')) return;
+            try {
+                // 先删除评论
+                await authFetch(SUPABASE_URL + `/rest/v1/comments?post_id=eq.${encodeURIComponent(postId)}`, { method: 'DELETE' });
+                // 删除收藏
+                await authFetch(SUPABASE_URL + `/rest/v1/favorites?post_id=eq.${encodeURIComponent(postId)}`, { method: 'DELETE' });
+                // 删除帖子
+                await authFetch(SUPABASE_URL + `/rest/v1/posts?id=eq.${encodeURIComponent(postId)}`, { method: 'DELETE' });
+                showToast('🗑️ 帖子已删除', false);
+                document.getElementById('postDetail').style.display = 'none';
+                document.getElementById('postList').style.display = 'block';
+                currentPostId = null;
+                await loadPosts(currentCategory, currentSearch);
+            } catch (e) { console.error('删除失败', e);
+                showToast('删除失败: ' + e.message, true); }
         }
 
         // =============================================================
@@ -1277,6 +1652,7 @@
                 postsCache = posts;
                 await fetchAuthors(posts);
                 commentCountMap = await fetchCommentCounts();
+                await loadFavorites();
                 renderPosts(posts);
                 updateStats(posts);
                 loadHotPosts(posts);
@@ -1322,6 +1698,7 @@
                     tagsHtml += `<span class="tag-item" onclick="searchByTag('${safeTag}')">#${displayTag}</span>`;
                 });
                 const safePostId = escapeJsString(post.id);
+                const isFav = favoriteMap.get(post.id) ? '❤️' : '🤍';
                 html += `
               <div class="post-card" data-id="${escapeHtml(post.id)}">
                 <div class="post-title" onclick="showPost('${safePostId}')">${isPinned}${escapeHtml(post.title)}</div>
@@ -1341,6 +1718,7 @@
                   <span class="downvote-btn" onclick="handleDownvote('${safePostId}')">👎 ${post.downvotes||0}</span>
                   <span>👁️ ${post.views||0}</span>
                   <span>🍫 ${post.chocolate_count||0}</span>
+                  <span class="fav-btn" onclick="toggleFavorite('${safePostId}')">${isFav}</span>
                   <span style="margin-left:auto;color:rgba(255,255,255,0.2);font-size:.7rem;">#${idx+1}</span>
                 </div>
               </div>
@@ -1362,6 +1740,7 @@
             if (currentUser && userProfile) {
                 document.getElementById('myChocolates').textContent = userProfile.chocolates || 0;
                 document.getElementById('myTotalPoints').textContent = userProfile.points || 0;
+                document.getElementById('myFavCount').textContent = favoriteMap.size;
             }
         }
 
@@ -1402,12 +1781,11 @@
         }
 
         // =============================================================
-        // ================ 帖子交互（点赞/推荐/点踩/观看） =============
+        // ================ 帖子交互 ====================================
         // =============================================================
         async function handleLike(postId) {
             if (!currentUser) { showToast('请先登录', true); return; }
             try {
-                // 先获取当前帖子数据
                 const resp = await authFetch(SUPABASE_URL + `/rest/v1/posts?id=eq.${encodeURIComponent(postId)}&select=likes`, { method: 'GET' });
                 const data = await handleResponse(resp);
                 if (!data || data.length === 0) throw new Error('帖子不存在');
@@ -1418,7 +1796,6 @@
                     body: JSON.stringify({ likes: newLikes })
                 });
                 await updateTaskProgress(currentUser.id, 'daily_like', 1);
-                // 刷新当前视图
                 if (currentPostId) {
                     await showPost(currentPostId);
                 } else {
@@ -1477,10 +1854,10 @@
             }
         }
 
-        // 观看量在 showPost 中增加
+        // ---- 显示帖子详情 ----
         async function showPost(postId) {
             try {
-                // 先增加观看量
+                // 增加观看量
                 const resp = await authFetch(SUPABASE_URL + `/rest/v1/posts?id=eq.${encodeURIComponent(postId)}&select=views`, { method: 'GET' });
                 const data = await handleResponse(resp);
                 if (!data || data.length === 0) { showToast('帖子不存在', true); return; }
@@ -1490,7 +1867,6 @@
                     body: JSON.stringify({ views: currentViews + 1 })
                 });
 
-                // 获取完整帖子信息和评论
                 const posts = await fetchPosts();
                 const post = posts.find(p => p.id == postId);
                 if (!post) { showToast('帖子不存在', true); return; }
@@ -1501,6 +1877,7 @@
                 if (!authorMap[post.author_id]) {
                     await fetchAuthors([post]);
                 }
+                await loadCommentLikes(comments);
                 renderPostDetail(post, comments);
             } catch (e) {
                 console.error('加载帖子详情失败', e);
@@ -1524,6 +1901,9 @@
             const safePostId = escapeJsString(post.id);
             const safeAuthorId = escapeJsString(post.author_id);
             const safeAuthorName = escapeJsString(displayName);
+            const isAuthor = currentUser && currentUser.id === post.author_id;
+            const isFav = favoriteMap.get(post.id) ? '❤️' : '🤍';
+            const favText = favoriteMap.get(post.id) ? '取消收藏' : '收藏';
 
             let html = `
             <div class="post-detail">
@@ -1536,6 +1916,7 @@
                 <span class="post-time">${escapeHtml(formatTime(post.created_at))}</span>
                 <span class="badge ${escapeHtml(post.category||'tech')}">${escapeHtml(catName)}</span>
                 ${tagsHtml}
+                ${isAuthor ? `<span style="color:#fcd34d;font-size:.7rem;">✏️ 作者</span>` : ''}
               </div>
               <div class="post-body">${nl2br(post.content)}</div>
               <div class="post-actions">
@@ -1544,13 +1925,27 @@
                 <span class="downvote-btn" onclick="handleDownvote('${safePostId}')">👎 ${post.downvotes||0}</span>
                 <span>👁️ ${post.views||0}</span>
                 <span>🍫 ${post.chocolate_count||0}</span>
-                <button class="btn-sm" onclick="openGiveChocolate('${safeAuthorId}','${safeAuthorName}')">🍫 投巧克力</button>
+                <span class="fav-btn" onclick="toggleFavorite('${safePostId}')">${isFav} ${favText}</span>
                 ${currentUser && currentUser.id !== post.author_id ? `<button class="btn-sm" onclick="followUser('${safeAuthorId}')">${followingMap.has(post.author_id)?'✅ 已关注':'➕ 关注'}</button>` : ''}
+                ${currentUser && currentUser.id !== post.author_id ? `<button class="btn-sm" onclick="openGiveChocolate('${safeAuthorId}','${safeAuthorName}')">🍫 投巧克力</button>` : ''}
+                ${isAuthor ? `<button class="btn-sm" onclick="showEditForm(${JSON.stringify(post).replace(/</g,'\\u003c')})">✏️ 编辑</button>` : ''}
+                ${isAuthor ? `<button class="btn-sm" style="border-color:#ef4444;color:#ef4444;" onclick="deletePost('${safePostId}')">🗑️ 删除</button>` : ''}
+                ${currentUser ? `<button class="btn-sm" onclick="openMessageUser('${safeAuthorName}')">💬 私信</button>` : ''}
+              </div>
+              <div class="edit-area" id="editArea">
+                <input id="editTitle" placeholder="标题" maxlength="100" style="margin-bottom:8px;" value="${escapeHtml(post.title)}">
+                <textarea id="editContent" placeholder="内容" rows="5" style="margin-bottom:8px;">${escapeHtml(post.content)}</textarea>
+                <button class="btn btn-success" onclick="saveEdit()">💾 保存</button>
+                <button class="btn btn-outline" onclick="cancelEdit()">取消</button>
+                <div id="editMsg" style="margin-top:8px;"></div>
               </div>
               <div style="margin-top:20px;">
                 <h3 style="margin-bottom:12px;">💬 评论 (${comments?comments.length:0})</h3>
                 <div id="commentList">
-                  ${comments && comments.length>0 ? comments.map(c => `
+                  ${comments && comments.length>0 ? comments.map(c => {
+                    const isLiked = commentLikeMap.get(c.id) || false;
+                    const likeCount = c.likes || 0;
+                    return `
                     <div class="reply-item">
                       <div class="reply-author-info">
                         <img src="${escapeHtml(getAvatarUrl({username:c.author_name||'匿名',avatar_url:c.author_avatar}))}" alt="avatar" onerror="this.src='https://ui-avatars.com/api/?name=U&background=6d5bff&color=fff&size=100&length=2'">
@@ -1558,8 +1953,11 @@
                         <span class="reply-time">${escapeHtml(formatTime(c.created_at))}</span>
                       </div>
                       <div class="reply-content">${nl2br(c.content)}</div>
+                      <div class="reply-actions">
+                        <span class="comment-like-btn" onclick="toggleCommentLike('${escapeJsString(c.id)}')">${isLiked?'❤️':'🤍'} ${likeCount}</span>
+                      </div>
                     </div>
-                  `).join('') : '<p style="color:rgba(255,255,255,0.3);">暂无评论，来说点什么吧</p>'}
+                  `}).join('') : '<p style="color:rgba(255,255,255,0.3);">暂无评论，来说点什么吧</p>'}
                 </div>
                 ${currentUser ? `
                   <div style="margin-top:16px;">
@@ -1571,8 +1969,56 @@
             </div>
           `;
             container.innerHTML = html;
+            // 如果编辑区域有内容，默认隐藏
+            const editArea = document.getElementById('editArea');
+            if (editArea) editArea.style.display = 'none';
         }
 
+        // ---- 编辑辅助 ----
+        function showEditForm(post) {
+            const editArea = document.getElementById('editArea');
+            if (!editArea) return;
+            document.getElementById('editTitle').value = post.title || '';
+            document.getElementById('editContent').value = post.content || '';
+            editArea.style.display = 'block';
+        }
+
+        function cancelEdit() {
+            const editArea = document.getElementById('editArea');
+            if (editArea) editArea.style.display = 'none';
+        }
+
+        async function saveEdit() {
+            const editArea = document.getElementById('editArea');
+            if (!editArea || editArea.style.display === 'none') return;
+            const postId = currentPostId;
+            const title = document.getElementById('editTitle').value.trim();
+            const content = document.getElementById('editContent').value.trim();
+            if (!title) { showToast('标题不能为空', true); return; }
+            if (!content) { showToast('内容不能为空', true); return; }
+            try {
+                await authFetch(SUPABASE_URL + `/rest/v1/posts?id=eq.${encodeURIComponent(postId)}`, {
+                    method: 'PATCH',
+                    body: JSON.stringify({ title, content })
+                });
+                showToast('✅ 帖子已更新', false);
+                cancelEdit();
+                await showPost(postId);
+                await loadPosts(currentCategory, currentSearch);
+            } catch (e) { console.error('保存失败', e);
+                showToast('保存失败: ' + e.message, true); }
+        }
+
+        // ---- 私信用户 ----
+        function openMessageUser(username) {
+            if (!currentUser) { showToast('请先登录', true); return; }
+            document.getElementById('messagesModal').classList.add('active');
+            document.getElementById('msgRecipient').value = username || '';
+            document.getElementById('msgContent').focus();
+            renderMessages();
+        }
+
+        // ---- 返回列表 ----
         function backToList() {
             document.getElementById('postDetail').style.display = 'none';
             document.getElementById('postList').style.display = 'block';
@@ -1580,6 +2026,7 @@
             loadPosts(currentCategory, currentSearch);
         }
 
+        // ---- 发表评论 ----
         async function publishComment(postId) {
             if (!currentUser) { showToast('请先登录', true); return; }
             const content = document.getElementById('commentInput').value.trim();
@@ -1605,14 +2052,12 @@
         }
 
         // =============================================================
-        // ================ 其他功能（签到、兑换、商城等） ==============
+        // ================ 签到、兑换、商城、关注 ====================
         // =============================================================
-        // 签到（使用 authFetch 修复 403）
         async function doCheckin() {
             if (!currentUser) { showToast('请先登录', true); return; }
             try {
                 const today = new Date().toISOString().split('T')[0];
-                // 查询今日是否已签到
                 const checkResp = await authFetch(
                     SUPABASE_URL + `/rest/v1/checkins?user_id=eq.${encodeURIComponent(currentUser.id)}&checkin_date=eq.${encodeURIComponent(today)}&select=id`,
                     { method: 'GET' }
@@ -1626,7 +2071,6 @@
                     showToast('今天已签到，明天再来吧！', false);
                     return;
                 }
-                // 插入签到
                 const insertResp = await authFetch(SUPABASE_URL + '/rest/v1/checkins', {
                     method: 'POST',
                     body: JSON.stringify({ user_id: currentUser.id, checkin_date: today })
@@ -1636,7 +2080,6 @@
                     return;
                 }
                 await handleResponse(insertResp);
-                // 连续签到
                 let streak = (userProfile?.streak || 0) + 1;
                 const yesterday = new Date();
                 yesterday.setDate(yesterday.getDate() - 1);
@@ -1647,7 +2090,6 @@
                 );
                 const yData = await handleResponse(yCheck);
                 if (!yData || yData.length === 0) streak = 1;
-                // 更新积分
                 const bonus = getLevelInfo(userProfile?.level || 1).signBonus || 2;
                 const newPoints = (userProfile?.points || 0) + bonus;
                 await authFetch(SUPABASE_URL + `/rest/v1/profiles?id=eq.${encodeURIComponent(currentUser.id)}`, {
@@ -1666,7 +2108,6 @@
             }
         }
 
-        // 积分兑换、商城、投巧克力、关注等函数（保持与之前一致）
         function openExchange() { if (!currentUser) { showToast('请先登录', true); return; } document.getElementById(
                 'exchangeModal').classList.add('active'); }
 
@@ -1940,6 +2381,7 @@
                     await loadPosts(currentCategory, currentSearch);
                     await loadTopics();
                     await getTasks(user.id);
+                    await loadFavorites();
                 } else {
                     showToast('登录失败', true);
                 }
@@ -1987,6 +2429,7 @@
             localStorage.removeItem('sb_refresh_token');
             localStorage.removeItem('sb_user');
             followingMap.clear();
+            favoriteMap.clear();
             document.getElementById('postDetail').style.display = 'none';
             document.getElementById('postList').style.display = 'block';
             showToast('已退出', false);
@@ -2022,6 +2465,7 @@
                             await loadPosts(currentCategory, currentSearch);
                             await loadTopics();
                             await getTasks(currentUser.id);
+                            await loadFavorites();
                             window.history.replaceState({}, document.title, window.location.pathname);
                         }
                     }
@@ -2150,8 +2594,8 @@
                 const { data, error } = await sb.from('notifications').select('*').eq('user_id', currentUser.id)
                     .order('created_at', { ascending: false }).limit(20);
                 if (error) {
-                    console.warn('通知表查询失败，可能未创建', error);
-                    container.innerHTML = '<p style="color:rgba(255,255,255,0.3);">通知功能暂不可用（表不存在）</p>';
+                    console.warn('通知表查询失败', error);
+                    container.innerHTML = '<p style="color:rgba(255,255,255,0.3);">通知功能暂不可用</p>';
                     return;
                 }
                 if (!data || data.length === 0) {
@@ -2196,7 +2640,7 @@
                 const { data, error } = await sb.from('notifications').select('id', { count: 'exact', head: true })
                     .eq('user_id', currentUser.id).eq('read', false);
                 if (error) {
-                    console.warn('通知查询失败，可能表不存在或字段错误', error);
+                    console.warn('通知查询失败', error);
                     document.getElementById('notifCount').classList.add('hidden');
                     return;
                 }
@@ -2233,6 +2677,7 @@
                 userName.textContent = userProfile.username || '用户';
                 document.getElementById('myChocolates').textContent = userProfile.chocolates || 0;
                 document.getElementById('myTotalPoints').textContent = userProfile.points || 0;
+                document.getElementById('myFavCount').textContent = favoriteMap.size;
             } else {
                 loginBtn.classList.remove('hidden');
                 userAvatar.classList.add('hidden');
@@ -2241,6 +2686,7 @@
                 profileLink.classList.add('hidden');
                 document.getElementById('myChocolates').textContent = '0';
                 document.getElementById('myTotalPoints').textContent = '0';
+                document.getElementById('myFavCount').textContent = '0';
             }
             updateUnreadBadge();
         }
@@ -2304,6 +2750,7 @@
                         const { data: follows } = await sb.from('follows').select('following_id').eq('follower_id',
                             currentUser.id);
                         if (follows) follows.forEach(f => followingMap.set(f.following_id, true));
+                        await loadFavorites();
                         await updateUnreadBadge().catch(() => {});
                         await getTasks(currentUser.id);
                     } catch (e) { console.warn('自动登录恢复失败', e);
@@ -2373,6 +2820,18 @@
             window.openTasks = openTasks;
             window.closeTasks = closeTasks;
             window.followUser = followUser;
+            window.toggleFavorite = toggleFavorite;
+            window.openFavorites = openFavorites;
+            window.closeFavorites = closeFavorites;
+            window.toggleCommentLike = toggleCommentLike;
+            window.openMessages = openMessages;
+            window.closeMessages = closeMessages;
+            window.sendMessage = sendMessage;
+            window.openMessageUser = openMessageUser;
+            window.showEditForm = showEditForm;
+            window.cancelEdit = cancelEdit;
+            window.saveEdit = saveEdit;
+            window.deletePost = deletePost;
             window.updateUI = updateUI;
 
             init().catch(e => console.error('初始化失败', e));
