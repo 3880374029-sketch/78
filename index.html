@@ -9,7 +9,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400;14..32,500;14..32,600;14..32,700&display=swap" rel="stylesheet">
     <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' https://cdn.jsdelivr.net https://unpkg.com 'unsafe-inline'; connect-src 'self' https://bkvsceiezbyexzqpvblj.supabase.co; img-src 'self' data: https://ui-avatars.com https://bkvsceiezbyexzqpvblj.supabase.co; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com;">
     <script>
-        const CACHE_VERSION = 'v7.1';
+        const CACHE_VERSION = 'v7.2';
         if (localStorage.getItem('forum_cache_version') !== CACHE_VERSION) {
             localStorage.clear();
             localStorage.setItem('forum_cache_version', CACHE_VERSION);
@@ -1405,12 +1405,13 @@
             } catch (e) { console.warn('fetchAuthors异常', e); }
         }
 
-        // ---- 任务系统 ----
+        // ---- 任务系统（修复 409 冲突） ----
         async function getTasks(userId) {
             const today = new Date().toISOString().split('T')[0];
-            const { data, error } = await sb.from('user_tasks').select('*').eq('user_id', userId).eq('reset_date',
-            today);
+            // 1. 查询当天已有任务
+            const { data, error } = await sb.from('user_tasks').select('*').eq('user_id', userId).eq('reset_date', today);
             if (error) return [];
+
             const defaultTasks = [
                 { task_type: 'daily_post', target: 1, progress: 0, completed: false },
                 { task_type: 'daily_comment', target: 2, progress: 0, completed: false },
@@ -1418,14 +1419,29 @@
                 { task_type: 'daily_recommend', target: 1, progress: 0, completed: false },
                 { task_type: 'daily_checkin', target: 1, progress: 0, completed: false }
             ];
+
+            // 2. 找出缺失的任务类型
             const existingTypes = data.map(d => d.task_type);
             const missing = defaultTasks.filter(t => !existingTypes.includes(t.task_type));
-            for (let t of missing) {
-                await sb.from('user_tasks').insert({ user_id: userId, task_type: t.task_type, target: t.target,
-                    progress: 0, completed: false, reset_date: today });
-                data.push({ ...t, id: null, user_id: userId, reset_date: today, last_updated: new Date().toISOString() });
+
+            // 3. 如果有缺失，尝试插入（使用 onConflict 忽略重复）
+            if (missing.length > 0) {
+                const inserts = missing.map(t => ({
+                    user_id: userId,
+                    task_type: t.task_type,
+                    target: t.target,
+                    progress: 0,
+                    completed: false,
+                    reset_date: today
+                }));
+                // ⭐ 关键：使用 onConflict 参数避免 409 错误
+                await sb.from('user_tasks').insert(inserts, { onConflict: 'user_id, task_type, reset_date' });
+                // 4. 重新查询一次，获取完整数据（包括刚插入的）
+                const { data: newData } = await sb.from('user_tasks').select('*').eq('user_id', userId).eq('reset_date', today);
+                return newData || [];
             }
-            return data;
+
+            return data || [];
         }
 
         async function updateTaskProgress(userId, taskType, progress = 1) {
