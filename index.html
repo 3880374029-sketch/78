@@ -3,13 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
-    <title>窍某论坛</title>
+    <title>窍某论坛 · 本地私信 · 完整版</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400;14..32,500;14..32,600;14..32,700&display=swap" rel="stylesheet">
     <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' https://cdn.jsdelivr.net https://unpkg.com 'unsafe-inline'; connect-src 'self' https://bkvsceiezbyexzqpvblj.supabase.co; img-src 'self' data: https://ui-avatars.com https://bkvsceiezbyexzqpvblj.supabase.co; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com;">
     <script>
-        const CACHE_VERSION = 'v9.0';
+        const CACHE_VERSION = 'v9.1';
         if (localStorage.getItem('forum_cache_version') !== CACHE_VERSION) {
             localStorage.clear();
             localStorage.setItem('forum_cache_version', CACHE_VERSION);
@@ -401,11 +401,39 @@
         .task-item .task-status.pending { color: #ef4444; }
         .edit-area { display: none; margin: 16px 0; padding: 20px; background: rgba(255,255,255,0.04); border-radius: 16px; border: 1px solid rgba(255,255,255,0.06); }
         .edit-area.active { display: block; }
-        .msg-item { padding: 12px 0; border-bottom: 1px solid rgba(255,255,255,0.04); }
-        .msg-item .msg-sender { color: #a78bfa; font-weight: 600; }
-        .msg-item .msg-time { color: rgba(255,255,255,0.3); font-size: .7rem; margin-left: 10px; }
-        .msg-item .msg-content { color: rgba(255,255,255,0.7); margin-top: 2px; }
-        .msg-item .msg-unread { background: rgba(124,106,255,0.08); border-left: 3px solid #7c6aff; padding-left: 14px; }
+        .msg-item {
+            padding: 12px 0;
+            border-bottom: 1px solid rgba(255,255,255,0.04);
+        }
+        .msg-item .msg-sender {
+            color: #a78bfa;
+            font-weight: 600;
+        }
+        .msg-item .msg-time {
+            color: rgba(255,255,255,0.3);
+            font-size: .7rem;
+            margin-left: 10px;
+        }
+        .msg-item .msg-content {
+            color: rgba(255,255,255,0.7);
+            margin-top: 2px;
+        }
+        .msg-item .msg-unread {
+            background: rgba(124,106,255,0.08);
+            border-left: 3px solid #7c6aff;
+            padding-left: 14px;
+        }
+        .msg-item .msg-read-btn {
+            margin-left: 10px;
+        }
+        .msg-local-badge {
+            font-size: 0.6rem;
+            background: rgba(124,106,255,0.2);
+            color: #a78bfa;
+            padding: 0 6px;
+            border-radius: 10px;
+            margin-left: 6px;
+        }
         .fav-item { display: flex; justify-content: space-between; align-items: center; padding: 8px 0; border-bottom: 1px solid rgba(255,255,255,0.04); cursor: pointer; transition: color 0.2s; }
         .fav-item:hover { color: #a78bfa; }
         .fav-item .fav-title { font-size: .9rem; }
@@ -452,6 +480,15 @@
             border-radius: 50%;
             border: 1px solid rgba(255,255,255,0.1);
         }
+        /* 聊天滚动 */
+        .msg-conversation {
+            max-height: 300px;
+            overflow-y: auto;
+            margin-top: 4px;
+            padding-right: 4px;
+        }
+        .msg-conversation::-webkit-scrollbar { width: 4px; }
+        .msg-conversation::-webkit-scrollbar-thumb { background: rgba(124,106,255,0.3); border-radius: 4px; }
     </style>
 </head>
 <body>
@@ -459,7 +496,7 @@
     <div class="container">
         <!-- 头部 -->
         <header>
-            <h1>💡 窍某论坛 · 量子幻彩</h1>
+            <h1>💡 窍某论坛 · 本地私信</h1>
             <div class="nav-controls">
                 <input class="search-box" id="searchInput" placeholder="搜索帖子..." oninput="searchPosts()">
                 <button class="btn btn-outline" id="themeToggle" onclick="toggleTheme()">🌙</button>
@@ -530,7 +567,7 @@
         </div>
         <footer>
             <div class="social-links"><a href="#">关于</a><a href="#">帮助</a><a href="#" onclick="showFeedback()">反馈</a><a href="#" onclick="showStatus()">📊 帖子状态</a></div>
-            <p class="footer-status">🔧 量子幻彩 · 真实在线 · 粒子背景 · 发光卡片 · 网格/列表切换</p>
+            <p class="footer-status">🔧 本地私信 · 消息缓存于浏览器 · 不上传数据库</p>
             <p style="color:rgba(255,255,255,0.2);font-size:.85rem;margin-top:4px;">© 2026 窍某论坛 · 用 ❤️ 构建</p>
         </footer>
     </div>
@@ -560,8 +597,8 @@
     <!-- 任务 -->
     <div class="modal" id="tasksModal"><div class="modal-box"><span class="close" onclick="closeTasks()">&times;</span><h2 style="margin-bottom:16px;">📋 积分任务</h2><p style="color:rgba(255,255,255,0.4);margin-bottom:16px;">完成每日任务获得额外积分</p><div id="tasksList"><p style="color:rgba(255,255,255,0.3);">加载中...</p></div></div></div>
 
-    <!-- 私信 -->
-    <div class="modal" id="messagesModal"><div class="modal-box"><span class="close" onclick="closeMessages()">&times;</span><h2 style="margin-bottom:16px;">💬 私信</h2><div id="messageList"><p style="color:rgba(255,255,255,0.3);">加载中...</p></div><div style="margin-top:16px;display:flex;gap:8px;flex-wrap:wrap;"><input id="msgRecipient" placeholder="收件人昵称" style="flex:1;min-width:120px;"><input id="msgContent" placeholder="消息内容" style="flex:2;min-width:150px;"><button class="btn" onclick="sendMessage()">发送</button></div></div></div>
+    <!-- 私信（本地版） -->
+    <div class="modal" id="messagesModal"><div class="modal-box"><span class="close" onclick="closeMessages()">&times;</span><h2 style="margin-bottom:16px;">💬 私信 <span class="msg-local-badge">本地缓存</span></h2><div id="messageList"><p style="color:rgba(255,255,255,0.3);">加载中...</p></div><div style="margin-top:16px;display:flex;gap:8px;flex-wrap:wrap;"><input id="msgRecipient" placeholder="收件人昵称" style="flex:1;min-width:120px;"><input id="msgContent" placeholder="消息内容" style="flex:2;min-width:150px;"><button class="btn" onclick="sendMessage()">发送</button></div></div></div>
 
     <!-- 收藏列表 -->
     <div class="modal" id="favoritesModal"><div class="modal-box"><span class="close" onclick="closeFavorites()">&times;</span><h2 style="margin-bottom:16px;">❤️ 我的收藏</h2><div id="favoritesList"><p style="color:rgba(255,255,255,0.3);">加载中...</p></div></div></div>
@@ -719,7 +756,7 @@
             return map[level] || map[1];
         }
         function showFeedback() { alert('📮 反馈请发送邮件至：3880374029@qq.com\n或者加入QQ群：1062578518'); }
-        function showStatus() { alert('✅ 量子幻彩完整版 + 真实在线已就绪！'); }
+        function showStatus() { alert('✅ 本地私信版 · 所有消息存储于浏览器'); }
 
         // ---- 自定义标记解析 ----
         function parseCustomMarkup(text) {
@@ -735,6 +772,232 @@
             result = result.replace(/\[#(.*?)\]/g, (m, key) => emojiMap[key.trim()] || '❓');
             result = result.replace(/\n/g, '<br>');
             return result;
+        }
+
+        // ---- 本地私信核心 ----
+        const CHAT_STORAGE_KEY = 'forum_local_messages';
+
+        function getLocalMessages() {
+            try {
+                const raw = localStorage.getItem(CHAT_STORAGE_KEY);
+                return raw ? JSON.parse(raw) : [];
+            } catch { return []; }
+        }
+
+        function saveLocalMessages(messages) {
+            localStorage.setItem(CHAT_STORAGE_KEY, JSON.stringify(messages));
+        }
+
+        function genMsgId() {
+            return Date.now().toString(36) + Math.random().toString(36).substr(2, 6);
+        }
+
+        function sendMessageToLocal(senderId, senderName, receiverId, receiverName, content) {
+            if (!currentUser) { showToast('请先登录', true); return false; }
+            if (!content.trim()) { showToast('请输入消息内容', true); return false; }
+            if (!receiverId) { showToast('收件人不存在', true); return false; }
+
+            const msg = {
+                id: genMsgId(),
+                sender_id: senderId,
+                sender_name: senderName || '用户',
+                receiver_id: receiverId,
+                receiver_name: receiverName || '用户',
+                content: content.trim(),
+                read: false,
+                created_at: new Date().toISOString()
+            };
+
+            const messages = getLocalMessages();
+            messages.push(msg);
+            saveLocalMessages(messages);
+            return true;
+        }
+
+        function getMyMessages(userId) {
+            const all = getLocalMessages();
+            return all.filter(m =>
+                m.sender_id === userId || m.receiver_id === userId
+            ).sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
+        }
+
+        function markMessageReadLocal(msgId) {
+            const messages = getLocalMessages();
+            const idx = messages.findIndex(m => m.id === msgId);
+            if (idx !== -1) {
+                messages[idx].read = true;
+                saveLocalMessages(messages);
+                return true;
+            }
+            return false;
+        }
+
+        function getUnreadCount(userId) {
+            const all = getLocalMessages();
+            return all.filter(m => m.receiver_id === userId && !m.read).length;
+        }
+
+        // =============================================================
+        // ================ 私信 UI ====================================
+        // =============================================================
+        async function openMessages() {
+            if (!currentUser) { showToast('请先登录', true); return; }
+            document.getElementById('messagesModal').classList.add('active');
+            await renderMessages();
+        }
+
+        function closeMessages() {
+            document.getElementById('messagesModal').classList.remove('active');
+        }
+
+        async function renderMessages() {
+            const container = document.getElementById('messageList');
+            if (!currentUser) {
+                container.innerHTML = '<p style="color:rgba(255,255,255,0.3);">请先登录</p>';
+                return;
+            }
+
+            const myMessages = getMyMessages(currentUser.id);
+            if (myMessages.length === 0) {
+                container.innerHTML = '<p style="color:rgba(255,255,255,0.3);">暂无消息，发送一条吧</p>';
+                return;
+            }
+
+            // 按对话分组
+            const conversations = {};
+            myMessages.forEach(m => {
+                const otherId = m.sender_id === currentUser.id ? m.receiver_id : m.sender_id;
+                const otherName = m.sender_id === currentUser.id ? m.receiver_name : m.sender_name;
+                if (!conversations[otherId]) {
+                    conversations[otherId] = { name: otherName || '未知用户', messages: [] };
+                }
+                conversations[otherId].messages.push(m);
+            });
+
+            let html = '';
+            for (const [otherId, conv] of Object.entries(conversations)) {
+                const msgs = conv.messages.sort((a, b) => new Date(a.created_at) - new Date(b.created_at));
+                const lastMsg = msgs[msgs.length - 1];
+                const unread = msgs.filter(m => m.receiver_id === currentUser.id && !m.read).length;
+                const unreadBadge = unread > 0 ? `<span style="background:#ef4444;color:#fff;border-radius:50%;padding:0 6px;font-size:11px;margin-left:8px;">${unread}</span>` : '';
+
+                html += `<div style="margin-bottom:16px;border-bottom:1px solid rgba(255,255,255,0.05);padding-bottom:12px;">
+                    <div style="display:flex;justify-content:space-between;align-items:center;">
+                        <strong style="color:#a78bfa;">💬 ${escapeHtml(conv.name)} ${unreadBadge}</strong>
+                        <span style="font-size:.7rem;color:rgba(255,255,255,0.3);">${formatTime(lastMsg.created_at)}</span>
+                    </div>
+                    <div class="msg-conversation">`;
+
+                msgs.forEach(m => {
+                    const isMine = m.sender_id === currentUser.id;
+                    const align = isMine ? 'right' : 'left';
+                    const color = isMine ? 'rgba(124,106,255,0.2)' : 'rgba(255,255,255,0.05)';
+                    const textAlign = isMine ? 'text-align:right;' : '';
+                    const unreadMark = (!m.read && m.receiver_id === currentUser.id) ?
+                        '<span style="color:#fcd34d;font-size:.6rem;margin-left:4px;">●</span>' : '';
+                    html += `<div style="padding:4px 8px;margin:2px 0;background:${color};border-radius:8px;${textAlign}">
+                        <span style="font-size:.8rem;">${escapeHtml(m.content)}</span>
+                        ${unreadMark}
+                        <span style="font-size:.6rem;color:rgba(255,255,255,0.3);margin-left:6px;">${formatTime(m.created_at)}</span>
+                        ${!isMine && !m.read ? `<button class="btn-sm" onclick="markMsgRead('${escapeJsString(m.id)}')" style="margin-left:8px;">标为已读</button>` : ''}
+                    </div>`;
+                });
+
+                html += `</div></div>`;
+            }
+
+            container.innerHTML = html;
+            updateUnreadBadge();
+        }
+
+        async function markMsgRead(msgId) {
+            if (markMessageReadLocal(msgId)) {
+                showToast('已标记为已读', 'success');
+                await renderMessages();
+                updateUnreadBadge();
+            }
+        }
+        window.markMsgRead = markMsgRead;
+
+        async function sendMessage() {
+            if (!currentUser) { showToast('请先登录', true); return; }
+            const recipientName = document.getElementById('msgRecipient').value.trim();
+            const content = document.getElementById('msgContent').value.trim();
+            if (!recipientName) { showToast('请输入收件人昵称', true); return; }
+            if (!content) { showToast('请输入消息内容', true); return; }
+
+            try {
+                const { data: profiles, error } = await sb
+                    .from('profiles')
+                    .select('id, username')
+                    .eq('username', recipientName)
+                    .limit(1);
+                if (error || !profiles || profiles.length === 0) {
+                    showToast('未找到该用户', true);
+                    return;
+                }
+                const receiver = profiles[0];
+                if (receiver.id === currentUser.id) {
+                    showToast('不能给自己发私信', true);
+                    return;
+                }
+
+                const success = sendMessageToLocal(
+                    currentUser.id,
+                    userProfile?.username || '我',
+                    receiver.id,
+                    receiver.username,
+                    content
+                );
+                if (success) {
+                    showToast('✅ 消息已发送（本地缓存）', false);
+                    document.getElementById('msgContent').value = '';
+                    await renderMessages();
+                    updateUnreadBadge();
+                }
+            } catch (e) {
+                console.error('发送私信失败', e);
+                showToast('发送失败: ' + e.message, true);
+            }
+        }
+        window.sendMessage = sendMessage;
+
+        function openMessageUser(username) {
+            if (!currentUser) { showToast('请先登录', true); return; }
+            const modal = document.getElementById('messagesModal');
+            if (!modal) { showToast('私信功能暂不可用', true); return; }
+            modal.classList.add('active');
+            document.getElementById('msgRecipient').value = username || '';
+            document.getElementById('msgContent').focus();
+            renderMessages();
+        }
+        window.openMessageUser = openMessageUser;
+
+        // 更新未读徽章（合并通知 + 私信）
+        async function updateUnreadBadge() {
+            if (!currentUser) {
+                document.getElementById('notifCount').classList.add('hidden');
+                return;
+            }
+            const unreadMsgs = getUnreadCount(currentUser.id);
+            let notifUnread = 0;
+            try {
+                const { data, error } = await sb
+                    .from('notifications')
+                    .select('id', { count: 'exact', head: true })
+                    .eq('user_id', currentUser.id)
+                    .eq('read', false);
+                if (!error) notifUnread = data?.count || 0;
+            } catch (e) {}
+
+            const totalUnread = unreadMsgs + notifUnread;
+            const badge = document.getElementById('notifCount');
+            if (totalUnread > 0) {
+                badge.textContent = totalUnread > 99 ? '99+' : totalUnread;
+                badge.classList.remove('hidden');
+            } else {
+                badge.classList.add('hidden');
+            }
         }
 
         // =============================================================
@@ -767,6 +1030,7 @@
             }
             return response;
         }
+
         async function authFetch(url, options) {
             const resp = await fetchWithAuth(url, options);
             if (resp.status === 401) {
@@ -776,6 +1040,7 @@
             }
             return resp;
         }
+
         async function handleResponse(res) {
             const text = await res.text();
             let json = null;
@@ -798,6 +1063,7 @@
             });
             return await handleResponse(resp);
         }
+
         async function signUp(email, password, username) {
             const resp = await fetch(SUPABASE_URL + '/auth/v1/signup', {
                 method: 'POST',
@@ -806,22 +1072,26 @@
             });
             return await handleResponse(resp);
         }
+
         async function getProfile(userId) {
             const resp = await authFetch(SUPABASE_URL + '/rest/v1/profiles?id=eq.' + userId, { method: 'GET' });
             if (resp.status === 404) return null;
             const data = await handleResponse(resp);
             return data && data.length > 0 ? data[0] : null;
         }
+
         async function upsertProfile(data) {
             const resp = await authFetch(SUPABASE_URL + '/rest/v1/profiles', { method: 'POST', body: JSON.stringify(data) });
             return await handleResponse(resp);
         }
+
         async function fetchPosts() {
             const resp = await fetch(SUPABASE_URL + '/rest/v1/posts?order=created_at.desc', {
                 headers: { 'apikey': SUPABASE_ANON_KEY, 'Content-Type': 'application/json' }
             });
             return await handleResponse(resp);
         }
+
         async function fetchComments(postId) {
             const safeId = encodeURIComponent(postId);
             const resp = await fetch(SUPABASE_URL + `/rest/v1/comments?post_id=eq.${safeId}&order=created_at.asc`, {
@@ -829,25 +1099,30 @@
             });
             return await handleResponse(resp);
         }
+
         async function createComment(data) {
             const resp = await authFetch(SUPABASE_URL + '/rest/v1/comments', { method: 'POST', body: JSON.stringify(data) });
             return await handleResponse(resp);
         }
+
         async function createPost(data) {
             const resp = await authFetch(SUPABASE_URL + '/rest/v1/posts', { method: 'POST', body: JSON.stringify(data) });
             return await handleResponse(resp);
         }
+
         async function fetchTopics() {
             const resp = await fetch(SUPABASE_URL + '/rest/v1/topics?order=name.asc', {
                 headers: { 'apikey': SUPABASE_ANON_KEY, 'Content-Type': 'application/json' }
             });
             return await handleResponse(resp);
         }
+
         async function createTopicAPI(name) {
             if (!currentUser) throw new Error('请先登录');
             const resp = await authFetch(SUPABASE_URL + '/rest/v1/topics', { method: 'POST', body: JSON.stringify({ name }) });
             return await handleResponse(resp);
         }
+
         async function fetchCommentCounts() {
             const resp = await fetch(SUPABASE_URL + '/rest/v1/comments?select=post_id', {
                 headers: { 'apikey': SUPABASE_ANON_KEY, 'Content-Type': 'application/json' }
@@ -928,6 +1203,7 @@
             }
             return data || [];
         }
+
         async function updateTaskProgress(userId, taskType, progress = 1) {
             const today = new Date().toISOString().split('T')[0];
             const { data, error } = await sb.from('user_tasks').select('*').eq('user_id', userId).eq('task_type',
@@ -952,6 +1228,7 @@
                 }
             }
         }
+
         async function renderTasks() {
             if (!currentUser) { document.getElementById('tasksList').innerHTML =
                     '<p style="color:rgba(255,255,255,0.3);">请先登录</p>'; return; }
@@ -970,9 +1247,11 @@
             });
             document.getElementById('tasksList').innerHTML = html;
         }
+
         function openTasks() { if (!currentUser) { showToast('请先登录', true); return; } document.getElementById('tasksModal')
                 .classList.add('active');
             renderTasks(); }
+
         function closeTasks() { document.getElementById('tasksModal').classList.remove('active'); }
 
         // ---- 标签 ----
@@ -1005,10 +1284,11 @@
                 updateUI();
                 if (currentPostId) await showPost(currentPostId);
                 else await loadPosts(currentCategory, currentSearch);
-                await updateUserActivity(); // 更新活跃
+                await updateUserActivity();
             } catch (e) { console.error('收藏操作失败', e);
                 showToast('操作失败', true); }
         }
+
         async function loadFavorites() {
             if (!currentUser) return;
             try {
@@ -1019,12 +1299,15 @@
                 document.getElementById('myFavCount').textContent = data.length;
             } catch (e) { console.warn('加载收藏失败', e); }
         }
+
         async function openFavorites() {
             if (!currentUser) { showToast('请先登录', true); return; }
             document.getElementById('favoritesModal').classList.add('active');
             await renderFavorites();
         }
+
         function closeFavorites() { document.getElementById('favoritesModal').classList.remove('active'); }
+
         async function renderFavorites() {
             const container = document.getElementById('favoritesList');
             if (!currentUser) { container.innerHTML = '<p style="color:rgba(255,255,255,0.3);">请先登录</p>'; return; }
@@ -1071,6 +1354,7 @@
             } catch (e) { console.error('评论点赞失败', e);
                 showToast('操作失败', true); }
         }
+
         async function loadCommentLikes(comments) {
             if (!currentUser || !comments || comments.length === 0) return;
             try {
@@ -1081,88 +1365,6 @@
                 commentLikeMap.clear();
                 data.forEach(d => commentLikeMap.set(d.comment_id, true));
             } catch (e) { console.warn('加载评论点赞状态失败', e); }
-        }
-
-        // =============================================================
-        // ================ 私信 ========================================
-        // =============================================================
-        async function openMessages() {
-            if (!currentUser) { showToast('请先登录', true); return; }
-            document.getElementById('messagesModal').classList.add('active');
-            await renderMessages();
-        }
-        function closeMessages() { document.getElementById('messagesModal').classList.remove('active'); }
-        async function renderMessages() {
-            const container = document.getElementById('messageList');
-            if (!currentUser) { container.innerHTML = '<p style="color:rgba(255,255,255,0.3);">请先登录</p>'; return; }
-            try {
-                const { data, error } = await sb.from('messages')
-                    .select('*')
-                    .or(`sender_id.eq.${currentUser.id},receiver_id.eq.${currentUser.id}`)
-                    .order('created_at', { ascending: false })
-                    .limit(50);
-                if (error) throw error;
-                if (!data || data.length === 0) { container.innerHTML = '<p style="color:rgba(255,255,255,0.3);">暂无私信</p>'; return; }
-                const senderIds = [...new Set(data.map(m => m.sender_id))];
-                const { data: profiles } = await sb.from('profiles').select('id, username').in('id', senderIds);
-                const nameMap = {};
-                profiles.forEach(p => nameMap[p.id] = p.username || '用户');
-                let html = '';
-                data.forEach(m => {
-                    const isUnread = !m.read && m.receiver_id === currentUser.id;
-                    const senderName = nameMap[m.sender_id] || '未知';
-                    const isMine = m.sender_id === currentUser.id;
-                    html += `
-                <div class="msg-item ${isUnread?'msg-unread':''}">
-                  <span class="msg-sender">${isMine?'我':escapeHtml(senderName)}</span>
-                  <span class="msg-time">${escapeHtml(formatTime(m.created_at))}</span>
-                  <div class="msg-content">${escapeHtml(m.content)}</div>
-                  ${isUnread?`<button class="btn-sm" onclick="markMessageRead('${escapeJsString(m.id)}')">标记已读</button>`:''}
-                </div>
-              `;
-                });
-                container.innerHTML = html;
-                await sb.from('messages').update({ read: true }).eq('receiver_id', currentUser.id).eq('read', false);
-            } catch (e) { console.error('加载私信失败', e);
-                container.innerHTML = '<p style="color:rgba(255,255,255,0.3);">加载失败</p>'; }
-        }
-        async function sendMessage() {
-            if (!currentUser) { showToast('请先登录', true); return; }
-            const recipient = document.getElementById('msgRecipient').value.trim();
-            const content = document.getElementById('msgContent').value.trim();
-            if (!recipient) { showToast('请输入收件人昵称', true); return; }
-            if (!content) { showToast('请输入消息内容', true); return; }
-            try {
-                const { data: profiles, error } = await sb.from('profiles').select('id').eq('username', recipient).limit(1);
-                if (error || !profiles || profiles.length === 0) { showToast('未找到该用户', true); return; }
-                const receiverId = profiles[0].id;
-                if (receiverId === currentUser.id) { showToast('不能给自己发私信', true); return; }
-                await authFetch(SUPABASE_URL + '/rest/v1/messages', {
-                    method: 'POST',
-                    body: JSON.stringify({ sender_id: currentUser.id, receiver_id: receiverId, content: content,
-                        read: false })
-                });
-                showToast('✅ 私信发送成功', false);
-                document.getElementById('msgContent').value = '';
-                await renderMessages();
-                await sb.from('notifications').insert({ user_id: receiverId,
-                    content: `📩 来自 ${userProfile?.username||'用户'} 的私信`, read: false });
-                await updateUserActivity();
-            } catch (e) { console.error('发送私信失败', e);
-                showToast('发送失败: ' + e.message, true); }
-        }
-        async function markMessageRead(msgId) {
-            try { await sb.from('messages').update({ read: true }).eq('id', msgId);
-                await renderMessages(); } catch (e) { console.warn('标记已读失败', e); }
-        }
-        function openMessageUser(username) {
-            if (!currentUser) { showToast('请先登录', true); return; }
-            const modal = document.getElementById('messagesModal');
-            if (!modal) { showToast('私信功能暂不可用', true); return; }
-            modal.classList.add('active');
-            document.getElementById('msgRecipient').value = username || '';
-            document.getElementById('msgContent').focus();
-            renderMessages();
         }
 
         // =============================================================
@@ -1188,10 +1390,12 @@
             editArea.classList.add('active');
             editArea.dataset.postId = post.id;
         }
+
         function cancelEdit() {
             const editArea = document.querySelector('.edit-area');
             if (editArea) editArea.classList.remove('active');
         }
+
         async function saveEdit() {
             const editArea = document.querySelector('.edit-area');
             if (!editArea || !editArea.classList.contains('active')) return;
@@ -1213,6 +1417,7 @@
             } catch (e) { console.error('保存失败', e);
                 showToast('保存失败: ' + e.message, true); }
         }
+
         async function deletePost(postId) {
             if (!currentUser) { showToast('请先登录', true); return; }
             if (!confirm('确定要删除这篇帖子吗？此操作不可恢复！')) return;
@@ -1307,9 +1512,12 @@
             } catch (e) { console.error(`${actionType}操作失败`, e);
                 showToast('操作失败: ' + e.message, true); } finally { actionLocks.delete(lockKey); }
         }
+
         async function handleLike(postId) { await performAction(postId, 'like', 'likes', 1, 'daily_like'); }
+
         async function handleRecommend(postId) { await performAction(postId, 'recommend', 'recommends', 1,
             'daily_recommend'); }
+
         async function handleDownvote(postId) { await performAction(postId, 'downvote', 'downvotes', 1, null); }
 
         // ---- 显示帖子详情 ----
@@ -1507,9 +1715,12 @@
             } catch (e) { console.error('签到异常', e);
                 showToast('签到异常: ' + e.message, true); }
         }
+
         function openExchange() { if (!currentUser) { showToast('请先登录', true); return; } document.getElementById(
                 'exchangeModal').classList.add('active'); }
+
         function closeExchange() { document.getElementById('exchangeModal').classList.remove('active'); }
+
         async function doExchange() {
             if (!currentUser) { showToast('请先登录', true); return; }
             const count = parseInt(document.getElementById('exchangeCount').value) || 1;
@@ -1532,9 +1743,12 @@
             } catch (e) { console.error('兑换失败', e);
                 showToast('兑换失败', true); }
         }
+
         function openShop() { if (!currentUser) { showToast('请先登录', true); return; } document.getElementById('shopModal')
                 .classList.add('active'); }
+
         function closeShop() { document.getElementById('shopModal').classList.remove('active'); }
+
         async function buyItem(item, cost) {
             if (!currentUser) { showToast('请先登录', true); return; }
             if ((userProfile?.chocolates || 0) < cost) { showToast('🍫 巧克力不足', true); return; }
@@ -1556,8 +1770,10 @@
             } catch (e) { console.error('购买失败', e);
                 showToast('购买失败', true); }
         }
+
         let giveTargetId = null,
             giveTargetName = '';
+
         function openGiveChocolate(userId, userName) {
             if (!currentUser) { showToast('请先登录', true); return; }
             if (userId === currentUser.id) { showToast('不能给自己投巧克力', true); return; }
@@ -1566,7 +1782,9 @@
             document.getElementById('giveTarget').textContent = `给 ${escapeHtml(giveTargetName)} 送巧克力`;
             document.getElementById('giveChocolateModal').classList.add('active');
         }
+
         function closeGiveChocolate() { document.getElementById('giveChocolateModal').classList.remove('active'); }
+
         async function doGiveChocolate() {
             if (!currentUser || !giveTargetId) { showToast('请先登录', true); return; }
             const count = parseInt(document.getElementById('giveCount').value) || 1;
@@ -1594,6 +1812,7 @@
             } catch (e) { console.error('送巧克力失败', e);
                 showToast('操作失败', true); }
         }
+
         async function followUser(userId) {
             if (!currentUser) { showToast('请先登录', true); return; }
             if (userId === currentUser.id) { showToast('不能关注自己', true); return; }
@@ -1640,6 +1859,7 @@
                 }
             } catch (e) { console.warn('加载话题失败', e); }
         }
+
         function setCategory(category) {
             currentCategory = category;
             document.querySelectorAll('.board-nav .board-btn').forEach(b => b.classList.remove('active'));
@@ -1658,11 +1878,13 @@
             }
             loadPosts(cat, currentSearch);
         }
+
         function searchPosts() {
             const input = document.getElementById('searchInput');
             currentSearch = input.value.trim();
             loadPosts(currentCategory, currentSearch);
         }
+
         function searchByTag(tag) {
             document.getElementById('searchInput').value = '#' + tag;
             currentSearch = '#' + tag;
@@ -1688,6 +1910,7 @@
                 document.getElementById('publishTitle').focus();
             }
         }
+
         async function publishPost() {
             if (!currentUser) { showToast('请先登录', true); return; }
             const title = document.getElementById('publishTitle').value.trim();
@@ -1734,7 +1957,9 @@
         // =============================================================
         function openNewTopic() { if (!currentUser) { showToast('请先登录', true); return; } document.getElementById(
                 'topicModal').classList.add('active'); }
+
         function closeTopicModal() { document.getElementById('topicModal').classList.remove('active'); }
+
         async function createTopic() {
             if (!currentUser) { showToast('请先登录', true); return; }
             const name = document.getElementById('topicNameInput').value.trim();
@@ -1780,13 +2005,15 @@
                     await loadTopics();
                     await getTasks(user.id);
                     await loadFavorites();
-                    await updateUserActivity(); // 首次更新活跃
-                    subscribeOnlineUsers(); // 订阅在线
-                    fetchOnlineUsers(); // 获取在线列表
+                    await updateUserActivity();
+                    subscribeOnlineUsers();
+                    fetchOnlineUsers();
+                    updateUnreadBadge();
                 } else { showToast('登录失败', true); }
             } catch (e) { console.error('登录错误', e);
                 showToast('登录失败: ' + e.message, true); }
         }
+
         async function handleRegister(e) {
             e.preventDefault();
             const name = document.getElementById('regName').value.trim();
@@ -1806,6 +2033,7 @@
             } catch (e) { console.error('注册错误', e);
                 showToast('注册失败: ' + e.message, true); }
         }
+
         async function handleSocialLogin(provider) {
             try {
                 const { data, error } = await sb.auth.signInWithOAuth({ provider });
@@ -1814,6 +2042,7 @@
             } catch (e) { console.error('社交登录失败', e);
                 showToast('社交登录失败: ' + e.message, true); }
         }
+
         function logout() {
             currentUser = null;
             userProfile = null;
@@ -1834,10 +2063,11 @@
             showToast('已退出', false);
             updateUI();
             loadPosts(currentCategory, currentSearch);
-            // 清空在线列表
             document.getElementById('onlineUserList').innerHTML = '<span style="color:rgba(255,255,255,0.3);">未登录</span>';
             document.getElementById('onlineCount').textContent = '0';
+            updateUnreadBadge();
         }
+
         async function handleOAuthCallback() {
             const url = new URL(window.location.href);
             if (url.hash && url.hash.includes('access_token')) {
@@ -1870,6 +2100,7 @@
                             await updateUserActivity();
                             subscribeOnlineUsers();
                             fetchOnlineUsers();
+                            updateUnreadBadge();
                             window.history.replaceState({}, document.title, window.location.pathname);
                         }
                     }
@@ -1883,7 +2114,9 @@
         function openProfile() { if (!currentUser) { showToast('请先登录', true); return; } document.getElementById(
                 'profileModal').classList.add('active');
             renderProfile(); }
+
         function closeProfile() { document.getElementById('profileModal').classList.remove('active'); }
+
         async function renderProfile() {
             if (!currentUser || !userProfile) return;
             document.getElementById('profileDisplayName').textContent = escapeHtml(userProfile.username || '用户');
@@ -1928,6 +2161,7 @@
             }
             document.getElementById('myPostsList').innerHTML = myPostsHtml;
         }
+
         async function uploadAvatar(event) {
             const file = event.target.files[0];
             if (!file) return;
@@ -1952,6 +2186,7 @@
             } catch (e) { console.error('上传头像失败', e);
                 showToast('上传失败: ' + e.message, true); }
         }
+
         async function saveProfile() {
             if (!currentUser) { showToast('请先登录', true); return; }
             const name = document.getElementById('profileNameInput').value.trim();
@@ -1979,7 +2214,9 @@
             document.getElementById('notificationModal').classList.add('active');
             await renderNotifications();
         }
+
         function closeNotificationPanel() { document.getElementById('notificationModal').classList.remove('active'); }
+
         async function renderNotifications() {
             const container = document.getElementById('notificationList');
             if (!currentUser) { container.innerHTML = '<p style="color:rgba(255,255,255,0.3);">请先登录</p>'; return; }
@@ -2008,23 +2245,10 @@
             } catch (e) { console.warn('加载通知失败', e);
                 container.innerHTML = '<p style="color:rgba(255,255,255,0.3);">加载失败</p>'; }
         }
+
         async function markNotificationRead(id) {
             try { await sb.from('notifications').update({ read: true }).eq('id', id);
                 renderNotifications(); } catch (e) { console.warn('标记已读失败', e); }
-        }
-        async function updateUnreadBadge() {
-            if (!currentUser) { document.getElementById('notifCount').classList.add('hidden'); return; }
-            try {
-                const { data, error } = await sb.from('notifications').select('id', { count: 'exact', head: true })
-                    .eq('user_id', currentUser.id).eq('read', false);
-                if (error) { console.warn('通知查询失败', error);
-                    document.getElementById('notifCount').classList.add('hidden'); return; }
-                unreadCount = data?.count || 0;
-                const badge = document.getElementById('notifCount');
-                if (unreadCount > 0) { badge.textContent = unreadCount > 99 ? '99+' : unreadCount;
-                    badge.classList.remove('hidden'); } else { badge.classList.add('hidden'); }
-            } catch (e) { console.warn('更新通知徽章失败', e);
-                document.getElementById('notifCount').classList.add('hidden'); }
         }
 
         // =============================================================
@@ -2037,29 +2261,16 @@
                     method: 'PATCH',
                     body: JSON.stringify({ last_active_at: new Date().toISOString() })
                 });
-            } catch (e) {
-                // 静默失败
-            }
+            } catch (e) {}
         }
 
         function subscribeOnlineUsers() {
             if (!currentUser) return;
-            if (onlineChannel) {
-                sb.removeChannel(onlineChannel);
-            }
+            if (onlineChannel) { sb.removeChannel(onlineChannel); }
             onlineChannel = sb.channel('online-users')
-                .on(
-                    'postgres_changes',
-                    {
-                        event: 'UPDATE',
-                        schema: 'public',
-                        table: 'profiles',
-                        // 不设filter，收到任何更新都重新拉取
-                    },
-                    () => {
-                        fetchOnlineUsers();
-                    }
-                )
+                .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'profiles' }, () => {
+                    fetchOnlineUsers();
+                })
                 .subscribe();
         }
 
@@ -2074,9 +2285,7 @@
                     .order('last_active_at', { ascending: false });
                 if (error) throw error;
                 renderOnlineUsers(data || []);
-            } catch (e) {
-                console.warn('获取在线用户失败', e);
-            }
+            } catch (e) { console.warn('获取在线用户失败', e); }
         }
 
         function renderOnlineUsers(users) {
@@ -2097,9 +2306,7 @@
                             ${escapeHtml(u.username || '匿名')}
                         </span>`;
             });
-            if (users.length > 10) {
-                html += `<span style="color:rgba(255,255,255,0.3);">+${users.length - 10}</span>`;
-            }
+            if (users.length > 10) { html += `<span style="color:rgba(255,255,255,0.3);">+${users.length - 10}</span>`; }
             container.innerHTML = html;
         }
 
@@ -2215,6 +2422,7 @@
                 document.getElementById('myFavCount').textContent = favoriteMap.size;
             }
         }
+
         function loadHotPosts(posts) {
             const container = document.getElementById('hotItems');
             if (!posts || posts.length === 0) { container.innerHTML =
@@ -2230,6 +2438,7 @@
             });
             container.innerHTML = html;
         }
+
         function loadTags(posts) {
             const container = document.getElementById('tagList');
             if (!posts || posts.length === 0) { container.innerHTML =
@@ -2287,7 +2496,9 @@
         // ================ 模态框控制 ==================================
         // =============================================================
         function openModal() { document.getElementById('authModal').classList.add('active'); }
+
         function closeModal() { document.getElementById('authModal').classList.remove('active'); }
+
         function switchTab(tab) {
             document.querySelectorAll('.modal-tabs button').forEach(b => b.classList.remove('active'));
             document.querySelector(`.modal-tabs button[data-tab="${tab}"]`).classList.add('active');
@@ -2341,9 +2552,8 @@
                             currentUser.id);
                         if (follows) follows.forEach(f => followingMap.set(f.following_id, true));
                         await loadFavorites();
-                        await updateUnreadBadge().catch(() => {});
+                        updateUnreadBadge();
                         await getTasks(currentUser.id);
-                        // 已登录则启动在线功能
                         await updateUserActivity();
                         subscribeOnlineUsers();
                         fetchOnlineUsers();
@@ -2358,17 +2568,11 @@
             updateUI();
             await loadTopics();
             await loadPosts('all', '');
-            // 心跳：每30秒更新活跃时间
             heartbeatInterval = setInterval(() => {
-                if (currentUser) {
-                    updateUserActivity();
-                }
+                if (currentUser) { updateUserActivity(); }
             }, 30000);
-            // 定时刷新在线列表（作为备用，正常情况下Realtime会推送）
             setInterval(() => {
-                if (currentUser) {
-                    fetchOnlineUsers();
-                }
+                if (currentUser) { fetchOnlineUsers(); }
             }, 60000);
         }
 
@@ -2380,10 +2584,9 @@
             window._appStarted = true;
             SUPABASE_URL = 'https://bkvsceiezbyexzqpvblj.supabase.co';
             SUPABASE_ANON_KEY =
-                'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJrdnNjZWllemJ5ZXh6cXB2YmxqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODM3MDk1MzIsImV4cCI6MjA5OTI4NTUzMn0.1h4Yp8YaJdMMOQW8N2zqvJi6QrxHPncBFMK9LjdmZ6E';
+                'eyJhbGciOiJIUi1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJrdnNjZWllemJ5ZXh6cXB2YmxqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODM3MDk1MzIsImV4cCI6MjA5OTI4NTUzMn0.1h4Yp8YaJdMMOQW8N2zqvJi6QrxHPncBFMK9LjdmZ6E';
             sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-            // 暴露全局
             window.doCheckin = doCheckin;
             window.openExchange = openExchange;
             window.doExchange = doExchange;
@@ -2434,6 +2637,7 @@
             window.closeMessages = closeMessages;
             window.sendMessage = sendMessage;
             window.openMessageUser = openMessageUser;
+            window.markMessageRead = markMsgRead;
             window.showEditForm = showEditForm;
             window.cancelEdit = cancelEdit;
             window.saveEdit = saveEdit;
