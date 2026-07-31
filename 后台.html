@@ -1,4 +1,4 @@
-    <!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
@@ -9,7 +9,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400;14..32,500;14..32,600;14..32,700&display=swap" rel="stylesheet">
     <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' https://cdn.jsdelivr.net https://unpkg.com 'unsafe-inline'; connect-src 'self' https://bkvsceiezbyexzqpvblj.supabase.co; img-src 'self' data: https://ui-avatars.com https://bkvsceiezbyexzqpvblj.supabase.co; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com;">
     <script>
-        const CACHE_VERSION = 'v12.0';
+        const CACHE_VERSION = 'v12.1';
         if (localStorage.getItem('forum_cache_version') !== CACHE_VERSION) {
             localStorage.clear();
             localStorage.setItem('forum_cache_version', CACHE_VERSION);
@@ -205,6 +205,12 @@
         .btn-sm:hover { background: rgba(255,255,255,0.08); border-color: #7c6aff; color: #a78bfa; }
         .btn-sm-danger:hover { border-color: #ef4444; color: #ef4444; }
         .btn-sm-success:hover { border-color: #22c55e; color: #22c55e; }
+        .btn-admin {
+            background: rgba(251,191,36,0.12);
+            border: 1px solid rgba(251,191,36,0.2);
+            color: #fcd34d;
+        }
+        .btn-admin:hover { background: rgba(251,191,36,0.2); border-color: #fcd34d; box-shadow: 0 4px 20px rgba(251,191,36,0.15); }
         .auth-section { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
         .user-avatar { width: 36px; height: 36px; border-radius: 50%; border: 2px solid rgba(255,255,255,0.12); object-fit: cover; transition: 0.3s; }
         .user-avatar:hover { border-color: #7c6aff; transform: scale(1.04); }
@@ -785,7 +791,7 @@
         .fav-item:hover { color: #a78bfa; }
         .fav-item .fav-title { font-size: .9rem; }
         .fav-item .fav-meta { font-size: .7rem; color: rgba(255,255,255,0.25); }
-        /* ===== 后台管理面板 (隐藏入口) ===== */
+        /* ===== 后台管理面板 ===== */
         .admin-panel {
             display: none;
             position: fixed;
@@ -1007,6 +1013,7 @@
                 <button class="btn" onclick="togglePublish()">✏️ 发布</button>
                 <span class="notification-badge" id="notificationBell" onclick="openNotificationPanel()">🔔 <span class="count hidden" id="notifCount">0</span></span>
                 <button class="btn btn-outline" onclick="openMessages()" title="私信">💬</button>
+                <button class="btn btn-admin hidden" id="adminEntryBtn" onclick="openAdminPanel()" title="后台管理">⚙️ 后台</button>
                 <div class="auth-section">
                     <button class="btn" id="loginBtn" onclick="openModal()">登录</button>
                     <img class="user-avatar hidden" id="userAvatar" alt="avatar">
@@ -1106,7 +1113,7 @@
 
     <div class="toast" id="toast"></div>
 
-    <!-- ===== 后台管理面板 (快捷键 Ctrl+Shift+A 唤起) ===== -->
+    <!-- ===== 后台管理面板 (显式入口按钮) ===== -->
     <div class="admin-panel" id="adminPanel">
         <div class="admin-box">
             <div class="admin-header">
@@ -3204,6 +3211,7 @@
             const userName = document.getElementById('userName');
             const logoutBtn = document.getElementById('logoutBtn');
             const profileLink = document.getElementById('profileLink');
+            const adminBtn = document.getElementById('adminEntryBtn');
             if (currentUser && userProfile) {
                 loginBtn.classList.add('hidden');
                 userAvatar.classList.remove('hidden');
@@ -3215,12 +3223,19 @@
                 document.getElementById('myChocolates').textContent = userProfile.chocolates || 0;
                 document.getElementById('myTotalPoints').textContent = userProfile.points || 0;
                 document.getElementById('myFavCount').textContent = favoriteMap.size;
+                // 管理员按钮显示/隐藏
+                if (isAdmin) {
+                    adminBtn.classList.remove('hidden');
+                } else {
+                    adminBtn.classList.add('hidden');
+                }
             } else {
                 loginBtn.classList.remove('hidden');
                 userAvatar.classList.add('hidden');
                 userName.classList.add('hidden');
                 logoutBtn.classList.add('hidden');
                 profileLink.classList.add('hidden');
+                adminBtn.classList.add('hidden');
                 document.getElementById('myChocolates').textContent = '0';
                 document.getElementById('myTotalPoints').textContent = '0';
                 document.getElementById('myFavCount').textContent = '0';
@@ -3229,7 +3244,7 @@
         }
 
         // =============================================================
-        // ================ 管理员验证 (仅数据库) ======================
+        // ================ 管理员验证 ==================================
         // =============================================================
         function checkAdmin() {
             if (!currentUser || !userProfile) return false;
@@ -3242,7 +3257,7 @@
         }
 
         // =============================================================
-        // ================ 后台管理 (Ctrl+Shift+A 唤起) ===============
+        // ================ 后台管理 ====================================
         // =============================================================
         let adminData = {
             users: [],
@@ -3256,18 +3271,6 @@
             posts: '',
             comments: ''
         };
-
-        // 键盘快捷键唤起后台
-        document.addEventListener('keydown', function(e) {
-            if ((e.ctrlKey || e.metaKey) && e.shiftKey && (e.key === 'A' || e.key === 'a')) {
-                e.preventDefault();
-                if (isAdmin) {
-                    openAdminPanel();
-                } else {
-                    showToast('无管理员权限', true);
-                }
-            }
-        });
 
         function openAdminPanel() {
             if (!isAdmin) {
@@ -3619,7 +3622,7 @@
                 } else {
                     document.getElementById('adminAdminList').textContent = '暂无管理员';
                 }
-                document.getElementById('adminCacheVersion').textContent = CACHE_VERSION || 'v12.0';
+                document.getElementById('adminCacheVersion').textContent = CACHE_VERSION || 'v12.1';
                 document.getElementById('adminDbStatus').textContent = '✅ 正常';
             } catch (e) {
                 console.error('加载设置失败', e);
@@ -3702,7 +3705,7 @@
                     fetchOnlineUsers();
                     updateUnreadBadge();
                     if (isAdmin) {
-                        showToast('👑 管理员已登录 (Ctrl+Shift+A 打开后台)', false);
+                        showToast('👑 管理员已登录，后台入口已显示', false);
                     }
                 } else { showToast('登录失败', true); }
             } catch (e) { console.error('登录错误', e);
@@ -3800,7 +3803,7 @@
                             fetchOnlineUsers();
                             updateUnreadBadge();
                             if (isAdmin) {
-                                showToast('👑 管理员已登录 (Ctrl+Shift+A 打开后台)', false);
+                                showToast('👑 管理员已登录，后台入口已显示', false);
                             }
                             window.history.replaceState({}, document.title, window.location.pathname);
                         }
