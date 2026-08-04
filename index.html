@@ -12,6 +12,115 @@
     <script src="https://cdn.jsdelivr.net/npm/dompurify@3.1.6/dist/purify.min.js"></script>
     <!-- Supabase 加载脚本 -->
     <script>
+        async function performAction(postId, actionType, taskType) {
+    if (!currentUser) { showToast('请先登录', true); return; }
+    var lockKey = postId + '_' + actionType;
+    if (actionLocks.has(lockKey)) { showToast('操作进行中，请稍候...', false); return; }
+    actionLocks.add(lockKey);
+    try {
+        // 1. 获取当前帖子数据
+        var resp = await authFetch(SUPABASE_URL + '/rest/v1/posts?id=eq.' + encodeURIComponent(postId) + '&select=likes,recommends,downvotes', { method: 'GET' });
+        var data = await handleResponse(resp);
+        if (!data || data.length === 0) throw new Error('帖子不存在');
+        var post = data[0];
+        var newLikes = post.likes || 0,
+            newRecommends = post.recommends || 0,
+            newDownvotes = post.downvotes || 0;
+
+        // 2. 获取当前用户对该帖子的动作记录
+        var { data: actions, error } = await sb.from('user_post_actions')
+            .select('action_type')
+            .eq('user_id', currentUser.id)
+            .eq('post_id', postId);
+        if (error) throw error;
+        var actionTypes = actions.map(a => a.action_type);
+        var hasAction = actionTypes.includes(actionType);
+        var hasLike = actionTypes.includes('like');
+        var hasRecommend = actionTypes.includes('recommend');
+        var hasDownvote = actionTypes.includes('downvote');
+
+        // 3. 计算新数值（互斥逻辑）
+        if (hasAction) {
+            // 取消当前操作
+            if (actionType === 'like') newLikes -= 1;
+            else if (actionType === 'recommend') newRecommends -= 1;
+            else if (actionType === 'downvote') newDownvotes -= 1;
+            await sb.from('user_post_actions').delete()
+                .eq('user_id', currentUser.id)
+                .eq('post_id', postId)
+                .eq('action_type', actionType);
+        } else {
+            // 执行新操作，需取消冲突操作
+            if (actionType === 'like') {
+                if (hasRecommend) { newRecommends -= 1; await sb.from('user_post_actions').delete().eq('user_id', currentUser.id).eq('post_id', postId).eq('action_type', 'recommend'); }
+                if (hasDownvote) { newDownvotes -= 1; await sb.from('user_post_actions').delete().eq('user_id', currentUser.id).eq('post_id', postId).eq('action_type', 'downvote'); }
+                newLikes += 1;
+            } else if (actionType === 'recommend') {
+                if (hasLike) { newLikes -= 1; await sb.from('user_post_actions').delete().eq('user_id', currentUser.id).eq('post_id', postId).eq('action_type', 'like'); }
+                if (hasDownvote) { newDownvotes -= 1; await sb.from('user_post_actions').delete().eq('user_id', currentUser.id).eq('post_id', postId).eq('action_type', 'downvote'); }
+                newRecommends += 1;
+            } else if (actionType === 'downvote') {
+                if (hasLike) { newLikes -= 1; await sb.from('user_post_actions').delete().eq('user_id', currentUser.id).eq('post_id', postId).eq('action_type', 'like'); }
+                if (hasRecommend) { newRecommends -= 1; await sb.from('user_post_actions').delete().eq('user_id', currentUser.id).eq('post_id', postId).eq('action_type', 'recommend'); }
+                newDownvotes += 1;
+            }
+            await sb.from('user_post_actions').insert({
+                user_id: currentUser.id,
+                post_id: postId,
+                action_type: actionType
+            }, { onConflict: 'user_id, post_id, action_type' });
+            if (taskType) { await updateTaskProgress(currentUser.id, taskType, 1); }
+        }
+
+        // 4. 更新数据库中的计数
+        await authFetch(SUPABASE_URL + '/rest/v1/posts?id=eq.' + encodeURIComponent(postId), {
+            method: 'PATCH',
+            body: JSON.stringify({ likes: newLikes, recommends: newRecommends, downvotes: newDownvotes })
+        });
+
+        // 5. 强制从服务器获取该帖子的最新完整数据（含最新计数）
+        var freshResp = await authFetch(SUPABASE_URL + '/rest/v1/posts?id=eq.' + encodeURIComponent(postId), { method: 'GET' });
+        var freshData = await handleResponse(freshResp);
+        if (freshData && freshData.length > 0) {
+            var freshPost = freshData[0];
+            // 更新缓存中的帖子数据
+            var idx = postsCache.findIndex(p => p.id === postId);
+            if (idx !== -1) {
+                // 保留原有作者信息，只更新计数等可变字段
+                postsCache[idx] = Object.assign(postsCache[idx], {
+                    likes: freshPost.likes,
+                    recommends: freshPost.recommends,
+                    downvotes: freshPost.downvotes,
+                    views: freshPost.views,
+                    chocolate_count: freshPost.chocolate_count
+                });
+            }
+            // 更新当前详情页（如果正在查看该帖子）
+            if (currentPostId === postId) {
+                // 重新获取评论并渲染详情
+                var comments = await fetchComments(postId);
+                await loadCommentLikes(comments);
+                renderPostDetail(freshPost, comments);
+            } else {
+                // 否则重新渲染列表（使用更新后的缓存）
+                renderPosts(postsCache.filter(p => {
+                    if (currentCategory !== 'all' && p.category !== currentCategory) return false;
+                    if (currentSearch.trim()) {
+                        var s = currentSearch.trim().toLowerCase();
+                        if (!p.title.toLowerCase().includes(s) && !(p.content && p.content.toLowerCase().includes(s))) return false;
+                    }
+                    return true;
+                }));
+            }
+        }
+        await updateUserActivity();
+    } catch (e) {
+        console.error(actionType + '操作失败', e);
+        showToast('操作失败: ' + e.message, true);
+    } finally {
+        actionLocks.delete(lockKey);
+    }
+}
         (function loadSupabase() {
             var cdnList = [
                 'https://cdnjs.cloudflare.com/ajax/libs/supabase-js/2.39.3/umd/supabase.min.js',
