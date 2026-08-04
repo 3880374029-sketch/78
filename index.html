@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>窍某论坛 · 完整版</title>
-    <!-- 字体 -->
+    <!-- 字体 (备选) -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400;500;600;700&display=swap" rel="stylesheet">
@@ -17,6 +17,7 @@
                 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2'
             ];
             var i = 0;
+
             function tryLoad() {
                 if (i >= cdnList.length) {
                     document.body.innerHTML = '<div style="color:red;text-align:center;padding:50px;">Supabase 库加载失败，请检查网络或使用本地文件</div>';
@@ -41,7 +42,10 @@
     <script async src="https://js.stripe.com/v3/"></script>
     <!-- MathJax -->
     <script>
-        window.MathJax = { tex: { inlineMath: [['$', '$'], ['\\(', '\\)']] }, svg: { fontCache: 'global' } };
+        window.MathJax = { tex: { inlineMath: [
+                ['$', '$'],
+                ['\\(', '\\)']
+            ] }, svg: { fontCache: 'global' } };
         window.addEventListener('load', function() {
             setTimeout(function() {
                 var s = document.createElement('script');
@@ -1805,7 +1809,7 @@
             isLoop = false,
             isShuffle = false;
 
-        // 工具函数
+        // ================== 工具函数 ==================
         function escapeHtml(t) { if (t == null) return ''; var d = document.createElement('div');
             d.textContent = String(t); return d.innerHTML; }
 
@@ -1850,9 +1854,7 @@
             return r.replace(/\n/g, '<br>');
         }
 
-        // ============================================================
-        // 网络请求
-        // ============================================================
+        // ================== 网络请求 ==================
         async function authFetch(url, opts) { let h = opts.headers || {};
             if (accessToken) h['Authorization'] = 'Bearer ' + accessToken;
             h['apikey'] = SUPABASE_ANON_KEY;
@@ -1923,7 +1925,6 @@
             sbInitPromise = (async function() {
                 if (typeof supabase === 'undefined') {
                     console.error('Supabase 库未加载');
-                    // 尝试重新加载
                     var s = document.createElement('script');
                     s.src = 'https://unpkg.com/@supabase/supabase-js@2/dist/umd/supabase.min.js';
                     s.onload = function() { if (typeof supabase !== 'undefined') initSupabase(); };
@@ -1931,14 +1932,12 @@
                     return;
                 }
                 sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-                // 恢复主题
                 var savedTheme = localStorage.getItem('theme');
                 if (savedTheme === 'light') {
                     document.body.style.background = '#f0f2f5';
                     document.body.style.color = '#1a1a2e';
                     document.getElementById('themeToggle').textContent = '☀️';
                 }
-                // 恢复会话
                 var token = localStorage.getItem('sb_token');
                 var refresh = localStorage.getItem('sb_refresh_token');
                 if (token && refresh) {
@@ -1968,10 +1967,8 @@
                         }
                     } catch (e) { console.warn('会话恢复失败', e); }
                 }
-                // 心跳
                 heartbeatInterval = setInterval(() => { if (currentUser) updateUserActivity(); }, 30000);
                 setInterval(() => { if (currentUser) fetchOnlineUsers(); }, 60000);
-                // Stripe
                 if (typeof Stripe !== 'undefined') stripe = Stripe(STRIPE_PUBLISHABLE_KEY);
                 renderQRPreviews();
                 if (currentUser) loadPurchaseHistory();
@@ -1981,7 +1978,6 @@
             return sbInitPromise;
         }
 
-        // 页面加载后自动初始化
         document.addEventListener('DOMContentLoaded', function() {
             if (typeof supabase !== 'undefined') {
                 initSupabase();
@@ -2000,9 +1996,7 @@
             }
         });
 
-        // ============================================================
-        // 认证相关
-        // ============================================================
+        // ================== 认证相关 ==================
         async function handleLogin(e) {
             e.preventDefault();
             if (!sb) {
@@ -2146,9 +2140,7 @@
             if (sub) sub.textContent = tab === 'login' ? '登录你的账号' : '注册新账号';
         }
 
-        // ============================================================
-        // UI更新
-        // ============================================================
+        // ================== UI更新 ==================
         function updateUI() {
             var loginBtn = document.getElementById('loginBtn');
             var userAvatar = document.getElementById('userAvatar');
@@ -2180,9 +2172,7 @@
             updateUnreadBadge();
         }
 
-        // ============================================================
-        // 帖子功能
-        // ============================================================
+        // ================== 帖子功能 ==================
         async function fetchAuthors(posts) { if (!posts || posts.length === 0) return; var ids = []; posts.forEach(p => { if (p
                     .author_id) ids.push(p.author_id); });
             ids = [...new Set(ids)]; if (ids.length === 0) return; try { var { data, error } = await sb.from('profiles')
@@ -2219,7 +2209,7 @@
 
         function renderPosts(posts) { var container = document.getElementById('postList'); if (!posts || posts.length === 0) {
                 container.innerHTML =
-                '<div class="empty-state"><h3>📭 暂无帖子</h3><p style="color:rgba(255,255,255,.3);">成为第一个发帖的人吧！</p></div>';
+                    '<div class="empty-state"><h3>📭 暂无帖子</h3><p style="color:rgba(255,255,255,.3);">成为第一个发帖的人吧！</p></div>';
                 return; } var html = ''; var pinned = posts.filter(p => p.pinned); var normal = posts.filter(p => !p.pinned);
             var sorted = pinned.concat(normal);
             sorted.forEach((post, idx) => { var displayName = authorMap[post.author_id] || post.author_name || '匿名'; var avatar =
@@ -2596,7 +2586,7 @@
                     'notifications').insert({ user_id: userId, content: content, read: false, created_at: new Date()
                         .toISOString() }); } catch (e) { console.warn('提及通知发送失败', e); } } }
 
-        // ============ 收藏 ============
+        // ================== 收藏 ==================
         async function toggleFavorite(postId) { if (!currentUser) { showToast('请先登录', true); return; } try { var exists =
                 favoriteMap.get(postId); if (exists) { await authFetch(SUPABASE_URL + '/rest/v1/favorites?user_id=eq.' +
                     encodeURIComponent(currentUser.id) + '&post_id=eq.' + encodeURIComponent(postId), { method: 'DELETE' });
@@ -2638,7 +2628,7 @@
                 container.innerHTML = html; } catch (e) { console.error('加载收藏失败', e);
                 container.innerHTML = '<p style="color:rgba(255,255,255,.3);">加载失败</p>'; } }
 
-        // ============ 评论点赞 ============
+        // ================== 评论点赞 ==================
         async function toggleCommentLike(commentId) { if (!currentUser) { showToast('请先登录', true); return; } try { var key =
                 commentId; var exists = commentLikeMap.get(key); if (exists) { await authFetch(SUPABASE_URL +
                         '/rest/v1/comment_likes?user_id=eq.' + encodeURIComponent(currentUser.id) + '&comment_id=eq.' +
@@ -2657,9 +2647,9 @@
                 data.forEach(d => { commentLikeMap.set(d.comment_id, true); }); } catch (e) { console.warn('加载评论点赞状态失败',
                     e); } }
 
-        // ============ 话题、分类、搜索 ============
+        // ================== 话题、分类、搜索 ==================
         async function loadTopics() { try { var topics = await fetchTopics();
-                topicsCache = topics; var nav = document.getElementById('boardNav'); var existing = nav.querySelectorAll(
+                topicsCache = topics; var nav = document.querySelector('.board-nav'); var existing = nav.querySelectorAll(
                     '.board-btn[data-category="topic"]'); for (var i = 1; i < existing.length; i++) existing[i].remove();
                 var topicBtn = nav.querySelector('.board-btn[data-category="topic"]'); if (topicBtn) { topics.forEach(t => { var btn =
                         document.createElement('button');
@@ -2716,7 +2706,7 @@
                     'duplicate key value')) { showToast('话题已存在', true); } else { showToast('创建失败: ' + e.message,
                     true); } } }
 
-        // ============ 私信（云端） ============
+        // ================== 私信（云端） ==================
         async function openMessages() { if (!currentUser) { showToast('请先登录', true); return; } document.getElementById(
                 'messagesModal').classList.add('active'); await renderMessages(); }
 
@@ -2804,7 +2794,7 @@
                 badge.classList.remove('hidden'); } else { badge.classList.add('hidden'); } } catch (e) { console.warn(
                     '更新未读标记失败', e); } }
 
-        // ============ 通知 ============
+        // ================== 通知 ==================
         async function openNotificationPanel() { if (!currentUser) { showToast('请先登录', true); return; } document
                 .getElementById('notificationModal').classList.add('active'); await renderNotifications(); }
 
@@ -2832,7 +2822,7 @@
                 id);
                 renderNotifications(); } catch (e) { console.warn('标记已读失败', e); } }
 
-        // ============ 签到、兑换、商城、关注、巧克力 ============
+        // ================== 签到、兑换、商城、关注、巧克力 ==================
         async function doCheckin() { if (!sb) await initSupabase(); if (!currentUser) { showToast('请先登录', true); return; } try {
                 var today = new Date().toISOString().split('T')[0]; var checkResp = await authFetch(SUPABASE_URL +
                     '/rest/v1/checkins?user_id=eq.' + encodeURIComponent(currentUser.id) + '&checkin_date=eq.' +
@@ -2942,7 +2932,7 @@
             await updateUserActivity(); } catch (e) { console.error('关注操作失败', e);
                 showToast('操作失败', true); } }
 
-        // ============ 任务系统 ============
+        // ================== 任务系统 ==================
         async function getTasks(userId) { var today = new Date().toISOString().split('T')[0]; var { data, error } = await sb
                 .from('user_tasks').select('*').eq('user_id', userId).eq('reset_date', today); if (error) return []; var
                 defaultTasks = [{ task_type: 'daily_post', target: 1, progress: 0, completed: false },
@@ -2991,7 +2981,7 @@
 
         function closeTasks() { document.getElementById('tasksModal').classList.remove('active'); }
 
-        // ============ 音乐播放器（云端） ============
+        // ================== 音乐播放器（云端） ==================
         async function loadPlaylist() { var { data, error } = await sb.from('songs').select('*').order('created_at'); if (
                 error) { console.error('加载歌曲失败:', error);
                 currentPlaylist = []; return; }
@@ -3087,7 +3077,7 @@
         audio.addEventListener('canplay', function() { document.getElementById('totalTime').textContent = formatTime(audio
                 .duration); });
 
-        // ============ 收款码管理（云端） ============
+        // ================== 收款码管理（云端） ==================
         async function getQRData(platform) { var { data, error } = await sb.from('qr_codes').select('data_url').eq(
                 'platform', platform).maybeSingle(); if (error || !data) return ''; return data.data_url; }
 
@@ -3115,7 +3105,7 @@
                     '<span style="color:rgba(255,255,255,.2);font-size:0.8rem;">未上传收款码</span>'; }
             container.innerHTML = html; }
 
-        // ============ 购买记录（云端） ============
+        // ================== 购买记录（云端） ==================
         async function loadPurchaseHistory() { if (!currentUser) return; var { data, error } = await sb.from(
                 'purchase_history').select('*').eq('user_id', currentUser.id).order('created_at', { ascending: false })
                 .limit(10); if (error) return; var container = document.getElementById('historyList'); if (!container) return; if (!
@@ -3128,7 +3118,7 @@
                     '</div>'; });
             container.innerHTML = html; }
 
-        // ============ 支付相关 ============
+        // ================== 支付相关 ==================
         function updateBuyTotal() { var count = parseInt(document.getElementById('buyChocoCount').value) || 1; if (count <
                 1) count = 1; if (count > 50) count = 50;
             document.getElementById('buyChocoCount').value = count; var total = count * 2.00;
@@ -3187,7 +3177,7 @@
                 showToast('🎉 购买成功！+' + count + ' 巧克力', false); }, 2000);
             pendingPurchase.count = 0; }
 
-        // ============ 个人中心 ============
+        // ================== 个人中心 ==================
         function openProfile() { if (!currentUser) { showToast('请先登录', true); return; } document.getElementById(
                 'profileModal').classList.add('active');
             renderProfile(); }
@@ -3257,7 +3247,7 @@
                 await updateUserActivity(); } catch (e) { console.error('保存失败', e);
                 showToast('保存失败: ' + e.message, true); } }
 
-        // ============ 在线用户 ============
+        // ================== 在线用户 ==================
         async function updateUserActivity() { if (!currentUser) return; try { await authFetch(SUPABASE_URL +
                     '/rest/v1/profiles?id=eq.' + encodeURIComponent(currentUser.id), { method: 'PATCH', body: JSON
                         .stringify({ last_active_at: new Date().toISOString() }) }); } catch (e) {} }
@@ -3290,7 +3280,7 @@
                     users.length - 10) + '</span>'; }
             container.innerHTML = html; }
 
-        // ============ Emoji 选择器 ============
+        // ================== Emoji 选择器 ==================
         var EMOJI_DATA = {
             '😊 笑脸': ['😀', '😁', '😂', '🤣', '😃', '😄', '😅', '😆', '😉', '😊', '😋', '😎', '😍', '🥰', '😘', '😗', '😙', '😚', '☺️',
                 '🙂', '🤗', '🤩', '🤔', '🤨', '😐', '😑', '😶', '🙄', '😏', '😣', '😥', '😮', '🤐', '😯', '😪', '😫', '😴', '😌', '😛',
@@ -3352,7 +3342,7 @@
         document.addEventListener('click', function(e) { if (!e.target.closest('.emoji-picker') && !e.target.closest(
                 '.emoji-btn')) { document.querySelectorAll('.emoji-picker').forEach(p => p.classList.remove('open')); } });
 
-        // ============ 右键菜单 ============
+        // ================== 右键菜单 ==================
         function handleReplyToPost() { document.getElementById('contextMenu').classList.remove('active'); if (!currentUser) {
                 showToast('请先登录', true); return; } if (!currentPostId) { showToast('无法获取帖子ID', true); return; } var commentInput =
                 document.getElementById('commentInput'); if (commentInput) { commentInput.scrollIntoView({ behavior: 'smooth',
@@ -3371,14 +3361,14 @@
             document.getElementById('contextMenu').classList.remove('active'); });
         document.addEventListener('click', function(e) { document.getElementById('contextMenu').classList.remove('active'); });
 
-        // ============ LaTeX 渲染 ============
+        // ================== LaTeX 渲染 ==================
         var latexRenderTimer = null;
 
         function renderLatex() { clearTimeout(latexRenderTimer);
             latexRenderTimer = setTimeout(function() { if (window.MathJax && MathJax.typesetPromise) { MathJax
                         .typesetPromise().catch(() => {}); } }, 500); }
 
-        // ============ 音乐上传（保留本地功能，但可选项） ============
+        // ================== 音乐上传（保留本地功能，但可选项） ==================
         function uploadMusic(event) { var files = event.target.files; for (var i = 0; i < files.length; i++) { var file =
                 files[i]; if (file.type.startsWith('audio/')) { var url = URL.createObjectURL(file); var song = { title: file
                         .name.replace(/\.[^/.]+$/, ''), artist: '本地音乐', url: url };
