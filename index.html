@@ -2160,6 +2160,53 @@
     .pl-item .pl-delta.plus { color: var(--success); }
     .pl-item .pl-delta.minus { color: var(--danger); }
     .pl-item .pl-time { color: var(--text-muted); font-size: .7rem; margin-left: 8px; }
+    /* ===== 小游戏公共 ===== */
+    .game-stats { display: flex; gap: 16px; flex-wrap: wrap; font-size: .85rem; color: var(--text-secondary); margin-bottom: 10px; }
+    .game-stats span { background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 999px; padding: 3px 12px; }
+
+    /* ===== 贪吃蛇 ===== */
+    .snake-wrap { position: relative; width: 320px; max-width: 100%; margin: 0 auto; }
+    .snake-wrap canvas { display: block; width: 100%; height: auto; border-radius: 14px; border: 1px solid var(--border-color); background: rgba(0, 0, 0, 0.25); }
+    .snake-overlay { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 12px; background: rgba(10, 6, 24, 0.55); border-radius: 14px; backdrop-filter: blur(3px); -webkit-backdrop-filter: blur(3px); }
+    .snake-overlay.hidden { display: none; }
+    .snake-title { font-size: 1.6rem; font-weight: 700; color: var(--text-primary); text-shadow: 0 0 12px var(--glow-a); }
+    .snake-pad { display: grid; grid-template-columns: repeat(3, 52px); grid-template-rows: repeat(2, 44px); gap: 6px; justify-content: center; margin-top: 12px; }
+    .pad-btn { border-radius: 12px; border: 1px solid var(--border-color); background: var(--bg-card); color: var(--text-secondary); font-size: 1rem; cursor: pointer; transition: transform var(--dur-fast) var(--ease-bounce), background var(--transition); }
+    .pad-btn:hover { background: var(--hover-bg); transform: translateY(-2px); }
+    .pad-btn:active { transform: scale(0.92); }
+
+    /* ===== 记忆翻牌 ===== */
+    .mem-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; max-width: 380px; margin: 0 auto; }
+    .mem-card { aspect-ratio: 1; border-radius: 14px; border: 1px solid var(--border-color); background: linear-gradient(135deg, var(--grad-pink), var(--grad-purple)); cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 1.6rem; transition: transform var(--dur-fast) var(--ease-bounce), background var(--transition), border-color var(--transition), box-shadow var(--dur-mid) var(--ease-out-soft); box-shadow: 0 4px 12px var(--shadow-color); }
+    .mem-card::before { content: '❔'; font-size: 1.5rem; opacity: .9; }
+    .mem-card:hover { transform: translateY(-3px) scale(1.02); }
+    .mem-card.flip { background: var(--bg-card); box-shadow: none; transform: rotateY(0deg); }
+    .mem-card.flip::before { content: none; }
+    .mem-card.matched { background: rgba(34, 197, 94, 0.18); border-color: var(--success); box-shadow: 0 0 14px var(--glow-a); opacity: .85; }
+    .mem-card.matched::before { content: none; }
+
+    /* ===== 石头剪刀布 ===== */
+    .rps-score { display: flex; justify-content: center; gap: 40px; font-size: 1rem; margin-bottom: 14px; }
+    .rps-stage { display: flex; align-items: center; justify-content: center; gap: 26px; margin: 8px 0 6px; }
+    .rps-side { text-align: center; }
+    .rps-big { font-size: 3rem; width: 92px; height: 92px; display: flex; align-items: center; justify-content: center; border-radius: 22px; border: 1px solid var(--border-color); background: var(--bg-card); transition: transform var(--dur-mid) var(--ease-bounce); }
+    .rps-big.pop { transform: scale(1.12) rotate(-6deg); }
+    .rps-label { font-size: .75rem; color: var(--text-muted); margin-top: 4px; }
+    .rps-vs { font-size: 1.2rem; font-weight: 800; color: var(--text-muted); }
+    .rps-result { text-align: center; font-weight: 600; font-size: .95rem; margin: 8px 0 12px; min-height: 24px; }
+    .rps-choices { display: flex; justify-content: center; gap: 14px; }
+    .rps-choice { display: flex; flex-direction: column; align-items: center; gap: 4px; width: 84px; padding: 12px 6px; border-radius: 16px; border: 1px solid var(--border-color); background: var(--bg-card); color: var(--text-secondary); font-size: .75rem; cursor: pointer; transition: transform var(--dur-fast) var(--ease-bounce), border-color var(--transition), box-shadow var(--dur-mid) var(--ease-out-soft); }
+    .rps-choice span { font-size: 2rem; }
+    .rps-choice:hover { transform: translateY(-4px); border-color: var(--accent); box-shadow: 0 8px 20px var(--shadow-color); }
+    .rps-choice:active { transform: scale(0.92); }
+
+    /* ===== 反应测试 ===== */
+    .rx-pad { max-width: 380px; height: 200px; margin: 0 auto; border-radius: 18px; display: flex; align-items: center; justify-content: center; font-size: 1.1rem; font-weight: 600; cursor: pointer; user-select: none; -webkit-user-select: none; background: linear-gradient(135deg, #ef4444, #dc2626); color: #fff; transition: background var(--dur-mid) var(--ease-out-soft), box-shadow var(--dur-mid) var(--ease-out-soft), transform var(--dur-fast) var(--ease-bounce); box-shadow: 0 8px 24px rgba(239, 68, 68, 0.3); }
+    .rx-pad.ready { background: linear-gradient(135deg, #22c55e, #16a34a); box-shadow: 0 8px 24px rgba(34, 197, 94, 0.3); }
+    .rx-pad.too-soon { background: linear-gradient(135deg, #f59e0b, #d97706); }
+    .rx-pad:active { transform: scale(0.98); }
+    .rx-result { text-align: center; margin-top: 12px; font-size: .9rem; color: var(--text-secondary); min-height: 22px; }
+
     </style>
 </head>
 <body>
@@ -2238,6 +2285,10 @@
                         <div class="gp-btn" onclick="openLottery()"><span class="gp-icon">🎡</span>幸运转盘</div>
                         <div class="gp-btn" onclick="openAchievements()"><span class="gp-icon">🏅</span>成就</div>
                         <div class="gp-btn" onclick="openCheckinCalendar()"><span class="gp-icon">📅</span>签到日历</div>
+                        <div class="gp-btn" onclick="openSnake()"><span class="gp-icon">🐍</span>贪吃蛇</div>
+                        <div class="gp-btn" onclick="openMemory()"><span class="gp-icon">🧠</span>记忆翻牌</div>
+                        <div class="gp-btn" onclick="openRPS()"><span class="gp-icon">✂️</span>石头剪刀布</div>
+                        <div class="gp-btn" onclick="openReaction()"><span class="gp-icon">⚡</span>反应测试</div>
                     </div>
                 </div>
             </div>
@@ -2540,6 +2591,89 @@
                 <div class="sb-day"><b>+16</b>积分</div>
                 <div class="sb-day big"><b>+16</b>积分<br>+🍫1</div>
             </div>
+        </div>
+    </div>
+
+    <!-- 贪吃蛇 -->
+    <div class="modal" id="snakeModal">
+        <div class="modal-box">
+            <span class="close" onclick="closeSnake()">&times;</span>
+            <h2>🐍 贪吃蛇</h2>
+            <p style="color:var(--text-muted);margin-bottom:8px;">方向键 / WASD 控制，手机上点按钮。吃到食物 +1 分</p>
+            <div class="game-stats">
+                <span>得分 <strong id="snakeScore" style="color:var(--accent);">0</strong></span>
+                <span>最高 <strong id="snakeBest" style="color:var(--warning);">0</strong></span>
+            </div>
+            <div class="snake-wrap">
+                <canvas id="snakeCanvas" width="320" height="320"></canvas>
+                <div class="snake-overlay" id="snakeOverlay">
+                    <div class="snake-title" id="snakeOverlayTitle">🐍</div>
+                    <button class="btn" id="snakeStartBtn" onclick="snakeStart()">开始游戏</button>
+                </div>
+            </div>
+            <div class="snake-pad">
+                <div></div><button class="pad-btn" data-dir="up">▲</button><div></div>
+                <button class="pad-btn" data-dir="left">◀</button><button class="pad-btn" data-dir="down">▼</button><button class="pad-btn" data-dir="right">▶</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 记忆翻牌 -->
+    <div class="modal" id="memoryModal">
+        <div class="modal-box">
+            <span class="close" onclick="closeMemory()">&times;</span>
+            <h2>🧠 记忆翻牌</h2>
+            <p style="color:var(--text-muted);margin-bottom:8px;">翻出所有配对的 emoji 即可获胜，试试最快纪录</p>
+            <div class="game-stats">
+                <span>步数 <strong id="memMoves" style="color:var(--accent);">0</strong></span>
+                <span>用时 <strong id="memTime" style="color:var(--accent);">0s</strong></span>
+                <span>最佳 <strong id="memBest" style="color:var(--warning);">--</strong></span>
+            </div>
+            <div class="mem-grid" id="memGrid"></div>
+            <div style="text-align:center;margin-top:12px;"><button class="btn btn-outline" onclick="memNewGame()">🔄 重新开始</button></div>
+        </div>
+    </div>
+
+    <!-- 石头剪刀布 -->
+    <div class="modal" id="rpsModal">
+        <div class="modal-box">
+            <span class="close" onclick="closeRPS()">&times;</span>
+            <h2>✂️ 石头剪刀布</h2>
+            <p style="color:var(--text-muted);margin-bottom:8px;">和电脑对战，三局两胜赢一局</p>
+            <div class="rps-score">
+                <span>你 <strong id="rpsYou" style="color:var(--accent);">0</strong></span>
+                <span>电脑 <strong id="rpsCpu" style="color:var(--danger);">0</strong></span>
+            </div>
+            <div class="rps-stage">
+                <div class="rps-side"><div class="rps-big" id="rpsYourPick">❔</div><div class="rps-label">你</div></div>
+                <div class="rps-vs">VS</div>
+                <div class="rps-side"><div class="rps-big" id="rpsCpuPick">❔</div><div class="rps-label">电脑</div></div>
+            </div>
+            <div class="rps-result" id="rpsResult" style="min-height:24px;">👆 出招吧</div>
+            <div class="rps-choices">
+                <button class="rps-choice" onclick="rpsPlay('rock')">✊<span>石头</span></button>
+                <button class="rps-choice" onclick="rpsPlay('scissors')">✌️<span>剪刀</span></button>
+                <button class="rps-choice" onclick="rpsPlay('paper')">✋<span>布</span></button>
+            </div>
+            <div style="text-align:center;margin-top:10px;"><button class="btn btn-outline" onclick="rpsReset()">🔄 重新计分</button></div>
+        </div>
+    </div>
+
+    <!-- 反应测试 -->
+    <div class="modal" id="reactionModal">
+        <div class="modal-box">
+            <span class="close" onclick="closeReaction()">&times;</span>
+            <h2>⚡ 反应测试</h2>
+            <p style="color:var(--text-muted);margin-bottom:8px;">等方块变绿立刻点击，测 3 次取平均</p>
+            <div class="game-stats">
+                <span>次数 <strong id="rxCount" style="color:var(--accent);">0/3</strong></span>
+                <span>本次 <strong id="rxLast" style="color:var(--accent);">--</strong></span>
+                <span>最快 <strong id="rxBest" style="color:var(--warning);">--</strong></span>
+            </div>
+            <div class="rx-pad" id="rxPad" onclick="rxClick()">
+                <span id="rxText">点击开始</span>
+            </div>
+            <div class="rx-result" id="rxResult"></div>
         </div>
     </div>
 
@@ -5634,6 +5768,445 @@
                     showToast('发奖失败，请稍后查看记录', true);
                 }
             }, 4300);
+        }
+
+        // ============================================================
+        // 小游戏：贪吃蛇 / 记忆翻牌 / 石头剪刀布 / 反应测试
+        // 纯前端实现，最高分存 localStorage，登录且成绩好时奖励积分
+        // ============================================================
+
+        // ================== 游戏奖励系统 ==================
+        // 服务端 API 调用,替代纯客户端 localStorage 限额
+        // 调用: await awardGameReward('snake', 25); // 返回 {awarded, points, message}
+        async function awardGameReward(gameType, score) {
+            if (!currentUser || !sb) return { awarded: false, points: 0, message: '未登录' };
+            try {
+                // supabase-js v2 的 rpc 返回 { data, error },data 才是函数返回值
+                var { data: res, error } = await sb.rpc('award_game_reward', { game_type: gameType, score: score });
+                if (error) {
+                    console.warn('游戏奖励 RPC 错误', error);
+                    return getLocalGameReward(gameType, score);
+                }
+                if (res && res.awarded) {
+                    userProfile.points = (userProfile.points || 0) + res.points;
+                    updateUI();
+                    showToast('🎉 ' + res.message + '（' + res.tier + '）', false);
+                    return { awarded: true, points: res.points, message: res.message };
+                } else if (res) {
+                    showToast('⚠️ ' + res.message, true);
+                    return { awarded: false, points: 0, message: res.message };
+                }
+            } catch (e) {
+                console.warn('游戏奖励发放失败', e);
+                showToast('奖励发放失败，尝试本地记录', true);
+                return getLocalGameReward(gameType, score);
+            }
+        }
+
+        // 降级方案:服务不可用时,用客户端 localStorage 记录(使用本地日期与 SQL current_date 对齐)
+        function getLocalGameReward(gameType, score) {
+            var d = new Date();
+            var today = d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
+            var key = 'game_reward_' + gameType + '_' + today;
+            var used = parseInt(localStorage.getItem(key) || '0', 10);
+            if (used >= 1) return { awarded: false, points: 0, message: '今日已领取' };
+            // 根据游戏类型计算奖励(与 SQL game_reward_tiers 档位完全一致)
+            var points = 0;
+            if (gameType === 'snake' && score >= 10) {
+                points = score <= 19 ? 1 : score <= 29 ? 2 : score <= 49 ? 3 : 5;
+            } else if (gameType === 'memory') {
+                points = score <= 19 ? 3 : score <= 29 ? 3 : score <= 39 ? 2 : 1;
+            } else if (gameType === 'rps' && score >= 1) {
+                points = 3;
+            } else if (gameType === 'reaction') {
+                points = score <= 149 ? 5 : score <= 199 ? 5 : score <= 249 ? 4 : score <= 299 ? 3 : score <= 399 ? 2 : 1;
+            }
+            if (points > 0) {
+                localStorage.setItem(key, '1');
+                return { awarded: true, points: points, message: '获得 ' + points + ' 积分' };
+            }
+            return { awarded: false, points: 0, message: '成绩未达标' };
+        }
+
+        // ================== 贪吃蛇 ==================
+        var snake = {
+            grid: 20, cell: 16, body: [], dir: 'right', nextDir: 'right',
+            food: null, score: 0, running: false, timer: null, over: false
+        };
+
+        function openSnake() {
+            if (!currentUser) { showToast('请先登录', true); return; }
+            document.getElementById('snakeModal').classList.add('active');
+            snakeBestRender();
+            snakeDraw();
+            if (snake.running && !snake.timer) snake.timer = setInterval(snakeTick, 150);
+        }
+        function closeSnake() {
+            document.getElementById('snakeModal').classList.remove('active');
+            snakePause();
+        }
+        function snakeBestRender() {
+            var el = document.getElementById('snakeBest');
+            if (el) el.textContent = localStorage.getItem('snake_best') || 0;
+        }
+        function snakeRandomFood() {
+            var free = [];
+            for (var y = 0; y < snake.grid; y++) {
+                for (var x = 0; x < snake.grid; x++) {
+                    if (!snake.body.some(function(s) { return s.x === x && s.y === y; })) free.push({ x: x, y: y });
+                }
+            }
+            if (free.length === 0) { snakeEnd(); return null; }
+            return free[Math.floor(Math.random() * free.length)];
+        }
+        function snakeStart() {
+            snakeStop();
+            snake.body = [{ x: 9, y: 10 }, { x: 8, y: 10 }, { x: 7, y: 10 }];
+            snake.dir = 'right';
+            snake.nextDir = 'right';
+            snake.score = 0;
+            snake.over = false;
+            snake.food = snakeRandomFood();
+            snake.running = true;
+            document.getElementById('snakeOverlay').classList.add('hidden');
+            document.getElementById('snakeScore').textContent = '0';
+            snake.timer = setInterval(snakeTick, 150);
+            snakeDraw();
+        }
+        function snakeStop() {
+            snakePause();
+            snake.running = false;
+        }
+        function snakePause() {
+            if (snake.timer) { clearInterval(snake.timer); snake.timer = null; }
+        }
+        function snakeEnd() {
+            snakeStop();
+            snake.over = true;
+            var best = parseInt(localStorage.getItem('snake_best') || '0', 10);
+            if (snake.score > best) {
+                localStorage.setItem('snake_best', String(snake.score));
+                snakeBestRender();
+            }
+            var ov = document.getElementById('snakeOverlay');
+            document.getElementById('snakeOverlayTitle').textContent = '游戏结束 · 得分 ' + snake.score;
+            document.getElementById('snakeStartBtn').textContent = '🔄 再来一局';
+            ov.classList.remove('hidden');
+            if (snake.score >= 10) {
+                await awardGameReward('snake', snake.score);
+            }
+        }
+        function snakeTick() {
+            if (!snake.running || snake.over) return;
+            if (!isOpposite(snake.nextDir, snake.dir)) {
+                snake.dir = snake.nextDir;
+            } else {
+                snake.nextDir = snake.dir; // 拒绝反向时清除残留，避免方向键短暂失灵
+            }
+            var head = { x: snake.body[0].x, y: snake.body[0].y };
+            if (snake.dir === 'up') head.y--;
+            else if (snake.dir === 'down') head.y++;
+            else if (snake.dir === 'left') head.x--;
+            else if (snake.dir === 'right') head.x++;
+            if (head.x < 0 || head.y < 0 || head.x >= snake.grid || head.y >= snake.grid ||
+                snake.body.slice(0, -1).some(function(s) { return s.x === head.x && s.y === head.y; })) {
+                snakeEnd();
+                return;
+            }
+            snake.body.unshift(head);
+            if (snake.food && head.x === snake.food.x && head.y === snake.food.y) {
+                snake.score++;
+                document.getElementById('snakeScore').textContent = String(snake.score);
+                snake.food = snakeRandomFood();
+                if (!snake.food) return;
+            } else {
+                snake.body.pop();
+            }
+            snakeDraw();
+        }
+        function isOpposite(a, b) {
+            return (a === 'up' && b === 'down') || (a === 'down' && b === 'up') ||
+                (a === 'left' && b === 'right') || (a === 'right' && b === 'left');
+        }
+        function snakeSetDir(d) {
+            if (snake.running && !isOpposite(d, snake.nextDir)) snake.nextDir = d;
+        }
+        function snakeDraw() {
+            var c = document.getElementById('snakeCanvas');
+            if (!c) return;
+            var ctx = c.getContext('2d');
+            ctx.clearRect(0, 0, c.width, c.height);
+            ctx.strokeStyle = 'rgba(255,255,255,0.06)';
+            ctx.lineWidth = 1;
+            for (var i = 0; i <= snake.grid; i++) {
+                ctx.beginPath(); ctx.moveTo(i * snake.cell, 0); ctx.lineTo(i * snake.cell, c.height); ctx.stroke();
+                ctx.beginPath(); ctx.moveTo(0, i * snake.cell); ctx.lineTo(c.width, i * snake.cell); ctx.stroke();
+            }
+            if (snake.food) {
+                ctx.fillStyle = '#ff5e8a';
+                ctx.beginPath();
+                ctx.arc(snake.food.x * snake.cell + snake.cell / 2, snake.food.y * snake.cell + snake.cell / 2, snake.cell / 2 - 2, 0, Math.PI * 2);
+                ctx.fill();
+            }
+            snake.body.forEach(function(s, idx) {
+                var t = idx / Math.max(snake.body.length - 1, 1);
+                var r = Math.round(168 - t * 120);
+                var g = Math.round(85 + t * 60);
+                var b = Math.round(247 - t * 60);
+                ctx.fillStyle = 'rgb(' + r + ',' + g + ',' + b + ')';
+                var pad = 1.5;
+                ctx.beginPath();
+                ctx.roundRect ? ctx.roundRect(s.x * snake.cell + pad, s.y * snake.cell + pad, snake.cell - pad * 2, snake.cell - pad * 2, 4)
+                    : ctx.rect(s.x * snake.cell + pad, s.y * snake.cell + pad, snake.cell - pad * 2, snake.cell - pad * 2);
+                ctx.fill();
+            });
+            var head = snake.body[0];
+            if (head) {
+                ctx.fillStyle = '#fff';
+                var hx = head.x * snake.cell + snake.cell / 2;
+                var hy = head.y * snake.cell + snake.cell / 2;
+                ctx.beginPath(); ctx.arc(hx - 3, hy - 2, 2, 0, Math.PI * 2); ctx.fill();
+                ctx.beginPath(); ctx.arc(hx + 3, hy - 2, 2, 0, Math.PI * 2); ctx.fill();
+            }
+        }
+        document.addEventListener('keydown', function(e) {
+            if (!document.getElementById('snakeModal').classList.contains('active')) return;
+            if (e.target && (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA')) return;
+            var map = { ArrowUp: 'up', ArrowDown: 'down', ArrowLeft: 'left', ArrowRight: 'right', w: 'up', s: 'down', a: 'left', d: 'right', W: 'up', S: 'down', A: 'left', D: 'right' };
+            var d = map[e.key];
+            if (d) { e.preventDefault(); snakeSetDir(d); }
+        });
+        document.querySelectorAll('.pad-btn').forEach(function(b) {
+            b.addEventListener('click', function() { snakeSetDir(b.getAttribute('data-dir')); });
+        });
+
+        // ================== 记忆翻牌 ==================
+        var MEM_EMOJIS = ['🍎', '🍌', '🍇', '🍓', '🍒', '🥝', '🍍', '🍋'];
+        var mem = { cards: [], moves: 0, matched: 0, first: null, lock: false, seconds: 0, timer: null, started: false };
+
+        function memShuffle() {
+            var arr = [];
+            MEM_EMOJIS.forEach(function(e) { arr.push(e, e); });
+            for (var i = arr.length - 1; i > 0; i--) {
+                var j = Math.floor(Math.random() * (i + 1));
+                var t = arr[i]; arr[i] = arr[j]; arr[j] = t;
+            }
+            return arr;
+        }
+        function memNewGame() {
+            if (mem.timer) { clearInterval(mem.timer); mem.timer = null; }
+            mem.cards = memShuffle();
+            mem.moves = 0;
+            mem.matched = 0;
+            mem.first = null;
+            mem.lock = false;
+            mem.started = false;
+            mem.seconds = 0;
+            document.getElementById('memMoves').textContent = '0';
+            document.getElementById('memTime').textContent = '0s';
+            memRenderBest();
+            var grid = document.getElementById('memGrid');
+            grid.innerHTML = mem.cards.map(function(e, i) {
+                return '<div class="mem-card" data-i="' + i + '" onclick="memFlip(this)">' + e + '</div>';
+            }).join('');
+        }
+        function memRenderBest() {
+            var el = document.getElementById('memBest');
+            if (!el) return;
+            var best = localStorage.getItem('mem_best');
+            el.textContent = best ? best + 's' : '--';
+        }
+        function memFlip(card) {
+            if (mem.lock || card.classList.contains('flip')) return;
+            if (!mem.started) {
+                mem.started = true;
+                mem.timer = setInterval(function() {
+                    mem.seconds++;
+                    document.getElementById('memTime').textContent = mem.seconds + 's';
+                }, 1000);
+            }
+            card.classList.add('flip');
+            if (mem.first === null) {
+                mem.first = card;
+                return;
+            }
+            mem.moves++;
+            document.getElementById('memMoves').textContent = String(mem.moves);
+            var a = mem.first;
+            var b = card;
+            mem.first = null;
+            if (a.textContent === b.textContent) {
+                a.classList.add('matched');
+                b.classList.add('matched');
+                mem.matched++;
+                if (mem.matched === MEM_EMOJIS.length) memWin();
+            } else {
+                mem.lock = true;
+                setTimeout(function() {
+                    a.classList.remove('flip');
+                    b.classList.remove('flip');
+                    mem.lock = false;
+                }, 700);
+            }
+        }
+        function memWin() {
+            if (mem.timer) { clearInterval(mem.timer); mem.timer = null; }
+            var best = parseFloat(localStorage.getItem('mem_best') || '0');
+            if (!best || mem.seconds < best) {
+                localStorage.setItem('mem_best', String(mem.seconds));
+                memRenderBest();
+            }
+            showToast('🎉 记忆翻牌完成！用时 ' + mem.seconds + 's，步数 ' + mem.moves, false);
+            if (mem.seconds <= 40) {
+                await awardGameReward('memory', mem.seconds);
+            }
+        }
+        function openMemory() {
+            if (!currentUser) { showToast('请先登录', true); return; }
+            document.getElementById('memoryModal').classList.add('active');
+            memNewGame();
+        }
+        function closeMemory() {
+            document.getElementById('memoryModal').classList.remove('active');
+            if (mem.timer) { clearInterval(mem.timer); mem.timer = null; }
+        }
+
+        // ================== 石头剪刀布 ==================
+        var rps = { you: 0, cpu: 0, locked: false, picks: { rock: '✊', scissors: '✌️', paper: '✋' } };
+        function rpsBeat(a, b) {
+            if (a === b) return 0;
+            if ((a === 'rock' && b === 'scissors') || (a === 'scissors' && b === 'paper') || (a === 'paper' && b === 'rock')) return 1;
+            return -1;
+        }
+        function rpsPlay(choice) {
+            if (rps.locked) return;
+            var cpuChoice = ['rock', 'scissors', 'paper'][Math.floor(Math.random() * 3)];
+            var youEl = document.getElementById('rpsYourPick');
+            var cpuEl = document.getElementById('rpsCpuPick');
+            youEl.textContent = rps.picks[choice];
+            cpuEl.textContent = rps.picks[cpuChoice];
+            youEl.classList.remove('pop'); cpuEl.classList.remove('pop');
+            void youEl.offsetWidth;
+            youEl.classList.add('pop'); cpuEl.classList.add('pop');
+            var r = rpsBeat(choice, cpuChoice);
+            var resEl = document.getElementById('rpsResult');
+            if (r === 1) {
+                rps.you++;
+                resEl.textContent = '🎉 你赢了这局！';
+                resEl.style.color = 'var(--success)';
+            } else if (r === -1) {
+                rps.cpu++;
+                resEl.textContent = '😅 电脑赢了这局';
+                resEl.style.color = 'var(--danger)';
+            } else {
+                resEl.textContent = '🤝 平局';
+                resEl.style.color = 'var(--text-muted)';
+            }
+            document.getElementById('rpsYou').textContent = String(rps.you);
+            document.getElementById('rpsCpu').textContent = String(rps.cpu);
+            if (rps.you >= 2 || rps.cpu >= 2) {
+                rps.locked = true;
+                if (rps.you >= 2) {
+                    showToast('🏆 你赢下三局两胜！', false);
+                    await awardGameReward('rps', 1);
+                } else {
+                    showToast('🤖 电脑赢下三局两胜，再来一次！', true);
+                }
+                setTimeout(function() { rpsReset(); }, 1400);
+            }
+        }
+        function rpsReset() {
+            rps.you = 0;
+            rps.cpu = 0;
+            rps.locked = false;
+            document.getElementById('rpsYou').textContent = '0';
+            document.getElementById('rpsCpu').textContent = '0';
+            document.getElementById('rpsYourPick').textContent = '❔';
+            document.getElementById('rpsCpuPick').textContent = '❔';
+            document.getElementById('rpsResult').textContent = '👆 出招吧';
+            document.getElementById('rpsResult').style.color = '';
+        }
+        function openRPS() {
+            if (!currentUser) { showToast('请先登录', true); return; }
+            document.getElementById('rpsModal').classList.add('active');
+            rpsReset();
+        }
+        function closeRPS() { document.getElementById('rpsModal').classList.remove('active'); }
+
+        // ================== 反应测试 ==================
+        var rx = { state: 'idle', times: [], timer: null, startAt: 0 };
+        function rxClick() {
+            var pad = document.getElementById('rxPad');
+            var text = document.getElementById('rxText');
+            if (rx.state === 'idle') {
+                rx.state = 'waiting';
+                pad.classList.remove('too-soon', 'ready');
+                text.textContent = '⏳ 等它变绿…';
+                rx.timer = setTimeout(function() {
+                    rx.state = 'ready';
+                    rx.startAt = performance.now();
+                    pad.classList.add('ready');
+                    text.textContent = '⚡ 快点！';
+                }, 800 + Math.random() * 2200);
+            } else if (rx.state === 'waiting') {
+                if (rx.timer) { clearTimeout(rx.timer); rx.timer = null; }
+                rx.state = 'idle';
+                pad.classList.add('too-soon');
+                text.textContent = '😅 太早了，重新开始';
+                document.getElementById('rxResult').textContent = '';
+                setTimeout(function() { pad.classList.remove('too-soon'); }, 600);
+            } else if (rx.state === 'ready') {
+                var ms = Math.round(performance.now() - rx.startAt);
+                rx.state = 'idle';
+                pad.classList.remove('ready');
+                rx.times.push(ms);
+                text.textContent = '点击开始';
+                document.getElementById('rxLast').textContent = ms + 'ms';
+                document.getElementById('rxCount').textContent = rx.times.length + '/3';
+                document.getElementById('rxResult').textContent = ms <= 200 ?
+                    '🏎️ ' + ms + 'ms — 这是开挂了吧！' : (ms <= 300 ? '💪 ' + ms + 'ms，不错！' : '🐢 ' + ms + 'ms，再练练');
+                var best = parseInt(localStorage.getItem('rx_best') || '0', 10);
+                if (!best || ms < best) {
+                    localStorage.setItem('rx_best', String(ms));
+                    document.getElementById('rxBest').textContent = ms + 'ms';
+                }
+                if (rx.times.length >= 3) {
+                    var avg = Math.round(rx.times.reduce(function(s, t) { return s + t; }, 0) / rx.times.length);
+                    var extra = ms <= 200 ? '（其中一次超快！）' : '';
+                    document.getElementById('rxResult').textContent = '🎯 平均反应 ' + avg + 'ms' + extra;
+                    if (avg <= 400) {
+                        await awardGameReward('reaction', avg);
+                    }
+                    rx.times = [];
+                    document.getElementById('rxCount').textContent = '0/3';
+                    document.getElementById('rxLast').textContent = '--';
+                }
+            }
+        }
+        function rxReset() {
+            if (rx.timer) { clearTimeout(rx.timer); rx.timer = null; }
+            rx.state = 'idle';
+            rx.times = [];
+            var pad = document.getElementById('rxPad');
+            if (pad) {
+                pad.classList.remove('ready', 'too-soon');
+                var text = document.getElementById('rxText');
+                if (text) text.textContent = '点击开始';
+            }
+            var best = parseInt(localStorage.getItem('rx_best') || '0', 10);
+            var bestEl = document.getElementById('rxBest');
+            if (bestEl) bestEl.textContent = best ? best + 'ms' : '--';
+            var resEl = document.getElementById('rxResult');
+            if (resEl) resEl.textContent = '';
+        }
+        function openReaction() {
+            if (!currentUser) { showToast('请先登录', true); return; }
+            document.getElementById('reactionModal').classList.add('active');
+            rxReset();
+        }
+        function closeReaction() {
+            document.getElementById('reactionModal').classList.remove('active');
+            rxReset();
         }
     </script>
 </body>
