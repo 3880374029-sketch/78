@@ -51,32 +51,52 @@
     <style>
         /* ===== CSS 变量 + 平滑主题切换 ===== */
         :root {
-            --bg-primary: #0f0f23;
-            --bg-secondary: #1a1a2e;
-            --bg-card: rgba(255, 255, 255, 0.04);
-            --text-primary: #eef2ff;
-            --text-secondary: rgba(255, 255, 255, 0.7);
-            --text-muted: rgba(255, 255, 255, 0.4);
-            --border-color: rgba(255, 255, 255, 0.06);
-            --shadow-color: rgba(0, 0, 0, 0.6);
-            --accent: #7c6aff;
-            --accent-glow: rgba(124, 106, 255, 0.3);
+            --bg-primary: #14111f;
+            --bg-secondary: #201a33;
+            --bg-card: rgba(255, 255, 255, 0.07);
+            --text-primary: #f8f7ff;
+            --text-secondary: rgba(248, 247, 255, 0.74);
+            --text-muted: rgba(248, 247, 255, 0.44);
+            --border-color: rgba(255, 255, 255, 0.13);
+            --shadow-color: rgba(15, 8, 35, 0.55);
+            --accent: #a855f7;
+            --accent-glow: rgba(168, 85, 247, 0.35);
             --success: #22c55e;
             --danger: #ef4444;
-            --warning: #fcd34d;
-            --transition: 0.3s ease;
+            --warning: #fbbf24;
+            --grad-pink: #ff5e8a;
+            --grad-purple: #a855f7;
+            --grad-violet: #7c6aff;
+            --grad-orange: #ff9f43;
+            --grad-cyan: #22d3ee;
+            --grad-green: #22c55e;
+            --glow-a: rgba(255, 94, 138, 0.35);
+            --glow-b: rgba(168, 85, 247, 0.30);
+            --glass-bg: rgba(30, 25, 48, 0.88);
+            --hover-bg: rgba(255, 255, 255, 0.08);
+            --bg-grad: radial-gradient(1000px 520px at 88% -8%, rgba(255, 94, 138, 0.20), transparent 60%), radial-gradient(900px 500px at -10% 18%, rgba(168, 85, 247, 0.16), transparent 55%), radial-gradient(760px 460px at 115% 95%, rgba(34, 211, 238, 0.10), transparent 60%), radial-gradient(600px 380px at 30% 110%, rgba(255, 159, 67, 0.08), transparent 55%), var(--bg-primary);
+            --transition: 0.32s cubic-bezier(0.22, 0.8, 0.3, 1);
+            --ease-out-soft: cubic-bezier(0.22, 0.8, 0.3, 1);
+            --ease-bounce: cubic-bezier(0.34, 1.4, 0.5, 1);
+            --dur-fast: 0.18s;
+            --dur-mid: 0.32s;
         }
         [data-theme="light"] {
-            --bg-primary: #f0f2f5;
+            --bg-primary: #f6f3ff;
             --bg-secondary: #ffffff;
-            --bg-card: rgba(0, 0, 0, 0.03);
-            --text-primary: #1a1a2e;
-            --text-secondary: #2d2d44;
-            --text-muted: rgba(0, 0, 0, 0.5);
-            --border-color: rgba(0, 0, 0, 0.08);
-            --shadow-color: rgba(0, 0, 0, 0.15);
-            --accent: #5a4bd1;
-            --accent-glow: rgba(90, 75, 209, 0.2);
+            --bg-card: rgba(255, 255, 255, 0.78);
+            --text-primary: #232038;
+            --text-secondary: #44405f;
+            --text-muted: rgba(35, 32, 56, 0.5);
+            --border-color: rgba(139, 92, 246, 0.2);
+            --shadow-color: rgba(90, 70, 180, 0.2);
+            --accent: #8b5cf6;
+            --accent-glow: rgba(139, 92, 246, 0.22);
+            --glow-a: rgba(255, 94, 138, 0.30);
+            --glow-b: rgba(139, 92, 246, 0.25);
+            --glass-bg: rgba(255, 255, 255, 0.9);
+            --hover-bg: rgba(0, 0, 0, 0.06);
+            --bg-grad: radial-gradient(1000px 520px at 88% -8%, rgba(255, 94, 138, 0.16), transparent 60%), radial-gradient(900px 500px at -10% 18%, rgba(139, 92, 246, 0.14), transparent 55%), radial-gradient(760px 460px at 115% 95%, rgba(34, 211, 238, 0.10), transparent 60%), var(--bg-primary);
         }
         * {
             margin: 0;
@@ -86,7 +106,7 @@
         }
         body {
             font-family: 'Inter', sans-serif;
-            background: var(--bg-primary);
+            background: var(--bg-grad);
             color: var(--text-primary);
             padding: 16px;
             line-height: 1.6;
@@ -105,7 +125,7 @@
             cursor: pointer;
             font-size: .9rem;
             font-weight: 500;
-            transition: transform .2s, box-shadow .2s;
+            transition: transform var(--dur-fast) var(--ease-bounce), box-shadow var(--dur-mid) var(--ease-out-soft), filter var(--dur-fast) ease;
             min-height: 36px;
             display: inline-flex;
             align-items: center;
@@ -113,11 +133,12 @@
             box-shadow: 0 2px 8px var(--accent-glow);
         }
         .btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 4px 16px var(--accent-glow);
+            transform: translateY(-2px) scale(1.02);
+            box-shadow: 0 8px 24px var(--accent-glow), 0 0 0 1px rgba(255, 255, 255, 0.08);
+            filter: brightness(1.08);
         }
         .btn:active {
-            transform: scale(0.97);
+            transform: translateY(0) scale(0.96);
         }
         .btn-outline {
             background: var(--bg-card);
@@ -126,7 +147,7 @@
             color: var(--text-secondary);
         }
         .btn-outline:hover {
-            background: rgba(255, 255, 255, 0.08);
+            background: var(--hover-bg);
         }
         .btn-success {
             background: linear-gradient(135deg, #22c55e, #16a34a);
@@ -146,7 +167,7 @@
             min-height: 26px;
         }
         .btn-sm:hover {
-            background: rgba(255, 255, 255, 0.08);
+            background: var(--hover-bg);
         }
         .btn:disabled {
             opacity: 0.5;
@@ -155,28 +176,59 @@
         }
         .post-card {
             background: var(--bg-card);
-            border-radius: 16px;
-            padding: 16px 20px;
+            border-radius: 20px;
+            padding: 18px 20px;
             margin-bottom: 12px;
             border: 1px solid var(--border-color);
-            transition: border-color .2s, background var(--transition);
+            position: relative;
+            overflow: hidden;
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            transition: border-color .2s, background var(--transition), transform var(--dur-mid) var(--ease-out-soft), box-shadow var(--dur-mid) var(--ease-out-soft);
+        }
+        .post-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: linear-gradient(90deg, var(--grad-pink), var(--grad-purple), var(--grad-cyan));
+            opacity: 0.8;
+            transition: opacity var(--dur-mid) var(--ease-out-soft);
+        }
+        .post-card:hover::before {
+            opacity: 1;
         }
         .post-card:hover {
             border-color: var(--accent);
+            transform: translateY(-3px);
+            box-shadow: 0 14px 34px var(--shadow-color), 0 0 0 1px var(--glow-a);
         }
         .modal {
-            display: none;
+            display: flex;
             position: fixed;
             inset: 0;
-            background: rgba(0, 0, 0, 0.6);
+            background: rgba(0, 0, 0, 0);
             justify-content: center;
             align-items: center;
             z-index: 999;
             padding: 20px;
-            backdrop-filter: blur(4px);
+            opacity: 0;
+            visibility: hidden;
+            pointer-events: none;
+            backdrop-filter: blur(0px);
+            -webkit-backdrop-filter: blur(0px);
+            transition: opacity var(--dur-mid) var(--ease-out-soft), background-color var(--dur-mid) var(--ease-out-soft), backdrop-filter var(--dur-mid) var(--ease-out-soft), visibility 0s linear var(--dur-mid);
         }
         .modal.active {
-            display: flex;
+            opacity: 1;
+            visibility: visible;
+            pointer-events: auto;
+            background: rgba(0, 0, 0, 0.6);
+            backdrop-filter: blur(6px);
+            -webkit-backdrop-filter: blur(6px);
+            transition: opacity var(--dur-mid) var(--ease-out-soft), background-color var(--dur-mid) var(--ease-out-soft), backdrop-filter var(--dur-mid) var(--ease-out-soft), visibility 0s;
         }
         .modal-box {
             background: var(--bg-secondary);
@@ -189,6 +241,13 @@
             position: relative;
             border: 1px solid var(--border-color);
             box-shadow: 0 16px 48px var(--shadow-color);
+            transform: translateY(18px) scale(0.94);
+            opacity: 0;
+            transition: transform var(--dur-mid) var(--ease-bounce), opacity var(--dur-mid) var(--ease-out-soft);
+        }
+        .modal.active .modal-box {
+            transform: translateY(0) scale(1);
+            opacity: 1;
         }
         .modal-box .close {
             position: absolute;
@@ -211,15 +270,22 @@
             border-radius: 10px;
             border: 1px solid var(--border-color);
             z-index: 1000;
-            display: none;
+            display: block;
             max-width: 90%;
             font-weight: 500;
             box-shadow: 0 4px 16px var(--shadow-color);
             color: var(--text-primary);
+            opacity: 0;
+            visibility: hidden;
+            pointer-events: none;
+            transform: translateX(-50%) translateY(18px) scale(0.96);
+            transition: opacity var(--dur-mid) var(--ease-out-soft), transform var(--dur-mid) var(--ease-bounce), visibility 0s linear var(--dur-mid), border-color var(--transition), box-shadow var(--dur-mid) var(--ease-out-soft);
         }
         .toast.show {
-            display: block;
-            animation: fadeIn .3s;
+            opacity: 1;
+            visibility: visible;
+            transform: translateX(-50%) translateY(0) scale(1);
+            transition: opacity var(--dur-mid) var(--ease-out-soft), transform var(--dur-mid) var(--ease-bounce), visibility 0s, border-color var(--transition), box-shadow var(--dur-mid) var(--ease-out-soft);
         }
         .toast.error {
             border-color: var(--danger);
@@ -304,7 +370,7 @@
             cursor: pointer;
         }
         .qr-manager .qr-upload-row .file-input-wrapper .file-label:hover {
-            background: rgba(255, 255, 255, 0.08);
+            background: var(--hover-bg);
             color: var(--text-primary);
         }
         .qr-manager .qr-preview {
@@ -437,7 +503,6 @@
             border: 1px solid var(--border-color);
         }
         .context-menu {
-            display: none;
             position: fixed;
             background: var(--bg-secondary);
             border: 1px solid var(--border-color);
@@ -446,9 +511,19 @@
             min-width: 140px;
             box-shadow: 0 8px 32px var(--shadow-color);
             z-index: 1000;
+            opacity: 0;
+            visibility: hidden;
+            transform: translateY(-6px) scale(0.96);
+            transform-origin: top left;
+            pointer-events: none;
+            transition: opacity var(--dur-fast) var(--ease-out-soft), transform var(--dur-fast) var(--ease-out-soft), visibility 0s linear var(--dur-fast);
         }
         .context-menu.active {
-            display: block;
+            opacity: 1;
+            visibility: visible;
+            transform: none;
+            pointer-events: auto;
+            transition: opacity var(--dur-fast) var(--ease-out-soft), transform var(--dur-fast) var(--ease-out-soft), visibility 0s;
         }
         .context-menu .menu-item {
             padding: 6px 16px;
@@ -467,7 +542,6 @@
             margin-left: 6px;
         }
         .emoji-picker {
-            display: none;
             position: absolute;
             bottom: 44px;
             left: 0;
@@ -480,9 +554,19 @@
             overflow-y: auto;
             box-shadow: 0 8px 32px var(--shadow-color);
             z-index: 100;
+            opacity: 0;
+            visibility: hidden;
+            transform: translateY(8px) scale(0.97);
+            transform-origin: bottom left;
+            pointer-events: none;
+            transition: opacity var(--dur-fast) var(--ease-out-soft), transform var(--dur-fast) var(--ease-out-soft), visibility 0s linear var(--dur-fast);
         }
         .emoji-picker.open {
-            display: block;
+            opacity: 1;
+            visibility: visible;
+            transform: none;
+            pointer-events: auto;
+            transition: opacity var(--dur-fast) var(--ease-out-soft), transform var(--dur-fast) var(--ease-out-soft), visibility 0s;
         }
         .emoji-picker .emoji-grid {
             display: grid;
@@ -611,7 +695,7 @@
             transition: background .2s;
         }
         .board-nav .board-btn:hover {
-            background: rgba(255, 255, 255, 0.08);
+            background: var(--hover-bg);
             color: var(--text-primary);
         }
         .board-nav .board-btn.active {
@@ -742,6 +826,7 @@
             background: linear-gradient(90deg, var(--accent), #a78bfa, var(--warning));
             width: 0;
             border-radius: 30px;
+            transition: width .8s var(--ease-out-soft);
         }
         .profile-upload-btn {
             position: relative;
@@ -863,7 +948,7 @@
             margin-bottom: 16px;
         }
         .post-detail .back-btn:hover {
-            background: rgba(255, 255, 255, 0.08);
+            background: var(--hover-bg);
             border-color: var(--accent);
         }
         .post-detail .post-author-info {
@@ -985,7 +1070,7 @@
             cursor: pointer;
         }
         .tag-item:hover {
-            background: rgba(255, 255, 255, 0.08);
+            background: var(--hover-bg);
             color: var(--text-primary);
         }
         .modal-tabs {
@@ -1076,6 +1161,7 @@
         select:focus {
             outline: 0;
             border-color: var(--accent);
+            box-shadow: 0 0 0 3px var(--accent-glow);
         }
         .publish-form {
             display: none;
@@ -1107,7 +1193,7 @@
             justify-content: center;
         }
         #musicPlayer .player-controls button:hover {
-            background: rgba(255, 255, 255, 0.08);
+            background: var(--hover-bg);
             color: var(--accent);
         }
         #musicPlayer .player-info {
@@ -1231,7 +1317,7 @@
             gap: 4px;
         }
         #musicPlayer .player-upload button:hover {
-            background: rgba(255, 255, 255, 0.08);
+            background: var(--hover-bg);
             color: var(--text-primary);
         }
         #musicPlayer .player-playlist-toggle {
@@ -1297,8 +1383,15 @@
         .like-btn,
         .recommend-btn,
         .downvote-btn {
+            display: inline-block;
             cursor: pointer;
-            transition: .2s;
+            transition: transform var(--dur-fast) var(--ease-bounce), color var(--transition);
+        }
+        .like-btn:active,
+        .recommend-btn:active,
+        .downvote-btn:active,
+        .fav-btn:active {
+            transform: scale(1.35);
         }
         .like-btn.active {
             color: var(--danger);
@@ -1486,6 +1579,587 @@
                 min-width: 0;
             }
         }
+    /* ===== 丝滑增强 ===== */
+    html { scroll-behavior: smooth; }
+    ::-webkit-scrollbar { width: 10px; height: 10px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: rgba(124, 106, 255, 0.3); border-radius: 10px; border: 2px solid transparent; background-clip: padding-box; }
+    ::-webkit-scrollbar-thumb:hover { background: rgba(124, 106, 255, 0.5); background-clip: padding-box; }
+    * { scrollbar-width: thin; scrollbar-color: rgba(124, 106, 255, 0.35) transparent; }
+
+    @keyframes fadeUp {
+        from { opacity: 0; transform: translateY(14px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+
+    header, .forum-stats, .board-nav, .view-toggle, footer { animation: fadeUp 0.5s var(--ease-out-soft) both; }
+    .forum-stats { animation-delay: 0.05s; }
+    .board-nav { animation-delay: 0.09s; }
+    .view-toggle { animation-delay: 0.12s; }
+    footer { animation-delay: 0.35s; }
+    .sidebar > * { animation: fadeUp 0.5s var(--ease-out-soft) both; }
+    .sidebar > *:nth-child(1) { animation-delay: 0.15s; }
+    .sidebar > *:nth-child(2) { animation-delay: 0.19s; }
+    .sidebar > *:nth-child(3) { animation-delay: 0.23s; }
+    .sidebar > *:nth-child(4) { animation-delay: 0.27s; }
+    .sidebar > *:nth-child(5) { animation-delay: 0.31s; }
+    .sidebar > *:nth-child(6) { animation-delay: 0.35s; }
+
+    .post-detail { animation: fadeUp 0.38s var(--ease-out-soft) both; }
+
+    .board-nav .board-btn { transition: background 0.2s, color var(--transition), border-color var(--transition), transform var(--dur-fast) var(--ease-bounce); }
+    .board-nav .board-btn:hover { transform: translateY(-1px); }
+    .view-toggle button { transition: background-color var(--transition), color var(--transition), border-color var(--transition), transform var(--dur-fast) var(--ease-bounce); }
+    .view-toggle button:hover { transform: translateY(-1px); }
+
+    .tag-item { transition: background 0.2s, color var(--transition), transform var(--dur-fast) var(--ease-bounce), border-color var(--transition); }
+    .tag-item:hover { transform: translateY(-1px) scale(1.05); }
+
+    .hot-item a { transition: color var(--transition), transform var(--dur-fast) var(--ease-out-soft); }
+    .hot-item a:hover { transform: translateX(3px); }
+
+    .stat-item { transition: transform var(--dur-mid) var(--ease-out-soft), border-color var(--transition), background var(--transition), box-shadow var(--dur-mid) var(--ease-out-soft); }
+    .stat-item:hover { transform: translateY(-2px); border-color: var(--accent); box-shadow: 0 6px 18px var(--shadow-color); }
+
+    .forum-stats { transition: transform var(--dur-mid) var(--ease-out-soft), border-color var(--transition), background var(--transition), box-shadow var(--dur-mid) var(--ease-out-soft); }
+    .forum-stats:hover { transform: translateY(-2px); border-color: var(--accent); box-shadow: 0 8px 24px var(--shadow-color); }
+
+    .hot-list, .online-users { transition: transform var(--dur-mid) var(--ease-out-soft), border-color var(--transition), box-shadow var(--dur-mid) var(--ease-out-soft); }
+    .hot-list:hover, .online-users:hover { transform: translateY(-2px); border-color: var(--accent); box-shadow: 0 8px 22px var(--shadow-color); }
+
+    .btn-sm { transition: background 0.2s, color var(--transition), transform var(--dur-fast) var(--ease-bounce), border-color var(--transition); }
+    .btn-sm:hover { transform: translateY(-1px); }
+
+    .user-avatar { transition: transform var(--dur-fast) var(--ease-bounce), border-color var(--transition), box-shadow var(--dur-mid) var(--ease-out-soft); }
+    .user-avatar:hover { transform: scale(1.1); border-color: var(--accent); }
+
+    .post-title { transition: color 0.2s, transform var(--dur-fast) var(--ease-out-soft); }
+    .post-title:hover { transform: translateX(2px); }
+
+    .qr-manager, .shop-buy-section { transition: border-color var(--transition), background var(--transition), box-shadow var(--dur-mid) var(--ease-out-soft); }
+    .qr-manager:hover, .shop-buy-section:hover { border-color: var(--accent); box-shadow: 0 8px 22px var(--shadow-color); }
+
+    @media (prefers-reduced-motion: reduce) {
+        *, *::before, *::after {
+            animation-duration: 0.01ms !important;
+            animation-iteration-count: 1 !important;
+            transition-duration: 0.01ms !important;
+            scroll-behavior: auto !important;
+        }
+    }
+
+    /* ===== 活力渐变皮肤 ===== */
+    header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        flex-wrap: wrap;
+        gap: 12px;
+        padding: 4px 0 16px;
+        border-bottom: 1px solid var(--border-color);
+        margin-bottom: 18px;
+    }
+    header h1 {
+        font-size: 1.5rem;
+        letter-spacing: 0.2px;
+        background: linear-gradient(90deg, var(--grad-pink), var(--grad-purple), var(--grad-violet));
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+    }
+
+    .btn {
+        background: linear-gradient(135deg, var(--grad-pink), var(--grad-purple), var(--grad-violet));
+        background-size: 200% 200%;
+        background-position: 0% 50%;
+        box-shadow: 0 4px 14px var(--glow-a), 0 2px 8px var(--accent-glow);
+        transition: transform var(--dur-fast) var(--ease-bounce), box-shadow var(--dur-mid) var(--ease-out-soft), filter var(--dur-fast) ease, background-position var(--dur-mid) var(--ease-out-soft), background-color var(--transition), color var(--transition), border-color var(--transition);
+    }
+    .btn:hover {
+        background-position: 100% 50%;
+        box-shadow: 0 10px 28px var(--glow-a), 0 0 0 1px rgba(255, 255, 255, 0.12);
+    }
+    .btn-outline {
+        background: var(--bg-card);
+        backdrop-filter: blur(8px);
+        -webkit-backdrop-filter: blur(8px);
+        box-shadow: none;
+        color: var(--text-secondary);
+        background-position: initial;
+    }
+    .btn-outline:hover {
+        background-position: initial;
+        box-shadow: none;
+    }
+
+    .btn-success {
+        background: linear-gradient(135deg, #22c55e, #16a34a);
+        background-size: initial;
+        background-position: initial;
+    }
+    .btn-stripe {
+        background: linear-gradient(135deg, #635bff, #3b82f6);
+        background-size: initial;
+        background-position: initial;
+    }
+
+    .badge.tech { background: linear-gradient(135deg, #3b82f6, #22d3ee); }
+    .badge.life { background: linear-gradient(135deg, #22c55e, #84cc16); }
+    .badge.career { background: linear-gradient(135deg, #f59e0b, #ff5e8a); }
+    .badge.topic { background: linear-gradient(135deg, #a855f7, #ec4899); }
+
+    .level-badge {
+        background: linear-gradient(135deg, #fbbf24, #ff9f43);
+        color: #3b1f00;
+        box-shadow: 0 2px 8px rgba(255, 159, 67, 0.3);
+    }
+
+    .board-nav .board-btn.active {
+        background: linear-gradient(135deg, var(--grad-pink), var(--grad-purple));
+        border-color: transparent;
+        color: #fff;
+        box-shadow: 0 4px 14px var(--glow-a);
+    }
+
+    .view-toggle {
+        background: var(--bg-card);
+        backdrop-filter: blur(10px);
+        -webkit-backdrop-filter: blur(10px);
+        border: 1px solid var(--border-color);
+        border-radius: 999px;
+        padding: 4px;
+        display: inline-flex;
+        gap: 2px;
+    }
+    .view-toggle button {
+        border-radius: 999px;
+        border: none;
+        padding: 4px 14px;
+    }
+    .view-toggle button.active {
+        background: linear-gradient(135deg, var(--grad-pink), var(--grad-purple));
+        color: #fff;
+        box-shadow: 0 3px 10px var(--glow-a);
+    }
+
+    .modal-tabs button.active {
+        color: var(--accent);
+        border-bottom-color: transparent;
+        position: relative;
+    }
+    .modal-tabs button.active::after {
+        content: '';
+        position: absolute;
+        bottom: -2px;
+        left: 22%;
+        right: 22%;
+        height: 3px;
+        border-radius: 3px;
+        background: linear-gradient(90deg, var(--grad-pink), var(--grad-purple));
+    }
+
+    .modal-box {
+        background: var(--bg-secondary);
+        backdrop-filter: blur(24px);
+        -webkit-backdrop-filter: blur(24px);
+        border-radius: 24px;
+    }
+    .modal-box h2:first-of-type {
+        background: linear-gradient(90deg, var(--grad-pink), var(--grad-purple));
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        display: inline-block;
+    }
+
+    .forum-stats, .hot-list, .online-users, .publish-form, .edit-area {
+        background: var(--bg-card);
+        backdrop-filter: blur(14px);
+        -webkit-backdrop-filter: blur(14px);
+    }
+
+    .stat-item .num {
+        background: linear-gradient(135deg, var(--grad-pink), var(--grad-purple));
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+    }
+
+    .level-progress .bar {
+        background: linear-gradient(90deg, var(--grad-pink), var(--grad-purple), var(--grad-cyan));
+    }
+
+    .shop-buy-section .buy-row .price-tag {
+        background: linear-gradient(90deg, var(--grad-orange), var(--grad-pink));
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+    }
+
+    .online-count {
+        background: linear-gradient(90deg, var(--grad-green), var(--grad-cyan));
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+    }
+
+    .hot-list h3 {
+        background: linear-gradient(90deg, var(--grad-orange), var(--grad-pink));
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+    }
+
+    .hot-item .hot-num {
+        color: transparent;
+        background: linear-gradient(180deg, var(--grad-orange), var(--grad-pink));
+        -webkit-background-clip: text;
+        background-clip: text;
+    }
+
+    .post-detail .post-author-info .author-name,
+    .reply-item .reply-author {
+        color: transparent;
+        background: linear-gradient(90deg, var(--grad-purple), var(--grad-pink));
+        -webkit-background-clip: text;
+        background-clip: text;
+    }
+
+    .post-card .post-meta .author {
+        color: var(--accent);
+        font-weight: 500;
+    }
+
+    .toast {
+        background: linear-gradient(90deg, var(--glow-a), var(--glass-bg) 30%);
+    }
+    .toast.error {
+        background: linear-gradient(90deg, rgba(239, 68, 68, 0.16), var(--glass-bg) 30%);
+    }
+
+    .user-avatar {
+        border: 2px solid var(--accent);
+        box-shadow: 0 0 8px var(--glow-b);
+    }
+    .profile-avatar-large {
+        border: 3px solid var(--accent);
+        box-shadow: 0 0 18px var(--glow-b);
+    }
+
+    .glow-text {
+        text-shadow: 0 0 6px var(--glow-a), 0 0 16px var(--glow-b);
+    }
+
+    .empty-state {
+        background: var(--bg-card);
+        backdrop-filter: blur(10px);
+        -webkit-backdrop-filter: blur(10px);
+        border-radius: 20px;
+    }
+
+    .search-box, textarea, input, select {
+        backdrop-filter: blur(8px);
+        -webkit-backdrop-filter: blur(8px);
+    }
+
+    #musicPlayer {
+        background: var(--glass-bg);
+        backdrop-filter: blur(22px);
+        -webkit-backdrop-filter: blur(22px);
+    }
+    .context-menu {
+        background: var(--glass-bg);
+        backdrop-filter: blur(18px);
+        -webkit-backdrop-filter: blur(18px);
+    }
+    [data-theme="light"] #musicPlayer { background: rgba(255, 255, 255, 0.9); }
+    [data-theme="light"] .context-menu { background: rgba(255, 255, 255, 0.94); }
+    [data-theme="light"] .toast {
+        background: linear-gradient(90deg, var(--glow-a), var(--glass-bg) 30%);
+    }
+
+    /* ===== 更多主题预设 ===== */
+    [data-theme="peach"] {
+        --bg-primary: #fdf0f4;
+        --bg-secondary: #ffffff;
+        --bg-card: rgba(255, 255, 255, 0.78);
+        --text-primary: #3a2330;
+        --text-secondary: #6b4a5c;
+        --text-muted: rgba(58, 35, 48, 0.48);
+        --border-color: rgba(255, 94, 138, 0.22);
+        --shadow-color: rgba(200, 60, 120, 0.22);
+        --accent: #ff5e8a;
+        --accent-glow: rgba(255, 94, 138, 0.28);
+        --grad-pink: #ff5e8a;
+        --grad-purple: #ff7ea6;
+        --grad-violet: #ffb3c8;
+        --grad-orange: #ff9f43;
+        --grad-cyan: #ff8fb0;
+        --grad-green: #22c55e;
+        --glow-a: rgba(255, 94, 138, 0.32);
+        --glow-b: rgba(255, 126, 166, 0.30);
+        --glass-bg: rgba(255, 255, 255, 0.9);
+        --hover-bg: rgba(0, 0, 0, 0.06);
+        --row-me: rgba(255, 94, 138, 0.10);
+        --bg-grad: radial-gradient(1000px 520px at 88% -8%, rgba(255, 94, 138, 0.20), transparent 60%), radial-gradient(900px 500px at -10% 18%, rgba(255, 143, 176, 0.16), transparent 55%), radial-gradient(760px 460px at 115% 95%, rgba(255, 159, 67, 0.10), transparent 60%), var(--bg-primary);
+    }
+    [data-theme="cyber"] {
+        --bg-primary: #0a0f1e;
+        --bg-secondary: #111a30;
+        --bg-card: rgba(34, 211, 238, 0.06);
+        --text-primary: #e6f7ff;
+        --text-secondary: rgba(230, 247, 255, 0.72);
+        --text-muted: rgba(230, 247, 255, 0.42);
+        --border-color: rgba(34, 211, 238, 0.18);
+        --shadow-color: rgba(0, 10, 25, 0.6);
+        --accent: #22d3ee;
+        --accent-glow: rgba(34, 211, 238, 0.35);
+        --grad-pink: #22d3ee;
+        --grad-purple: #6366f1;
+        --grad-violet: #0ea5e9;
+        --grad-orange: #f59e0b;
+        --grad-cyan: #67e8f9;
+        --grad-green: #34d399;
+        --glow-a: rgba(34, 211, 238, 0.35);
+        --glow-b: rgba(99, 102, 241, 0.35);
+        --glass-bg: rgba(17, 26, 48, 0.88);
+        --row-me: rgba(34, 211, 238, 0.10);
+        --bg-grad: radial-gradient(1000px 520px at 88% -8%, rgba(34, 211, 238, 0.16), transparent 60%), radial-gradient(900px 500px at -10% 18%, rgba(99, 102, 241, 0.16), transparent 55%), radial-gradient(760px 460px at 115% 95%, rgba(14, 165, 233, 0.10), transparent 60%), var(--bg-primary);
+    }
+    [data-theme="mint"] {
+        --bg-primary: #0d1713;
+        --bg-secondary: #14221d;
+        --bg-card: rgba(52, 211, 153, 0.07);
+        --text-primary: #eafff6;
+        --text-secondary: rgba(234, 255, 246, 0.72);
+        --text-muted: rgba(234, 255, 246, 0.42);
+        --border-color: rgba(52, 211, 153, 0.18);
+        --shadow-color: rgba(0, 20, 12, 0.55);
+        --accent: #34d399;
+        --accent-glow: rgba(52, 211, 153, 0.35);
+        --grad-pink: #34d399;
+        --grad-purple: #2dd4bf;
+        --grad-violet: #10b981;
+        --grad-orange: #fbbf24;
+        --grad-cyan: #6ee7b7;
+        --grad-green: #22c55e;
+        --glow-a: rgba(52, 211, 153, 0.35);
+        --glow-b: rgba(45, 212, 191, 0.30);
+        --glass-bg: rgba(20, 34, 29, 0.88);
+        --row-me: rgba(52, 211, 153, 0.10);
+        --bg-grad: radial-gradient(1000px 520px at 88% -8%, rgba(52, 211, 153, 0.16), transparent 60%), radial-gradient(900px 500px at -10% 18%, rgba(45, 212, 191, 0.14), transparent 55%), radial-gradient(760px 460px at 115% 95%, rgba(16, 185, 129, 0.10), transparent 60%), var(--bg-primary);
+    }
+    :root, [data-theme="dark"] { --row-me: rgba(168, 85, 247, 0.10); }
+    [data-theme="light"] { --row-me: rgba(139, 92, 246, 0.08); }
+
+    /* ===== 玩法中心 ===== */
+    .games-panel { margin-top: 14px; }
+    .games-panel .gp-title { font-size: .9rem; color: var(--text-secondary); margin-bottom: 8px; }
+    .games-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+    .games-grid .gp-btn {
+        display: flex; flex-direction: column; align-items: center; gap: 2px;
+        padding: 10px 4px;
+        border-radius: 14px;
+        border: 1px solid var(--border-color);
+        background: var(--bg-card);
+        backdrop-filter: blur(8px);
+        cursor: pointer;
+        color: var(--text-secondary);
+        font-size: .72rem;
+        transition: transform var(--dur-fast) var(--ease-bounce), border-color var(--transition), box-shadow var(--dur-mid) var(--ease-out-soft), background var(--transition);
+    }
+    .games-grid .gp-btn:hover { transform: translateY(-2px); border-color: var(--accent); box-shadow: 0 6px 16px var(--shadow-color); }
+    .games-grid .gp-btn .gp-icon { font-size: 1.3rem; }
+
+    /* ===== 主题选择器 ===== */
+    .theme-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); gap: 12px; }
+    .theme-card {
+        border: 2px solid var(--border-color);
+        border-radius: 16px;
+        padding: 14px 12px;
+        cursor: pointer;
+        text-align: center;
+        background: var(--bg-card);
+        backdrop-filter: blur(8px);
+        transition: transform var(--dur-fast) var(--ease-bounce), border-color var(--transition), box-shadow var(--dur-mid) var(--ease-out-soft);
+    }
+    .theme-card:hover { transform: translateY(-2px); border-color: var(--accent); }
+    .theme-card.active { border-color: var(--accent); box-shadow: 0 0 0 1px var(--accent), 0 6px 18px var(--shadow-color); }
+    .theme-card .theme-preview { width: 100%; height: 34px; border-radius: 8px; margin-bottom: 8px; border: 1px solid var(--border-color); }
+    .theme-card .t-icon { font-size: 1.7rem; display: block; margin-bottom: 4px; }
+    .theme-card .t-name { font-weight: 600; font-size: .9rem; }
+    .theme-card .t-desc { font-size: .7rem; color: var(--text-muted); margin-top: 2px; }
+
+    /* ===== 排行榜 ===== */
+    .lb-tabs { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 14px; }
+    .lb-tabs button {
+        background: var(--bg-card);
+        border: 1px solid var(--border-color);
+        color: var(--text-muted);
+        padding: 4px 14px;
+        border-radius: 999px;
+        cursor: pointer;
+        font-size: .8rem;
+        transition: background-color var(--transition), color var(--transition), transform var(--dur-fast) var(--ease-bounce), border-color var(--transition);
+    }
+    .lb-tabs button:hover { transform: translateY(-1px); color: var(--text-primary); }
+    .lb-tabs button.active { background: linear-gradient(135deg, var(--grad-pink), var(--grad-purple)); color: #fff; border-color: transparent; box-shadow: 0 3px 10px var(--glow-a); }
+    .lb-item {
+        display: flex; align-items: center; gap: 10px;
+        padding: 8px 12px;
+        border-radius: 12px;
+        border-bottom: 1px solid var(--border-color);
+        animation: fadeUp .3s var(--ease-out-soft) both;
+    }
+    .lb-item:hover { background: var(--bg-card); }
+    .lb-item.lb-me { background: var(--row-me); outline: 1px solid var(--accent-glow); }
+    .lb-item .lb-rank {
+        width: 26px; height: 26px;
+        border-radius: 50%;
+        display: inline-flex; align-items: center; justify-content: center;
+        font-weight: 700; font-size: .8rem;
+        flex-shrink: 0;
+        background: var(--bg-card);
+        color: var(--text-muted);
+    }
+    .lb-item .lb-rank.top1 { background: linear-gradient(135deg, #fbbf24, #ff9f43); color: #3b1f00; }
+    .lb-item .lb-rank.top2 { background: linear-gradient(135deg, #e2e8f0, #94a3b8); color: #0f172a; }
+    .lb-item .lb-rank.top3 { background: linear-gradient(135deg, #f59e0b, #b45309); color: #fff; }
+    .lb-item img { width: 26px; height: 26px; border-radius: 50%; object-fit: cover; border: 1px solid var(--border-color); }
+    .lb-item .lb-name { flex: 1; font-weight: 500; font-size: .9rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .lb-item .lb-value { font-weight: 700; color: var(--accent); }
+
+    /* ===== 幸运转盘 ===== */
+    .lottery-box { display: flex; flex-direction: column; align-items: center; gap: 16px; padding: 8px 0 4px; }
+    .wheel-wrap { position: relative; width: 260px; height: 260px; }
+    .wheel {
+        width: 100%; height: 100%;
+        border-radius: 50%;
+        position: relative;
+        transition: transform 4.2s cubic-bezier(0.12, 0.8, 0.2, 1);
+        box-shadow: 0 8px 32px var(--shadow-color), 0 0 0 4px var(--bg-secondary), 0 0 0 6px var(--border-color);
+    }
+    .wheel .wheel-label {
+        position: absolute;
+        left: 50%; top: 50%;
+        width: 100px;
+        margin-left: -50px;
+        text-align: center;
+        font-size: .7rem;
+        font-weight: 600;
+        color: #fff;
+        text-shadow: 0 1px 2px rgba(0, 0, 0, 0.45);
+        pointer-events: none;
+    }
+    .wheel-pointer {
+        position: absolute;
+        top: -6px;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 0; height: 0;
+        border-left: 12px solid transparent;
+        border-right: 12px solid transparent;
+        border-top: 24px solid var(--danger);
+        z-index: 2;
+        filter: drop-shadow(0 2px 3px rgba(0, 0, 0, 0.4));
+    }
+    .wheel-center {
+        position: absolute;
+        top: 50%; left: 50%;
+        transform: translate(-50%, -50%);
+        width: 64px; height: 64px;
+        border-radius: 50%;
+        background: var(--bg-secondary);
+        display: flex; align-items: center; justify-content: center;
+        font-size: .78rem; font-weight: 700;
+        cursor: pointer;
+        border: 3px solid var(--border-color);
+        box-shadow: 0 4px 14px var(--shadow-color);
+        z-index: 3;
+        user-select: none;
+        transition: transform var(--dur-fast) var(--ease-bounce);
+    }
+    .wheel-center:hover { transform: translate(-50%, -50%) scale(1.06); }
+    .wheel-center:active { transform: translate(-50%, -50%) scale(0.96); }
+    .lottery-info { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; justify-content: center; }
+    .lottery-records { width: 100%; max-height: 150px; overflow-y: auto; margin-top: 4px; }
+    .lottery-records .lr-item {
+        display: flex; justify-content: space-between;
+        padding: 5px 10px;
+        border-radius: 8px;
+        font-size: .8rem;
+        color: var(--text-secondary);
+        border-bottom: 1px solid var(--border-color);
+    }
+    .lottery-records .lr-item .lr-time { color: var(--text-muted); font-size: .7rem; }
+
+    /* ===== 成就墙 ===== */
+    .ach-stats {
+        display: flex; justify-content: space-between; align-items: center;
+        margin-bottom: 14px; padding: 10px 14px;
+        background: var(--bg-card);
+        border-radius: 12px;
+        border: 1px solid var(--border-color);
+        font-size: .85rem;
+    }
+    .ach-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); gap: 12px; }
+    .ach-item {
+        border: 1px solid var(--border-color);
+        border-radius: 14px;
+        padding: 12px 8px;
+        text-align: center;
+        background: var(--bg-card);
+        backdrop-filter: blur(8px);
+        transition: transform var(--dur-fast) var(--ease-bounce), border-color var(--transition), box-shadow var(--dur-mid) var(--ease-out-soft), opacity var(--transition);
+    }
+    .ach-item:hover { transform: translateY(-2px); }
+    .ach-item.unlocked { border-color: var(--accent); box-shadow: 0 0 0 1px var(--accent-glow), 0 6px 16px var(--shadow-color); }
+    .ach-item.locked { opacity: .55; filter: grayscale(.6); }
+    .ach-item .a-icon { font-size: 1.6rem; display: block; margin-bottom: 4px; }
+    .ach-item .a-name { font-size: .8rem; font-weight: 600; }
+    .ach-item .a-desc { font-size: .68rem; color: var(--text-muted); margin-top: 2px; line-height: 1.3; }
+    .ach-item .a-pts { display: inline-block; margin-top: 6px; font-size: .65rem; padding: 1px 8px; border-radius: 999px; background: linear-gradient(135deg, var(--grad-orange), var(--grad-pink)); color: #fff; }
+
+    /* ===== 签到日历 ===== */
+    .cal-legend { display: flex; gap: 14px; justify-content: center; font-size: .72rem; color: var(--text-muted); margin-bottom: 10px; flex-wrap: wrap; }
+    .cal-wrap { display: grid; grid-template-columns: repeat(7, 1fr); gap: 6px; margin: 6px 0 14px; }
+    .cal-day {
+        aspect-ratio: 1;
+        border-radius: 10px;
+        border: 1px solid var(--border-color);
+        background: var(--bg-card);
+        display: flex; flex-direction: column;
+        align-items: center; justify-content: center;
+        font-size: .65rem;
+        color: var(--text-muted);
+        position: relative;
+        transition: transform var(--dur-fast) var(--ease-bounce), border-color var(--transition);
+    }
+    .cal-day .d-num { font-size: .8rem; font-weight: 600; }
+    .cal-day.done { border-color: var(--success); background: rgba(34, 197, 94, 0.12); color: var(--success); }
+    .cal-day.today { border-color: var(--accent); box-shadow: 0 0 0 1px var(--accent); color: var(--accent); }
+    .cal-day.future { opacity: .4; }
+    .cal-day.done::after { content: '✓'; position: absolute; top: 2px; right: 4px; font-size: .58rem; color: var(--success); }
+    .streak-bonus { display: grid; grid-template-columns: repeat(7, 1fr); gap: 6px; margin: 10px 0 4px; }
+    .streak-bonus .sb-day {
+        text-align: center;
+        padding: 6px 2px;
+        border-radius: 10px;
+        background: var(--bg-card);
+        border: 1px solid var(--border-color);
+        font-size: .62rem;
+        color: var(--text-muted);
+    }
+    .streak-bonus .sb-day b { display: block; font-size: .8rem; }
+    .streak-bonus .sb-day.big { border-color: var(--warning); color: var(--warning); }
+
+    /* ===== 积分流水 ===== */
+    .point-log-list { max-height: 180px; overflow-y: auto; margin-top: 8px; }
+    .pl-item { display: flex; justify-content: space-between; align-items: center; padding: 5px 10px; border-radius: 8px; font-size: .8rem; color: var(--text-secondary); border-bottom: 1px solid var(--border-color); }
+    .pl-item .pl-delta { font-weight: 700; }
+    .pl-item .pl-delta.plus { color: var(--success); }
+    .pl-item .pl-delta.minus { color: var(--danger); }
+    .pl-item .pl-time { color: var(--text-muted); font-size: .7rem; margin-left: 8px; }
     </style>
 </head>
 <body>
@@ -1495,7 +2169,7 @@
             <h1>💡 窍某论坛 · 完整版</h1>
             <div class="nav-controls">
                 <input class="search-box" id="searchInput" placeholder="搜索..." onkeydown="if(event.key==='Enter')searchPosts()">
-                <button class="btn btn-outline" id="themeToggle" onclick="toggleTheme()">🌙</button>
+                <button class="btn btn-outline" id="themeToggle" onclick="openThemePicker()">🎨</button>
                 <button class="btn" onclick="togglePublish()">✏️ 发布</button>
                 <span class="notification-badge" onclick="openNotificationPanel()">🔔 <span class="count hidden" id="notifCount">0</span></span>
                 <button class="btn btn-outline" onclick="openMessages()">💬</button>
@@ -1528,8 +2202,8 @@
                     <button class="board-btn" onclick="setCategory('career')">职业</button>
                     <button class="board-btn" onclick="setCategory('topic')">话题</button>
                     <button class="board-btn" onclick="openNewTopic()">➕ 话题</button>
-                    <button class="board-btn" onclick="openShop()" style="background:#d4a373;color:#1a1a2e;">🍫 商城</button>
-                    <button class="board-btn" onclick="openFavorites()" style="background:#fbbf24;color:#1a1a2e;">❤️ 收藏</button>
+                    <button class="board-btn" onclick="openShop()" style="background:linear-gradient(135deg,#ff9f43,#ff5e8a);color:#fff;">🍫 商城</button>
+                    <button class="board-btn" onclick="openFavorites()" style="background:linear-gradient(135deg,#fbbf24,#ff5e8a);color:#fff;">❤️ 收藏</button>
                 </div>
                 <div class="view-toggle">
                     <button class="active" onclick="setView('list')">📋 列表</button>
@@ -1554,9 +2228,18 @@
                 <div style="background:var(--bg-card);border-radius:16px;padding:14px 18px;border:1px solid var(--border-color);margin-bottom:20px;"><h3 style="font-size:1rem;margin-bottom:10px;">🏷️ 标签</h3><div id="tagList"><p style="color:var(--text-muted)">加载中...</p></div></div>
                 <div class="online-users"><h4>🟢 在线用户</h4><div><span class="online-count" id="onlineCount">0</span> 人在线</div><div id="onlineUserList" style="margin-top:6px;display:flex;flex-wrap:wrap;gap:4px;"><span style="color:var(--text-muted)">加载中...</span></div></div>
                 <button class="btn" style="width:100%;margin-top:14px;" onclick="doCheckin()">✅ 签到</button>
-                <button class="btn" style="width:100%;margin-top:6px;background:#d4a373;color:#1a1a2e;" onclick="openExchange()">🍫 积分换巧克力</button>
-                <button class="btn" style="width:100%;margin-top:6px;background:#3b82f6;color:#fff;" onclick="openTasks()">📋 任务</button>
-                <button class="btn" style="width:100%;margin-top:6px;background:linear-gradient(135deg,#f59e0b,#d97706);color:#fff;" onclick="openShop()">🛒 商城</button>
+                <button class="btn" style="width:100%;margin-top:6px;background:linear-gradient(135deg,#ff9f43,#fbbf24);color:#fff;" onclick="openExchange()">🍫 积分换巧克力</button>
+                <button class="btn" style="width:100%;margin-top:6px;background:linear-gradient(135deg,#3b82f6,#22d3ee);color:#fff;" onclick="openTasks()">📋 任务</button>
+                <button class="btn" style="width:100%;margin-top:6px;background:linear-gradient(135deg,#ff5e8a,#a855f7);color:#fff;" onclick="openShop()">🛒 商城</button>
+                <div class="games-panel">
+                    <div class="gp-title">🎮 玩法中心</div>
+                    <div class="games-grid">
+                        <div class="gp-btn" onclick="openLeaderboard()"><span class="gp-icon">🏆</span>排行榜</div>
+                        <div class="gp-btn" onclick="openLottery()"><span class="gp-icon">🎡</span>幸运转盘</div>
+                        <div class="gp-btn" onclick="openAchievements()"><span class="gp-icon">🏅</span>成就</div>
+                        <div class="gp-btn" onclick="openCheckinCalendar()"><span class="gp-icon">📅</span>签到日历</div>
+                    </div>
+                </div>
             </div>
         </div>
         <footer>
@@ -1573,8 +2256,8 @@
             <h2 id="modalTitle">欢迎</h2>
             <p id="modalSub" style="color:var(--text-muted);margin-bottom:16px;">登录你的账号</p>
             <div class="modal-tabs">
-                <button class="active" onclick="switchTab('login')">登录</button>
-                <button onclick="switchTab('register')">注册</button>
+                <button class="active" data-tab="login" onclick="switchTab('login')">登录</button>
+                <button data-tab="register" onclick="switchTab('register')">注册</button>
             </div>
             <form id="loginForm" class="auth-form active" onsubmit="handleLogin(event)">
                 <input type="email" id="loginEmail" placeholder="邮箱" required>
@@ -1716,6 +2399,10 @@
             <h2>📋 积分任务</h2>
             <p style="color:var(--text-muted);margin-bottom:16px;">完成每日任务获得积分</p>
             <div id="tasksList"><p style="color:var(--text-muted)">加载中...</p></div>
+            <div style="margin-top:20px;border-top:1px solid var(--border-color);padding-top:12px;">
+                <div style="font-size:.9rem;font-weight:600;margin-bottom:4px;">💸 积分流水</div>
+                <div class="point-log-list" id="pointLogList"><p style="color:var(--text-muted)">加载中...</p></div>
+            </div>
         </div>
     </div>
 
@@ -1770,6 +2457,91 @@
     </div>
 
     <div class="toast" id="toast"></div>
+
+    <!-- 主题切换 -->
+    <div class="modal" id="themeModal">
+        <div class="modal-box">
+            <span class="close" onclick="closeThemePicker()">&times;</span>
+            <h2>🎨 主题切换</h2>
+            <p style="color:var(--text-muted);margin-bottom:16px;">选择你喜欢的皮肤风格，立即生效</p>
+            <div id="themeList" class="theme-grid"></div>
+        </div>
+    </div>
+
+    <!-- 排行榜 -->
+    <div class="modal" id="leaderboardModal">
+        <div class="modal-box">
+            <span class="close" onclick="closeLeaderboard()">&times;</span>
+            <h2>🏆 排行榜</h2>
+            <p style="color:var(--text-muted);margin-bottom:12px;">看看谁是最强用户</p>
+            <div class="lb-tabs">
+                <button class="active" onclick="renderLeaderboard('points')">⭐ 积分</button>
+                <button onclick="renderLeaderboard('chocolates')">🍫 巧克力</button>
+                <button onclick="renderLeaderboard('streak')">🔥 连签</button>
+                <button onclick="renderLeaderboard('posts')">📝 发帖</button>
+            </div>
+            <div id="leaderboardList" style="max-height:380px;overflow-y:auto;"><p style="color:var(--text-muted)">加载中...</p></div>
+        </div>
+    </div>
+
+    <!-- 幸运转盘 -->
+    <div class="modal" id="lotteryModal">
+        <div class="modal-box">
+            <span class="close" onclick="closeLottery()">&times;</span>
+            <h2>🎡 幸运转盘</h2>
+            <p style="color:var(--text-muted);margin-bottom:8px;">消耗 <strong style="color:var(--warning);">20 积分</strong> 抽一次，奖品自动到账</p>
+            <div class="lottery-box">
+                <div class="wheel-wrap">
+                    <div class="wheel-pointer"></div>
+                    <div class="wheel" id="lotteryWheel"></div>
+                    <div class="wheel-center" id="lotteryBtn" onclick="spinLottery()">🎲 抽奖</div>
+                </div>
+                <div class="lottery-info">
+                    <span>我的积分：<strong style="color:var(--accent);" id="lotteryPoints">0</strong></span>
+                    <span>抽奖次数：<strong style="color:var(--accent);" id="lotteryCount">0</strong></span>
+                </div>
+                <div class="lottery-records" id="lotteryRecords"><p style="color:var(--text-muted);text-align:center;">暂无记录</p></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 成就墙 -->
+    <div class="modal" id="achievementsModal">
+        <div class="modal-box">
+            <span class="close" onclick="closeAchievements()">&times;</span>
+            <h2>🏅 成就墙</h2>
+            <div class="ach-stats">
+                <span>已解锁 <strong id="achUnlockedCount" style="color:var(--accent);">0</strong> / <span id="achTotalCount">0</span></span>
+                <span>成就积分 <strong id="achPointsTotal" style="color:var(--warning);">0</strong></span>
+            </div>
+            <div id="achievementList" class="ach-grid"><p style="color:var(--text-muted)">加载中...</p></div>
+        </div>
+    </div>
+
+    <!-- 签到日历 -->
+    <div class="modal" id="checkinModal">
+        <div class="modal-box">
+            <span class="close" onclick="closeCheckinCalendar()">&times;</span>
+            <h2>📅 签到日历</h2>
+            <p style="color:var(--text-muted);margin:4px 0 12px;">当前连续签到 <strong style="color:var(--accent);" id="calStreak">0</strong> 天</p>
+            <div class="cal-legend">
+                <span><span style="color:var(--success);">✓</span> 已签到</span>
+                <span style="color:var(--accent);">● 今天</span>
+                <span>○ 未签</span>
+            </div>
+            <div class="cal-wrap" id="calGrid"></div>
+            <div style="font-size:.85rem;color:var(--text-secondary);margin-bottom:6px;">7 天周期奖励（按连续天数）：</div>
+            <div class="streak-bonus">
+                <div class="sb-day"><b>+2</b>积分</div>
+                <div class="sb-day"><b>+2</b>积分</div>
+                <div class="sb-day"><b>+4</b>积分</div>
+                <div class="sb-day"><b>+2</b>积分</div>
+                <div class="sb-day"><b>+8</b>积分</div>
+                <div class="sb-day"><b>+16</b>积分</div>
+                <div class="sb-day big"><b>+16</b>积分<br>+🍫1</div>
+            </div>
+        </div>
+    </div>
 
     <!-- 音乐播放器 -->
     <div id="musicPlayer">
@@ -1826,7 +2598,8 @@
             userPostActions = new Map();
         var actionLocks = new Set(),
             authorMap = {},
-            currentPostId = null;
+            currentPostId = null,
+            currentEditingPost = null;
         var publishLock = false,
             lastPublishTime = 0,
             currentView = 'list';
@@ -1847,20 +2620,48 @@
             isShuffle = false;
         var PAYMENT_ENABLED = false;
 
-        // ================== 平滑主题切换 ==================
-        function toggleTheme() {
-            var current = document.documentElement.getAttribute('data-theme');
-            var newTheme = current === 'light' ? 'dark' : 'light';
-            document.documentElement.setAttribute('data-theme', newTheme);
-            localStorage.setItem('theme', newTheme);
-            document.getElementById('themeToggle').textContent = newTheme === 'light' ? '☀️' : '🌙';
+        // ================== 多主题切换 ==================
+        var THEMES = [
+            { id: 'dark', name: '深空紫', icon: '🌌', desc: '默认暗色', preview: 'linear-gradient(135deg,#14111f,#201a33,#a855f7)' },
+            { id: 'light', name: '明亮', icon: '☀️', desc: '清爽白色', preview: 'linear-gradient(135deg,#f6f3ff,#ffffff,#8b5cf6)' },
+            { id: 'peach', name: '蜜桃粉', icon: '🍑', desc: '粉嫩少女', preview: 'linear-gradient(135deg,#fdf0f4,#ffffff,#ff5e8a)' },
+            { id: 'cyber', name: '赛博青', icon: '🤖', desc: '霓虹科技', preview: 'linear-gradient(135deg,#0a0f1e,#111a30,#22d3ee)' },
+            { id: 'mint', name: '薄荷绿', icon: '🌿', desc: '清新自然', preview: 'linear-gradient(135deg,#0d1713,#14221d,#34d399)' }
+        ];
+
+        function getTheme() { return document.documentElement.getAttribute('data-theme') || 'dark'; }
+
+        function openThemePicker() {
+            var list = document.getElementById('themeList');
+            var cur = getTheme();
+            list.innerHTML = THEMES.map(function(t) {
+                var active = cur === t.id ? ' active' : '';
+                return '<div class="theme-card' + active + '" onclick="applyTheme(\'' + t.id + '\')">' +
+                    '<div class="theme-preview" style="background:' + t.preview + '"></div>' +
+                    '<span class="t-icon">' + t.icon + '</span>' +
+                    '<div class="t-name">' + t.name + '</div>' +
+                    '<div class="t-desc">' + t.desc + '</div></div>';
+            }).join('');
+            document.getElementById('themeModal').classList.add('active');
+        }
+
+        function closeThemePicker() { document.getElementById('themeModal').classList.remove('active'); }
+
+        function applyTheme(id) {
+            var t = null;
+            for (var i = 0; i < THEMES.length; i++) { if (THEMES[i].id === id) { t = THEMES[i]; break; } }
+            if (!t) return;
+            document.documentElement.setAttribute('data-theme', id);
+            localStorage.setItem('theme', id);
+            showToast(t.icon + ' 已切换为「' + t.name + '」主题', false);
+            document.querySelectorAll('#themeList .theme-card').forEach(function(c) {
+                c.classList.toggle('active', c.getAttribute('onclick') === "applyTheme('" + id + "')");
+            });
         }
         (function() {
             var saved = localStorage.getItem('theme');
-            if (saved) {
-                document.documentElement.setAttribute('data-theme', saved);
-                document.getElementById('themeToggle').textContent = saved === 'light' ? '☀️' : '🌙';
-            }
+            if (saved) document.documentElement.setAttribute('data-theme', saved);
+            document.getElementById('themeToggle').textContent = '🎨';
         })();
 
         // ================== 工具函数 ==================
@@ -1873,6 +2674,14 @@
                 .replace(/"/g, '\\"').replace(/\n/g, '\\n').replace(/\r/g, '\\r'); }
 
         function formatTime(d) { if (!d) return ''; return new Date(d).toLocaleString('zh-CN'); }
+
+        function formatDuration(sec) {
+            if (sec == null || !isFinite(sec) || sec < 0) return '0:00';
+            sec = Math.floor(sec);
+            var m = Math.floor(sec / 60);
+            var s = sec % 60;
+            return m + ':' + (s < 10 ? '0' + s : s);
+        }
 
         function getAvatarUrl(u) { if (u && u.avatar_url) return u.avatar_url; var n = u?.username || u?.email || 'U'; return 'https://ui-avatars.com/api/?name=' +
                 encodeURIComponent(n) + '&background=7c6aff&color=fff&size=100&length=2'; }
@@ -2557,6 +3366,7 @@
         }
 
         function renderPostDetail(post, comments) {
+            currentEditingPost = post;
             var container = document.getElementById('postDetail');
             var displayName = authorMap[post.author_id] || post.author_name || '用户';
             var avatar = getAvatarUrl({ username: displayName, avatar_url: post.author_avatar });
@@ -2589,7 +3399,7 @@
                 '<img src="' + escapeHtml(avatar) +
                 '" alt="avatar" onerror="this.src=\'https://ui-avatars.com/api/?name=U&background=7c6aff&color=fff&size=100&length=2\'">' +
                 '<span class="author-name">' + escapeHtml(displayName) + '</span>' +
-                '<span class="level-badge" style="background:#fbbf24;color:#1a1a2e;padding:0 8px;border-radius:12px;font-size:.7rem;font-weight:700;">' +
+                '<span class="level-badge">' +
                 escapeHtml(levelName) + '</span>' +
                 '<span class="post-time">' + escapeHtml(formatTime(post.created_at)) + '</span>' +
                 '<span class="badge ' + escapeHtml(post.category || 'tech') + '">' + escapeHtml(catName) +
@@ -2616,8 +3426,7 @@
                     '<button class="btn-sm" onclick="openGiveChocolate(\'' + safeAuthorId + '\',\'' + safeAuthorName +
                     '\')">🍫 投巧克力</button>' : '') +
                 (isAuthor ?
-                    '<button class="btn-sm" onclick="showEditForm(' + JSON.stringify(post).replace(/</g, '\\u003c') +
-                    ')">✏️ 编辑</button>' : '') +
+                    '<button class="btn-sm" onclick="showEditForm()">✏️ 编辑</button>' : '') +
                 (isAuthor ?
                     '<button class="btn-sm" style="border-color:var(--danger);color:var(--danger);" onclick="deletePost(\'' +
                     safePostId + '\')">🗑️ 删除</button>' : '') +
@@ -2764,6 +3573,7 @@
                     await loadPosts(currentCategory, currentSearch);
                 }
                 await updateTaskProgress(currentUser.id, 'daily_post', 1);
+                await checkAchievements();
                 showToast('✅ 发布成功', false);
                 updateStats(postsCache);
                 var finalFiltered = postsCache.filter(function(p) {
@@ -2855,6 +3665,7 @@
                 await createComment(data);
                 await showPost(postId);
                 await updateTaskProgress(currentUser.id, 'daily_comment', 1);
+                await checkAchievements();
                 showToast('✅ 评论成功', false);
                 renderLatex();
             } catch (e) {
@@ -2962,6 +3773,7 @@
                     await loadPosts(currentCategory, currentSearch);
                 }
                 await updateUserActivity();
+                await checkAchievements();
                 showToast('操作成功', false);
             } catch (e) {
                 console.error(actionType + '操作失败', e);
@@ -3099,7 +3911,7 @@
                         var btn = document.createElement('button');
                         btn.className = 'board-btn';
                         btn.dataset.category = 'topic_' + t.id;
-                        btn.textContent = '#' + escapeHtml(t.name);
+                        btn.textContent = '#' + t.name;
                         btn.onclick = function() { setCategory('topic_' + t.id); };
                         nav.insertBefore(btn, topicBtn.nextSibling);
                     });
@@ -3313,13 +4125,12 @@
         async function updateUnreadBadge() {
             if (!currentUser) { document.getElementById('notifCount').classList.add('hidden'); return; }
             try {
-                var { data, error } = await sb.from('messages').select('id', { count: 'exact', head: true }).eq(
+                var { count: unreadMsgs, error } = await sb.from('messages').select('id', { count: 'exact', head: true }).eq(
                     'receiver_id', currentUser.id).eq('read', false);
                 if (error) throw error;
-                var unreadMsgs = data?.count || 0;
-                var { data: notifData, error: notifErr } = await sb.from('notifications')
+                var { count: unreadNotifs, error: notifErr } = await sb.from('notifications')
                     .select('id', { count: 'exact', head: true }).eq('user_id', currentUser.id).eq('read', false);
-                if (!notifErr) unreadMsgs += notifData?.count || 0;
+                if (!notifErr) unreadMsgs += unreadNotifs || 0;
                 var badge = document.getElementById('notifCount');
                 if (unreadMsgs > 0) {
                     badge.textContent = unreadMsgs > 99 ? '99+' : unreadMsgs;
@@ -3418,6 +4229,8 @@
                     userProfile.streak = streak;
                 }
                 await updateTaskProgress(currentUser.id, 'daily_checkin', 1);
+                await logPoints(bonusPoints, '每日签到（连签' + streak + '天）');
+                await checkAchievements();
                 var msg = '✅ 签到成功！连续签到 ' + streak + ' 天，+' + bonusPoints + ' 积分';
                 if (bonusChocolate > 0) msg += ' 🍫 +' + bonusChocolate + ' 巧克力';
                 showToast(msg, false);
@@ -3454,6 +4267,7 @@
                     userProfile.points = newPoints;
                     userProfile.chocolates = newChocolates;
                 }
+                await logPoints(-cost, '积分兑换巧克力');
                 showToast('🍫 兑换成功！+' + count + ' 巧克力', false);
                 closeExchange();
                 updateUI();
@@ -3486,7 +4300,7 @@
                 var purchased = JSON.parse(localStorage.getItem('purchased_items') || '[]');
                 purchased.push({ item: item, time: new Date().toISOString() });
                 localStorage.setItem('purchased_items', JSON.stringify(purchased));
-                showToast('🎉 成功购买 ' + escapeHtml(item) + '！', false);
+                showToast('🎉 成功购买 ' + item + '！', false);
                 updateUI();
                 document.getElementById('shopMsg').innerHTML = '<p style="color:var(--success);">✅ 已购买 ' +
                     escapeHtml(item) + '，在个人中心查看</p>';
@@ -3502,7 +4316,7 @@
             if (userId === currentUser.id) { showToast('不能给自己投巧克力', true); return; }
             giveTargetId = userId;
             giveTargetName = userName || '用户';
-            document.getElementById('giveTarget').textContent = '给 ' + escapeHtml(giveTargetName) + ' 送巧克力';
+            document.getElementById('giveTarget').textContent = '给 ' + giveTargetName + ' 送巧克力';
             document.getElementById('giveChocolateModal').classList.add('active');
         }
 
@@ -3527,7 +4341,8 @@
                     method: 'PATCH',
                     body: JSON.stringify({ chocolates: newTarget })
                 });
-                showToast('🍫 成功送给 ' + escapeHtml(giveTargetName) + ' ' + count + ' 块巧克力！', false);
+                showToast('🍫 成功送给 ' + giveTargetName + ' ' + count + ' 块巧克力！', false);
+                await checkAchievements();
                 closeGiveChocolate();
                 updateUI();
                 if (currentPostId) await showPost(currentPostId);
@@ -3617,6 +4432,7 @@
                     await sb.from('profiles').update({ points: newPoints }).eq('id', userId);
                     if (userId === currentUser?.id) {
                         if (userProfile) userProfile.points = newPoints;
+                        await logPoints(bonus, '任务完成');
                         showToast('🎉 任务完成！+' + bonus + ' 积分', false);
                         updateUI();
                     }
@@ -3650,6 +4466,7 @@
             if (!currentUser) { showToast('请先登录', true); return; }
             document.getElementById('tasksModal').classList.add('active');
             renderTasks();
+            loadPointLogs();
         }
 
         function closeTasks() { document.getElementById('tasksModal').classList.remove('active'); }
@@ -3799,15 +4616,15 @@
         audio.addEventListener('timeupdate', function() {
             var progress = (audio.currentTime / audio.duration) * 100;
             document.getElementById('progressBar').value = progress || 0;
-            document.getElementById('currentTime').textContent = formatTime(audio.currentTime);
-            document.getElementById('totalTime').textContent = formatTime(audio.duration);
+            document.getElementById('currentTime').textContent = formatDuration(audio.currentTime);
+            document.getElementById('totalTime').textContent = formatDuration(audio.duration);
         });
         audio.addEventListener('ended', function() {
             if (isLoop) { audio.currentTime = 0;
                 audio.play(); } else { playerNext(); }
         });
         audio.addEventListener('canplay', function() {
-            document.getElementById('totalTime').textContent = formatTime(audio.duration);
+            document.getElementById('totalTime').textContent = formatDuration(audio.duration);
         });
 
         // ================== 收款码 ==================
@@ -3955,8 +4772,8 @@
 
         async function renderProfile() {
             if (!currentUser || !userProfile) return;
-            document.getElementById('profileDisplayName').textContent = escapeHtml(userProfile.username || '用户');
-            document.getElementById('profileEmail').textContent = escapeHtml(currentUser.email || '');
+            document.getElementById('profileDisplayName').textContent = userProfile.username || '用户';
+            document.getElementById('profileEmail').textContent = currentUser.email || '';
             document.getElementById('profilePoints').textContent = userProfile.points || 0;
             document.getElementById('profileChocolates').textContent = userProfile.chocolates || 0;
             document.getElementById('profileStreak').textContent = userProfile.streak || 0;
@@ -4100,7 +4917,7 @@
             displayUsers.forEach(function(u) {
                 var avatar = u.avatar_url || getAvatarUrl({ username: u.username });
                 html += '<span class="online-user-item">' +
-                    '<img src="' + avatar + '" alt="">' +
+                    '<img src="' + escapeHtml(avatar) + '" alt="">' +
                     escapeHtml(u.username || '匿名') +
                     '</span>';
             });
@@ -4282,7 +5099,9 @@
         }
 
         // ================== 编辑相关 ==================
-        function showEditForm(post) {
+        function showEditForm() {
+            var post = currentEditingPost;
+            if (!post) { showToast('无法获取帖子数据，请刷新后重试', true); return; }
             var container = document.getElementById('postDetail');
             var editArea = document.getElementById('editArea');
             if (!editArea) {
@@ -4376,6 +5195,446 @@
 
         console.log('🚀 完整版已加载，第三方登录已修复，点赞功能正常。');
         console.log('⚠️ 请确保 Supabase RLS 策略已正确配置。');
+
+        // ============================================================
+        // 新玩法：积分流水 / 排行榜 / 签到日历 / 成就 / 幸运转盘
+        // ============================================================
+
+        // ================== 积分流水 ==================
+        async function logPoints(delta, reason) {
+            try {
+                if (!sb) await initSupabase();
+                if (!currentUser) return;
+                await sb.from('point_logs').insert({ user_id: currentUser.id, delta: delta, reason: reason });
+            } catch (e) { console.warn('积分流水记录失败', e); }
+        }
+
+        async function loadPointLogs() {
+            var el = document.getElementById('pointLogList');
+            if (!el) return;
+            if (!currentUser) { el.innerHTML = '<p style="color:var(--text-muted)">请先登录</p>'; return; }
+            try {
+                if (!sb) await initSupabase();
+                var { data, error } = await sb.from('point_logs').select('*').eq('user_id', currentUser.id)
+                    .order('created_at', { ascending: false }).limit(30);
+                if (error) throw error;
+                if (!data || data.length === 0) { el.innerHTML =
+                        '<p style="color:var(--text-muted)">暂无积分变动记录</p>'; return; }
+                el.innerHTML = data.map(function(l) {
+                    var cls = l.delta >= 0 ? 'plus' : 'minus';
+                    var sign = l.delta >= 0 ? '+' : '';
+                    var t = l.created_at ? formatTime(l.created_at) : '';
+                    return '<div class="pl-item"><span>' + escapeHtml(l.reason) +
+                        '<span class="pl-time">' + t + '</span></span><span class="pl-delta ' + cls + '">' +
+                        sign + l.delta + '</span></div>';
+                }).join('');
+            } catch (e) { el.innerHTML = '<p style="color:var(--text-muted)">流水加载失败</p>'; }
+        }
+
+        // ================== 排行榜 ==================
+        function openLeaderboard() {
+            if (!currentUser) { showToast('请先登录', true); return; }
+            document.getElementById('leaderboardModal').classList.add('active');
+            renderLeaderboard('points');
+        }
+
+        function closeLeaderboard() { document.getElementById('leaderboardModal').classList.remove('active'); }
+
+        async function renderLeaderboard(type) {
+            var el = document.getElementById('leaderboardList');
+            if (!el) return;
+            document.querySelectorAll('.lb-tabs button').forEach(function(b) {
+                b.classList.toggle('active', b.getAttribute('onclick') === "renderLeaderboard('" + type + "')");
+            });
+            el.innerHTML = '<p style="color:var(--text-muted)">加载中...</p>';
+            try {
+                if (!sb) await initSupabase();
+                var rows = [];
+                if (type === 'posts') {
+                    var { data: allPosts } = await sb.from('posts').select('author_id');
+                    var m2 = {};
+                    (allPosts || []).forEach(function(p) { if (p.author_id) m2[p.author_id] = (m2[p.author_id] || 0) + 1; });
+                    var entries = Object.entries(m2).sort(function(a, b) { return b[1] - a[1]; }).slice(0, 20);
+                    var ids = entries.map(function(e) { return e[0]; });
+                    var profMap = {};
+                    if (ids.length) {
+                        var { data: profs } = await sb.from('profiles').select('id, username, avatar_url')
+                            .in('id', ids);
+                        (profs || []).forEach(function(p) { profMap[p.id] = p; });
+                    }
+                    rows = entries.map(function(e) {
+                        var p = profMap[e[0]] || {};
+                        return {
+                            name: p.username || authorMap[e[0]] || '神秘用户',
+                            avatar: p.avatar_url || getAvatarUrl({ username: p.username || 'U' }),
+                            value: e[1],
+                            id: e[0]
+                        };
+                    });
+                } else {
+                    var orderField = { points: 'points', chocolates: 'chocolates', streak: 'streak' }[type] || 'points';
+                    var { data: profs } = await sb.from('profiles')
+                        .select('id, username, avatar_url, points, chocolates, streak')
+                        .order(orderField, { ascending: false }).limit(20);
+                    rows = (profs || []).map(function(p) {
+                        return { name: p.username || '神秘用户', avatar: p.avatar_url || getAvatarUrl(p), value: p[orderField] || 0, id: p.id };
+                    });
+                }
+                if (rows.length === 0) { el.innerHTML = '<p style="color:var(--text-muted)">暂无数据</p>'; return; }
+                var suffix = type === 'points' ? ' ⭐' : type === 'chocolates' ? ' 🍫' : type === 'streak' ? ' 🔥' : ' 📝';
+                var medals = ['🥇', '🥈', '🥉'];
+                el.innerHTML = rows.map(function(r, i) {
+                    var rank = i + 1;
+                    var rankCls = rank === 1 ? 'top1' : rank === 2 ? 'top2' : rank === 3 ? 'top3' : '';
+                    var me = currentUser && r.id === currentUser.id ? ' lb-me' : '';
+                    var medal = rank <= 3 ? medals[rank - 1] : rank;
+                    return '<div class="lb-item' + me + '" style="animation-delay:' + (i * 0.03) + 's">' +
+                        '<span class="lb-rank ' + rankCls + '">' + medal + '</span>' +
+                        '<img src="' + escapeHtml(r.avatar) +
+                        '" alt="avatar" onerror="this.style.visibility=\'hidden\'">' +
+                        '<span class="lb-name">' + escapeHtml(r.name) + (me ?
+                            ' <span style="font-size:.65rem;color:var(--text-muted);">(我)</span>' : '') + '</span>' +
+                        '<span class="lb-value">' + r.value + suffix + '</span></div>';
+                }).join('');
+            } catch (e) {
+                console.error('排行榜加载失败', e);
+                el.innerHTML = '<p style="color:var(--text-muted)">排行榜加载失败：' + escapeHtml(e.message) + '</p>';
+            }
+        }
+
+        // ================== 签到日历 ==================
+        function openCheckinCalendar() {
+            if (!currentUser) { showToast('请先登录', true); return; }
+            document.getElementById('checkinModal').classList.add('active');
+            renderCheckinCalendar();
+        }
+
+        function closeCheckinCalendar() { document.getElementById('checkinModal').classList.remove('active'); }
+
+        async function renderCheckinCalendar() {
+            var grid = document.getElementById('calGrid');
+            var streakEl = document.getElementById('calStreak');
+            if (streakEl) streakEl.textContent = userProfile?.streak || 0;
+            if (!grid) return;
+            grid.innerHTML = '<p style="color:var(--text-muted)">加载中...</p>';
+            try {
+                if (!sb) await initSupabase();
+                var start = new Date();
+                start.setDate(start.getDate() - 29);
+                var { data, error } = await sb.from('checkins').select('checkin_date')
+                    .eq('user_id', currentUser.id)
+                    .gte('checkin_date', start.toISOString().split('T')[0]);
+                if (error) throw error;
+                var doneSet = {};
+                (data || []).forEach(function(c) { doneSet[c.checkin_date] = true; });
+                var html = '';
+                var now = new Date();
+                var todayStr = now.toISOString().split('T')[0];
+                for (var i = 0; i < 30; i++) {
+                    var d = new Date(start);
+                    d.setDate(start.getDate() + i);
+                    var y = d.getFullYear();
+                    var m = ('0' + (d.getMonth() + 1)).slice(-2);
+                    var dd = ('0' + d.getDate()).slice(-2);
+                    var key = y + '-' + m + '-' + dd;
+                    var isToday = key === todayStr;
+                    var done = !!doneSet[key];
+                    var future = d > now;
+                    var cls = 'cal-day' + (done ? ' done' : '') + (isToday ? ' today' : '') + (future ? ' future' : '');
+                    var weekday = '日一二三四五六'[d.getDay()];
+                    html += '<div class="' + cls + '" title="' + key +
+                        '"><span class="d-num">' + dd + '</span><span>' + weekday + '</span></div>';
+                }
+                grid.innerHTML = html;
+            } catch (e) {
+                grid.innerHTML = '<p style="color:var(--text-muted)">日历加载失败</p>';
+            }
+        }
+
+        // ================== 成就系统 ==================
+        function openAchievements() {
+            if (!currentUser) { showToast('请先登录', true); return; }
+            document.getElementById('achievementsModal').classList.add('active');
+            renderAchievements();
+        }
+
+        function closeAchievements() { document.getElementById('achievementsModal').classList.remove('active'); }
+
+        async function renderAchievements() {
+            var list = document.getElementById('achievementList');
+            if (!list) return;
+            list.innerHTML = '<p style="color:var(--text-muted)">加载中...</p>';
+            try {
+                if (!sb) await initSupabase();
+                var { data: defs } = await sb.from('achievements').select('*');
+                if (!defs || defs.length === 0) {
+                    list.innerHTML = '<p style="color:var(--text-muted)">成就数据为空，请先执行 SQL 脚本创建表</p>';
+                    return;
+                }
+                var { data: mine } = await sb.from('user_achievements').select('achievement_id')
+                    .eq('user_id', currentUser.id);
+                var unlockedMap = {};
+                (mine || []).forEach(function(u) { unlockedMap[u.achievement_id] = true; });
+                var unlockedCount = Object.keys(unlockedMap).length;
+                var totalPts = defs.filter(function(d) { return unlockedMap[d.id]; })
+                    .reduce(function(s, d) { return s + (d.points || 0); }, 0);
+                document.getElementById('achUnlockedCount').textContent = unlockedCount;
+                document.getElementById('achTotalCount').textContent = defs.length;
+                document.getElementById('achPointsTotal').textContent = totalPts;
+                list.innerHTML = defs.map(function(d) {
+                    var unlocked = !!unlockedMap[d.id];
+                    return '<div class="ach-item ' + (unlocked ? 'unlocked' : 'locked') + '">' +
+                        '<span class="a-icon">' + (d.icon || '🏅') + '</span>' +
+                        '<div class="a-name">' + escapeHtml(d.name) + '</div>' +
+                        '<div class="a-desc">' + escapeHtml(d.description) + '</div>' +
+                        '<span class="a-pts">+' + (d.points || 0) + ' 积分</span>' +
+                        (unlocked ?
+                            '<div style="font-size:.6rem;color:var(--success);margin-top:4px;">✓ 已解锁</div>' : '') +
+                        '</div>';
+                }).join('');
+            } catch (e) {
+                list.innerHTML = '<p style="color:var(--text-muted)">成就加载失败：请确认已执行 SQL 脚本创建表</p>';
+            }
+        }
+
+        async function checkAchievements() {
+            if (!currentUser) return;
+            try {
+                if (!sb) await initSupabase();
+                var { data: defs, error: defErr } = await sb.from('achievements').select('*');
+                if (defErr || !defs || defs.length === 0) return;
+                var { data: mine } = await sb.from('user_achievements').select('achievement_id')
+                    .eq('user_id', currentUser.id);
+                var have = {};
+                (mine || []).forEach(function(u) { have[u.achievement_id] = true; });
+                var pending = defs.filter(function(d) { return !have[d.id]; });
+                if (pending.length === 0) return;
+                var postCount = 0;
+                var likesReceived = 0;
+                postsCache.forEach(function(p) {
+                    if (p.author_id === currentUser.id) { postCount++; likesReceived += (p.likes || 0); }
+                });
+                if (postCount === 0) {
+                    var { count: pc } = await sb.from('posts').select('id', { count: 'exact', head: true })
+                        .eq('author_id', currentUser.id);
+                    postCount = pc || 0;
+                    var { data: myP } = await sb.from('posts').select('likes').eq('author_id', currentUser.id);
+                    likesReceived = (myP || []).reduce(function(s, p) { return s + (p.likes || 0); }, 0);
+                }
+                var { count: myComments } = await sb.from('comments').select('id', { count: 'exact', head: true })
+                    .eq('user_id', currentUser.id);
+                var { count: followers } = await sb.from('follows').select('id', { count: 'exact', head: true })
+                    .eq('following_id', currentUser.id);
+                var { count: lotteryCount } = await sb.from('lottery_records')
+                    .select('id', { count: 'exact', head: true }).eq('user_id', currentUser.id);
+                var streak = userProfile?.streak || 0;
+                var chocolates = userProfile?.chocolates || 0;
+                var unlockedNow = [];
+                pending.forEach(function(d) {
+                    var ok = false;
+                    switch (d.id) {
+                        case 'first_post': ok = postCount >= 1; break;
+                        case 'ten_posts': ok = postCount >= 10; break;
+                        case 'first_like': ok = likesReceived >= 1; break;
+                        case 'ten_likes': ok = likesReceived >= 10; break;
+                        case 'streak7': ok = streak >= 7; break;
+                        case 'streak30': ok = streak >= 30; break;
+                        case 'first_follow': ok = followers >= 1; break;
+                        case 'ten_comments': ok = myComments >= 10; break;
+                        case 'rich': ok = chocolates >= 50; break;
+                        case 'lottery_first': ok = lotteryCount >= 1; break;
+                        case 'lottery_grand': ok = lotteryCount >= 50; break;
+                    }
+                    if (ok) unlockedNow.push(d);
+                });
+                if (unlockedNow.length > 0) {
+                    var rows = unlockedNow.map(function(d) {
+                        return { user_id: currentUser.id, achievement_id: d.id };
+                    });
+                    await sb.from('user_achievements').insert(rows, {
+                        onConflict: 'user_id,achievement_id',
+                        ignoreDuplicates: true
+                    });
+                    var pts = unlockedNow.reduce(function(s, d) { return s + (d.points || 0); }, 0);
+                    if (pts > 0) {
+                        var np = (userProfile?.points || 0) + pts;
+                        await authFetch(SUPABASE_URL + '/rest/v1/profiles?id=eq.' + encodeURIComponent(currentUser
+                            .id), {
+                            method: 'PATCH',
+                            body: JSON.stringify({ points: np })
+                        });
+                        if (userProfile) userProfile.points = np;
+                        await logPoints(pts, '成就：' + unlockedNow.map(function(d) { return d.name; }).join('、'));
+                    }
+                    showToast(unlockedNow[0].icon + ' 解锁成就「' + unlockedNow[0].name + '」+' +
+                        (unlockedNow[0].points || 0) + ' 积分', false);
+                    updateUI();
+                }
+            } catch (e) { console.warn('成就检查失败', e); }
+        }
+
+        // ================== 幸运转盘 ==================
+        var LOTTERY_COST = 20;
+        var LOTTERY_SEGMENTS = [
+            { label: '🍫 巧克力 x1', type: 'chocolate', value: 1 },
+            { label: '⭐ 积分 x5', type: 'points', value: 5 },
+            { label: '💨 再接再厉', type: 'nothing', value: 0 },
+            { label: '🍫 巧克力 x3', type: 'chocolate', value: 3 },
+            { label: '⭐ 积分 x10', type: 'points', value: 10 },
+            { label: '⭐ 积分 x20', type: 'points', value: 20 },
+            { label: '🍫 巧克力 x5', type: 'chocolate', value: 5 },
+            { label: '🏆 幸运徽章', type: 'badge', value: 1 }
+        ];
+        var lotterySpinning = false;
+        var lotteryCurrentAngle = 0;
+
+        function openLottery() {
+            if (!currentUser) { showToast('请先登录', true); return; }
+            document.getElementById('lotteryModal').classList.add('active');
+            buildLotteryWheel();
+            renderLotteryInfo();
+            loadLotteryRecords();
+        }
+
+        function closeLottery() { document.getElementById('lotteryModal').classList.remove('active'); }
+
+        function buildLotteryWheel() {
+            var wheel = document.getElementById('lotteryWheel');
+            if (!wheel) return;
+            var n = LOTTERY_SEGMENTS.length;
+            var segDeg = 360 / n;
+            var colors = ['#ff5e8a', '#a855f7', '#6366f1', '#22d3ee', '#ff9f43', '#ec4899', '#8b5cf6', '#14b8a6'];
+            var stops = [];
+            for (var i = 0; i < n; i++) {
+                stops.push(colors[i % colors.length] + ' ' + (i * segDeg) + 'deg ' + ((i + 1) * segDeg) + 'deg');
+            }
+            wheel.style.background = 'conic-gradient(' + stops.join(',') + ')';
+            var labels = '';
+            for (var j = 0; j < n; j++) {
+                var ang = j * segDeg + segDeg / 2;
+                var rad = (ang * Math.PI) / 180;
+                var tx = Math.sin(rad) * 92;
+                var ty = -Math.cos(rad) * 92;
+                labels += '<span class="wheel-label" style="transform:translate(' + tx.toFixed(1) + 'px,' +
+                    ty.toFixed(1) + 'px) translate(-50%,-50%);">' + LOTTERY_SEGMENTS[j].label + '</span>';
+            }
+            wheel.innerHTML = labels;
+            lotteryCurrentAngle = 0;
+            wheel.style.transform = 'rotate(0deg)';
+        }
+
+        async function renderLotteryInfo() {
+            var ptsEl = document.getElementById('lotteryPoints');
+            if (ptsEl) ptsEl.textContent = userProfile?.points || 0;
+            try {
+                if (!sb) await initSupabase();
+                var { count } = await sb.from('lottery_records').select('id', { count: 'exact', head: true })
+                    .eq('user_id', currentUser.id);
+                var cntEl = document.getElementById('lotteryCount');
+                if (cntEl) cntEl.textContent = count || 0;
+            } catch (e) {}
+        }
+
+        async function loadLotteryRecords() {
+            var el = document.getElementById('lotteryRecords');
+            if (!el) return;
+            try {
+                if (!sb) await initSupabase();
+                var { data, error } = await sb.from('lottery_records').select('*').eq('user_id', currentUser.id)
+                    .order('created_at', { ascending: false }).limit(10);
+                if (error) throw error;
+                if (!data || data.length === 0) {
+                    el.innerHTML = '<p style="color:var(--text-muted);text-align:center;">暂无记录</p>';
+                    return;
+                }
+                el.innerHTML = data.map(function(r) {
+                    return '<div class="lr-item"><span>' + escapeHtml(r.prize) +
+                        '</span><span class="lr-time">' + formatTime(r.created_at) + '</span></div>';
+                }).join('');
+            } catch (e) { el.innerHTML = '<p style="color:var(--text-muted);text-align:center;">记录加载失败</p>'; }
+        }
+
+        async function spinLottery() {
+            if (lotterySpinning) return;
+            if (!currentUser) { showToast('请先登录', true); return; }
+            if (!sb) await initSupabase();
+            if ((userProfile?.points || 0) < LOTTERY_COST) { showToast('积分不足，做任务或签到赚积分吧', true); return; }
+            var wheel = document.getElementById('lotteryWheel');
+            if (!wheel) return;
+            lotterySpinning = true;
+            var btn = document.getElementById('lotteryBtn');
+            try {
+                var newPoints = (userProfile?.points || 0) - LOTTERY_COST;
+                await authFetch(SUPABASE_URL + '/rest/v1/profiles?id=eq.' + encodeURIComponent(currentUser.id), {
+                    method: 'PATCH',
+                    body: JSON.stringify({ points: newPoints })
+                });
+                if (userProfile) userProfile.points = newPoints;
+            } catch (e) {
+                lotterySpinning = false;
+                showToast('扣积分失败', true);
+                return;
+            }
+            try { await logPoints(-LOTTERY_COST, '幸运转盘'); } catch (e) {}
+            var n = LOTTERY_SEGMENTS.length;
+            var idx = Math.floor(Math.random() * n);
+            var prize = LOTTERY_SEGMENTS[idx];
+            var segDeg = 360 / n;
+            var targetAng = idx * segDeg + segDeg / 2;
+            var spins = 5 + Math.floor(Math.random() * 3);
+            var base = lotteryCurrentAngle - (lotteryCurrentAngle % 360);
+            var newAngle = base + spins * 360 + (360 - targetAng);
+            lotteryCurrentAngle = newAngle;
+            wheel.style.transform = 'rotate(' + newAngle + 'deg)';
+            renderLotteryInfo();
+            if (btn) btn.textContent = '...';
+            setTimeout(async function() {
+                lotterySpinning = false;
+                if (btn) btn.textContent = '🎲 抽奖';
+                try {
+                    if (prize.type === 'points' && prize.value > 0) {
+                        var np = (userProfile?.points || 0) + prize.value;
+                        await authFetch(SUPABASE_URL + '/rest/v1/profiles?id=eq.' + encodeURIComponent(currentUser
+                            .id), {
+                            method: 'PATCH',
+                            body: JSON.stringify({ points: np })
+                        });
+                        if (userProfile) userProfile.points = np;
+                    } else if (prize.type === 'chocolate' && prize.value > 0) {
+                        var nc = (userProfile?.chocolates || 0) + prize.value;
+                        await authFetch(SUPABASE_URL + '/rest/v1/profiles?id=eq.' + encodeURIComponent(currentUser
+                            .id), {
+                            method: 'PATCH',
+                            body: JSON.stringify({ chocolates: nc })
+                        });
+                        if (userProfile) userProfile.chocolates = nc;
+                    } else if (prize.type === 'badge') {
+                        var badges = JSON.parse(localStorage.getItem('lottery_badges') || '[]');
+                        badges.push({ time: new Date().toISOString() });
+                        localStorage.setItem('lottery_badges', JSON.stringify(badges));
+                    }
+                    await sb.from('lottery_records').insert({
+                        user_id: currentUser.id,
+                        prize: prize.label,
+                        prize_type: prize.type,
+                        prize_value: prize.value
+                    });
+                    await logPoints(prize.type === 'points' ? prize.value : 0, '转盘奖品：' + prize.label);
+                    renderLotteryInfo();
+                    loadLotteryRecords();
+                    updateUI();
+                    if (prize.type === 'nothing') {
+                        showToast('💨 差一点！再接再厉', false);
+                    } else {
+                        showToast('🎉 恭喜抽中 ' + prize.label + '！', false);
+                    }
+                    await checkAchievements();
+                } catch (e) {
+                    console.error('发奖失败', e);
+                    showToast('发奖失败，请稍后查看记录', true);
+                }
+            }, 4300);
+        }
     </script>
 </body>
 </html>
