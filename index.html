@@ -4615,9 +4615,29 @@
             if (!sb) await initSupabase();
             progress = progress || 1;
             var today = new Date().toISOString().split('T')[0];
+            var targets = { daily_post: 1, daily_comment: 2, daily_like: 3, daily_recommend: 1,
+                daily_checkin: 1 };
             var { data, error } = await sb.from('user_tasks').select('*').eq('user_id', userId).eq('task_type',
                 taskType).eq('reset_date', today).maybeSingle();
-            if (!data || data.completed) return;
+            if (error) { console.warn('查询任务失败', error); return; }
+            // 当天任务行不存在(跨天未刷新/未先初始化)时自动创建,避免进度静默丢失
+            // ignoreDuplicates: 并发建行时静默跳过,由先到者完成初始化,不覆盖已有进度
+            if (!data) {
+                var target = targets[taskType] || 1;
+                var ins = await sb.from('user_tasks').insert({
+                    user_id: userId, task_type: taskType, target: target, progress: 0,
+                    completed: false, reset_date: today
+                }, { ignoreDuplicates: true }).select();
+                if (ins.error) { console.warn('创建任务行失败', ins.error); return; }
+                data = (ins.data && ins.data[0]) || null;
+                // 并发冲突导致 insert 跳过时,重查一次;仍无则放弃(不重复创建)
+                if (!data) {
+                    var { data: fresh } = await sb.from('user_tasks').select('*').eq('user_id', userId).eq(
+                        'task_type', taskType).eq('reset_date', today).maybeSingle();
+                    data = fresh || null;
+                }
+            }
+            if (!data || !data.id || data.completed) return;
             var newProgress = data.progress + progress;
             var completed = newProgress >= data.target;
             await sb.from('user_tasks').update({ progress: newProgress, completed: completed, last_updated: new Date()
@@ -5612,15 +5632,14 @@
                 (mine || []).forEach(function(u) { have[u.achievement_id] = true; });
                 var pending = defs.filter(function(d) { return !have[d.id]; });
                 if (pending.length === 0) return;
-                var postCount = 0;
+                // 直接从数据库取全量发帖/获赞数据,不依赖可能被分类/搜索过滤的 postsCache
+                var { count: pc } = await sb.from('posts').select('id', { count: 'exact', head: true })
+                    .eq('author_id', currentUser.id);
+                var postCount = pc || 0;
+                // 仅在存在获赞类成就待解锁时才查询 likes(避免每次全量拉帖子)
+                var needLikes = pending.some(function(d) { return d.id === 'first_like' || d.id === 'ten_likes'; });
                 var likesReceived = 0;
-                postsCache.forEach(function(p) {
-                    if (p.author_id === currentUser.id) { postCount++; likesReceived += (p.likes || 0); }
-                });
-                if (postCount === 0) {
-                    var { count: pc } = await sb.from('posts').select('id', { count: 'exact', head: true })
-                        .eq('author_id', currentUser.id);
-                    postCount = pc || 0;
+                if (needLikes) {
                     var { data: myP } = await sb.from('posts').select('likes').eq('author_id', currentUser.id);
                     likesReceived = (myP || []).reduce(function(s, p) { return s + (p.likes || 0); }, 0);
                 }
@@ -5669,8 +5688,14 @@
                         if (userProfile) userProfile.points = np;
                         await logPoints(pts, '成就：' + unlockedNow.map(function(d) { return d.name; }).join('、'));
                     }
-                    showToast(unlockedNow[0].icon + ' 解锁成就「' + unlockedNow[0].name + '」+' +
-                        (unlockedNow[0].points || 0) + ' 积分', false);
+                    if (unlockedNow.length === 1) {
+                        showToast(unlockedNow[0].icon + ' 解锁成就「' + unlockedNow[0].name + '」+' +
+                            (unlockedNow[0].points || 0) + ' 积分', false);
+                    } else {
+                        var names = unlockedNow.map(function(d) { return d.name; }).join('、');
+                        showToast('🏆 解锁 ' + unlockedNow.length + ' 个成就：' + names + '（+' + pts +
+                            ' 积分）', false);
+                    }
                     updateUI();
                 }
             } catch (e) { console.warn('成就检查失败', e); }
