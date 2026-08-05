@@ -4,7 +4,10 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>窍某论坛 · 完整最终版</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400;500;600;700&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
+    <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400;500;600;700&display=swap"></noscript>
     <script src="https://cdn.jsdelivr.net/npm/dompurify@3.1.6/dist/purify.min.js"></script>
     <script>
         (function loadSupabase() {
@@ -2855,6 +2858,30 @@
             return DOMPurify.sanitize(r);
         }
 
+        // ================== 本地缓存工具 ==================
+        // 基于 localStorage 的 TTL 缓存,用于帖子/话题/评论数等只读数据的秒开
+        // 写操作(发帖/删帖/点赞/评论)后会通过 cacheBust 立即失效,保证数据新鲜
+        function cacheGet(key, ttlMs) {
+            try {
+                var raw = localStorage.getItem('lfc_' + key);
+                if (!raw) return null;
+                var obj = JSON.parse(raw);
+                if (!obj || !obj.t || Date.now() - obj.t > ttlMs) {
+                    localStorage.removeItem('lfc_' + key);
+                    return null;
+                }
+                return obj.v;
+            } catch (e) { return null; }
+        }
+        function cacheSet(key, val) {
+            try {
+                localStorage.setItem('lfc_' + key, JSON.stringify({ t: Date.now(), v: val }));
+            } catch (e) { /* localStorage 满或不可用时静默降级为不缓存 */ }
+        }
+        function cacheBust(key) {
+            try { localStorage.removeItem('lfc_' + key); } catch (e) {}
+        }
+
         // ================== 网络请求 ==================
         async function authFetch(url, opts) {
             var h = opts.headers || {};
@@ -2936,10 +2963,15 @@
         }
 
         async function fetchPosts() {
+            // 60 秒缓存,刷新页面秒开;写操作后 cacheBust 即时失效
+            var cached = cacheGet('posts', 60000);
+            if (cached) return cached;
             var r = await fetch(SUPABASE_URL + '/rest/v1/posts?order=created_at.desc', {
                 headers: { 'apikey': SUPABASE_ANON_KEY, 'Content-Type': 'application/json' }
             });
-            return await handleResponse(r);
+            var d = await handleResponse(r);
+            if (Array.isArray(d)) cacheSet('posts', d);
+            return d;
         }
 
         async function fetchComments(pid) {
@@ -2961,10 +2993,15 @@
         }
 
         async function fetchTopics() {
+            // 10 分钟缓存,话题极少变动
+            var cached = cacheGet('topics', 600000);
+            if (cached) return cached;
             var r = await fetch(SUPABASE_URL + '/rest/v1/topics?order=name.asc', {
                 headers: { 'apikey': SUPABASE_ANON_KEY, 'Content-Type': 'application/json' }
             });
-            return await handleResponse(r);
+            var d = await handleResponse(r);
+            if (Array.isArray(d)) cacheSet('topics', d);
+            return d;
         }
 
         async function createTopicAPI(n) {
@@ -2974,14 +3011,24 @@
         }
 
         async function fetchCommentCounts() {
-            var r = await fetch(SUPABASE_URL + '/rest/v1/comments?select=post_id', {
-                headers: { 'apikey': SUPABASE_ANON_KEY, 'Content-Type': 'application/json' }
-            });
-            var d = await handleResponse(r);
-            if (!d || !Array.isArray(d)) return {};
-            var m = {};
-            d.forEach(function(c) { var pid = c.post_id; if (pid) m[pid] = (m[pid] || 0) + 1; });
-            return m;
+            // 60 秒缓存;该接口拉取全部评论仅为计数,缓存可避免每次刷新全量传输
+            var cached = cacheGet('comment_counts', 60000);
+            if (cached) return cached;
+            try {
+                var r = await fetch(SUPABASE_URL + '/rest/v1/comments?select=post_id', {
+                    headers: { 'apikey': SUPABASE_ANON_KEY, 'Content-Type': 'application/json' }
+                });
+                var d = await handleResponse(r);
+                if (!d || !Array.isArray(d)) return {};
+                var m = {};
+                d.forEach(function(c) { var pid = c.post_id; if (pid) m[pid] = (m[pid] || 0) + 1; });
+                cacheSet('comment_counts', m);
+                return m;
+            } catch (e) {
+                // 并行加载时单点失败不拖垮整个 loadPosts
+                console.warn('加载评论数失败', e);
+                return {};
+            }
         }
 
         // ============================================================
@@ -3197,6 +3244,10 @@
             localStorage.removeItem('sb_token');
             localStorage.removeItem('sb_refresh_token');
             localStorage.removeItem('sb_user');
+            // 清理本地数据缓存,防止内容与账号维度挂钩(当前为匿名公共数据,预防性清理)
+            cacheBust('posts');
+            cacheBust('topics');
+            cacheBust('comment_counts');
             if (sb) sb.auth.signOut();
             followingMap.clear();
             favoriteMap.clear();
@@ -3313,11 +3364,15 @@
                             .toLowerCase().includes(s)); });
                 }
                 postsCache = posts;
-                await fetchAuthors(posts);
-                commentCountMap = await fetchCommentCounts();
-                await loadFavorites();
+                // 并行加载作者/评论数/收藏/用户操作,互不依赖,显著减少首屏等待
                 var postIds = posts.map(function(p) { return p.id; });
-                await loadUserActions(postIds);
+                var results = await Promise.all([
+                    fetchAuthors(posts),
+                    fetchCommentCounts(),
+                    loadFavorites(),
+                    loadUserActions(postIds)
+                ]);
+                commentCountMap = results[1] || {};
                 renderPosts(posts);
                 updateStats(posts);
                 loadHotPosts(posts);
@@ -3482,6 +3537,12 @@
                     method: 'PATCH',
                     body: JSON.stringify({ views: currentViews + 1 })
                 });
+                // 本地同步浏览量,避免 bust 整份缓存
+                var cachedPosts = cacheGet('posts', 60000);
+                if (Array.isArray(cachedPosts)) {
+                    var cpi = cachedPosts.findIndex(function(p) { return p.id == postId; });
+                    if (cpi !== -1) { cachedPosts[cpi].views = currentViews + 1; cacheSet('posts', cachedPosts); }
+                }
                 var posts = await fetchPosts();
                 var post = posts.find(function(p) { return p.id == postId; });
                 if (!post) { showToast('帖子不存在', true); return; }
@@ -3689,6 +3750,8 @@
                     created_at: new Date().toISOString()
                 };
                 var result = await createPost(data);
+                cacheBust('posts');
+                cacheBust('comment_counts');
                 var realPost = result && result.length > 0 ? result[0] : null;
                 if (realPost) {
                     var idx = postsCache.findIndex(function(p) { return p.id === tempId; });
@@ -3797,6 +3860,7 @@
                     created_at: new Date().toISOString()
                 };
                 await createComment(data);
+                cacheBust('comment_counts');
                 await showPost(postId);
                 await updateTaskProgress(currentUser.id, 'daily_comment', 1);
                 await checkAchievements();
@@ -3900,6 +3964,7 @@
                     method: 'PATCH',
                     body: JSON.stringify({ likes: newLikes, recommends: newRecommends, downvotes: newDownvotes })
                 });
+                cacheBust('posts');
                 // 强制刷新视图
                 if (currentPostId === postId) {
                     await showPost(postId);
@@ -4118,6 +4183,7 @@
             if (!name) { showToast('请输入话题名称', true); return; }
             try {
                 await createTopicAPI(name);
+                cacheBust('topics');
                 showToast('✅ 话题创建成功', false);
                 document.getElementById('topicNameInput').value = '';
                 closeTopicModal();
@@ -5273,6 +5339,7 @@
                     method: 'PATCH',
                     body: JSON.stringify({ title: title, content: content })
                 });
+                cacheBust('posts');
                 showToast('✅ 帖子已更新', false);
                 cancelEdit();
                 await showPost(postId);
@@ -5291,6 +5358,8 @@
                 await authFetch(SUPABASE_URL + '/rest/v1/comments?post_id=eq.' + encodeURIComponent(postId), { method: 'DELETE' });
                 await authFetch(SUPABASE_URL + '/rest/v1/favorites?post_id=eq.' + encodeURIComponent(postId), { method: 'DELETE' });
                 await authFetch(SUPABASE_URL + '/rest/v1/posts?id=eq.' + encodeURIComponent(postId), { method: 'DELETE' });
+                cacheBust('posts');
+                cacheBust('comment_counts');
                 showToast('🗑️ 帖子已删除', false);
                 document.getElementById('postDetail').style.display = 'none';
                 document.getElementById('postList').style.display = 'block';
@@ -5880,7 +5949,7 @@
         function snakePause() {
             if (snake.timer) { clearInterval(snake.timer); snake.timer = null; }
         }
-        function snakeEnd() {
+        async function snakeEnd() {
             snakeStop();
             snake.over = true;
             var best = parseInt(localStorage.getItem('snake_best') || '0', 10);
@@ -6049,7 +6118,7 @@
                 }, 700);
             }
         }
-        function memWin() {
+        async function memWin() {
             if (mem.timer) { clearInterval(mem.timer); mem.timer = null; }
             var best = parseFloat(localStorage.getItem('mem_best') || '0');
             if (!best || mem.seconds < best) {
@@ -6078,7 +6147,7 @@
             if ((a === 'rock' && b === 'scissors') || (a === 'scissors' && b === 'paper') || (a === 'paper' && b === 'rock')) return 1;
             return -1;
         }
-        function rpsPlay(choice) {
+        async function rpsPlay(choice) {
             if (rps.locked) return;
             var cpuChoice = ['rock', 'scissors', 'paper'][Math.floor(Math.random() * 3)];
             var youEl = document.getElementById('rpsYourPick');
@@ -6135,7 +6204,7 @@
 
         // ================== 反应测试 ==================
         var rx = { state: 'idle', times: [], timer: null, startAt: 0 };
-        function rxClick() {
+        async function rxClick() {
             var pad = document.getElementById('rxPad');
             var text = document.getElementById('rxText');
             if (rx.state === 'idle') {
