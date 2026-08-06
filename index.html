@@ -2247,6 +2247,21 @@
     .rx-pad:active { transform: scale(0.98); }
     .rx-result { text-align: center; margin-top: 12px; font-size: .9rem; color: var(--text-secondary); min-height: 22px; }
 
+    /* ===== 操作说明(帮助) ===== */
+    .help-modal-box { max-width: 800px; }
+    .help-content { line-height: 1.7; }
+    .help-content h2 { font-size: 1.2rem; margin: 26px 0 10px; color: var(--accent); border-left: 3px solid var(--accent); padding-left: 10px; }
+    .help-content h2:first-child { margin-top: 0; }
+    .help-content h3 { font-size: 1rem; margin: 16px 0 8px; }
+    .help-content p { margin: 6px 0; }
+    .help-content ul, .help-content ol { margin: 6px 0 6px 22px; }
+    .help-content li { margin: 3px 0; }
+    .help-content table { width: 100%; border-collapse: collapse; margin: 8px 0; font-size: .88rem; }
+    .help-content th, .help-content td { border: 1px solid var(--border-color); padding: 6px 10px; text-align: left; }
+    .help-content th { background: var(--hover-bg); }
+    .help-content code { background: var(--hover-bg); border: 1px solid var(--border-color); border-radius: 5px; padding: 1px 6px; font-size: .85em; }
+    .help-note { background: var(--bg-card); border: 1px solid var(--border-color); border-left: 3px solid var(--warning); border-radius: 10px; padding: 10px 14px; margin: 10px 0; font-size: .9rem; }
+
     </style>
 </head>
 <body>
@@ -2334,7 +2349,7 @@
             </div>
         </div>
         <footer>
-            <div class="social-links"><a href="#">关于</a><a href="#">帮助</a><a href="#" onclick="showFeedback()">反馈</a><a href="#" onclick="showStatus()">状态</a></div>
+            <div class="social-links"><a href="#">关于</a><a href="#" onclick="openHelp()">帮助</a><a href="#" onclick="showFeedback()">反馈</a><a href="#" onclick="showStatus()">状态</a></div>
             <p class="footer-status">🔧 完整版 · 所有数据在Supabase</p>
             <p style="color:var(--text-muted);font-size:.85rem;">© 2026 窍某</p>
         </footer>
@@ -2556,6 +2571,247 @@
             <h2>🎨 主题切换</h2>
             <p style="color:var(--text-muted);margin-bottom:16px;">选择你喜欢的皮肤风格，立即生效</p>
             <div id="themeList" class="theme-grid"></div>
+        </div>
+    </div>
+
+    <!-- 操作说明 -->
+    <div class="modal" id="helpModal">
+        <div class="modal-box help-modal-box">
+            <span class="close" onclick="closeHelp()">&times;</span>
+            <h2>📖 操作说明</h2>
+            <p style="color:var(--text-muted);margin-bottom:6px;">窍某论坛 · 完整最终版 使用指南（数据存于 Supabase）</p>
+            <div class="help-content">
+
+                <h2>1. 打开方式</h2>
+                <p>直接用浏览器打开 <code>index.html</code> 即可使用（推荐 Chrome / Edge 最新版）。页面需联网加载 Supabase、Google 字体、DOMPurify、MathJax、Stripe 等外部资源；若网络不通，顶部会提示加载失败。</p>
+                <p>数据存储在后端 Supabase，首次使用前请确认数据库已按 <code>supabase_setup.sql</code> 初始化建表，否则登录、发帖等操作会报错。</p>
+
+                <h2>2. 账号：注册 / 登录 / 退出</h2>
+                <p>点击右上角 <strong>「登录」</strong> 弹出窗口，有 登录 / 注册 两个页签：</p>
+                <table>
+                    <tr><th>方式</th><th>说明</th></tr>
+                    <tr><td>邮箱 + 密码</td><td>注册需填昵称、邮箱、密码（至少 6 位）、确认密码</td></tr>
+                    <tr><td>Google / GitHub</td><td>社交登录，一键授权</td></tr>
+                </table>
+                <p>登录后右上角显示头像、昵称，出现 👤 个人中心与退出按钮。未登录可以浏览、搜索帖子，但 <strong>发帖、评论、点赞、签到、任务、商城等操作都需要登录</strong>。</p>
+                <h3>个人中心（👤）</h3>
+                <ul>
+                    <li>点击头像可上传头像图片。</li>
+                    <li>可修改昵称（≤30 字）。</li>
+                    <li>查看等级进度条、积分、巧克力、连续签到天数。</li>
+                    <li>查看统计：帖子数、评论数、获赞、关注、粉丝。</li>
+                    <li>「我的帖子」列表可快速回看自己发过的内容。</li>
+                </ul>
+
+                <h2>3. 界面总览</h2>
+                <h3>顶部导航栏</h3>
+                <table>
+                    <tr><th>元素</th><th>功能</th></tr>
+                    <tr><td>🔍 搜索框</td><td>输入关键词按回车搜索帖子</td></tr>
+                    <tr><td>🎨</td><td>打开主题切换（5 种皮肤）</td></tr>
+                    <tr><td>✏️ 发布</td><td>展开 / 收起发帖表单</td></tr>
+                    <tr><td>🔔</td><td>通知面板（被 @、被回复等提醒，带未读数角标）</td></tr>
+                    <tr><td>💬</td><td>私信面板</td></tr>
+                    <tr><td>登录 / 头像区</td><td>账号操作</td></tr>
+                </table>
+                <h3>统计栏</h3>
+                <p>实时显示：帖子总数、评论总数、用户总数、今日发帖、我的巧克力、我的积分、我的收藏。</p>
+                <h3>主内容区</h3>
+                <ul>
+                    <li><strong>版块导航</strong>：全部 / 技术 / 生活 / 职业 / 话题，点击筛选对应分类。</li>
+                    <li><strong>➕ 话题</strong>：创建新话题（需登录）。</li>
+                    <li><strong>🍫 商城</strong>：购买装扮、购买巧克力。</li>
+                    <li><strong>❤️ 收藏</strong>：查看我收藏的帖子。</li>
+                    <li><strong>视图切换</strong>：📋 列表 / 🔲 网格 两种帖子展示方式。</li>
+                </ul>
+                <h3>右侧边栏</h3>
+                <ul>
+                    <li>🔥 热门：点击热门帖直达。</li>
+                    <li>🏷️ 标签：按标签筛选帖子。</li>
+                    <li>🟢 在线用户：当前在线人数与名单（登录后可见自己的在线状态）。</li>
+                    <li>✅ 签到：每日签到入口。</li>
+                    <li>🍫 积分换巧克力：50 积分兑换 1 块巧克力。</li>
+                    <li>📋 任务：每日任务与积分流水。</li>
+                    <li>🛒 商城：快捷入口。</li>
+                    <li>🎮 玩法中心：排行榜、幸运转盘、成就、签到日历、贪吃蛇、记忆翻牌、石头剪刀布、反应测试。</li>
+                </ul>
+                <p>页脚：关于 / 帮助 / 反馈 / 状态（可提交反馈、查看站点状态）。</p>
+
+                <h2>4. 发帖</h2>
+                <p>点击顶部 <strong>「✏️ 发布」</strong> 展开发布表单：</p>
+                <ol>
+                    <li><strong>分类</strong>：技术 / 生活 / 职业 / 话题（必选）。</li>
+                    <li><strong>标题</strong>：不超过 100 字。</li>
+                    <li><strong>内容</strong>：支持富文本语法，见下表。</li>
+                    <li><strong>标签</strong>：逗号分隔，例如 <code>前端, React, 教程</code>。</li>
+                    <li>点击 <strong>发布</strong>。</li>
+                </ol>
+                <h3>内容支持的特殊语法</h3>
+                <table>
+                    <tr><th>语法</th><th>效果</th></tr>
+                    <tr><td><code>$...$</code> 或 <code>\(...\)</code></td><td>LaTeX 数学公式（页面加载 2 秒后自动渲染）</td></tr>
+                    <tr><td><code>@用户名</code></td><td>提及用户，对方会收到通知</td></tr>
+                    <tr><td><code>$\colour 文字$</code></td><td>彩虹渐变文字</td></tr>
+                    <tr><td><code>$\big 文字$</code></td><td>加大字号</td></tr>
+                    <tr><td><code>$\glow 文字$</code></td><td>发光文字</td></tr>
+                    <tr><td><code>$\blink 文字$</code></td><td>闪烁文字</td></tr>
+                    <tr><td><code>[#happy]</code> 等</td><td>表情代码：happy😄 happyn😁 why🤔 sad😢 love❤️ cool😎 angry😡 cry😭 laugh😂 wow😮</td></tr>
+                    <tr><td>😊 按钮</td><td>打开 emoji 选择面板，插入表情</td></tr>
+                    <tr><td>换行</td><td>自动转成 <code>&lt;br&gt;</code> 换行显示</td></tr>
+                </table>
+                <p>帖子内容经 DOMPurify 过滤，安全显示。</p>
+
+                <h2>5. 浏览与搜索</h2>
+                <ul>
+                    <li><strong>分类筛选</strong>：点击版块按钮（全部/技术/生活/职业/话题）。</li>
+                    <li><strong>搜索</strong>：顶部搜索框回车，按标题/内容关键词检索。</li>
+                    <li><strong>标签</strong>：点击帖子下方的 <code>#标签</code>，或侧边栏「标签」，按标签筛选。</li>
+                    <li><strong>话题</strong>：点击「话题」分类查看话题帖；「➕ 话题」可创建新话题。</li>
+                    <li><strong>帖子详情</strong>：点击帖子卡片进入，自动 +1 浏览量。</li>
+                    <li><strong>返回</strong>：详情页左上角「← 返回列表」。</li>
+                    <li><strong>右键菜单</strong>：在帖子卡片上点右键 →「回应此帖」，评论框会自动带上「回复：」前缀。</li>
+                </ul>
+
+                <h2>6. 互动操作</h2>
+                <p>在帖子详情页可对帖子执行：</p>
+                <table>
+                    <tr><th>操作</th><th>说明</th></tr>
+                    <tr><td>❤️ 点赞</td><td>喜欢此帖（计入每日任务「点赞」）</td></tr>
+                    <tr><td>👍 推荐</td><td>推荐此帖（计入每日任务「推荐」）</td></tr>
+                    <tr><td>👎 踩</td><td>不赞同</td></tr>
+                    <tr><td>🍫 投巧克力</td><td>把巧克力送给作者（不能投给自己）</td></tr>
+                    <tr><td>❤️/🤍 收藏</td><td>收藏 / 取消收藏，收藏夹在顶部「❤️ 收藏」查看</td></tr>
+                    <tr><td>➕ 关注 / ✅ 已关注</td><td>关注或取关作者</td></tr>
+                    <tr><td>💬 私信</td><td>快速给作者发私信</td></tr>
+                    <tr><td>✏️ 编辑 / 🗑️ 删除</td><td>仅作者本人可见，删除不可恢复</td></tr>
+                </table>
+                <h3>评论</h3>
+                <ul>
+                    <li>登录后可在底部输入框写评论、发表。</li>
+                    <li>评论旁 😊 按钮可插入 emoji。</li>
+                    <li>每条评论可以点 ❤️/🤍 点赞。</li>
+                    <li>未登录时提示「请登录后评论」。</li>
+                </ul>
+
+                <h2>7. 积分系统 ⭐</h2>
+                <p>积分是网站的核心货币，可用来抽奖、兑换巧克力等。</p>
+                <h3>积分获取方式</h3>
+                <table>
+                    <tr><th>方式</th><th>奖励</th></tr>
+                    <tr><td>✅ 每日签到</td><td>基础 +5，连续签到另有阶梯奖励</td></tr>
+                    <tr><td>📝 发布帖子</td><td>每日任务，+3</td></tr>
+                    <tr><td>💬 评论（2 条）</td><td>每日任务，+2</td></tr>
+                    <tr><td>❤️ 点赞（3 次）</td><td>每日任务，+1</td></tr>
+                    <tr><td>👍 推荐</td><td>每日任务，+2</td></tr>
+                    <tr><td>🎡 幸运转盘</td><td>抽中即得（消耗 20 积分/次）</td></tr>
+                    <tr><td>🏅 成就</td><td>解锁成就获得成就积分</td></tr>
+                    <tr><td>🐍 贪吃蛇 / 🧠 记忆翻牌</td><td>登录状态打出好成绩奖励积分</td></tr>
+                    <tr><td>⭐ 积分流水</td><td>「任务」面板中可查看每笔积分进出记录</td></tr>
+                </table>
+                <h3>积分消费</h3>
+                <ul>
+                    <li>🍫 积分换巧克力：50 积分 = 1 块。</li>
+                    <li>🎡 幸运转盘：20 积分抽一次。</li>
+                </ul>
+
+                <h2>8. 巧克力系统 🍫</h2>
+                <h3>巧克力获取</h3>
+                <table>
+                    <tr><th>方式</th><th>说明</th></tr>
+                    <tr><td>💳 在线购买</td><td>商城「购买巧克力」，¥2.00/块，Stripe 支付，支付成功自动到账</td></tr>
+                    <tr><td>💱 积分兑换</td><td>50 积分换 1 块</td></tr>
+                    <tr><td>📅 签到日历</td><td>连续 7 天奖励 +16 积分并送 🍫1</td></tr>
+                    <tr><td>🎁 游戏 / 抽奖</td><td>转盘等玩法掉落</td></tr>
+                </table>
+                <div class="help-note">⚠️ 注意：目前支付功能默认处于关闭状态（「⛔ 支付已关闭」按钮禁用，Stripe key 为占位值）。如需开通，需要配置真实的 Stripe key 并开启 <code>PAYMENT_ENABLED</code>；未开通前可用「收款码（备选）」上传微信/支付宝收款码走模拟支付流程。</div>
+                <h3>巧克力消费</h3>
+                <ul>
+                    <li>🛒 商城装扮：见下表。</li>
+                    <li>🍫 投巧克力：打赏给其他用户。</li>
+                </ul>
+
+                <h2>9. 商城与装扮 🛒</h2>
+                <p>打开「🍫 商城」：</p>
+                <table>
+                    <tr><th>装扮</th><th>价格</th><th>效果</th></tr>
+                    <tr><td>🌈 头像框</td><td>🍫 5</td><td>头像外框</td></tr>
+                    <tr><td>✨ 金色昵称</td><td>🍫 10</td><td>昵称金色特效</td></tr>
+                    <tr><td>👑 皇冠</td><td>🍫 20</td><td>头像皇冠</td></tr>
+                    <tr><td>💎 钻石边框</td><td>🍫 50</td><td>钻石头像框</td></tr>
+                </table>
+                <ul>
+                    <li>购买后自动装备，头像/昵称效果<strong>全站可见</strong>。</li>
+                    <li>底部「📋 购买记录」可查看历史购买。</li>
+                    <li>「📱 收款码（备选）」：可上传微信/支付宝收款码图片，供模拟支付使用，可随时清除。</li>
+                </ul>
+
+                <h2>10. 任务 / 成就 / 签到日历</h2>
+                <h3>📋 每日任务</h3>
+                <p>每天刷新，完成任务自动累计进度并发放积分：发布帖子 ×1、评论 ×2、点赞 ×3、推荐 ×1、签到 ×1。</p>
+                <h3>🏅 成就墙</h3>
+                <ul>
+                    <li>完成各类行为解锁成就。</li>
+                    <li>顶部显示「已解锁 X / Y」「成就积分」，解锁进度全站可见。</li>
+                </ul>
+                <h3>📅 签到日历</h3>
+                <ul>
+                    <li>每天可签到一次，重复签到会提示「今天已签到」。</li>
+                    <li>连续签到不断档，7 天一个周期，奖励阶梯：+2 → +2 → +4 → +2 → +8 → +16 →（第 7 天）+16 积分 + 🍫1。</li>
+                    <li>日历中用 ✓ 标记已签、● 标记今天。</li>
+                </ul>
+
+                <h2>11. 玩法中心 🎮</h2>
+                <table>
+                    <tr><th>玩法</th><th>说明</th></tr>
+                    <tr><td>🏆 排行榜</td><td>积分 / 巧克力 / 连签 / 发帖 四榜，看谁是站内最强</td></tr>
+                    <tr><td>🎡 幸运转盘</td><td>20 积分抽一次，奖品自动到账，有抽奖记录</td></tr>
+                    <tr><td>🐍 贪吃蛇</td><td>方向键 / WASD 控制，手机上用下方按钮；吃到食物 +1 分，登录后破纪录奖励积分</td></tr>
+                    <tr><td>🧠 记忆翻牌</td><td>翻出所有配对 emoji 获胜，记录步数、用时、最佳成绩</td></tr>
+                    <tr><td>✂️ 石头剪刀布</td><td>与电脑对战，三局两胜赢一局；可重新计分</td></tr>
+                    <tr><td>⚡ 反应测试</td><td>等方块变绿立刻点击，测 3 次取平均，记录最快成绩</td></tr>
+                </table>
+
+                <h2>12. 音乐播放器 🎵</h2>
+                <p>页面右下角悬浮播放器：</p>
+                <ul>
+                    <li>📁 上传：选择本地音频文件加入播放列表。</li>
+                    <li>▶ / ⏮ / ⏭：播放、上一首、下一首。</li>
+                    <li>🔁 循环、🔀 随机播放。</li>
+                    <li>进度条拖拽跳转，音量滑块调节音量。</li>
+                    <li>📋 打开播放列表，点击歌曲切换。</li>
+                </ul>
+
+                <h2>13. 主题切换 🎨</h2>
+                <p>点击顶部 🎨 打开主题面板，共 5 种皮肤，点击即时生效：</p>
+                <table>
+                    <tr><th>主题</th><th>风格</th></tr>
+                    <tr><td>🌌 深空紫</td><td>默认暗色</td></tr>
+                    <tr><td>☀️ 明亮</td><td>清爽白色</td></tr>
+                    <tr><td>🍑 蜜桃粉</td><td>粉嫩少女</td></tr>
+                    <tr><td>🤖 赛博青</td><td>霓虹科技</td></tr>
+                    <tr><td>🌿 薄荷绿</td><td>清新自然</td></tr>
+                </table>
+
+                <h2>14. 通知与私信 💬</h2>
+                <ul>
+                    <li><strong>🔔 通知</strong>：被 @ 提及、被回复等会生成通知，角标显示未读数。</li>
+                    <li><strong>💬 私信</strong>：在消息面板选择/输入收件人昵称和内容发送；帖子详情页「💬 私信」可快速给作者发信。</li>
+                </ul>
+
+                <h2>15. 常见问题</h2>
+                <table>
+                    <tr><th>问题</th><th>处理</th></tr>
+                    <tr><td>页面提示「Supabase 库加载失败」</td><td>检查网络，刷新重试</td></tr>
+                    <tr><td>登录/注册后无反应</td><td>确认已执行 <code>supabase_setup.sql</code> 建表（含 RLS 策略）</td></tr>
+                    <tr><td>操作提示「请先登录」</td><td>登录后再操作</td></tr>
+                    <tr><td>提示「权限不足 / RLS」</td><td>数据库 RLS 策略未配置，按 <code>supabase_setup.sql</code> 执行</td></tr>
+                    <tr><td>签到提示「今天已签到」</td><td>每天限一次，明天再来</td></tr>
+                    <tr><td>支付按钮灰色不可点</td><td>支付功能默认关闭，需配置 Stripe 或走收款码模拟支付</td></tr>
+                    <tr><td>公式不显示</td><td>LaTeX 为加载后延迟渲染，稍等片刻或刷新</td></tr>
+                </table>
+
+                <p style="color:var(--text-muted);font-size:.85rem;margin-top:18px;">* 本文档基于 index.html（完整最终版）功能整理，具体数值（积分、价格、任务目标）以页面实际显示为准。</p>
+            </div>
         </div>
     </div>
 
@@ -2874,6 +3130,11 @@
                 6: { name: 'Lv.6', signBonus: 12 } }; return m[l] || m[1]; }
 
         function showFeedback() { alert('📮 反馈请发送邮件至：3880374029@qq.com'); }
+
+        // ================== 操作说明(帮助) ==================
+        function openHelp() { document.getElementById('helpModal').classList.add('active'); }
+
+        function closeHelp() { document.getElementById('helpModal').classList.remove('active'); }
 
         function showStatus() { alert('✅ 所有功能已就绪'); }
 
