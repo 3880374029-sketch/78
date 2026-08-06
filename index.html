@@ -750,6 +750,43 @@
             border: 2px solid var(--border-color);
             object-fit: cover;
         }
+        /* ===== 商城装扮：头像框 / 昵称效果 ===== */
+        .avatar-frame-rainbow {
+            border: 3px solid transparent !important;
+            background: linear-gradient(#14111f, #14111f) padding-box,
+                linear-gradient(90deg, #ff5e8a, #ff9f43, #22d3ee, #a855f7, #ff5e8a) border-box;
+            background-size: 100% 100%, 300% 100%;
+            animation: frameSpin 4s linear infinite;
+        }
+        .avatar-frame-diamond {
+            border: 3px solid transparent !important;
+            background: linear-gradient(#14111f, #14111f) padding-box,
+                linear-gradient(135deg, #7cf8ff, #4facfe, #7cf8ff, #a78bfa, #7cf8ff) border-box;
+            background-size: 100% 100%, 300% 300%;
+            animation: frameSpin 5s linear infinite;
+            box-shadow: 0 0 12px rgba(124, 248, 255, 0.45);
+        }
+        @keyframes frameSpin {
+            from { background-position: 0% 0%, 0% 0%; }
+            to { background-position: 0% 0%, 300% 0%; }
+        }
+        .nickname-golden {
+            color: #ffd700 !important;
+            background: linear-gradient(90deg, #ffe259, #ffa751, #ffe259);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+            font-weight: 700;
+        }
+        .nickname-crown {
+            position: relative;
+            color: #ffd700 !important;
+            font-weight: 700;
+        }
+        .nickname-crown::before {
+            content: '👑';
+            margin-right: 3px;
+        }
         .user-name {
             color: var(--text-secondary);
             font-weight: 500;
@@ -3301,7 +3338,11 @@
                 profileLink.classList.remove('hidden');
                 userAvatar.src = userProfile.avatar_url || getAvatarUrl({ username: userProfile.username,
                     avatar_url: null });
+                userAvatar.classList.remove('avatar-frame-rainbow', 'avatar-frame-diamond');
+                applyAvatarFrame(userAvatar);
                 userName.textContent = userProfile.username || '用户';
+                userName.classList.remove('nickname-golden', 'nickname-crown');
+                applyNickname(userName);
                 document.getElementById('myChocolates').textContent = userProfile.chocolates || 0;
                 document.getElementById('myTotalPoints').textContent = userProfile.points || 0;
                 document.getElementById('myFavCount').textContent = favoriteMap.size;
@@ -3396,6 +3437,10 @@
             sorted.forEach(function(post, idx) {
                 var displayName = authorMap[post.author_id] || post.author_name || '匿名';
                 var avatar = getAvatarUrl({ username: displayName, avatar_url: post.author_avatar });
+                // 自己发的帖子应用已购装扮(头像框/昵称效果)
+                var isSelf = currentUser && post.author_id === currentUser.id;
+                var frameCls = isSelf ? avatarFrameClass() : '';
+                var nickCls = isSelf ? nicknameEffect().className : '';
                 var commentCount = commentCountMap[post.id] || 0;
                 var excerpt = post.content ? post.content.replace(/<[^>]+>/g, '').substring(0, 120) : '';
                 var catMap = { tech: '技术', life: '生活', career: '职业', topic: '话题' };
@@ -3421,9 +3466,10 @@
                     '<div class="post-title" onclick="showPost(\'' + safePostId + '\')">' + isPinned + escapeHtml(
                         post.title) + ' ' + syncText + '</div>' +
                     '<div class="post-meta">' +
-                    '<img class="author-avatar" src="' + escapeHtml(avatar) +
+                    '<img class="author-avatar' + (frameCls ? ' ' + frameCls : '') + '" src="' + escapeHtml(avatar) +
                     '" alt="avatar" onerror="this.src=\'https://ui-avatars.com/api/?name=U&background=7c6aff&color=fff&size=100&length=2\'">' +
-                    '<span class="author">' + escapeHtml(displayName) + '</span>' +
+                    '<span class="author' + (nickCls ? ' ' + nickCls : '') + '">' + escapeHtml(displayName) +
+                    '</span>' +
                     '<span class="level-badge">' + escapeHtml(getLevelInfo(post.author_level || 1).name) +
                     '</span>' +
                     '<span>' + escapeHtml(formatTime(post.created_at)) + '</span>' +
@@ -3579,6 +3625,9 @@
             var safeAuthorId = escapeJsString(post.author_id);
             var safeAuthorName = escapeJsString(displayName);
             var isAuthor = currentUser && currentUser.id === post.author_id;
+            // 自己查看自己的帖子时应用已购装扮
+            var frameCls = isAuthor ? avatarFrameClass() : '';
+            var nickCls = isAuthor ? nicknameEffect().className : '';
             var isFav = favoriteMap.get(post.id) ? '❤️' : '🤍';
             var favText = favoriteMap.get(post.id) ? '取消收藏' : '收藏';
             var actions = userPostActions.get(post.id) || { liked: false, recommended: false,
@@ -3591,9 +3640,10 @@
                 '<button class="back-btn" onclick="backToList()">← 返回列表</button>' +
                 '<h2 style="font-size:1.5rem;margin-bottom:8px;">' + escapeHtml(post.title) + '</h2>' +
                 '<div class="post-author-info">' +
-                '<img src="' + escapeHtml(avatar) +
+                '<img class="' + (frameCls || '') + '" src="' + escapeHtml(avatar) +
                 '" alt="avatar" onerror="this.src=\'https://ui-avatars.com/api/?name=U&background=7c6aff&color=fff&size=100&length=2\'">' +
-                '<span class="author-name">' + escapeHtml(displayName) + '</span>' +
+                '<span class="author-name' + (nickCls ? ' ' + nickCls : '') + '">' + escapeHtml(displayName) +
+                '</span>' +
                 '<span class="level-badge">' +
                 escapeHtml(levelName) + '</span>' +
                 '<span class="post-time">' + escapeHtml(formatTime(post.created_at)) + '</span>' +
@@ -4500,15 +4550,53 @@
                 var purchased = JSON.parse(localStorage.getItem('purchased_items') || '[]');
                 purchased.push({ item: item, time: new Date().toISOString() });
                 localStorage.setItem('purchased_items', JSON.stringify(purchased));
-                showToast('🎉 成功购买 ' + item + '！', false);
+                // 购买后自动装备该装扮
+                equipItem(item);
+                showToast('🎉 成功购买并装备 ' + item + '！', false);
                 updateUI();
-                document.getElementById('shopMsg').innerHTML = '<p style="color:var(--success);">✅ 已购买 ' +
-                    escapeHtml(item) + '，在个人中心查看</p>';
+                renderProfile();
+                document.getElementById('shopMsg').innerHTML = '<p style="color:var(--success);">✅ 已购买并装备 ' +
+                    escapeHtml(item) + '，个人中心/发帖处即刻生效</p>';
                 await updateUserActivity();
             } catch (e) {
                 console.error('购买失败', e);
                 showToast('购买失败', true);
             }
+        }
+
+        // ================== 装扮装备系统 ==================
+        // 购买后自动装备，装扮存 localStorage，应用于头像/昵称渲染
+        function getEquipped() {
+            try { return JSON.parse(localStorage.getItem('equipped_items') || '[]'); } catch (e) { return []; }
+        }
+        function equipItem(item) {
+            var eq = getEquipped();
+            if (!eq.includes(item)) eq.push(item);
+            localStorage.setItem('equipped_items', JSON.stringify(eq));
+        }
+        // 头像框: 头像 img 加 frame class
+        function avatarFrameClass() {
+            var eq = getEquipped();
+            if (eq.includes('钻石边框')) return 'avatar-frame-diamond';
+            if (eq.includes('头像框')) return 'avatar-frame-rainbow';
+            return '';
+        }
+        // 昵称: 返回昵称效果 class(皇冠优先于金色昵称)
+        function nicknameEffect() {
+            var eq = getEquipped();
+            if (eq.includes('皇冠')) return { className: 'nickname-crown' };
+            if (eq.includes('金色昵称')) return { className: 'nickname-golden' };
+            return { className: '' };
+        }
+        function applyAvatarFrame(el) {
+            if (!el) return;
+            var cls = avatarFrameClass();
+            if (cls) el.classList.add(cls);
+        }
+        function applyNickname(el) {
+            if (!el) return;
+            var eff = nicknameEffect();
+            if (eff.className) el.classList.add(eff.className);
         }
 
         function openGiveChocolate(userId, userName) {
@@ -4993,6 +5081,8 @@
         async function renderProfile() {
             if (!currentUser || !userProfile) return;
             document.getElementById('profileDisplayName').textContent = userProfile.username || '用户';
+            document.getElementById('profileDisplayName').classList.remove('nickname-golden', 'nickname-crown');
+            applyNickname(document.getElementById('profileDisplayName'));
             document.getElementById('profileEmail').textContent = currentUser.email || '';
             document.getElementById('profilePoints').textContent = userProfile.points || 0;
             document.getElementById('profileChocolates').textContent = userProfile.chocolates || 0;
@@ -5000,7 +5090,10 @@
             var level = userProfile.level || 1;
             document.getElementById('profileLevel').textContent = getLevelInfo(level).name;
             var avatar = userProfile.avatar_url || getAvatarUrl({ username: userProfile.username, avatar_url: null });
-            document.getElementById('profileAvatarPreview').src = avatar;
+            var profileAvatar = document.getElementById('profileAvatarPreview');
+            profileAvatar.src = avatar;
+            profileAvatar.classList.remove('avatar-frame-rainbow', 'avatar-frame-diamond');
+            applyAvatarFrame(profileAvatar);
             document.getElementById('profileNameInput').value = userProfile.username || '';
             var expNeeded = level * 50;
             var exp = userProfile.points || 0;
