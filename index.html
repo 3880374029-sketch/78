@@ -118,8 +118,7 @@
         .container {
             max-width: 1200px;
             margin: 0 auto;
-        }
-        .btn {
+        }.btn {
             background: linear-gradient(135deg, #7c6aff, #6d5bff);
             color: #fff;
             border: none;
@@ -134,6 +133,12 @@
             align-items: center;
             justify-content: center;
             box-shadow: 0 2px 8px var(--accent-glow);
+
+            background: linear-gradient(135deg, var(--grad-pink), var(--grad-purple), var(--grad-violet));
+            background-size: 200% 200%;
+            background-position: 0% 50%;
+            box-shadow: 0 4px 14px var(--glow-a), 0 2px 8px var(--accent-glow);
+            transition: transform var(--dur-fast) var(--ease-bounce), box-shadow var(--dur-mid) var(--ease-out-soft), filter var(--dur-fast) ease, background-position var(--dur-mid) var(--ease-out-soft), background-color var(--transition), color var(--transition), border-color var(--transition);
         }
         .btn:hover {
             transform: translateY(-2px) scale(1.02);
@@ -142,24 +147,35 @@
         }
         .btn:active {
             transform: translateY(0) scale(0.96);
-        }
-        .btn-outline {
+        }.btn-outline {
             background: var(--bg-card);
             border: 1px solid var(--border-color);
             box-shadow: none;
             color: var(--text-secondary);
+
+            background: var(--bg-card);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            box-shadow: none;
+            color: var(--text-secondary);
+            background-position: initial;
         }
         .btn-outline:hover {
             background: var(--hover-bg);
-        }
-        .btn-success {
+        }.btn-success {
             background: linear-gradient(135deg, #22c55e, #16a34a);
-        }
-        .btn-stripe {
+
+            background: linear-gradient(135deg, #22c55e, #16a34a);
+            background-size: initial;
+            background-position: initial;
+        }.btn-stripe {
             background: linear-gradient(135deg, #635bff, #3b82f6);
             color: #fff;
-        }
-        .btn-sm {
+
+            background: linear-gradient(135deg, #635bff, #3b82f6);
+            background-size: initial;
+            background-position: initial;
+        }.btn-sm {
             background: var(--bg-card);
             border: 1px solid var(--border-color);
             color: var(--text-secondary);
@@ -168,6 +184,8 @@
             cursor: pointer;
             font-size: .7rem;
             min-height: 26px;
+
+            transition: background 0.2s, color var(--transition), transform var(--dur-fast) var(--ease-bounce), border-color var(--transition);
         }
         .btn-sm:hover {
             background: var(--hover-bg);
@@ -232,8 +250,7 @@
             backdrop-filter: blur(6px);
             -webkit-backdrop-filter: blur(6px);
             transition: opacity var(--dur-mid) var(--ease-out-soft), background-color var(--dur-mid) var(--ease-out-soft), backdrop-filter var(--dur-mid) var(--ease-out-soft), visibility 0s;
-        }
-        .modal-box {
+        }.modal-box {
             background: var(--bg-secondary);
             padding: 28px 32px;
             border-radius: 20px;
@@ -247,6 +264,11 @@
             transform: translateY(18px) scale(0.94);
             opacity: 0;
             transition: transform var(--dur-mid) var(--ease-bounce), opacity var(--dur-mid) var(--ease-out-soft);
+
+            background: var(--bg-secondary);
+            backdrop-filter: blur(24px);
+            -webkit-backdrop-filter: blur(24px);
+            border-radius: 24px;
         }
         .modal.active .modal-box {
             transform: translateY(0) scale(1);
@@ -262,8 +284,7 @@
         }
         .modal-box .close:hover {
             color: var(--text-primary);
-        }
-        .toast {
+        }.toast {
             position: fixed;
             bottom: 20px;
             left: 50%;
@@ -283,6 +304,8 @@
             pointer-events: none;
             transform: translateX(-50%) translateY(18px) scale(0.96);
             transition: opacity var(--dur-mid) var(--ease-out-soft), transform var(--dur-mid) var(--ease-bounce), visibility 0s linear var(--dur-mid), border-color var(--transition), box-shadow var(--dur-mid) var(--ease-out-soft);
+
+            background: linear-gradient(90deg, var(--glow-a), var(--glass-bg) 30%);
         }
         .toast.show {
             opacity: 1;
@@ -313,10 +336,11 @@
             font-size: 2em;
             font-weight: 700;
             display: inline-block;
-        }
-        .glow-text {
+        }.glow-text {
             color: #fff;
             text-shadow: 0 0 8px #7c6aff, 0 0 16px #7c6aff, 0 0 24px #6d5bff;
+
+            text-shadow: 0 0 6px var(--glow-a), 0 0 16px var(--glow-b);
         }
         .blink-text {
             animation: blink 1s step-end infinite;
@@ -485,11 +509,15 @@
             background: var(--success);
             border-radius: 50%;
             margin-right: 4px;
-        }
-        .online-count {
+        }.online-count {
             font-weight: 700;
             color: var(--success);
             font-size: 1.1rem;
+
+            background: linear-gradient(90deg, var(--grad-green), var(--grad-cyan));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
         }
         .online-user-item {
             display: inline-flex;
@@ -504,8 +532,7 @@
             height: 18px;
             border-radius: 50%;
             border: 1px solid var(--border-color);
-        }
-        .context-menu {
+        }.context-menu {
             position: fixed;
             background: var(--bg-secondary);
             border: 1px solid var(--border-color);
@@ -520,6 +547,10 @@
             transform-origin: top left;
             pointer-events: none;
             transition: opacity var(--dur-fast) var(--ease-out-soft), transform var(--dur-fast) var(--ease-out-soft), visibility 0s linear var(--dur-fast);
+
+            background: var(--glass-bg);
+            backdrop-filter: blur(18px);
+            -webkit-backdrop-filter: blur(18px);
         }
         .context-menu.active {
             opacity: 1;
@@ -652,11 +683,21 @@
             font-size: .65rem;
             color: var(--warning);
             margin-left: 6px;
-        }
-        .view-toggle {
+        }.view-toggle {
             display: flex;
             gap: 6px;
             margin-bottom: 12px;
+
+            animation-delay: 0.12s;
+
+            background: var(--bg-card);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border: 1px solid var(--border-color);
+            border-radius: 999px;
+            padding: 4px;
+            display: inline-flex;
+            gap: 2px;
         }
         .view-toggle button {
             background: var(--bg-card);
@@ -679,13 +720,14 @@
         }
         .posts-grid .post-card {
             margin-bottom: 0;
-        }
-        .board-nav {
+        }.board-nav {
             display: flex;
             gap: 6px;
             flex-wrap: wrap;
             margin-bottom: 16px;
             padding: 4px 0;
+
+            animation-delay: 0.09s;
         }
         .board-nav .board-btn {
             background: var(--bg-card);
@@ -705,8 +747,7 @@
             background: var(--accent);
             color: #fff;
             border-color: var(--accent);
-        }
-        .forum-stats {
+        }.forum-stats {
             display: flex;
             gap: 16px;
             flex-wrap: wrap;
@@ -715,6 +756,10 @@
             border-radius: 16px;
             border: 1px solid var(--border-color);
             margin-bottom: 20px;
+
+            animation-delay: 0.05s;
+
+            transition: transform var(--dur-mid) var(--ease-out-soft), border-color var(--transition), background var(--transition), box-shadow var(--dur-mid) var(--ease-out-soft);
         }
         .forum-stats span {
             color: var(--text-muted);
@@ -742,13 +787,17 @@
             align-items: center;
             gap: 6px;
             flex-wrap: wrap;
-        }
-        .user-avatar {
+        }.user-avatar {
             width: 32px;
             height: 32px;
             border-radius: 50%;
             border: 2px solid var(--border-color);
             object-fit: cover;
+
+            transition: transform var(--dur-fast) var(--ease-bounce), border-color var(--transition), box-shadow var(--dur-mid) var(--ease-out-soft);
+
+            border: 2px solid var(--accent);
+            box-shadow: 0 0 8px var(--glow-b);
         }
         /* ===== 商城装扮：头像框 / 昵称效果 ===== */
         .avatar-frame-rainbow {
@@ -816,13 +865,15 @@
             gap: 20px;
             flex-wrap: wrap;
             margin-bottom: 20px;
-        }
-        .profile-avatar-large {
+        }.profile-avatar-large {
             width: 72px;
             height: 72px;
             border-radius: 50%;
             object-fit: cover;
             border: 3px solid var(--accent);
+
+            border: 3px solid var(--accent);
+            box-shadow: 0 0 18px var(--glow-b);
         }
         .profile-info h2 {
             margin-bottom: 2px;
@@ -837,13 +888,14 @@
             grid-template-columns: repeat(auto-fit, minmax(70px, 1fr));
             gap: 10px;
             margin: 14px 0;
-        }
-        .stat-item {
+        }.stat-item {
             background: var(--bg-card);
             padding: 10px 6px;
             border-radius: 12px;
             text-align: center;
             border: 1px solid var(--border-color);
+
+            transition: transform var(--dur-mid) var(--ease-out-soft), border-color var(--transition), background var(--transition), box-shadow var(--dur-mid) var(--ease-out-soft);
         }
         .stat-item .num {
             font-size: 1.2rem;
@@ -970,13 +1022,14 @@
         .fav-item .fav-meta {
             font-size: .7rem;
             color: var(--text-muted);
-        }
-        .post-detail {
+        }.post-detail {
             background: var(--bg-card);
             padding: 24px 28px;
             border-radius: 16px;
             border: 1px solid var(--border-color);
             margin-top: 16px;
+
+            animation: fadeUp 0.38s var(--ease-out-soft) both;
         }
         .post-detail .back-btn {
             background: var(--bg-card);
@@ -1097,8 +1150,7 @@
             color: var(--warning);
             font-weight: 700;
             margin-right: 6px;
-        }
-        .tag-item {
+        }.tag-item {
             display: inline-block;
             background: var(--bg-card);
             padding: 2px 10px;
@@ -1108,6 +1160,8 @@
             color: var(--text-muted);
             border: 1px solid var(--border-color);
             cursor: pointer;
+
+            transition: background 0.2s, color var(--transition), transform var(--dur-fast) var(--ease-bounce), border-color var(--transition);
         }
         .tag-item:hover {
             background: var(--hover-bg);
@@ -1471,14 +1525,17 @@
         .badge.topic {
             background: #8b5cf6;
             color: #fff;
-        }
-        .level-badge {
+        }.level-badge {
             background: #fbbf24;
             color: #1a1a2e;
             padding: 0 8px;
             border-radius: 12px;
             font-size: .65rem;
             font-weight: 700;
+
+            background: linear-gradient(135deg, #fbbf24, #ff9f43);
+            color: #3b1f00;
+            box-shadow: 0 2px 8px rgba(255, 159, 67, 0.3);
         }
         .post-meta {
             display: flex;
@@ -1494,12 +1551,13 @@
             height: 22px;
             border-radius: 50%;
             object-fit: cover;
-        }
-        .post-title {
+        }.post-title {
             font-size: 1.1rem;
             font-weight: 600;
             cursor: pointer;
             transition: color .2s;
+
+            transition: color 0.2s, transform var(--dur-fast) var(--ease-out-soft);
         }
         .post-title:hover {
             color: var(--accent);
@@ -1579,18 +1637,21 @@
         .footer-status {
             font-size: .85rem;
             color: var(--text-muted);
-        }
-        .empty-state {
+        }.empty-state {
             text-align: center;
             padding: 40px 20px;
             color: var(--text-muted);
             border: 1px dashed var(--border-color);
             border-radius: 16px;
+
+            background: var(--bg-card);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border-radius: 20px;
         }
         .empty-state h3 {
             color: var(--text-primary);
-        }
-        #musicPlayer {
+        }#musicPlayer {
             position: fixed;
             bottom: 0;
             left: 0;
@@ -1605,6 +1666,10 @@
             flex-wrap: wrap;
             height: 64px;
             overflow: hidden;
+
+            background: var(--glass-bg);
+            backdrop-filter: blur(22px);
+            -webkit-backdrop-filter: blur(22px);
         }
         @media(max-width:768px) {
             #musicPlayer {
@@ -1633,9 +1698,6 @@
     }
 
     header, .forum-stats, .board-nav, .view-toggle, footer { animation: fadeUp 0.5s var(--ease-out-soft) both; }
-    .forum-stats { animation-delay: 0.05s; }
-    .board-nav { animation-delay: 0.09s; }
-    .view-toggle { animation-delay: 0.12s; }
     footer { animation-delay: 0.35s; }
     .sidebar > * { animation: fadeUp 0.5s var(--ease-out-soft) both; }
     .sidebar > *:nth-child(1) { animation-delay: 0.15s; }
@@ -1645,35 +1707,21 @@
     .sidebar > *:nth-child(5) { animation-delay: 0.31s; }
     .sidebar > *:nth-child(6) { animation-delay: 0.35s; }
 
-    .post-detail { animation: fadeUp 0.38s var(--ease-out-soft) both; }
-
     .board-nav .board-btn { transition: background 0.2s, color var(--transition), border-color var(--transition), transform var(--dur-fast) var(--ease-bounce); }
     .board-nav .board-btn:hover { transform: translateY(-1px); }
     .view-toggle button { transition: background-color var(--transition), color var(--transition), border-color var(--transition), transform var(--dur-fast) var(--ease-bounce); }
     .view-toggle button:hover { transform: translateY(-1px); }
-
-    .tag-item { transition: background 0.2s, color var(--transition), transform var(--dur-fast) var(--ease-bounce), border-color var(--transition); }
     .tag-item:hover { transform: translateY(-1px) scale(1.05); }
 
     .hot-item a { transition: color var(--transition), transform var(--dur-fast) var(--ease-out-soft); }
     .hot-item a:hover { transform: translateX(3px); }
-
-    .stat-item { transition: transform var(--dur-mid) var(--ease-out-soft), border-color var(--transition), background var(--transition), box-shadow var(--dur-mid) var(--ease-out-soft); }
     .stat-item:hover { transform: translateY(-2px); border-color: var(--accent); box-shadow: 0 6px 18px var(--shadow-color); }
-
-    .forum-stats { transition: transform var(--dur-mid) var(--ease-out-soft), border-color var(--transition), background var(--transition), box-shadow var(--dur-mid) var(--ease-out-soft); }
     .forum-stats:hover { transform: translateY(-2px); border-color: var(--accent); box-shadow: 0 8px 24px var(--shadow-color); }
 
     .hot-list, .online-users { transition: transform var(--dur-mid) var(--ease-out-soft), border-color var(--transition), box-shadow var(--dur-mid) var(--ease-out-soft); }
     .hot-list:hover, .online-users:hover { transform: translateY(-2px); border-color: var(--accent); box-shadow: 0 8px 22px var(--shadow-color); }
-
-    .btn-sm { transition: background 0.2s, color var(--transition), transform var(--dur-fast) var(--ease-bounce), border-color var(--transition); }
     .btn-sm:hover { transform: translateY(-1px); }
-
-    .user-avatar { transition: transform var(--dur-fast) var(--ease-bounce), border-color var(--transition), box-shadow var(--dur-mid) var(--ease-out-soft); }
     .user-avatar:hover { transform: scale(1.1); border-color: var(--accent); }
-
-    .post-title { transition: color 0.2s, transform var(--dur-fast) var(--ease-out-soft); }
     .post-title:hover { transform: translateX(2px); }
 
     .qr-manager, .shop-buy-section { transition: border-color var(--transition), background var(--transition), box-shadow var(--dur-mid) var(--ease-out-soft); }
@@ -1707,40 +1755,13 @@
         -webkit-text-fill-color: transparent;
         background-clip: text;
     }
-
-    .btn {
-        background: linear-gradient(135deg, var(--grad-pink), var(--grad-purple), var(--grad-violet));
-        background-size: 200% 200%;
-        background-position: 0% 50%;
-        box-shadow: 0 4px 14px var(--glow-a), 0 2px 8px var(--accent-glow);
-        transition: transform var(--dur-fast) var(--ease-bounce), box-shadow var(--dur-mid) var(--ease-out-soft), filter var(--dur-fast) ease, background-position var(--dur-mid) var(--ease-out-soft), background-color var(--transition), color var(--transition), border-color var(--transition);
-    }
     .btn:hover {
         background-position: 100% 50%;
         box-shadow: 0 10px 28px var(--glow-a), 0 0 0 1px rgba(255, 255, 255, 0.12);
     }
-    .btn-outline {
-        background: var(--bg-card);
-        backdrop-filter: blur(8px);
-        -webkit-backdrop-filter: blur(8px);
-        box-shadow: none;
-        color: var(--text-secondary);
-        background-position: initial;
-    }
     .btn-outline:hover {
         background-position: initial;
         box-shadow: none;
-    }
-
-    .btn-success {
-        background: linear-gradient(135deg, #22c55e, #16a34a);
-        background-size: initial;
-        background-position: initial;
-    }
-    .btn-stripe {
-        background: linear-gradient(135deg, #635bff, #3b82f6);
-        background-size: initial;
-        background-position: initial;
     }
 
     .badge.tech { background: linear-gradient(135deg, #3b82f6, #22d3ee); }
@@ -1748,28 +1769,11 @@
     .badge.career { background: linear-gradient(135deg, #f59e0b, #ff5e8a); }
     .badge.topic { background: linear-gradient(135deg, #a855f7, #ec4899); }
 
-    .level-badge {
-        background: linear-gradient(135deg, #fbbf24, #ff9f43);
-        color: #3b1f00;
-        box-shadow: 0 2px 8px rgba(255, 159, 67, 0.3);
-    }
-
     .board-nav .board-btn.active {
         background: linear-gradient(135deg, var(--grad-pink), var(--grad-purple));
         border-color: transparent;
         color: #fff;
         box-shadow: 0 4px 14px var(--glow-a);
-    }
-
-    .view-toggle {
-        background: var(--bg-card);
-        backdrop-filter: blur(10px);
-        -webkit-backdrop-filter: blur(10px);
-        border: 1px solid var(--border-color);
-        border-radius: 999px;
-        padding: 4px;
-        display: inline-flex;
-        gap: 2px;
     }
     .view-toggle button {
         border-radius: 999px;
@@ -1796,13 +1800,6 @@
         height: 3px;
         border-radius: 3px;
         background: linear-gradient(90deg, var(--grad-pink), var(--grad-purple));
-    }
-
-    .modal-box {
-        background: var(--bg-secondary);
-        backdrop-filter: blur(24px);
-        -webkit-backdrop-filter: blur(24px);
-        border-radius: 24px;
     }
     .modal-box h2:first-of-type {
         background: linear-gradient(90deg, var(--grad-pink), var(--grad-purple));
@@ -1836,13 +1833,6 @@
         background-clip: text;
     }
 
-    .online-count {
-        background: linear-gradient(90deg, var(--grad-green), var(--grad-cyan));
-        -webkit-background-clip: text;
-        -webkit-text-fill-color: transparent;
-        background-clip: text;
-    }
-
     .hot-list h3 {
         background: linear-gradient(90deg, var(--grad-orange), var(--grad-pink));
         -webkit-background-clip: text;
@@ -1869,48 +1859,13 @@
         color: var(--accent);
         font-weight: 500;
     }
-
-    .toast {
-        background: linear-gradient(90deg, var(--glow-a), var(--glass-bg) 30%);
-    }
     .toast.error {
         background: linear-gradient(90deg, rgba(239, 68, 68, 0.16), var(--glass-bg) 30%);
-    }
-
-    .user-avatar {
-        border: 2px solid var(--accent);
-        box-shadow: 0 0 8px var(--glow-b);
-    }
-    .profile-avatar-large {
-        border: 3px solid var(--accent);
-        box-shadow: 0 0 18px var(--glow-b);
-    }
-
-    .glow-text {
-        text-shadow: 0 0 6px var(--glow-a), 0 0 16px var(--glow-b);
-    }
-
-    .empty-state {
-        background: var(--bg-card);
-        backdrop-filter: blur(10px);
-        -webkit-backdrop-filter: blur(10px);
-        border-radius: 20px;
     }
 
     .search-box, textarea, input, select {
         backdrop-filter: blur(8px);
         -webkit-backdrop-filter: blur(8px);
-    }
-
-    #musicPlayer {
-        background: var(--glass-bg);
-        backdrop-filter: blur(22px);
-        -webkit-backdrop-filter: blur(22px);
-    }
-    .context-menu {
-        background: var(--glass-bg);
-        backdrop-filter: blur(18px);
-        -webkit-backdrop-filter: blur(18px);
     }
     [data-theme="light"] #musicPlayer { background: rgba(255, 255, 255, 0.9); }
     [data-theme="light"] .context-menu { background: rgba(255, 255, 255, 0.94); }
@@ -2298,11 +2253,11 @@
         <div class="main-layout">
             <div class="main-content">
                 <div class="board-nav">
-                    <button class="board-btn active" onclick="setCategory('all')">全部</button>
-                    <button class="board-btn" onclick="setCategory('tech')">技术</button>
-                    <button class="board-btn" onclick="setCategory('life')">生活</button>
-                    <button class="board-btn" onclick="setCategory('career')">职业</button>
-                    <button class="board-btn" onclick="setCategory('topic')">话题</button>
+                    <button class="board-btn active" data-category="all" onclick="setCategory('all')">全部</button>
+                    <button class="board-btn" data-category="tech" onclick="setCategory('tech')">技术</button>
+                    <button class="board-btn" data-category="life" onclick="setCategory('life')">生活</button>
+                    <button class="board-btn" data-category="career" onclick="setCategory('career')">职业</button>
+                    <button class="board-btn" data-category="topic" onclick="setCategory('topic')">话题</button>
                     <button class="board-btn" onclick="openNewTopic()">➕ 话题</button>
                     <button class="board-btn" onclick="openShop()" style="background:linear-gradient(135deg,#ff9f43,#ff5e8a);color:#fff;">🍫 商城</button>
                     <button class="board-btn" onclick="openFavorites()" style="background:linear-gradient(135deg,#fbbf24,#ff5e8a);color:#fff;">❤️ 收藏</button>
@@ -2826,6 +2781,13 @@
                 <button onclick="renderLeaderboard('chocolates')">🍫 巧克力</button>
                 <button onclick="renderLeaderboard('streak')">🔥 连签</button>
                 <button onclick="renderLeaderboard('posts')">📝 发帖</button>
+                <button onclick="renderLeaderboard('games')">🎮 游戏</button>
+            </div>
+            <div id="gameTabs" style="display:none;margin:0 0 10px;gap:6px;flex-wrap:wrap;">
+                <button class="btn-sm active" onclick="renderLeaderboard('game_snake')">🐍 贪吃蛇</button>
+                <button class="btn-sm" onclick="renderLeaderboard('game_memory')">🧠 记忆翻牌</button>
+                <button class="btn-sm" onclick="renderLeaderboard('game_rps')">✂️ 石头剪刀布</button>
+                <button class="btn-sm" onclick="renderLeaderboard('game_reaction')">⚡ 反应测试</button>
             </div>
             <div id="leaderboardList" style="max-height:380px;overflow-y:auto;"><p style="color:var(--text-muted)">加载中...</p></div>
         </div>
@@ -3006,6 +2968,18 @@
 
     <script>
         // ============================================================
+        // JS 结构导航(自上而下,按功能分区维护):
+        //   [01] 全局配置 / 多主题切换 / 工具函数 / 操作说明 / XSS 安全 / 本地缓存
+        //   [02] 网络请求(双层缓存 + 并发去重)与 Supabase 初始化
+        //   [03] 认证: 登录 / 注册 / OAuth / 登出 / 会话
+        //   [04] 社区: UI 更新 / 帖子 / 互动(点赞/推荐/踩) / 收藏 / 评论点赞 / 话题 / 私信 / 通知
+        //   [05] 经济系统: 签到 / 兑换 / 商城 / 关注 / 巧克力 / 装扮装备 / 任务 / 收款码 / 购买记录 / 支付
+        //   [06] 用户与内容: 个人中心 / 在线用户 / Emoji / 右键菜单 / LaTeX / 音乐播放器与上传 / 编辑
+        //   [07] 玩法: 积分流水 / 排行榜 / 签到日历 / 成就 / 幸运转盘
+        //   [08] 小游戏: 贪吃蛇 / 记忆翻牌 / 石头剪刀布 / 反应测试(游戏奖励统一走 awardGameReward)
+        // 约定: 新功能放入对应分区;函数一律使用 function 声明(有提升,定义顺序不影响调用)。
+        // ============================================================
+        // ============================================================
         // 全局配置
         // ============================================================
         const SUPABASE_URL = 'https://bkvsceiezbyexzqpvblj.supabase.co';
@@ -3130,6 +3104,9 @@
                 6: { name: 'Lv.6', signBonus: 12 } }; return m[l] || m[1]; }
 
         function showFeedback() { alert('📮 反馈请发送邮件至：3880374029@qq.com'); }
+        function genTempId() { if (crypto.randomUUID) return crypto.randomUUID(); return 'temp_' + Date.now() + '_' + Math
+                .random().toString(36).substr(2, 9); }
+
 
         // ================== 操作说明(帮助) ==================
         function openHelp() { document.getElementById('helpModal').classList.add('active'); }
@@ -3137,10 +3114,6 @@
         function closeHelp() { document.getElementById('helpModal').classList.remove('active'); }
 
         function showStatus() { alert('✅ 所有功能已就绪'); }
-
-        function genTempId() { if (crypto.randomUUID) return crypto.randomUUID(); return 'temp_' + Date.now() + '_' + Math
-                .random().toString(36).substr(2, 9); }
-
         // ================== XSS 安全修复 ==================
         function parseCustomMarkup(t) {
             if (!t) return '';
@@ -3160,9 +3133,16 @@
         }
 
         // ================== 本地缓存工具 ==================
-        // 基于 localStorage 的 TTL 缓存,用于帖子/话题/评论数等只读数据的秒开
-        // 写操作(发帖/删帖/点赞/评论)后会通过 cacheBust 立即失效,保证数据新鲜
+        // 基于 localStorage + 内存双层 TTL 缓存,用于帖子/话题/评论数等只读数据的秒开
+        // 内存层(memCache)让同一次会话内的重复读取零开销(免 localStorage 读 + JSON.parse)
+        // localStorage 层跨页面复用;写操作(发帖/删帖/点赞/评论)后通过 cacheBust 同时清两层,保证数据新鲜
+        var memCache = new Map();
+
         function cacheGet(key, ttlMs) {
+            // 内存优先:同会话内重复读取零开销
+            var m = memCache.get(key);
+            if (m && Date.now() - m.t <= ttlMs) return m.v;
+            if (m) memCache.delete(key);
             try {
                 var raw = localStorage.getItem('lfc_' + key);
                 if (!raw) return null;
@@ -3171,19 +3151,27 @@
                     localStorage.removeItem('lfc_' + key);
                     return null;
                 }
+                // 命中 localStorage 后提升到内存,后续读取不再反序列化
+                memCache.set(key, obj);
                 return obj.v;
             } catch (e) { return null; }
         }
         function cacheSet(key, val) {
             try {
-                localStorage.setItem('lfc_' + key, JSON.stringify({ t: Date.now(), v: val }));
-            } catch (e) { /* localStorage 满或不可用时静默降级为不缓存 */ }
+                var entry = { t: Date.now(), v: val };
+                memCache.set(key, entry);
+                localStorage.setItem('lfc_' + key, JSON.stringify(entry));
+            } catch (e) { /* localStorage 满或不可用时静默降级为仅内存缓存 */ }
         }
         function cacheBust(key) {
+            memCache.delete(key);
             try { localStorage.removeItem('lfc_' + key); } catch (e) {}
         }
 
         // ================== 网络请求 ==================
+        // 进行中的请求去重:并发调用(fetchPosts 被 loadPosts/refresh 重复触发)复用同一个 Promise,避免重复请求
+        var pendingFetches = {};
+
         async function authFetch(url, opts) {
             var h = opts.headers || {};
             if (accessToken) h['Authorization'] = 'Bearer ' + accessToken;
@@ -3264,15 +3252,20 @@
         }
 
         async function fetchPosts() {
-            // 60 秒缓存,刷新页面秒开;写操作后 cacheBust 即时失效
-            var cached = cacheGet('posts', 60000);
+            if (pendingFetches['posts']) return pendingFetches['posts'];
+            // 5 分钟缓存,刷新页面秒开;写操作后 cacheBust 即时失效,不会展示旧数据
+            var cached = cacheGet('posts', 300000);
             if (cached) return cached;
-            var r = await fetch(SUPABASE_URL + '/rest/v1/posts?order=created_at.desc', {
-                headers: { 'apikey': SUPABASE_ANON_KEY, 'Content-Type': 'application/json' }
-            });
-            var d = await handleResponse(r);
-            if (Array.isArray(d)) cacheSet('posts', d);
-            return d;
+            var p = (async function() {
+                var r = await fetch(SUPABASE_URL + '/rest/v1/posts?order=created_at.desc', {
+                    headers: { 'apikey': SUPABASE_ANON_KEY, 'Content-Type': 'application/json' }
+                });
+                var d = await handleResponse(r);
+                if (Array.isArray(d)) cacheSet('posts', d);
+                return d;
+            })();
+            pendingFetches['posts'] = p;
+            try { return await p; } finally { delete pendingFetches['posts']; }
         }
 
         async function fetchComments(pid) {
@@ -3294,15 +3287,20 @@
         }
 
         async function fetchTopics() {
-            // 10 分钟缓存,话题极少变动
-            var cached = cacheGet('topics', 600000);
+            if (pendingFetches['topics']) return pendingFetches['topics'];
+            // 30 分钟缓存,话题极少变动;创建话题后 cacheBust 即时失效
+            var cached = cacheGet('topics', 1800000);
             if (cached) return cached;
-            var r = await fetch(SUPABASE_URL + '/rest/v1/topics?order=name.asc', {
-                headers: { 'apikey': SUPABASE_ANON_KEY, 'Content-Type': 'application/json' }
-            });
-            var d = await handleResponse(r);
-            if (Array.isArray(d)) cacheSet('topics', d);
-            return d;
+            var p = (async function() {
+                var r = await fetch(SUPABASE_URL + '/rest/v1/topics?order=name.asc', {
+                    headers: { 'apikey': SUPABASE_ANON_KEY, 'Content-Type': 'application/json' }
+                });
+                var d = await handleResponse(r);
+                if (Array.isArray(d)) cacheSet('topics', d);
+                return d;
+            })();
+            pendingFetches['topics'] = p;
+            try { return await p; } finally { delete pendingFetches['topics']; }
         }
 
         async function createTopicAPI(n) {
@@ -3312,24 +3310,29 @@
         }
 
         async function fetchCommentCounts() {
-            // 60 秒缓存;该接口拉取全部评论仅为计数,缓存可避免每次刷新全量传输
-            var cached = cacheGet('comment_counts', 60000);
+            if (pendingFetches['comment_counts']) return pendingFetches['comment_counts'];
+            // 5 分钟缓存;该接口拉取全部评论仅为计数,缓存可避免每次刷新全量传输
+            var cached = cacheGet('comment_counts', 300000);
             if (cached) return cached;
-            try {
-                var r = await fetch(SUPABASE_URL + '/rest/v1/comments?select=post_id', {
-                    headers: { 'apikey': SUPABASE_ANON_KEY, 'Content-Type': 'application/json' }
-                });
-                var d = await handleResponse(r);
-                if (!d || !Array.isArray(d)) return {};
-                var m = {};
-                d.forEach(function(c) { var pid = c.post_id; if (pid) m[pid] = (m[pid] || 0) + 1; });
-                cacheSet('comment_counts', m);
-                return m;
-            } catch (e) {
-                // 并行加载时单点失败不拖垮整个 loadPosts
-                console.warn('加载评论数失败', e);
-                return {};
-            }
+            var p = (async function() {
+                try {
+                    var r = await fetch(SUPABASE_URL + '/rest/v1/comments?select=post_id', {
+                        headers: { 'apikey': SUPABASE_ANON_KEY, 'Content-Type': 'application/json' }
+                    });
+                    var d = await handleResponse(r);
+                    if (!d || !Array.isArray(d)) return {};
+                    var m = {};
+                    d.forEach(function(c) { var pid = c.post_id; if (pid) m[pid] = (m[pid] || 0) + 1; });
+                    cacheSet('comment_counts', m);
+                    return m;
+                } catch (e) {
+                    // 并行加载时单点失败不拖垮整个 loadPosts
+                    console.warn('加载评论数失败', e);
+                    return {};
+                }
+            })();
+            pendingFetches['comment_counts'] = p;
+            try { return await p; } finally { delete pendingFetches['comment_counts']; }
         }
 
         // ============================================================
@@ -3629,10 +3632,32 @@
         }
 
         // ================== 帖子功能 ==================
+        // 标题查重(本地缓存 + 数据库),返回 true 表示标题已被占用;excludeId 用于编辑时排除自身
+        async function isTitleTaken(title, excludeId) {
+            var t = String(title || '').trim();
+            if (!t) return false;
+            var tLow = t.toLowerCase();
+            if (postsCache.some(function(p) {
+                var pt = String(p.title || '').trim().toLowerCase();
+                return pt === tLow && (!excludeId || p.id !== excludeId);
+            })) return true;
+            if (!sb) return false;
+            try {
+                var q = sb.from('posts').select('id').eq('title', t);
+                if (excludeId) q = q.neq('id', excludeId);
+                var r = await q.limit(1);
+                if (r.error) throw r.error;
+                return !!(r.data && r.data.length > 0);
+            } catch (e) {
+                console.warn('标题查重失败,放行(由数据库唯一约束兜底)', e);
+                return false;
+            }
+        }
+
         async function fetchAuthors(posts) {
             if (!posts || posts.length === 0) return;
             var ids = [];
-            posts.forEach(function(p) { if (p.author_id) ids.push(p.author_id); });
+            posts.forEach(function(p) { if (p.author_id && !authorMap[p.author_id]) ids.push(p.author_id); });
             ids = [...new Set(ids)];
             if (ids.length === 0) return;
             try {
@@ -3670,8 +3695,18 @@
                 }
                 if (search && search.trim()) {
                     var s = search.trim().toLowerCase();
-                    posts = posts.filter(function(p) { return p.title.toLowerCase().includes(s) || (p.content && p.content
-                            .toLowerCase().includes(s)); });
+                    if (s.charAt(0) === '#') {
+                        // 标签搜索(#前缀): 按 tags 字段精确匹配,而非在标题/正文里找字面量
+                        var tagName = s.substring(1);
+                        posts = posts.filter(function(p) {
+                            return p.tags && p.tags.split(',').some(function(t) {
+                                return t.trim().toLowerCase() === tagName;
+                            });
+                        });
+                    } else {
+                        posts = posts.filter(function(p) { return p.title.toLowerCase().includes(s) || (p.content && p.content
+                                .toLowerCase().includes(s)); });
+                    }
                 }
                 postsCache = posts;
                 // 并行加载作者/评论数/收藏/用户操作,互不依赖,显著减少首屏等待
@@ -4021,6 +4056,12 @@
             if (now - lastPublishTime < 2000) { showToast('请稍后再发布', true); return; }
             publishLock = true;
             lastPublishTime = now;
+            // 标题唯一性检查:与已有帖子重复则拦截(本地缓存 + 数据库)
+            if (await isTitleTaken(title)) {
+                publishLock = false;
+                showToast('⚠️ 标题已存在，请更换标题', true);
+                return;
+            }
             var tempId = genTempId();
             var newPost = {
                 id: tempId,
@@ -4109,7 +4150,12 @@
                 renderLatex();
             } catch (e) {
                 console.error('发布失败', e);
-                showToast('❌ 发布失败，请重试', true);
+                var dupMsg = e && e.message ? String(e.message) : '';
+                if (/duplicate|23505|unique/i.test(dupMsg)) {
+                    showToast('⚠️ 标题已存在，请更换标题', true);
+                } else {
+                    showToast('❌ 发布失败，请重试', true);
+                }
                 var idx = postsCache.findIndex(function(p) { return p.id === tempId; });
                 if (idx !== -1) postsCache.splice(idx, 1);
                 var rollbackFiltered = postsCache.filter(function(p) {
@@ -4844,6 +4890,72 @@
                 showToast('购买失败', true);
             }
         }
+        function openGiveChocolate(userId, userName) {
+            if (!currentUser) { showToast('请先登录', true); return; }
+            if (userId === currentUser.id) { showToast('不能给自己投巧克力', true); return; }
+            giveTargetId = userId;
+            giveTargetName = userName || '用户';
+            document.getElementById('giveTarget').textContent = '给 ' + giveTargetName + ' 送巧克力';
+            document.getElementById('giveChocolateModal').classList.add('active');
+        }
+
+        function closeGiveChocolate() { document.getElementById('giveChocolateModal').classList.remove('active'); }
+
+        async function doGiveChocolate() {
+            if (!currentUser || !giveTargetId) { showToast('请先登录', true); return; }
+            var count = parseInt(document.getElementById('giveCount').value) || 1;
+            if (count <= 0) { showToast('请输入有效数量', true); return; }
+            if ((userProfile?.chocolates || 0) < count) { showToast('🍫 巧克力不足', true); return; }
+            try {
+                var newSelf = (userProfile?.chocolates || 0) - count;
+                await authFetch(SUPABASE_URL + '/rest/v1/profiles?id=eq.' + encodeURIComponent(currentUser.id), {
+                    method: 'PATCH',
+                    body: JSON.stringify({ chocolates: newSelf })
+                });
+                if (userProfile) userProfile.chocolates = newSelf;
+                var { data: targetProf } = await sb.from('profiles').select('chocolates').eq('id', giveTargetId)
+                    .single();
+                var newTarget = (targetProf?.chocolates || 0) + count;
+                await authFetch(SUPABASE_URL + '/rest/v1/profiles?id=eq.' + encodeURIComponent(giveTargetId), {
+                    method: 'PATCH',
+                    body: JSON.stringify({ chocolates: newTarget })
+                });
+                showToast('🍫 成功送给 ' + giveTargetName + ' ' + count + ' 块巧克力！', false);
+                await checkAchievements();
+                closeGiveChocolate();
+                updateUI();
+                if (currentPostId) await showPost(currentPostId);
+                await updateUserActivity();
+            } catch (e) {
+                console.error('送巧克力失败', e);
+                showToast('操作失败', true);
+            }
+        }
+
+        async function followUser(userId) {
+            if (!currentUser) { showToast('请先登录', true); return; }
+            if (userId === currentUser.id) { showToast('不能关注自己', true); return; }
+            try {
+                if (followingMap.has(userId)) {
+                    await authFetch(SUPABASE_URL + '/rest/v1/follows?follower_id=eq.' + encodeURIComponent(currentUser
+                        .id) + '&following_id=eq.' + encodeURIComponent(userId), { method: 'DELETE' });
+                    followingMap.delete(userId);
+                    showToast('已取消关注', false);
+                } else {
+                    await authFetch(SUPABASE_URL + '/rest/v1/follows', { method: 'POST', body: JSON.stringify({ follower_id: currentUser
+                                .id, following_id: userId }) });
+                    followingMap.set(userId, true);
+                    showToast('关注成功', false);
+                }
+                if (currentPostId) await showPost(currentPostId);
+                updateUI();
+                await updateUserActivity();
+            } catch (e) {
+                console.error('关注操作失败', e);
+                showToast('操作失败', true);
+            }
+        }
+
 
         // ================== 装扮装备系统(数据库) ==================
         // 购买记录 + 装备状态存 inventory_items 表,已装备装扮全站可见
@@ -4971,73 +5083,6 @@
             var eff = nicknameEffect();
             if (eff.className) el.classList.add(eff.className);
         }
-
-        function openGiveChocolate(userId, userName) {
-            if (!currentUser) { showToast('请先登录', true); return; }
-            if (userId === currentUser.id) { showToast('不能给自己投巧克力', true); return; }
-            giveTargetId = userId;
-            giveTargetName = userName || '用户';
-            document.getElementById('giveTarget').textContent = '给 ' + giveTargetName + ' 送巧克力';
-            document.getElementById('giveChocolateModal').classList.add('active');
-        }
-
-        function closeGiveChocolate() { document.getElementById('giveChocolateModal').classList.remove('active'); }
-
-        async function doGiveChocolate() {
-            if (!currentUser || !giveTargetId) { showToast('请先登录', true); return; }
-            var count = parseInt(document.getElementById('giveCount').value) || 1;
-            if (count <= 0) { showToast('请输入有效数量', true); return; }
-            if ((userProfile?.chocolates || 0) < count) { showToast('🍫 巧克力不足', true); return; }
-            try {
-                var newSelf = (userProfile?.chocolates || 0) - count;
-                await authFetch(SUPABASE_URL + '/rest/v1/profiles?id=eq.' + encodeURIComponent(currentUser.id), {
-                    method: 'PATCH',
-                    body: JSON.stringify({ chocolates: newSelf })
-                });
-                if (userProfile) userProfile.chocolates = newSelf;
-                var { data: targetProf } = await sb.from('profiles').select('chocolates').eq('id', giveTargetId)
-                    .single();
-                var newTarget = (targetProf?.chocolates || 0) + count;
-                await authFetch(SUPABASE_URL + '/rest/v1/profiles?id=eq.' + encodeURIComponent(giveTargetId), {
-                    method: 'PATCH',
-                    body: JSON.stringify({ chocolates: newTarget })
-                });
-                showToast('🍫 成功送给 ' + giveTargetName + ' ' + count + ' 块巧克力！', false);
-                await checkAchievements();
-                closeGiveChocolate();
-                updateUI();
-                if (currentPostId) await showPost(currentPostId);
-                await updateUserActivity();
-            } catch (e) {
-                console.error('送巧克力失败', e);
-                showToast('操作失败', true);
-            }
-        }
-
-        async function followUser(userId) {
-            if (!currentUser) { showToast('请先登录', true); return; }
-            if (userId === currentUser.id) { showToast('不能关注自己', true); return; }
-            try {
-                if (followingMap.has(userId)) {
-                    await authFetch(SUPABASE_URL + '/rest/v1/follows?follower_id=eq.' + encodeURIComponent(currentUser
-                        .id) + '&following_id=eq.' + encodeURIComponent(userId), { method: 'DELETE' });
-                    followingMap.delete(userId);
-                    showToast('已取消关注', false);
-                } else {
-                    await authFetch(SUPABASE_URL + '/rest/v1/follows', { method: 'POST', body: JSON.stringify({ follower_id: currentUser
-                                .id, following_id: userId }) });
-                    followingMap.set(userId, true);
-                    showToast('关注成功', false);
-                }
-                if (currentPostId) await showPost(currentPostId);
-                updateUI();
-                await updateUserActivity();
-            } catch (e) {
-                console.error('关注操作失败', e);
-                showToast('操作失败', true);
-            }
-        }
-
         // ================== 任务 ==================
         async function getTasks(userId) {
             var today = new Date().toISOString().split('T')[0];
@@ -5417,11 +5462,6 @@
                 console.error('Stripe 支付失败:', e);
                 showToast('支付启动失败: ' + e.message, true);
             }
-        }
-
-        function openPayment() {
-            if (!currentUser) { showToast('请先登录', true); return; }
-            showToast('💳 支付功能正在升级，敬请期待', false);
         }
 
         function closePayment() { document.getElementById('paymentModal').classList.remove('active'); }
@@ -5820,6 +5860,11 @@
             var content = document.getElementById('editContent').value.trim();
             if (!title) { showToast('标题不能为空', true); return; }
             if (!content) { showToast('内容不能为空', true); return; }
+            // 标题唯一性检查:改标题时排除当前帖子自身
+            if (await isTitleTaken(title, postId)) {
+                showToast('⚠️ 标题已存在，请更换标题', true);
+                return;
+            }
             try {
                 await authFetch(SUPABASE_URL + '/rest/v1/posts?id=eq.' + encodeURIComponent(postId), {
                     method: 'PATCH',
@@ -5932,9 +5977,21 @@
         async function renderLeaderboard(type) {
             var el = document.getElementById('leaderboardList');
             if (!el) return;
+            // 「🎮 游戏」页签默认展示贪吃蛇榜
+            if (type === 'games') type = 'game_snake';
+            var isGame = type.indexOf('game_') === 0;
+            var gameTabs = document.getElementById('gameTabs');
+            if (gameTabs) gameTabs.style.display = isGame ? 'flex' : 'none';
             document.querySelectorAll('.lb-tabs button').forEach(function(b) {
-                b.classList.toggle('active', b.getAttribute('onclick') === "renderLeaderboard('" + type + "')");
+                var target = b.getAttribute('onclick');
+                b.classList.toggle('active', target === "renderLeaderboard('" + type + "')" ||
+                    (isGame && target === "renderLeaderboard('games')"));
             });
+            if (gameTabs) {
+                document.querySelectorAll('#gameTabs .btn-sm').forEach(function(b) {
+                    b.classList.toggle('active', b.getAttribute('onclick') === "renderLeaderboard('" + type + "')");
+                });
+            }
             el.innerHTML = '<p style="color:var(--text-muted)">加载中...</p>';
             try {
                 if (!sb) await initSupabase();
@@ -5960,6 +6017,21 @@
                             id: e[0]
                         };
                     });
+                } else if (isGame) {
+                    // 游戏榜:调用数据库 get_game_leaderboard(近 7 天)
+                    var { data: gd, error: gerr } = await sb.rpc('get_game_leaderboard', {
+                        p_game_type: type.slice(5),
+                        p_days: 7
+                    });
+                    if (gerr) throw gerr;
+                    rows = (gd || []).map(function(r) {
+                        return {
+                            name: r.username || '神秘用户',
+                            avatar: r.avatar_url || getAvatarUrl({ username: r.username || 'U' }),
+                            value: r.score,
+                            id: r.user_id
+                        };
+                    });
                 } else {
                     var orderField = { points: 'points', chocolates: 'chocolates', streak: 'streak' }[type] || 'points';
                     var { data: profs } = await sb.from('profiles')
@@ -5970,7 +6042,9 @@
                     });
                 }
                 if (rows.length === 0) { el.innerHTML = '<p style="color:var(--text-muted)">暂无数据</p>'; return; }
-                var suffix = type === 'points' ? ' ⭐' : type === 'chocolates' ? ' 🍫' : type === 'streak' ? ' 🔥' : ' 📝';
+                var suffix = type === 'points' ? ' ⭐' : type === 'chocolates' ? ' 🍫' : type === 'streak' ? ' 🔥' :
+                    type === 'game_snake' ? ' 分' : type === 'game_memory' ? ' 秒' : type === 'game_rps' ? ' 胜' :
+                    type === 'game_reaction' ? ' ms' : ' 📝';
                 var medals = ['🥇', '🥈', '🥉'];
                 el.innerHTML = rows.map(function(r, i) {
                     var rank = i + 1;
@@ -6110,7 +6184,7 @@
                     likesReceived = (myP || []).reduce(function(s, p) { return s + (p.likes || 0); }, 0);
                 }
                 var { count: myComments } = await sb.from('comments').select('id', { count: 'exact', head: true })
-                    .eq('user_id', currentUser.id);
+                    .eq('author_id', currentUser.id);
                 var { count: followers } = await sb.from('follows').select('id', { count: 'exact', head: true })
                     .eq('following_id', currentUser.id);
                 var { count: lotteryCount } = await sb.from('lottery_records')
