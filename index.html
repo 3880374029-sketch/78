@@ -2967,6 +2967,8 @@
     </div>
 
     <script>
+        // 版本标记: 用于确认页面加载的是否为最新代码(游戏成绩 rpc 参数修复版)
+        console.log('%c✅ 论坛版本 2026-08-06(游戏成绩修复版 p_game_type/p_score)', 'color:#22c55e;font-weight:bold');
         // ============================================================
         // JS 结构导航(自上而下,按功能分区维护):
         //   [01] 全局配置 / 多主题切换 / 工具函数 / 操作说明 / XSS 安全 / 本地缓存
@@ -6416,7 +6418,8 @@
             if (!currentUser || !sb) return { awarded: false, points: 0, message: '未登录' };
             try {
                 // supabase-js v2 的 rpc 返回 { data, error },data 才是函数返回值
-                var { data: res, error } = await sb.rpc('award_game_reward', { game_type: gameType, score: score });
+                // 参数名必须与 SQL 函数签名一致(p_game_type/p_score),否则 PostgREST 按名传参会失败
+                var { data: res, error } = await sb.rpc('award_game_reward', { p_game_type: gameType, p_score: score });
                 if (error) {
                     console.warn('游戏奖励 RPC 错误', error);
                     return getLocalGameReward(gameType, score);
@@ -6427,7 +6430,8 @@
                     showToast('🎉 ' + res.message + '（' + res.tier + '）', false);
                     return { awarded: true, points: res.points, message: res.message };
                 } else if (res) {
-                    showToast('⚠️ ' + res.message, true);
+                    // 成绩已记录;未达标不发奖(静默,不打扰玩家)
+                    if (res.message !== '成绩未达标') showToast('⚠️ ' + res.message, true);
                     return { awarded: false, points: 0, message: res.message };
                 }
             } catch (e) {
@@ -6526,9 +6530,8 @@
             document.getElementById('snakeOverlayTitle').textContent = '游戏结束 · 得分 ' + snake.score;
             document.getElementById('snakeStartBtn').textContent = '🔄 再来一局';
             ov.classList.remove('hidden');
-            if (snake.score >= 10) {
-                await awardGameReward('snake', snake.score);
-            }
+            // 成绩上报(无论是否达标都入库,未达标仅记录不发奖;达标/发奖由数据库判定)
+            await awardGameReward('snake', snake.score);
         }
         function snakeTick() {
             if (!snake.running || snake.over) return;
@@ -6691,9 +6694,8 @@
                 memRenderBest();
             }
             showToast('🎉 记忆翻牌完成！用时 ' + mem.seconds + 's，步数 ' + mem.moves, false);
-            if (mem.seconds <= 40) {
-                await awardGameReward('memory', mem.seconds);
-            }
+            // 成绩上报(无论是否达标都入库,未达标仅记录不发奖)
+            await awardGameReward('memory', mem.seconds);
         }
         function openMemory() {
             if (!currentUser) { showToast('请先登录', true); return; }
@@ -6808,9 +6810,8 @@
                     var avg = Math.round(rx.times.reduce(function(s, t) { return s + t; }, 0) / rx.times.length);
                     var extra = ms <= 200 ? '（其中一次超快！）' : '';
                     document.getElementById('rxResult').textContent = '🎯 平均反应 ' + avg + 'ms' + extra;
-                    if (avg <= 400) {
-                        await awardGameReward('reaction', avg);
-                    }
+                    // 成绩上报(无论是否达标都入库,未达标仅记录不发奖)
+                    await awardGameReward('reaction', avg);
                     rx.times = [];
                     document.getElementById('rxCount').textContent = '0/3';
                     document.getElementById('rxLast').textContent = '--';
