@@ -3134,42 +3134,6 @@
             return DOMPurify.sanitize(r);
         }
 
-        // ================== 本地缓存工具 ==================
-        // 基于 localStorage + 内存双层 TTL 缓存,用于帖子/话题/评论数等只读数据的秒开
-        // 内存层(memCache)让同一次会话内的重复读取零开销(免 localStorage 读 + JSON.parse)
-        // localStorage 层跨页面复用;写操作(发帖/删帖/点赞/评论)后通过 cacheBust 同时清两层,保证数据新鲜
-        var memCache = new Map();
-
-        function cacheGet(key, ttlMs) {
-            // 内存优先:同会话内重复读取零开销
-            var m = memCache.get(key);
-            if (m && Date.now() - m.t <= ttlMs) return m.v;
-            if (m) memCache.delete(key);
-            try {
-                var raw = localStorage.getItem('lfc_' + key);
-                if (!raw) return null;
-                var obj = JSON.parse(raw);
-                if (!obj || !obj.t || Date.now() - obj.t > ttlMs) {
-                    localStorage.removeItem('lfc_' + key);
-                    return null;
-                }
-                // 命中 localStorage 后提升到内存,后续读取不再反序列化
-                memCache.set(key, obj);
-                return obj.v;
-            } catch (e) { return null; }
-        }
-        function cacheSet(key, val) {
-            try {
-                var entry = { t: Date.now(), v: val };
-                memCache.set(key, entry);
-                localStorage.setItem('lfc_' + key, JSON.stringify(entry));
-            } catch (e) { /* localStorage 满或不可用时静默降级为仅内存缓存 */ }
-        }
-        function cacheBust(key) {
-            memCache.delete(key);
-            try { localStorage.removeItem('lfc_' + key); } catch (e) {}
-        }
-
         // ================== 网络请求 ==================
         // 进行中的请求去重:并发调用(fetchPosts 被 loadPosts/refresh 重复触发)复用同一个 Promise,避免重复请求
         var pendingFetches = {};
@@ -3255,16 +3219,12 @@
 
         async function fetchPosts() {
             if (pendingFetches['posts']) return pendingFetches['posts'];
-            // 5 分钟缓存,刷新页面秒开;写操作后 cacheBust 即时失效,不会展示旧数据
-            var cached = cacheGet('posts', 300000);
-            if (cached) return cached;
+            // 实时拉取,不做本地缓存(帖子会实时新增/编辑/删除)
             var p = (async function() {
                 var r = await fetch(SUPABASE_URL + '/rest/v1/posts?order=created_at.desc', {
                     headers: { 'apikey': SUPABASE_ANON_KEY, 'Content-Type': 'application/json' }
                 });
-                var d = await handleResponse(r);
-                if (Array.isArray(d)) cacheSet('posts', d);
-                return d;
+                return await handleResponse(r);
             })();
             pendingFetches['posts'] = p;
             try { return await p; } finally { delete pendingFetches['posts']; }
@@ -3290,16 +3250,12 @@
 
         async function fetchTopics() {
             if (pendingFetches['topics']) return pendingFetches['topics'];
-            // 30 分钟缓存,话题极少变动;创建话题后 cacheBust 即时失效
-            var cached = cacheGet('topics', 1800000);
-            if (cached) return cached;
+            // 实时拉取,不做本地缓存(创建话题后立即可见)
             var p = (async function() {
                 var r = await fetch(SUPABASE_URL + '/rest/v1/topics?order=name.asc', {
                     headers: { 'apikey': SUPABASE_ANON_KEY, 'Content-Type': 'application/json' }
                 });
-                var d = await handleResponse(r);
-                if (Array.isArray(d)) cacheSet('topics', d);
-                return d;
+                return await handleResponse(r);
             })();
             pendingFetches['topics'] = p;
             try { return await p; } finally { delete pendingFetches['topics']; }
@@ -3313,9 +3269,7 @@
 
         async function fetchCommentCounts() {
             if (pendingFetches['comment_counts']) return pendingFetches['comment_counts'];
-            // 5 分钟缓存;该接口拉取全部评论仅为计数,缓存可避免每次刷新全量传输
-            var cached = cacheGet('comment_counts', 300000);
-            if (cached) return cached;
+            // 实时拉取,不做本地缓存(评论数实时变化)
             var p = (async function() {
                 try {
                     var r = await fetch(SUPABASE_URL + '/rest/v1/comments?select=post_id', {
@@ -3325,7 +3279,6 @@
                     if (!d || !Array.isArray(d)) return {};
                     var m = {};
                     d.forEach(function(c) { var pid = c.post_id; if (pid) m[pid] = (m[pid] || 0) + 1; });
-                    cacheSet('comment_counts', m);
                     return m;
                 } catch (e) {
                     // 并行加载时单点失败不拖垮整个 loadPosts
@@ -3553,10 +3506,7 @@
             localStorage.removeItem('sb_token');
             localStorage.removeItem('sb_refresh_token');
             localStorage.removeItem('sb_user');
-            // 清理本地数据缓存,防止内容与账号维度挂钩(当前为匿名公共数据,预防性清理)
-            cacheBust('posts');
-            cacheBust('topics');
-            cacheBust('comment_counts');
+            // (本地读缓存已移除,无需清理)
             if (sb) sb.auth.signOut();
             followingMap.clear();
             favoriteMap.clear();
@@ -3891,12 +3841,9 @@
                     method: 'PATCH',
                     body: JSON.stringify({ views: currentViews + 1 })
                 });
-                // 本地同步浏览量,避免 bust 整份缓存
-                var cachedPosts = cacheGet('posts', 60000);
-                if (Array.isArray(cachedPosts)) {
-                    var cpi = cachedPosts.findIndex(function(p) { return p.id == postId; });
-                    if (cpi !== -1) { cachedPosts[cpi].views = currentViews + 1; cacheSet('posts', cachedPosts); }
-                }
+                // 本地同步浏览量(直接更新内存中的 postsCache,不依赖缓存)
+                var cpi = postsCache.findIndex(function(p) { return p.id == postId; });
+                if (cpi !== -1) postsCache[cpi].views = currentViews + 1;
                 var posts = await fetchPosts();
                 var post = posts.find(function(p) { return p.id == postId; });
                 if (!post) { showToast('帖子不存在', true); return; }
@@ -4116,8 +4063,6 @@
                     created_at: new Date().toISOString()
                 };
                 var result = await createPost(data);
-                cacheBust('posts');
-                cacheBust('comment_counts');
                 var realPost = result && result.length > 0 ? result[0] : null;
                 if (realPost) {
                     var idx = postsCache.findIndex(function(p) { return p.id === tempId; });
@@ -4231,7 +4176,6 @@
                     created_at: new Date().toISOString()
                 };
                 await createComment(data);
-                cacheBust('comment_counts');
                 await showPost(postId);
                 await updateTaskProgress(currentUser.id, 'daily_comment', 1);
                 await checkAchievements();
@@ -4335,7 +4279,6 @@
                     method: 'PATCH',
                     body: JSON.stringify({ likes: newLikes, recommends: newRecommends, downvotes: newDownvotes })
                 });
-                cacheBust('posts');
                 // 强制刷新视图
                 if (currentPostId === postId) {
                     await showPost(postId);
@@ -4554,7 +4497,6 @@
             if (!name) { showToast('请输入话题名称', true); return; }
             try {
                 await createTopicAPI(name);
-                cacheBust('topics');
                 showToast('✅ 话题创建成功', false);
                 document.getElementById('topicNameInput').value = '';
                 closeTopicModal();
@@ -5872,7 +5814,6 @@
                     method: 'PATCH',
                     body: JSON.stringify({ title: title, content: content })
                 });
-                cacheBust('posts');
                 showToast('✅ 帖子已更新', false);
                 cancelEdit();
                 await showPost(postId);
@@ -5891,8 +5832,6 @@
                 await authFetch(SUPABASE_URL + '/rest/v1/comments?post_id=eq.' + encodeURIComponent(postId), { method: 'DELETE' });
                 await authFetch(SUPABASE_URL + '/rest/v1/favorites?post_id=eq.' + encodeURIComponent(postId), { method: 'DELETE' });
                 await authFetch(SUPABASE_URL + '/rest/v1/posts?id=eq.' + encodeURIComponent(postId), { method: 'DELETE' });
-                cacheBust('posts');
-                cacheBust('comment_counts');
                 showToast('🗑️ 帖子已删除', false);
                 document.getElementById('postDetail').style.display = 'none';
                 document.getElementById('postList').style.display = 'block';
@@ -6418,8 +6357,8 @@
             if (!currentUser || !sb) return { awarded: false, points: 0, message: '未登录' };
             try {
                 // supabase-js v2 的 rpc 返回 { data, error },data 才是函数返回值
-                // 参数名必须与 SQL 函数签名一致(p_game_type/p_score),否则 PostgREST 按名传参会失败
-                var { data: res, error } = await sb.rpc('award_game_reward', { p_game_type: gameType, p_score: score });
+                // 参数名必须与 SQL 函数签名一致(game_type/score),否则 PostgREST 按名传参会 404
+                var { data: res, error } = await sb.rpc('award_game_reward', { game_type: gameType, score: score });
                 if (error) {
                     console.warn('游戏奖励 RPC 错误', error);
                     return getLocalGameReward(gameType, score);
