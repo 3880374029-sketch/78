@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>窍某论坛 · 完整最终版</title>
-    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E💬%3C/text%3E%3C/svg%3E">
+    <link rel="icon" type="image/png" href="favicon.png">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400;500;600;700&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
@@ -2269,7 +2269,7 @@
                 </div>
                 <!-- 发布表单 -->
                 <div class="publish-form" id="publishForm">
-                    <select id="publishCategory"><option value="tech">技术</option><option value="life">生活</option><option value="career">职业</option><option value="topic">话题</option></select>
+                    <select id="publishCategory"><option value="tech">技术</option><option value="life">生活</option><option value="career">职业</option><option value="topic">话题</option></select><select id="publishTopic" title="投稿到具体话题（选填）"><option value="">话题（选填）</option></select>
                     <input id="publishTitle" placeholder="标题" maxlength="100">
                     <div class="input-wrapper">
                         <textarea id="publishContent" placeholder="内容（支持LaTeX $...$，@用户名）" rows="5"></textarea>
@@ -2508,6 +2508,8 @@
 
     <div class="context-menu" id="contextMenu">
         <div class="menu-item" onclick="handleReplyToPost()">回应此帖</div>
+        <div class="menu-item" onclick="copyPostContent()">📄 复制帖子内容</div>
+        <div class="menu-item" onclick="copyPostLink()">🔗 复制帖子链接</div>
     </div>
 
     <div class="modal" id="playlistModal">
@@ -3009,7 +3011,8 @@
         var actionLocks = new Set(),
             authorMap = {},
             currentPostId = null,
-            currentEditingPost = null;
+            currentEditingPost = null,
+            currentContextPostId = null;
         var publishLock = false,
             lastPublishTime = 0,
             currentView = 'list';
@@ -3406,6 +3409,28 @@
                     }
                 }, 10000);
             }
+            var hashMatch = location.hash.match(/^#post-(.+)$/);
+            if (hashMatch) {
+                var postIdFromHash = decodeURIComponent(hashMatch[1]);
+                var hashTries = 0;
+                var openTimer = setInterval(function() {
+                    if (sbReady) {
+                        clearInterval(openTimer);
+                        showPost(postIdFromHash);
+                    } else if (++hashTries >= 50) {
+                        clearInterval(openTimer);
+                    }
+                }, 200);
+            }
+        });
+
+        var hashOpenTimer = null;
+        window.addEventListener('hashchange', function() {
+            var m = location.hash.match(/^#post-(.+)$/);
+            if (m) {
+                clearTimeout(hashOpenTimer);
+                hashOpenTimer = setTimeout(function() { showPost(decodeURIComponent(m[1])); }, 150);
+            }
         });
 
         // ================== 认证相关 ==================
@@ -3644,7 +3669,12 @@
             try {
                 var posts = await fetchPosts();
                 if (category && category !== 'all') {
-                    posts = posts.filter(function(p) { return p.category === category; });
+                    if (category.indexOf('topic_') === 0) {
+                        var topicIdFilter = category.substring(6);
+                        posts = posts.filter(function(p) { return String(p.topic_id) === String(topicIdFilter); });
+                    } else {
+                        posts = posts.filter(function(p) { return p.category === category; });
+                    }
                 }
                 if (search && search.trim()) {
                     var s = search.trim().toLowerCase();
@@ -3734,6 +3764,7 @@
                     '<span>' + escapeHtml(formatTime(post.created_at)) + '</span>' +
                     '<span class="badge ' + escapeHtml(post.category || 'tech') + '">' + escapeHtml(catName) +
                     '</span>' +
+                    (topicNameFor(post) ? '<span class="badge" style="cursor:pointer;" title="点击筛选此话题" onclick="setCategory(\'topic_' + escapeHtml(escapeJsString(post.topic_id)) + '\')">#' + escapeHtml(topicNameFor(post)) + '</span>' : '') +
                     tagsHtml +
                     '</div>' +
                     '<div class="post-excerpt">' + escapeHtml(excerpt) + (excerpt.length >= 120 ? '...' : '') +
@@ -3849,6 +3880,7 @@
                 var post = posts.find(function(p) { return p.id == postId; });
                 if (!post) { showToast('帖子不存在', true); return; }
                 currentPostId = postId;
+                try { history.replaceState(null, '', '#post-' + encodeURIComponent(postId)); } catch (e) {}
                 document.getElementById('postList').style.display = 'none';
                 document.getElementById('postDetail').style.display = 'block';
                 var comments = await fetchComments(postId);
@@ -3907,6 +3939,7 @@
                 '<span class="post-time">' + escapeHtml(formatTime(post.created_at)) + '</span>' +
                 '<span class="badge ' + escapeHtml(post.category || 'tech') + '">' + escapeHtml(catName) +
                 '</span>' +
+                (topicNameFor(post) ? '<span class="badge" style="cursor:pointer;" title="点击筛选此话题" onclick="setCategory(\'topic_' + escapeHtml(escapeJsString(post.topic_id)) + '\')">#' + escapeHtml(topicNameFor(post)) + '</span>' : '') +
                 tagsHtml +
                 (isAuthor ? '<span style="color:var(--warning);font-size:.7rem;">✏️ 作者</span>' : '') +
                 '</div>' +
@@ -3938,6 +3971,10 @@
                     '') +
                 '</div>' +
                 '<div class="edit-area" id="editArea" style="display:none;">' +
+                '<select id="editCategory" style="margin-bottom:8px;">' +
+                '<option value="tech">技术</option><option value="life">生活</option><option value="career">职业</option><option value="topic">话题</option>' +
+                '</select>' +
+                '<select id="editTopic" style="margin-bottom:8px;"></select>' +
                 '<input id="editTitle" placeholder="标题" maxlength="100" style="margin-bottom:8px;" value="' +
                 escapeHtml(post.title) + '">' +
                 '<textarea id="editContent" placeholder="内容" rows="5" style="margin-bottom:8px;">' + escapeHtml(
@@ -3990,7 +4027,24 @@
             document.getElementById('postDetail').style.display = 'none';
             document.getElementById('postList').style.display = 'block';
             currentPostId = null;
+            try { if (location.hash.indexOf('#post-') === 0) history.replaceState(null, '', location.pathname + location.search); } catch (e) {}
             loadPosts(currentCategory, currentSearch);
+        }
+
+        function matchesCurrentView(p) {
+            if (currentCategory !== 'all') {
+                if (currentCategory.indexOf('topic_') === 0) {
+                    var tid = currentCategory.substring(6);
+                    if (String(p.topic_id) !== String(tid)) return false;
+                } else if (p.category !== currentCategory) {
+                    return false;
+                }
+            }
+            if (currentSearch.trim()) {
+                var s = currentSearch.trim().toLowerCase();
+                if (!p.title.toLowerCase().includes(s) && !(p.content && p.content.toLowerCase().includes(s))) return false;
+            }
+            return true;
         }
 
         async function publishPost() {
@@ -3998,6 +4052,7 @@
             var title = document.getElementById('publishTitle').value.trim();
             var content = document.getElementById('publishContent').value.trim();
             var category = document.getElementById('publishCategory').value;
+            var topicId = document.getElementById('publishTopic') ? document.getElementById('publishTopic').value : '';
             var tags = document.getElementById('publishTags').value.trim();
             if (!title) { showToast('请输入标题', true); return; }
             if (!content) { showToast('请输入内容', true); return; }
@@ -4018,6 +4073,7 @@
                 title: title,
                 content: content,
                 category: category,
+                topic_id: topicId || null,
                 author_id: currentUser.id,
                 author_name: userProfile?.username || '匿名',
                 author_avatar: userProfile?.avatar_url || null,
@@ -4034,21 +4090,15 @@
                 _syncing: true
             };
             postsCache.unshift(newPost);
-            var currentFiltered = postsCache.filter(function(p) {
-                if (currentCategory !== 'all' && p.category !== currentCategory) return false;
-                if (currentSearch.trim()) {
-                    var s = currentSearch.trim().toLowerCase();
-                    if (!p.title.toLowerCase().includes(s) && !(p.content && p.content.toLowerCase().includes(
-                        s))) return false;
-                }
-                return true;
-            });
+            var currentFiltered = postsCache.filter(matchesCurrentView);
             renderPosts(currentFiltered);
             updateStats(postsCache);
             document.getElementById('publishForm').style.display = 'none';
             document.getElementById('publishTitle').value = '';
             document.getElementById('publishContent').value = '';
             document.getElementById('publishTags').value = '';
+            var pubTopicSel = document.getElementById('publishTopic');
+            if (pubTopicSel) pubTopicSel.value = '';
             showToast('📤 发布中...', false);
             await processMentions(content, currentUser.id, tempId, 'post');
             try {
@@ -4056,6 +4106,7 @@
                     title: title,
                     content: content,
                     category: category,
+                    topic_id: topicId || null,
                     author_id: currentUser.id,
                     author_name: userProfile?.username || '匿名',
                     author_avatar: userProfile?.avatar_url || null,
@@ -4085,15 +4136,7 @@
                 await checkAchievements();
                 showToast('✅ 发布成功', false);
                 updateStats(postsCache);
-                var finalFiltered = postsCache.filter(function(p) {
-                    if (currentCategory !== 'all' && p.category !== currentCategory) return false;
-                    if (currentSearch.trim()) {
-                        var s = currentSearch.trim().toLowerCase();
-                        if (!p.title.toLowerCase().includes(s) && !(p.content && p.content.toLowerCase()
-                            .includes(s))) return false;
-                    }
-                    return true;
-                });
+                var finalFiltered = postsCache.filter(matchesCurrentView);
                 renderPosts(finalFiltered);
                 renderLatex();
             } catch (e) {
@@ -4106,15 +4149,7 @@
                 }
                 var idx = postsCache.findIndex(function(p) { return p.id === tempId; });
                 if (idx !== -1) postsCache.splice(idx, 1);
-                var rollbackFiltered = postsCache.filter(function(p) {
-                    if (currentCategory !== 'all' && p.category !== currentCategory) return false;
-                    if (currentSearch.trim()) {
-                        var s = currentSearch.trim().toLowerCase();
-                        if (!p.title.toLowerCase().includes(s) && !(p.content && p.content.toLowerCase()
-                            .includes(s))) return false;
-                    }
-                    return true;
-                });
+                var rollbackFiltered = postsCache.filter(matchesCurrentView);
                 renderPosts(rollbackFiltered);
                 updateStats(postsCache);
                 document.getElementById('publishForm').style.display = 'block';
@@ -4412,24 +4447,52 @@
         }
 
         // ================== 话题 ==================
+        function fillTopicSelect(selectId, selectedId) {
+            var sel = document.getElementById(selectId);
+            if (!sel) return;
+            var html = '<option value="">（无）</option>';
+            var matched = false;
+            (topicsCache || []).forEach(function(t) {
+                var val = escapeHtml(String(t.id));
+                if (selectedId && String(t.id) === String(selectedId)) matched = true;
+                html += '<option value="' + val + '"' + (selectedId && String(t.id) === String(selectedId) ? ' selected' : '') + '>' + escapeHtml(t.name) + '</option>';
+            });
+            if (selectedId && !matched) {
+                html += '<option value="' + escapeHtml(String(selectedId)) + '" selected>（原话题已不存在）</option>';
+            }
+            sel.innerHTML = html;
+        }
+
+        function refreshTopicSelects() {
+            fillTopicSelect('publishTopic');
+            fillTopicSelect('editTopic');
+        }
+
+        function topicNameFor(post) {
+            if (!post || !post.topic_id) return '';
+            var t = (topicsCache || []).find(function(t) { return String(t.id) === String(post.topic_id); });
+            return t ? t.name : '';
+        }
+
         async function loadTopics() {
             try {
                 var topics = await fetchTopics();
                 topicsCache = topics;
                 var nav = document.querySelector('.board-nav');
-                var existing = nav.querySelectorAll('.board-btn[data-category="topic"]');
-                for (var i = 1; i < existing.length; i++) existing[i].remove();
+                nav.querySelectorAll('.board-btn[data-category^="topic_"]').forEach(function(b) { b.remove(); });
                 var topicBtn = nav.querySelector('.board-btn[data-category="topic"]');
                 if (topicBtn) {
+                    var insertRef = topicBtn.nextSibling;
                     topics.forEach(function(t) {
                         var btn = document.createElement('button');
                         btn.className = 'board-btn';
                         btn.dataset.category = 'topic_' + t.id;
                         btn.textContent = '#' + t.name;
                         btn.onclick = function() { setCategory('topic_' + t.id); };
-                        nav.insertBefore(btn, topicBtn.nextSibling);
+                        nav.insertBefore(btn, insertRef);
                     });
                 }
+                refreshTopicSelects();
             } catch (e) { console.warn('加载话题失败', e); }
         }
 
@@ -4446,9 +4509,8 @@
             });
             var cat = category;
             if (category.startsWith('topic_')) {
-                var id = category.replace('topic_', '');
-                var topic = topicsCache.find(function(t) { return t.id == id; });
-                if (topic) { loadPosts('all', topic.name); return; }
+                loadPosts(category, currentSearch);
+                return;
             }
             loadPosts(cat, currentSearch);
         }
@@ -5711,6 +5773,55 @@
             }
         }
 
+        function currentContextPost() {
+            if (currentEditingPost) return currentEditingPost;
+            var id = currentContextPostId || currentPostId;
+            if (!id) return null;
+            return postsCache.find(function(p) { return String(p.id) === String(id); }) || null;
+        }
+
+        function copyToClipboard(text, okMsg) {
+            if (!text) { showToast('没有可复制的内容', true); return; }
+            function done() { showToast(okMsg || '✅ 已复制', false); }
+            function fallback() {
+                var ta = document.createElement('textarea');
+                ta.value = text;
+                ta.style.position = 'fixed';
+                ta.style.opacity = '0';
+                document.body.appendChild(ta);
+                ta.select();
+                try {
+                    document.execCommand('copy');
+                    done();
+                } catch (e) {
+                    showToast('复制失败: ' + e.message, true);
+                }
+                document.body.removeChild(ta);
+            }
+            if (navigator.clipboard && navigator.clipboard.writeText) {
+                navigator.clipboard.writeText(text).then(done).catch(fallback);
+            } else {
+                fallback();
+            }
+        }
+
+        function copyPostContent() {
+            var post = currentContextPost();
+            if (!post) { showToast('无法获取帖子内容', true); return; }
+            var displayName = authorMap[post.author_id] || post.author_name || '';
+            var text = '【' + (post.title || '') + '】\n' +
+                (displayName ? '作者：' + displayName + '\n' : '') +
+                (post.content || '');
+            copyToClipboard(text, '✅ 帖子内容已复制');
+        }
+
+        function copyPostLink() {
+            var post = currentContextPost();
+            if (!post) { showToast('无法获取帖子链接', true); return; }
+            var url = location.origin + location.pathname + '#post-' + encodeURIComponent(post.id);
+            copyToClipboard(url, '✅ 帖子链接已复制');
+        }
+
         document.addEventListener('contextmenu', function(e) {
             var postDetail = document.getElementById('postDetail');
             if (postDetail && postDetail.style.display !== 'none') {
@@ -5779,7 +5890,11 @@
                 editArea = document.createElement('div');
                 editArea.className = 'edit-area';
                 editArea.id = 'editArea';
-                editArea.innerHTML = '<input id="editTitle" placeholder="标题" maxlength="100" style="margin-bottom:8px;">' +
+                editArea.innerHTML = '<select id="editCategory" style="margin-bottom:8px;">' +
+                    '<option value="tech">技术</option><option value="life">生活</option><option value="career">职业</option><option value="topic">话题</option>' +
+                    '</select>' +
+                    '<select id="editTopic" style="margin-bottom:8px;"></select>' +
+                    '<input id="editTitle" placeholder="标题" maxlength="100" style="margin-bottom:8px;">' +
                     '<textarea id="editContent" placeholder="内容" rows="5" style="margin-bottom:8px;"></textarea>' +
                     '<button class="btn btn-success" onclick="saveEdit()">💾 保存</button>' +
                     '<button class="btn btn-outline" onclick="cancelEdit()">取消</button>' +
@@ -5788,6 +5903,11 @@
             }
             document.getElementById('editTitle').value = post.title || '';
             document.getElementById('editContent').value = post.content || '';
+            var editCatSel = document.getElementById('editCategory');
+            if (editCatSel) {
+                editCatSel.value = (post.category && ['tech', 'life', 'career', 'topic'].indexOf(post.category) !== -1) ? post.category : 'tech';
+            }
+            fillTopicSelect('editTopic', post.topic_id);
             editArea.style.display = 'block';
             editArea.dataset.postId = post.id;
         }
@@ -5810,10 +5930,14 @@
                 showToast('⚠️ 标题已存在，请更换标题', true);
                 return;
             }
+            var editCatSel = document.getElementById('editCategory');
+            var category = editCatSel ? editCatSel.value : 'tech';
+            var editTopicSel = document.getElementById('editTopic');
+            var topicId = editTopicSel ? editTopicSel.value : '';
             try {
                 await authFetch(SUPABASE_URL + '/rest/v1/posts?id=eq.' + encodeURIComponent(postId), {
                     method: 'PATCH',
-                    body: JSON.stringify({ title: title, content: content })
+                    body: JSON.stringify({ title: title, content: content, category: category, topic_id: topicId || null })
                 });
                 showToast('✅ 帖子已更新', false);
                 cancelEdit();
