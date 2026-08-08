@@ -2865,6 +2865,7 @@
                 <span>得分 <strong id="snakeScore" style="color:var(--accent);">0</strong></span>
                 <span>最高 <strong id="snakeBest" style="color:var(--warning);">0</strong></span>
             </div>
+            <div style="text-align:center;margin-bottom:10px;"><button class="btn btn-outline" onclick="openSnakePvp()">⚔️ 联机对战</button></div>
             <div class="snake-wrap">
                 <canvas id="snakeCanvas" width="320" height="320"></canvas>
                 <div class="snake-overlay" id="snakeOverlay">
@@ -2875,6 +2876,48 @@
             <div class="snake-pad">
                 <div></div><button class="pad-btn" data-dir="up">▲</button><div></div>
                 <button class="pad-btn" data-dir="left">◀</button><button class="pad-btn" data-dir="down">▼</button><button class="pad-btn" data-dir="right">▶</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 贪吃蛇·联机对战 -->
+    <div class="modal" id="snakePvpModal">
+        <div class="modal-box">
+            <span class="close" onclick="closeSnakePvp()">&times;</span>
+            <h2>⚔️ 贪吃蛇 · 联机对战</h2>
+            <div id="pvpHome" style="text-align:center;">
+                <p style="color:var(--text-muted);margin-bottom:12px;">创建房间邀请好友，或输入房间码加入对局<br>地图 30×30，场上 <strong>3</strong> 个苹果，吃苹果变长<br>大蛇对准小蛇的<strong>头</strong>咬下去即可吃掉对方获胜！</p>
+                <button class="btn" style="width:100%;margin-bottom:8px;" onclick="pvpCreateRoom()">🏠 创建房间</button>
+                <div style="display:flex;gap:8px;margin-top:8px;">
+                    <input id="pvpRoomInput" placeholder="4 位房间码" maxlength="4" style="flex:1;text-transform:uppercase;">
+                    <button class="btn btn-outline" onclick="pvpJoinRoom()">🔑 加入</button>
+                </div>
+            </div>
+            <div id="pvpWaiting" style="display:none;text-align:center;">
+                <p style="color:var(--text-muted);margin-bottom:8px;">把房间码发给好友：</p>
+                <div id="pvpRoomCode" style="font-size:2rem;font-weight:800;letter-spacing:6px;color:var(--accent);margin-bottom:10px;"></div>
+                <p id="pvpWaitingText" style="color:var(--text-muted);margin-bottom:14px;">⏳ 等待对手加入…</p>
+                <button class="btn btn-outline" onclick="pvpCancelWait()">取消</button>
+            </div>
+            <div id="pvpGame" style="display:none;">
+                <p style="color:var(--text-muted);font-size:.75rem;margin-bottom:6px;">长度 = 大小；比你长的蛇咬中你的头你会输，比它长你咬中它就赢（撞墙/撞身体会重生）</p>
+                <div class="game-stats">
+                    <span>你 <strong id="pvpMyName" style="color:var(--accent);"></strong> <strong id="pvpMyScore">0</strong></span>
+                    <span><strong id="pvpOpScore">0</strong> <strong id="pvpOpName" style="color:var(--warning);"></strong> 对手</span>
+                    <span>房间 <strong id="pvpRoomCodeGame"></strong></span>
+                </div>
+                <div class="snake-wrap" style="margin-top:8px;">
+                    <canvas id="pvpCanvas" width="480" height="480"></canvas>
+                    <div class="snake-overlay" id="pvpOverlay">
+                        <div class="snake-title" id="pvpOverlayTitle">⚔️</div>
+                        <button class="btn" id="pvpRestartBtn" onclick="pvpRestart()" style="display:none;margin-bottom:8px;">🔄 再来一局</button>
+                        <button class="btn btn-outline" onclick="pvpExitToHome()">退出房间</button>
+                    </div>
+                </div>
+                <div class="snake-pad">
+                    <div></div><button class="pad-btn" data-dir="up">▲</button><div></div>
+                    <button class="pad-btn" data-dir="left">◀</button><button class="pad-btn" data-dir="down">▼</button><button class="pad-btn" data-dir="right">▶</button>
+                </div>
             </div>
         </div>
     </div>
@@ -6670,15 +6713,588 @@
                 ctx.beginPath(); ctx.arc(hx + 3, hy - 2, 2, 0, Math.PI * 2); ctx.fill();
             }
         }
+        // ================== 贪吃蛇·联机对战 ==================
+        // 房主权威：房主本地跑 150ms 游戏循环，经 Supabase Realtime Broadcast 广播双方蛇/食物/长度；
+        // 加入方只渲染收到的 state，并把方向输入发回房主。房间=Realtime channel（无需数据库表）。
+        var PVP_GRID = 30, PVP_CELL = 16, PVP_FOOD_COUNT = 3;
+        var pvp = {
+            state: 'idle', // idle | waiting | playing | over
+            role: null, // 'host' | 'guest'
+            room: '',
+            channel: null,
+            timer: null,
+            heartbeatTimer: null,
+            waitTimer: null,
+            lastStateAt: 0,
+            lastSeenAt: 0,
+            tickNo: 0,
+            myName: '',
+            opName: '',
+            hostId: '',
+            guestId: '',
+            snakes: { host: null, guest: null },
+            foods: [],
+            winner: null
+        };
+
+        function pvpGenRoomCode() {
+            var chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+            var s = '';
+            for (var i = 0; i < 4; i++) s += chars[Math.floor(Math.random() * chars.length)];
+            return s;
+        }
+
+        function pvpSend(event, payload) {
+            if (!pvp.channel) return;
+            try { pvp.channel.send({ type: 'broadcast', event: event, payload: payload || {} }); }
+            catch (e) { console.warn('联机广播失败', e); }
+        }
+
+        function pvpShowView(view) {
+            var home = document.getElementById('pvpHome');
+            var wait = document.getElementById('pvpWaiting');
+            var game = document.getElementById('pvpGame');
+            if (home) home.style.display = view === 'home' ? '' : 'none';
+            if (wait) wait.style.display = view === 'waiting' ? '' : 'none';
+            if (game) game.style.display = view === 'game' ? '' : 'none';
+        }
+
+        function openSnakePvp() {
+            if (!currentUser) { showToast('请先登录', true); return; }
+            snakePause();
+            pvpReset();
+            document.getElementById('snakePvpModal').classList.add('active');
+            pvpShowView('home');
+            document.getElementById('pvpRoomInput').value = '';
+        }
+
+        function closeSnakePvp() {
+            pvpCleanup();
+            pvpReset();
+            document.getElementById('snakePvpModal').classList.remove('active');
+        }
+
+        function pvpNewSnake(side, len) {
+            // 出生点：host 头 (20,26) 朝右、身体先向左铺，铺满整行后向上折返；guest 头 (9,3) 朝左、身体向右铺，铺满后向下折返。
+            // 这样重生长度可以超过单行宽度而不被截断（全图铺满才会停止）。
+            var startX, startY, step, rowStep;
+            if (side === 'host') { startX = 20; startY = 26; step = -1; rowStep = -1; }
+            else { startX = 9; startY = 3; step = 1; rowStep = 1; }
+            var n = Math.max(3, len || 3);
+            var body = [];
+            var x = startX, y = startY, dir = step;
+            for (var i = 0; i < n; i++) {
+                body.push({ x: x, y: y });
+                var nx = x + dir;
+                if (nx < 0 || nx >= PVP_GRID) {
+                    y += rowStep;
+                    if (y < 0 || y >= PVP_GRID) break; // 地图已铺满
+                    dir = -dir;
+                    nx = x + dir;
+                }
+                x = nx;
+            }
+            return {
+                body: body,
+                dir: side === 'host' ? 'right' : 'left',
+                nextDir: side === 'host' ? 'right' : 'left'
+            };
+        }
+
+        function pvpRandomFood() {
+            var occupied = {};
+            ['host', 'guest'].forEach(function(side) {
+                var s = pvp.snakes[side];
+                if (s && s.body) s.body.forEach(function(c) { occupied[c.x + ',' + c.y] = true; });
+            });
+            (pvp.foods || []).forEach(function(f) { if (f) occupied[f.x + ',' + f.y] = true; });
+            var free = [];
+            for (var y = 0; y < PVP_GRID; y++) {
+                for (var x = 0; x < PVP_GRID; x++) {
+                    if (!occupied[x + ',' + y]) free.push({ x: x, y: y });
+                }
+            }
+            if (free.length === 0) return null;
+            return free[Math.floor(Math.random() * free.length)];
+        }
+
+        async function pvpCreateRoom() {
+            if (!currentUser) { showToast('请先登录', true); return; }
+            if (!sb) await initSupabase();
+            if (!sb) { showToast('Supabase 初始化失败', true); return; }
+            var room = pvpGenRoomCode();
+            pvp.room = room;
+            pvp.role = 'host';
+            pvp.hostId = Math.random().toString(36).slice(2) + Date.now().toString(36);
+            pvp.myName = (userProfile && userProfile.username) || currentUser.user_metadata?.username || '房主';
+            pvp.state = 'waiting';
+            pvpShowView('waiting');
+            document.getElementById('pvpRoomCode').textContent = room;
+            document.getElementById('pvpWaitingText').textContent = '⏳ 等待对手加入…';
+            pvp.channel = sb.channel('snake-pvp-' + room, { config: { broadcast: { self: false } } });
+            pvp.channel
+                .on('broadcast', { event: 'join' }, function(m) { pvpOnGuestJoin(m); })
+                .on('broadcast', { event: 'input' }, function(m) {
+                    var p = m.payload || {};
+                    if (p.guestId !== pvp.guestId) return;
+                    var d = p.dir;
+                    if (['up', 'down', 'left', 'right'].indexOf(d) === -1) return;
+                    var g = pvp.snakes.guest;
+                    if (g && !isOpposite(d, g.nextDir)) g.nextDir = d;
+                })
+                .on('broadcast', { event: 'heartbeat' }, function(m) {
+                    if ((m.payload || {}).guestId !== pvp.guestId) return;
+                    pvp.lastSeenAt = Date.now();
+                })
+                .on('broadcast', { event: 'restart' }, function(m) {
+                    if ((m.payload || {}).guestId !== pvp.guestId) return;
+                    if (pvp.role === 'host' && (pvp.state === 'playing' || pvp.state === 'over')) pvpStartMatch();
+                })
+                .on('broadcast', { event: 'leave' }, function(m) {
+                    if ((m.payload || {}).guestId !== pvp.guestId) return;
+                    pvpOnOpponentLeave();
+                })
+                .subscribe();
+            pvp.waitTimer = setTimeout(function() {
+                if (pvp.state === 'waiting') {
+                    pvpCancelWait();
+                    showToast('⏰ 等待超时，房间已关闭', true);
+                }
+            }, 60000);
+        }
+
+        function pvpOnGuestJoin(m) {
+            if (pvp.role !== 'host' || pvp.state !== 'waiting') {
+                pvpSend('full', {});
+                return;
+            }
+            var p = m.payload || {};
+            if (!p.guestId) return;
+            clearTimeout(pvp.waitTimer);
+            pvp.guestId = p.guestId;
+            pvp.opName = p.name || '对手';
+            pvpStartMatch();
+        }
+
+        function pvpStartMatch() {
+            clearTimeout(pvp.waitTimer);
+            pvp.state = 'playing';
+            pvp.winner = null;
+            pvp.tickNo = 0;
+            pvp.snakes.host = pvpNewSnake('host');
+            pvp.snakes.guest = pvpNewSnake('guest');
+            pvp.foods = [];
+            for (var fi = 0; fi < PVP_FOOD_COUNT; fi++) pvp.foods.push(pvpRandomFood());
+            pvp.lastSeenAt = Date.now();
+            pvpShowView('game');
+            pvpSetNames();
+            pvpRenderScores();
+            document.getElementById('pvpOverlay').classList.add('hidden');
+            pvpSend('start', { hostName: pvp.myName, guestName: pvp.opName, hostId: pvp.hostId });
+            pvpBroadcastState();
+            pvpDraw();
+            if (pvp.timer) clearInterval(pvp.timer);
+            pvp.timer = setInterval(pvpTick, 150);
+        }
+
+        function pvpTick() {
+            if (pvp.state !== 'playing' || !pvp.snakes.host || !pvp.snakes.guest) return;
+            // 对手心跳超时判定掉线
+            if (Date.now() - pvp.lastSeenAt > 6000) {
+                pvpEndMatch('opponent_left');
+                return;
+            }
+            // 应用方向输入（拒绝反向）
+            ['host', 'guest'].forEach(function(side) {
+                var s = pvp.snakes[side];
+                if (s && !isOpposite(s.nextDir, s.dir)) s.dir = s.nextDir;
+                else if (s) s.nextDir = s.dir;
+            });
+            // 先计算两蛇新头，再做判定（同时判定，保证公平）
+            var heads = {};
+            ['host', 'guest'].forEach(function(side) {
+                var s = pvp.snakes[side];
+                var h = { x: s.body[0].x, y: s.body[0].y };
+                if (s.dir === 'up') h.y--;
+                else if (s.dir === 'down') h.y++;
+                else if (s.dir === 'left') h.x--;
+                else if (s.dir === 'right') h.x++;
+                heads[side] = h;
+            });
+            // 吃食物判定（吃到则本帧 +1 长度）
+            var ate = {};
+            ['host', 'guest'].forEach(function(side) {
+                var h = heads[side];
+                ate[side] = (pvp.foods || []).some(function(f) { return f && f.x === h.x && f.y === h.y; });
+            });
+            // 本帧移动后的长度（即大小）
+            var len = {};
+            ['host', 'guest'].forEach(function(side) {
+                len[side] = pvp.snakes[side].body.length + (ate[side] ? 1 : 0);
+            });
+            var respawned = {};
+            // 头部判定：谁的新头撞到了对方的头（当前头格），或双方新头同时落进同一格 → 大的吃掉小的获胜
+            var headHit = {};
+            ['host', 'guest'].forEach(function(side) {
+                var other = side === 'host' ? 'guest' : 'host';
+                var h = heads[side];
+                var oh = pvp.snakes[other].body[0];
+                headHit[side] = !!(oh && h.x === oh.x && h.y === oh.y);
+            });
+            if (headHit.host || headHit.guest ||
+                (heads.host.x === heads.guest.x && heads.host.y === heads.guest.y)) {
+                if (len.host > len.guest) {
+                    pvp.winner = 'host';
+                } else if (len.guest > len.host) {
+                    pvp.winner = 'guest';
+                } else {
+                    // 等长互咬：双双重生（长度保留；len 已含本帧食物加成）
+                    pvp.snakes.host = pvpNewSnake('host', pvp.snakes.host.body.length);
+                    pvp.snakes.guest = pvpNewSnake('guest', pvp.snakes.guest.body.length);
+                    respawned.host = true;
+                    respawned.guest = true;
+                }
+            }
+            if (!pvp.winner) {
+                // 各自碰撞：撞墙/撞自己/撞对方身体（非头）→ 重生（出生点复位，长度保留）
+                ['host', 'guest'].forEach(function(side) {
+                    if (respawned[side]) return;
+                    var other = side === 'host' ? 'guest' : 'host';
+                    var h = heads[side];
+                    var s = pvp.snakes[side];
+                    var hitWall = h.x < 0 || h.y < 0 || h.x >= PVP_GRID || h.y >= PVP_GRID;
+                    // 吃到食物时本帧不缩尾，尾巴不会移走，此时不能排除尾巴
+                    var tailExclude = ate[side] ? 0 : -1;
+                    var hitSelf = s.body.slice(0, tailExclude).some(function(c) { return c.x === h.x && c.y === h.y; });
+                    var hitOther = pvp.snakes[other].body.some(function(c) { return c.x === h.x && c.y === h.y; });
+                    if (hitWall || hitSelf || hitOther) {
+                        // 撞墙/撞自己/撞对方身体（非头）→ 重生（出生点复位，长度保留）
+                        pvp.snakes[side] = pvpNewSnake(side, pvp.snakes[side].body.length);
+                        respawned[side] = true;
+                    }
+                });
+                // 移动
+                ['host', 'guest'].forEach(function(side) {
+                    if (respawned[side]) return;
+                    var s = pvp.snakes[side];
+                    var h = heads[side];
+                    s.body.unshift(h);
+                    if (!ate[side]) s.body.pop();
+                });
+                // 补足食物（被吃掉的补回，保持 3 个在场；重生蛇本帧未移动，不算吃到）
+                (pvp.foods || []).forEach(function(f, idx) {
+                    if (!f) return;
+                    var eaten = (!respawned.host && heads.host.x === f.x && heads.host.y === f.y) ||
+                        (!respawned.guest && heads.guest.x === f.x && heads.guest.y === f.y);
+                    if (eaten) pvp.foods[idx] = pvpRandomFood();
+                });
+            }
+            pvp.tickNo++;
+            pvpRenderScores();
+            pvpBroadcastState();
+            pvpDraw();
+            if (pvp.winner) {
+                pvpEndMatch('win');
+            }
+        }
+
+        function pvpBroadcastState() {
+            pvpSend('state', {
+                hid: pvp.hostId,
+                tick: pvp.tickNo,
+                hostSnake: pvp.snakes.host,
+                guestSnake: pvp.snakes.guest,
+                foods: pvp.foods,
+                winner: pvp.winner,
+                over: !!pvp.winner
+            });
+        }
+
+        async function pvpJoinRoom() {
+            if (!currentUser) { showToast('请先登录', true); return; }
+            var code = document.getElementById('pvpRoomInput').value.trim().toUpperCase();
+            if (!/^[A-Z0-9]{4}$/.test(code)) { showToast('请输入 4 位房间码', true); return; }
+            if (!sb) await initSupabase();
+            if (!sb) { showToast('Supabase 初始化失败', true); return; }
+            pvp.room = code;
+            pvp.role = 'guest';
+            pvp.guestId = Math.random().toString(36).slice(2) + Date.now().toString(36);
+            pvp.myName = (userProfile && userProfile.username) || currentUser.user_metadata?.username || '挑战者';
+            pvp.state = 'waiting';
+            pvpShowView('waiting');
+            document.getElementById('pvpRoomCode').textContent = code;
+            document.getElementById('pvpWaitingText').textContent = '🔍 正在加入房间…';
+            pvp.channel = sb.channel('snake-pvp-' + code, { config: { broadcast: { self: false } } });
+            pvp.channel
+                .on('broadcast', { event: 'start' }, function(m) { pvpGuestStart(m.payload); })
+                .on('broadcast', { event: 'state' }, function(m) { pvpOnState(m); })
+                .on('broadcast', { event: 'full' }, function() {
+                    if (pvp.state === 'waiting' && pvp.role === 'guest') {
+                        clearTimeout(pvp.waitTimer);
+                        pvpCleanup();
+                        pvp.state = 'idle';
+                        pvp.role = null;
+                        pvpShowView('home');
+                        showToast('❌ 房间已满', true);
+                    }
+                })
+                .on('broadcast', { event: 'over' }, function(m) {
+                    var p = m.payload || {};
+                    if (p.hostId !== pvp.hostId) return;
+                    if (p.winner && pvp.role === 'guest') {
+                        pvp.winner = p.winner;
+                        pvpEndMatch('win');
+                    }
+                })
+                .on('broadcast', { event: 'leave' }, function(m) {
+                    var p = m.payload || {};
+                    if (p.hostId !== pvp.hostId) return;
+                    pvpOnOpponentLeave();
+                })
+                .subscribe(function(status) {
+                    if (status === 'SUBSCRIBED') {
+                        pvpSend('join', { name: pvp.myName, guestId: pvp.guestId });
+                        pvp.waitTimer = setTimeout(function() {
+                            if (pvp.state === 'waiting') {
+                                pvpCancelWait();
+                                showToast('❌ 房间不存在或已满', true);
+                            }
+                        }, 10000);
+                    }
+                });
+        }
+
+        function pvpGuestStart(payload) {
+            if (pvp.role !== 'guest') return;
+            clearTimeout(pvp.waitTimer);
+            pvp.myName = (payload && payload.guestName) || '我';
+            pvp.opName = (payload && payload.hostName) || '对手';
+            pvp.hostId = (payload && payload.hostId) || '';
+            pvp.state = 'playing';
+            pvp.winner = null;
+            pvpShowView('game');
+            pvpSetNames();
+            pvpRenderScores();
+            document.getElementById('pvpOverlay').classList.add('hidden');
+            pvp.lastStateAt = Date.now();
+            pvpDraw();
+            if (pvp.heartbeatTimer) clearInterval(pvp.heartbeatTimer);
+            pvp.heartbeatTimer = setInterval(function() {
+                pvpSend('heartbeat', { guestId: pvp.guestId });
+                if (Date.now() - pvp.lastStateAt > 5000) {
+                    pvpEndMatch('host_left');
+                }
+            }, 1500);
+        }
+
+        function pvpOnState(m) {
+            var st = m.payload;
+            if (!st || pvp.role !== 'guest') return;
+            if (st.hid !== pvp.hostId) return;
+            pvp.lastStateAt = Date.now();
+            pvp.snakes.host = st.hostSnake;
+            pvp.snakes.guest = st.guestSnake;
+            pvp.foods = st.foods || [];
+            pvp.winner = st.winner || null;
+            pvpRenderScores();
+            pvpDraw();
+            if (st.over && pvp.state === 'playing') {
+                pvpEndMatch('win');
+            }
+        }
+
+        function pvpEndMatch(reason) {
+            if (pvp.state === 'over') return;
+            var wasPlaying = pvp.state === 'playing';
+            clearInterval(pvp.timer);
+            pvp.timer = null;
+            clearInterval(pvp.heartbeatTimer);
+            pvp.heartbeatTimer = null;
+            pvp.state = 'over';
+            var title = document.getElementById('pvpOverlayTitle');
+            var restartBtn = document.getElementById('pvpRestartBtn');
+            if (reason === 'opponent_left') {
+                title.textContent = '🏆 对手已离开，你赢了';
+            } else if (reason === 'host_left') {
+                title.textContent = '😢 房主已离开对局';
+            } else if (reason === 'win') {
+                title.textContent = (pvp.winner === pvp.role) ? '🎉 你赢了！' : '😢 你输了';
+            }
+            if (restartBtn) restartBtn.style.display = '';
+            document.getElementById('pvpOverlay').classList.remove('hidden');
+            if (wasPlaying && pvp.role === 'host') {
+                if (reason === 'win') pvpSend('over', { winner: pvp.winner, hostId: pvp.hostId });
+                else if (reason === 'opponent_left') pvpSend('leave', { hostId: pvp.hostId });
+            }
+        }
+
+        function pvpOnOpponentLeave() {
+            if (pvp.state !== 'playing' && pvp.state !== 'over') return;
+            pvpEndMatch(pvp.role === 'host' ? 'opponent_left' : 'host_left');
+        }
+
+        function pvpRestart() {
+            if (pvp.role === 'host') {
+                pvpStartMatch();
+            } else {
+                pvpSend('restart', { guestId: pvp.guestId });
+            }
+        }
+
+        function pvpSetDir(d) {
+            if (pvp.state !== 'playing') return;
+            if (pvp.role === 'host') {
+                var s = pvp.snakes.host;
+                if (s && !isOpposite(d, s.nextDir)) s.nextDir = d;
+            } else {
+                pvpSend('input', { dir: d, guestId: pvp.guestId });
+            }
+        }
+
+        function pvpSetNames() {
+            var me = document.getElementById('pvpMyName');
+            var op = document.getElementById('pvpOpName');
+            var rc = document.getElementById('pvpRoomCodeGame');
+            if (me) me.textContent = pvp.myName;
+            if (op) op.textContent = pvp.opName;
+            if (rc) rc.textContent = pvp.room;
+        }
+
+        function pvpRenderScores() {
+            var m = document.getElementById('pvpMyScore');
+            var o = document.getElementById('pvpOpScore');
+            if (!m || !o || !pvp.role) return;
+            var mySide = pvp.role;
+            var opSide = pvp.role === 'host' ? 'guest' : 'host';
+            m.textContent = pvp.snakes[mySide] ? pvp.snakes[mySide].body.length : 0;
+            o.textContent = pvp.snakes[opSide] ? pvp.snakes[opSide].body.length : 0;
+        }
+
+        function pvpDraw() {
+            var c = document.getElementById('pvpCanvas');
+            if (!c) return;
+            var ctx = c.getContext('2d');
+            ctx.clearRect(0, 0, c.width, c.height);
+            ctx.strokeStyle = 'rgba(255,255,255,0.06)';
+            ctx.lineWidth = 1;
+            for (var i = 0; i <= PVP_GRID; i++) {
+                ctx.beginPath(); ctx.moveTo(i * PVP_CELL, 0); ctx.lineTo(i * PVP_CELL, c.height); ctx.stroke();
+                ctx.beginPath(); ctx.moveTo(0, i * PVP_CELL); ctx.lineTo(c.width, i * PVP_CELL); ctx.stroke();
+            }
+            (pvp.foods || []).forEach(function(f) {
+                if (!f) return;
+                ctx.fillStyle = '#ff5e8a';
+                ctx.beginPath();
+                ctx.arc(f.x * PVP_CELL + PVP_CELL / 2, f.y * PVP_CELL + PVP_CELL / 2, PVP_CELL / 2 - 2, 0, Math.PI * 2);
+                ctx.fill();
+            });
+            ['host', 'guest'].forEach(function(side) {
+                var s = pvp.snakes[side];
+                if (!s || !s.body) return;
+                var mine = side === pvp.role;
+                s.body.forEach(function(pt, idx) {
+                    var t = idx / Math.max(s.body.length - 1, 1);
+                    var r, g, b;
+                    if (mine) {
+                        r = Math.round(168 - t * 120); g = Math.round(85 + t * 60); b = Math.round(247 - t * 60);
+                    } else {
+                        r = Math.round(255 - t * 90); g = Math.round(94 - t * 30); b = Math.round(138 - t * 40);
+                    }
+                    ctx.fillStyle = 'rgb(' + r + ',' + g + ',' + b + ')';
+                    var pad = 1.5;
+                    ctx.beginPath();
+                    ctx.roundRect ? ctx.roundRect(pt.x * PVP_CELL + pad, pt.y * PVP_CELL + pad, PVP_CELL - pad * 2, PVP_CELL - pad * 2, 4)
+                        : ctx.rect(pt.x * PVP_CELL + pad, pt.y * PVP_CELL + pad, PVP_CELL - pad * 2, PVP_CELL - pad * 2);
+                    ctx.fill();
+                });
+                var head = s.body[0];
+                if (head) {
+                    ctx.fillStyle = '#fff';
+                    var hx = head.x * PVP_CELL + PVP_CELL / 2;
+                    var hy = head.y * PVP_CELL + PVP_CELL / 2;
+                    ctx.beginPath(); ctx.arc(hx - 3, hy - 2, 2, 0, Math.PI * 2); ctx.fill();
+                    ctx.beginPath(); ctx.arc(hx + 3, hy - 2, 2, 0, Math.PI * 2); ctx.fill();
+                }
+            });
+        }
+
+        function pvpCancelWait() {
+            clearTimeout(pvp.waitTimer);
+            pvpCleanup();
+            pvp.state = 'idle';
+            pvp.role = null;
+            pvpShowView('home');
+        }
+
+        function pvpExitToHome() {
+            if (pvp.state === 'playing' || pvp.state === 'over') {
+                pvpSend('leave', pvp.role === 'host' ? { hostId: pvp.hostId } : { guestId: pvp.guestId });
+            }
+            var ch = pvp.channel;
+            pvp.channel = null;
+            clearTimeout(pvp.waitTimer);
+            clearInterval(pvp.timer);
+            clearInterval(pvp.heartbeatTimer);
+            pvpReset();
+            pvpShowView('home');
+            if (ch) {
+                setTimeout(function() { try { sb.removeChannel(ch); } catch (e) {} }, 300);
+            }
+            showToast('已退出房间', false);
+        }
+
+        function pvpCleanup() {
+            clearTimeout(pvp.waitTimer);
+            pvp.waitTimer = null;
+            clearInterval(pvp.timer);
+            pvp.timer = null;
+            clearInterval(pvp.heartbeatTimer);
+            pvp.heartbeatTimer = null;
+            if (pvp.channel) {
+                try { sb.removeChannel(pvp.channel); } catch (e) {}
+                pvp.channel = null;
+            }
+        }
+
+        function pvpReset() {
+            pvpCleanup();
+            pvp.state = 'idle';
+            pvp.role = null;
+            pvp.room = '';
+            pvp.myName = '';
+            pvp.opName = '';
+            pvp.hostId = '';
+            pvp.guestId = '';
+            pvp.snakes.host = null;
+            pvp.snakes.guest = null;
+            pvp.foods = [];
+            pvp.winner = null;
+            pvp.tickNo = 0;
+            pvp.lastStateAt = 0;
+            pvp.lastSeenAt = 0;
+        }
+
         document.addEventListener('keydown', function(e) {
-            if (!document.getElementById('snakeModal').classList.contains('active')) return;
             if (e.target && (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA')) return;
             var map = { ArrowUp: 'up', ArrowDown: 'down', ArrowLeft: 'left', ArrowRight: 'right', w: 'up', s: 'down', a: 'left', d: 'right', W: 'up', S: 'down', A: 'left', D: 'right' };
             var d = map[e.key];
-            if (d) { e.preventDefault(); snakeSetDir(d); }
+            if (!d) return;
+            var pvpModal = document.getElementById('snakePvpModal');
+            if (pvpModal && pvpModal.classList.contains('active') && pvp.state === 'playing') {
+                e.preventDefault();
+                pvpSetDir(d);
+                return;
+            }
+            if (!document.getElementById('snakeModal').classList.contains('active')) return;
+            e.preventDefault();
+            snakeSetDir(d);
         });
         document.querySelectorAll('.pad-btn').forEach(function(b) {
-            b.addEventListener('click', function() { snakeSetDir(b.getAttribute('data-dir')); });
+            b.addEventListener('click', function() {
+                var d = b.getAttribute('data-dir');
+                if (pvp.state === 'playing') { pvpSetDir(d); return; }
+                snakeSetDir(d);
+            });
         });
 
         // ================== 记忆翻牌 ==================
