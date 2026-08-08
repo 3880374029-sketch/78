@@ -2170,6 +2170,9 @@
     .pad-btn { border-radius: 12px; border: 1px solid var(--border-color); background: var(--bg-card); color: var(--text-secondary); font-size: 1rem; cursor: pointer; transition: transform var(--dur-fast) var(--ease-bounce), background var(--transition); }
     .pad-btn:hover { background: var(--hover-bg); transform: translateY(-2px); }
     .pad-btn:active { transform: scale(0.92); }
+    .joy-wrap { display: flex; justify-content: center; margin: 10px 0 6px; touch-action: none; -webkit-user-select: none; user-select: none; }
+    .joy-base { position: relative; width: 110px; height: 110px; border-radius: 50%; background: rgba(255,255,255,0.08); border: 1px solid var(--border-color); box-shadow: inset 0 0 12px rgba(0,0,0,0.3); touch-action: none; }
+    .joy-knob { position: absolute; left: 50%; top: 50%; width: 46px; height: 46px; margin: -23px 0 0 -23px; border-radius: 50%; background: linear-gradient(135deg, var(--accent), #a855f7); box-shadow: 0 4px 12px rgba(0,0,0,0.4); will-change: transform; touch-action: none; }
 
     /* ===== 记忆翻牌 ===== */
     .mem-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; max-width: 380px; margin: 0 auto; }
@@ -2873,6 +2876,7 @@
                     <button class="btn" id="snakeStartBtn" onclick="snakeStart()">开始游戏</button>
                 </div>
             </div>
+            <div class="joy-wrap" id="joyWrapSnake"><div class="joy-base"><div class="joy-knob" id="joyKnobSnake"></div></div></div>
             <div class="snake-pad">
                 <div></div><button class="pad-btn" data-dir="up">▲</button><div></div>
                 <button class="pad-btn" data-dir="left">◀</button><button class="pad-btn" data-dir="down">▼</button><button class="pad-btn" data-dir="right">▶</button>
@@ -2914,6 +2918,7 @@
                         <button class="btn btn-outline" onclick="pvpExitToHome()">退出房间</button>
                     </div>
                 </div>
+                <div class="joy-wrap" id="joyWrapPvp"><div class="joy-base"><div class="joy-knob" id="joyKnobPvp"></div></div></div>
                 <div class="snake-pad">
                     <div></div><button class="pad-btn" data-dir="up">▲</button><div></div>
                     <button class="pad-btn" data-dir="left">◀</button><button class="pad-btn" data-dir="down">▼</button><button class="pad-btn" data-dir="right">▶</button>
@@ -6723,6 +6728,7 @@
             room: '',
             channel: null,
             timer: null,
+            predictTimer: null,
             heartbeatTimer: null,
             waitTimer: null,
             lastStateAt: 0,
@@ -6732,9 +6738,20 @@
             opName: '',
             hostId: '',
             guestId: '',
+            localDir: 'left', // guest 本地预测方向（即时响应）
             snakes: { host: null, guest: null },
             foods: [],
             winner: null
+        };
+
+        // 渲染态：rAF 循环插值渲染对手蛇（消除跳格），加入方本地预测己方蛇（消除输入延迟）
+        var pvpRender = {
+            mySnake: null, // 己方蛇（渲染用；guest 侧为本地预测副本）
+            opPrev: null, // 对手蛇上一帧（插值起点）
+            opCur: null, // 对手蛇当前帧（插值终点）
+            opStart: 0, // 插值开始时间
+            foods: [],
+            rafId: 0
         };
 
         function pvpGenRoomCode() {
@@ -6892,7 +6909,13 @@
             document.getElementById('pvpOverlay').classList.add('hidden');
             pvpSend('start', { hostName: pvp.myName, guestName: pvp.opName, hostId: pvp.hostId });
             pvpBroadcastState();
-            pvpDraw();
+            // 初始化渲染态并启动 rAF 渲染循环（对手蛇插值平滑）
+            pvpRender.mySnake = pvp.snakes.host;
+            pvpRender.opPrev = null;
+            pvpRender.opCur = pvpSnakeCopy(pvp.snakes.guest);
+            pvpRender.opStart = Date.now();
+            pvpRender.foods = pvp.foods;
+            if (!pvpRender.rafId) pvpRenderLoop();
             if (pvp.timer) clearInterval(pvp.timer);
             pvp.timer = setInterval(pvpTick, 150);
         }
@@ -6992,7 +7015,12 @@
             pvp.tickNo++;
             pvpRenderScores();
             pvpBroadcastState();
-            pvpDraw();
+            // 更新渲染态：己方蛇取最新，对手蛇进入 150ms 插值窗口（深拷贝，避免插值恒等失效）
+            pvpRender.mySnake = pvp.snakes.host;
+            pvpRender.opPrev = pvpRender.opCur;
+            pvpRender.opCur = pvpSnakeCopy(pvp.snakes.guest);
+            pvpRender.opStart = Date.now();
+            pvpRender.foods = pvp.foods;
             if (pvp.winner) {
                 pvpEndMatch('win');
             }
@@ -7077,7 +7105,16 @@
             pvpRenderScores();
             document.getElementById('pvpOverlay').classList.add('hidden');
             pvp.lastStateAt = Date.now();
-            pvpDraw();
+            pvp.localDir = 'left';
+            // 初始化渲染态，启动 rAF 渲染循环 + 本地预测（即时响应）
+            pvpRender.mySnake = pvpNewSnake('guest');
+            pvpRender.opPrev = null;
+            pvpRender.opCur = pvpNewSnake('host');
+            pvpRender.opStart = Date.now();
+            pvpRender.foods = [];
+            if (!pvpRender.rafId) pvpRenderLoop();
+            if (pvp.predictTimer) clearInterval(pvp.predictTimer);
+            pvp.predictTimer = setInterval(pvpPredictTick, 150);
             if (pvp.heartbeatTimer) clearInterval(pvp.heartbeatTimer);
             pvp.heartbeatTimer = setInterval(function() {
                 pvpSend('heartbeat', { guestId: pvp.guestId });
@@ -7096,8 +7133,13 @@
             pvp.snakes.guest = st.guestSnake;
             pvp.foods = st.foods || [];
             pvp.winner = st.winner || null;
+            // 权威 state 覆盖本地预测（己方蛇），对手蛇进入插值窗口
+            pvpRender.mySnake = pvpSnakeCopy(st.guestSnake);
+            pvpRender.opPrev = pvpRender.opCur;
+            pvpRender.opCur = pvpSnakeCopy(st.hostSnake);
+            pvpRender.opStart = Date.now();
+            pvpRender.foods = st.foods || [];
             pvpRenderScores();
-            pvpDraw();
             if (st.over && pvp.state === 'playing') {
                 pvpEndMatch('win');
             }
@@ -7108,8 +7150,11 @@
             var wasPlaying = pvp.state === 'playing';
             clearInterval(pvp.timer);
             pvp.timer = null;
+            clearInterval(pvp.predictTimer);
+            pvp.predictTimer = null;
             clearInterval(pvp.heartbeatTimer);
             pvp.heartbeatTimer = null;
+            if (pvpRender.rafId) { cancelAnimationFrame(pvpRender.rafId); pvpRender.rafId = 0; }
             pvp.state = 'over';
             var title = document.getElementById('pvpOverlayTitle');
             var restartBtn = document.getElementById('pvpRestartBtn');
@@ -7147,6 +7192,8 @@
                 var s = pvp.snakes.host;
                 if (s && !isOpposite(d, s.nextDir)) s.nextDir = d;
             } else {
+                // 本地立即预览转向（预测），同时广播给房主
+                pvp.localDir = d;
                 pvpSend('input', { dir: d, guestId: pvp.guestId });
             }
         }
@@ -7170,6 +7217,56 @@
             o.textContent = pvp.snakes[opSide] ? pvp.snakes[opSide].body.length : 0;
         }
 
+        function pvpSnakeCopy(s) {
+            if (!s) return null;
+            return {
+                body: (s.body || []).map(function(c) { return { x: c.x, y: c.y }; }),
+                dir: s.dir,
+                nextDir: s.nextDir || s.dir
+            };
+        }
+
+        function pvpInterpSnake() {
+            var prev = pvpRender.opPrev, cur = pvpRender.opCur;
+            if (!cur) return null;
+            if (!prev) return cur;
+            var t = Math.min(1, (Date.now() - pvpRender.opStart) / 150);
+            var body = [];
+            for (var i = 0; i < cur.body.length; i++) {
+                var c = cur.body[i];
+                var p = prev.body[i] || prev.body[prev.body.length - 1] || c;
+                body.push({ x: p.x + (c.x - p.x) * t, y: p.y + (c.y - p.y) * t });
+            }
+            return { body: body, dir: cur.dir };
+        }
+
+        function pvpRenderLoop() {
+            pvpRender.rafId = requestAnimationFrame(pvpRenderLoop);
+            if (pvp.state === 'playing' && document.getElementById('snakePvpModal').classList.contains('active')) {
+                pvpDraw();
+            }
+        }
+
+        // 加入方本地预测：在两次权威 state 之间按同样 150ms 节奏推进己方蛇，操作零延迟响应
+        function pvpPredictTick() {
+            if (pvp.state !== 'playing' || pvp.role !== 'guest') return;
+            var s = pvpRender.mySnake;
+            if (!s || !s.body || s.body.length === 0) return;
+            if (!isOpposite(pvp.localDir, s.dir)) s.dir = pvp.localDir;
+            else pvp.localDir = s.dir;
+            var h = { x: s.body[0].x, y: s.body[0].y };
+            if (s.dir === 'up') h.y--;
+            else if (s.dir === 'down') h.y++;
+            else if (s.dir === 'left') h.x--;
+            else if (s.dir === 'right') h.x++;
+            // 本地预测不判定死亡/吃食物，撞墙/撞自己时原地等待权威 state 纠正
+            var hitWall = h.x < 0 || h.y < 0 || h.x >= PVP_GRID || h.y >= PVP_GRID;
+            var hitSelf = s.body.slice(0, -1).some(function(c) { return c.x === h.x && c.y === h.y; });
+            if (hitWall || hitSelf) return;
+            s.body.unshift(h);
+            s.body.pop();
+        }
+
         function pvpDraw() {
             var c = document.getElementById('pvpCanvas');
             if (!c) return;
@@ -7181,41 +7278,44 @@
                 ctx.beginPath(); ctx.moveTo(i * PVP_CELL, 0); ctx.lineTo(i * PVP_CELL, c.height); ctx.stroke();
                 ctx.beginPath(); ctx.moveTo(0, i * PVP_CELL); ctx.lineTo(c.width, i * PVP_CELL); ctx.stroke();
             }
-            (pvp.foods || []).forEach(function(f) {
+            (pvpRender.foods || []).forEach(function(f) {
                 if (!f) return;
                 ctx.fillStyle = '#ff5e8a';
                 ctx.beginPath();
                 ctx.arc(f.x * PVP_CELL + PVP_CELL / 2, f.y * PVP_CELL + PVP_CELL / 2, PVP_CELL / 2 - 2, 0, Math.PI * 2);
                 ctx.fill();
             });
-            ['host', 'guest'].forEach(function(side) {
-                var s = pvp.snakes[side];
-                if (!s || !s.body) return;
-                var mine = side === pvp.role;
-                s.body.forEach(function(pt, idx) {
-                    var t = idx / Math.max(s.body.length - 1, 1);
-                    var r, g, b;
-                    if (mine) {
-                        r = Math.round(168 - t * 120); g = Math.round(85 + t * 60); b = Math.round(247 - t * 60);
-                    } else {
-                        r = Math.round(255 - t * 90); g = Math.round(94 - t * 30); b = Math.round(138 - t * 40);
-                    }
-                    ctx.fillStyle = 'rgb(' + r + ',' + g + ',' + b + ')';
-                    var pad = 1.5;
-                    ctx.beginPath();
-                    ctx.roundRect ? ctx.roundRect(pt.x * PVP_CELL + pad, pt.y * PVP_CELL + pad, PVP_CELL - pad * 2, PVP_CELL - pad * 2, 4)
-                        : ctx.rect(pt.x * PVP_CELL + pad, pt.y * PVP_CELL + pad, PVP_CELL - pad * 2, PVP_CELL - pad * 2);
-                    ctx.fill();
-                });
-                var head = s.body[0];
-                if (head) {
-                    ctx.fillStyle = '#fff';
-                    var hx = head.x * PVP_CELL + PVP_CELL / 2;
-                    var hy = head.y * PVP_CELL + PVP_CELL / 2;
-                    ctx.beginPath(); ctx.arc(hx - 3, hy - 2, 2, 0, Math.PI * 2); ctx.fill();
-                    ctx.beginPath(); ctx.arc(hx + 3, hy - 2, 2, 0, Math.PI * 2); ctx.fill();
+            var mine = pvpRender.mySnake;
+            var op = pvpInterpSnake();
+            if (mine) pvpDrawSnake(ctx, mine, true);
+            if (op) pvpDrawSnake(ctx, op, false);
+        }
+
+        function pvpDrawSnake(ctx, s, mine) {
+            if (!s || !s.body) return;
+            s.body.forEach(function(pt, idx) {
+                var t = idx / Math.max(s.body.length - 1, 1);
+                var r, g, b;
+                if (mine) {
+                    r = Math.round(168 - t * 120); g = Math.round(85 + t * 60); b = Math.round(247 - t * 60);
+                } else {
+                    r = Math.round(255 - t * 90); g = Math.round(94 - t * 30); b = Math.round(138 - t * 40);
                 }
+                ctx.fillStyle = 'rgb(' + r + ',' + g + ',' + b + ')';
+                var pad = 1.5;
+                ctx.beginPath();
+                ctx.roundRect ? ctx.roundRect(pt.x * PVP_CELL + pad, pt.y * PVP_CELL + pad, PVP_CELL - pad * 2, PVP_CELL - pad * 2, 4)
+                    : ctx.rect(pt.x * PVP_CELL + pad, pt.y * PVP_CELL + pad, PVP_CELL - pad * 2, PVP_CELL - pad * 2);
+                ctx.fill();
             });
+            var head = s.body[0];
+            if (head) {
+                ctx.fillStyle = '#fff';
+                var hx = head.x * PVP_CELL + PVP_CELL / 2;
+                var hy = head.y * PVP_CELL + PVP_CELL / 2;
+                ctx.beginPath(); ctx.arc(hx - 3, hy - 2, 2, 0, Math.PI * 2); ctx.fill();
+                ctx.beginPath(); ctx.arc(hx + 3, hy - 2, 2, 0, Math.PI * 2); ctx.fill();
+            }
         }
 
         function pvpCancelWait() {
@@ -7248,8 +7348,15 @@
             pvp.waitTimer = null;
             clearInterval(pvp.timer);
             pvp.timer = null;
+            clearInterval(pvp.predictTimer);
+            pvp.predictTimer = null;
             clearInterval(pvp.heartbeatTimer);
             pvp.heartbeatTimer = null;
+            if (pvpRender.rafId) { cancelAnimationFrame(pvpRender.rafId); pvpRender.rafId = 0; }
+            pvpRender.mySnake = null;
+            pvpRender.opPrev = null;
+            pvpRender.opCur = null;
+            pvpRender.foods = [];
             if (pvp.channel) {
                 try { sb.removeChannel(pvp.channel); } catch (e) {}
                 pvp.channel = null;
@@ -7265,6 +7372,7 @@
             pvp.opName = '';
             pvp.hostId = '';
             pvp.guestId = '';
+            pvp.localDir = 'left';
             pvp.snakes.host = null;
             pvp.snakes.guest = null;
             pvp.foods = [];
@@ -7296,6 +7404,67 @@
                 snakeSetDir(d);
             });
         });
+
+        // ================== 虚拟摇杆 ==================
+        function initJoystick(wrapId, knobId, onDir) {
+            var wrap = document.getElementById(wrapId);
+            var knob = document.getElementById(knobId);
+            if (!wrap || !knob) return;
+            var active = false, activePointerId = null, lastDir = null, centerX = 0, centerY = 0, baseR = 55, knobR = 23;
+            var DEAD = 14;
+            function setKnob(dx, dy) {
+                var len = Math.sqrt(dx * dx + dy * dy);
+                var max = baseR - knobR;
+                if (max < 1) max = 1;
+                if (len > max) { dx = dx / len * max; dy = dy / len * max; len = max; }
+                knob.style.transform = 'translate(' + dx + 'px,' + dy + 'px)';
+                return { dx: dx, dy: dy, len: len };
+            }
+            function handleMove(clientX, clientY) {
+                var r = setKnob(clientX - centerX, clientY - centerY);
+                if (r.len < DEAD) return;
+                var dir = (Math.abs(r.dx) >= Math.abs(r.dy)) ? (r.dx > 0 ? 'right' : 'left') : (r.dy > 0 ? 'down' : 'up');
+                if (dir !== lastDir) {
+                    lastDir = dir;
+                    onDir(dir);
+                }
+            }
+            wrap.addEventListener('pointerdown', function(e) {
+                if (active) return; // 已有激活指针，忽略新按下的手指
+                if (e.pointerType === 'mouse' && e.button !== 0) return;
+                active = true;
+                activePointerId = e.pointerId;
+                lastDir = null;
+                var rect = wrap.getBoundingClientRect();
+                centerX = rect.left + rect.width / 2;
+                centerY = rect.top + rect.height / 2;
+                baseR = rect.width / 2;
+                knobR = knob.getBoundingClientRect().width / 2;
+                knob.style.transform = 'translate(0px,0px)';
+                try { wrap.setPointerCapture(e.pointerId); } catch (err) {}
+                handleMove(e.clientX, e.clientY);
+                e.preventDefault();
+            });
+            wrap.addEventListener('pointermove', function(e) {
+                if (!active || e.pointerId !== activePointerId) return;
+                handleMove(e.clientX, e.clientY);
+                e.preventDefault();
+            });
+            function end(e) {
+                if (!active || e.pointerId !== activePointerId) return;
+                active = false;
+                activePointerId = null;
+                knob.style.transform = 'translate(0px,0px)';
+                lastDir = null;
+                e.preventDefault();
+            }
+            wrap.addEventListener('pointerup', end);
+            wrap.addEventListener('pointercancel', end);
+            wrap.addEventListener('lostpointercapture', end);
+        }
+
+        initJoystick('joyWrapSnake', 'joyKnobSnake', function(d) { snakeSetDir(d); });
+        initJoystick('joyWrapPvp', 'joyKnobPvp', function(d) { pvpSetDir(d); });
 
         // ================== 记忆翻牌 ==================
         var MEM_EMOJIS = ['🍎', '🍌', '🍇', '🍓', '🍒', '🥝', '🍍', '🍋'];
