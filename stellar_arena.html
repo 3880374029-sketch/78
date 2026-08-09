@@ -7,85 +7,95 @@
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🎯</text></svg>">
 <style>
   *{margin:0;padding:0;box-sizing:border-box;-webkit-user-select:none;user-select:none}
-  html,body{width:100%;height:100%;overflow:hidden;background:#05070f;font-family:"Segoe UI","Microsoft YaHei",system-ui,sans-serif;color:#e8f2ff}
+  html,body{width:100%;height:100%;overflow:hidden;background:#04070a;font-family:Consolas,"Courier New","Microsoft YaHei",monospace;color:#c8e6c9}
   canvas#cv{position:fixed;inset:0;display:block;cursor:none;background:transparent}
   .hidden{display:none!important}
 
-  /* ===== 菜单 ===== */
+  /* ===== 菜单：作战简报 ===== */
   #menu{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;z-index:50;
-        background:radial-gradient(1200px 700px at 50% 30%,#101a3d 0%,#070b1d 55%,#04060e 100%)}
-  #menu .panel{width:460px;max-width:92vw;padding:34px 40px;border-radius:20px;text-align:center;
-        background:rgba(10,16,38,.72);border:1px solid rgba(110,160,255,.28);
-        box-shadow:0 0 60px rgba(60,120,255,.18),inset 0 0 40px rgba(60,120,255,.05);backdrop-filter:blur(8px)}
-  #menu h1{font-size:44px;letter-spacing:6px;background:linear-gradient(90deg,#7ee0ff,#4c8dff,#c07dff);
-        -webkit-background-clip:text;background-clip:text;color:transparent;text-shadow:0 0 30px rgba(80,160,255,.4)}
-  #menu h2{font-size:13px;letter-spacing:8px;color:#6f8cbd;margin:6px 0 26px}
-  #menu .namebox{margin-bottom:14px}
-  #menu input[type=text]{width:100%;padding:11px 14px;border-radius:10px;border:1px solid rgba(110,160,255,.35);
-        background:rgba(5,10,26,.7);color:#e8f2ff;font-size:15px;outline:none;text-align:center}
-  #menu input[type=text]:focus{border-color:#5aa7ff;box-shadow:0 0 12px rgba(80,160,255,.35)}
-  #menu button{display:block;width:100%;margin:10px 0 0;padding:13px;border-radius:12px;border:1px solid rgba(110,160,255,.35);
-        background:linear-gradient(135deg,rgba(40,80,180,.55),rgba(20,40,110,.55));color:#eaf3ff;font-size:16px;cursor:pointer;
-        transition:all .15s;letter-spacing:2px}
-  #menu button:hover{transform:translateY(-2px);box-shadow:0 8px 24px rgba(60,130,255,.35);border-color:#5aa7ff}
-  #menu button:active{transform:translateY(0)}
-  #menu button.primary{background:linear-gradient(135deg,#2f7bff,#7c4dff);border-color:transparent;font-weight:600}
-  #menu button.primary:hover{box-shadow:0 8px 28px rgba(90,120,255,.5)}
-  #menu .joinrow{display:flex;gap:8px;margin-top:10px}
+        background:repeating-linear-gradient(0deg,rgba(120,255,140,.022) 0 1px,transparent 1px 3px),
+        radial-gradient(1100px 700px at 50% 32%,#0c1a10 0%,#060d08 60%,#03060a 100%)}
+  #menu .panel{width:480px;max-width:92vw;padding:30px 36px;text-align:center;border:1px solid rgba(120,230,140,.35);
+        background:rgba(5,12,7,.88);box-shadow:0 0 50px rgba(90,200,110,.12),inset 0 0 60px rgba(90,200,110,.05);
+        clip-path:polygon(0 0,100% 0,100% calc(100% - 14px),calc(100% - 14px) 100%,0 100%)}
+  #menu h1{font-size:36px;letter-spacing:4px;color:#b8f0a0;text-shadow:0 0 18px rgba(140,255,160,.35);font-weight:700}
+  #menu h2{font-size:12px;letter-spacing:5px;color:#5f8f66;margin:4px 0 20px}
+  #menu .namebox{margin-bottom:12px}
+  #menu input[type=text]{width:100%;padding:10px 12px;background:rgba(3,8,4,.9);color:#c8e6c9;font-family:inherit;
+        font-size:14px;border:1px solid rgba(120,230,140,.4);outline:none;letter-spacing:1px;text-align:center}
+  #menu input[type=text]:focus{border-color:#8fe8a0;box-shadow:0 0 10px rgba(120,255,140,.25)}
+  #menu button{display:block;width:100%;margin:8px 0 0;padding:12px;font-family:inherit;font-size:15px;letter-spacing:2px;
+        color:#b8f0a0;background:transparent;border:1px solid rgba(120,230,140,.4);cursor:pointer;text-align:left;transition:all .12s}
+  #menu button:hover{background:rgba(120,230,140,.12);border-color:#8fe8a0;box-shadow:0 0 14px rgba(120,255,140,.2)}
+  #menu button.primary{background:rgba(120,230,140,.18);border-color:#8fe8a0;font-weight:700}
+  #menu button.primary:hover{background:rgba(120,230,140,.28)}
+  #menu .joinrow{display:flex;gap:6px;margin-top:8px}
   #menu .joinrow input{flex:1}
-  #menu .joinrow button{width:auto;margin:0;padding:13px 16px}
-  #err{color:#ff7b9c;font-size:13px;min-height:18px;margin-top:8px}
-  #menu .help{margin-top:18px;font-size:12px;color:#8fa6cf;line-height:1.9;text-align:left;
-        background:rgba(8,14,34,.6);border-radius:10px;padding:12px 14px;border:1px solid rgba(110,160,255,.15)}
-  #menu .help b{color:#cfe4ff}
-  #menu .foot{margin-top:14px;font-size:11px;color:#5d7298}
-  .mbtn{margin-top:16px!important;background:linear-gradient(135deg,rgba(30,60,140,.5),rgba(15,30,90,.5))!important;font-size:13px!important}
+  #menu .joinrow button{width:auto;margin:0;padding:12px 16px;text-align:center}
+  #err{color:#ff8080;font-size:12px;min-height:16px;margin-top:6px;letter-spacing:1px}
+  #menu .help{margin-top:14px;font-size:12px;color:#7fa884;line-height:1.9;text-align:left;border:1px solid rgba(120,230,140,.25);
+        padding:10px 12px;background:rgba(3,8,4,.7)}
+  #menu .help b{color:#b8f0a0}
+  #menu .foot{margin-top:12px;font-size:10px;color:#4a6f52;letter-spacing:1px}
+  .mbtn{margin-top:14px!important;text-align:center!important;font-size:12px!important}
 
   /* ===== HUD ===== */
-  #hud{position:fixed;inset:0;pointer-events:none;z-index:20;display:none}
-  #hpwrap{position:absolute;left:22px;top:20px;width:240px}
-  #hpwrap .lbl{font-size:11px;color:#9db6e4;letter-spacing:2px;margin-bottom:4px}
-  #hpbar,#shieldbar{height:14px;border-radius:8px;background:rgba(8,14,34,.75);border:1px solid rgba(120,160,255,.3);overflow:hidden;position:relative}
-  #hpbar .fill{height:100%;border-radius:8px;background:linear-gradient(90deg,#4cff8a,#25c96a);transition:width .12s;box-shadow:0 0 12px rgba(70,255,140,.5)}
-  #hpbar .fill.low{background:linear-gradient(90deg,#ff6b6b,#ff2d55)}
-  #shieldbar{height:8px;margin-top:5px;display:none}
-  #shieldbar .fill{height:100%;border-radius:8px;background:linear-gradient(90deg,#7ee0ff,#3d8bff);box-shadow:0 0 10px rgba(90,180,255,.6)}
-  #hptext{position:absolute;right:6px;top:1px;font-size:11px;color:#dff3ff;text-shadow:0 1px 2px #000}
+  #hud{position:fixed;inset:0;pointer-events:none;z-index:20;display:none;font-family:Consolas,"Courier New",monospace}
+  #vitals{position:absolute;left:18px;top:18px;width:252px;padding:10px 12px;border:1px solid rgba(120,230,140,.3);
+        background:rgba(4,10,5,.78)}
+  #vitals .vt{display:flex;align-items:center;margin:3px 0}
+  #vitals .tag{width:52px;font-size:10px;letter-spacing:2px;color:#6fae78}
+  #vitals .bar{flex:1;height:10px;border:1px solid rgba(120,230,140,.35);background:rgba(0,0,0,.6)}
+  #vitals .fill{height:100%;background:linear-gradient(90deg,#4a9f55,#8fe8a0);box-shadow:0 0 8px rgba(120,255,140,.35)}
+  #vitals .fill.low{background:linear-gradient(90deg,#b33,#ff5555);box-shadow:0 0 8px rgba(255,80,80,.5)}
+  #vitals .fill.stam{background:linear-gradient(90deg,#3a7bd5,#7ec8ff)}
+  #vitals .fill.armor{background:linear-gradient(90deg,#2f6b8a,#5fd0e0)}
+  #vitals .num{width:40px;text-align:right;font-size:11px;color:#b8f0a0;margin-left:6px}
+  #armorrow{display:none}
 
-  #weaponinfo{position:absolute;left:22px;bottom:26px}
-  #weaponname{font-size:17px;font-weight:600;letter-spacing:1px;color:#ffe08a;text-shadow:0 0 12px rgba(255,200,80,.4)}
-  #ammo{font-size:26px;font-weight:700;color:#fff;text-shadow:0 2px 6px rgba(0,0,0,.6)}
-  #weaponinfo .sub{font-size:11px;color:#8fa6cf;margin-top:2px}
+  #weaponinfo{position:absolute;left:18px;bottom:20px;padding:10px 14px;border:1px solid rgba(120,230,140,.3);
+        background:rgba(4,10,5,.78);min-width:180px}
+  #weaponname{font-size:14px;letter-spacing:2px;color:#ffd75e;font-weight:700}
+  #ammo{font-size:30px;font-weight:700;color:#e8ffe8;margin:2px 0}
+  #ammo .ammosep{color:#4a6f52;margin:0 4px;font-size:18px}
+  #ammo .res{color:#8fb890;font-size:22px}
+  #weaponsub{font-size:11px;color:#6fae78;letter-spacing:1px;margin-top:2px;min-height:14px}
 
-  #killfeed{position:absolute;right:22px;top:20px;width:280px;text-align:right}
-  #killfeed .kf{font-size:13px;margin:3px 0;padding:5px 10px;border-radius:8px;background:rgba(8,14,34,.7);
-        border-left:3px solid #4c8dff;animation:kfin .2s ease;text-shadow:0 1px 2px #000}
-  @keyframes kfin{from{opacity:0;transform:translateX(20px)}to{opacity:1;transform:none}}
-  #killfeed .kf .k{font-weight:700}
+  #killfeed{position:absolute;right:18px;top:18px;width:310px;text-align:right}
+  #killfeed .kf{font-size:12px;margin:2px 0;padding:4px 8px;background:rgba(4,10,5,.78);
+        border-right:2px solid #4a9f55;color:#9fbfa4;animation:kfin .18s ease;letter-spacing:1px}
+  @keyframes kfin{from{opacity:0;transform:translateX(16px)}to{opacity:1;transform:none}}
+  #killfeed .kf .k{font-weight:700;color:#d9f2da}
+  #killfeed .kf .wpn{color:#6fae78}
 
-  #scoreboard{position:absolute;left:22px;top:64px;width:200px;font-size:12px;background:rgba(8,14,34,.55);
-        border-radius:10px;padding:8px 10px;border:1px solid rgba(110,160,255,.18)}
-  #scoreboard .sb-title{font-size:10px;color:#8fa6cf;letter-spacing:3px;margin-bottom:4px}
-  #scoreboard .sb-row{display:flex;justify-content:space-between;padding:1px 2px;color:#cfe4ff}
-  #scoreboard .sb-row.me{color:#7ee0ff;font-weight:700}
+  #scoreboard{position:absolute;left:18px;top:132px;width:210px;font-size:11px;background:rgba(4,10,5,.72);
+        padding:8px 10px;border:1px solid rgba(120,230,140,.25)}
+  #scoreboard .sb-title{font-size:9px;color:#5f8f66;letter-spacing:2px;margin-bottom:4px}
+  #scoreboard .sb-row{display:flex;justify-content:space-between;padding:1px 2px;color:#9fbfa4}
+  #scoreboard .sb-row.me{color:#b8f0a0;font-weight:700}
 
-  #minimap{position:absolute;right:22px;bottom:22px;border-radius:12px;overflow:hidden;border:1px solid rgba(110,160,255,.3);
-        box-shadow:0 0 20px rgba(60,120,255,.2);background:rgba(8,14,34,.7)}
+  #minimap{position:absolute;right:18px;bottom:18px;border:1px solid rgba(120,230,140,.4);box-shadow:0 0 18px rgba(90,200,110,.15)}
+  #minimap canvas{display:block;background:rgba(2,6,3,.92)}
 
-  #netinfo{position:absolute;top:20px;left:50%;transform:translateX(-50%);font-size:13px;color:#9fe6ff;
-        background:rgba(8,14,34,.65);border:1px solid rgba(90,180,255,.35);padding:6px 16px;border-radius:20px;letter-spacing:1px}
-  #netinfo .dot{display:inline-block;width:8px;height:8px;border-radius:50%;background:#3dff88;margin-right:6px;box-shadow:0 0 8px #3dff88}
+  #netinfo{position:absolute;top:16px;left:50%;transform:translateX(-50%);font-size:12px;color:#b8f0a0;
+        background:rgba(4,10,5,.8);border:1px solid rgba(120,230,140,.4);padding:6px 16px;letter-spacing:1px}
+  #netinfo .dot{display:inline-block;width:7px;height:7px;border-radius:50%;background:#7CFC60;margin-right:6px;
+        box-shadow:0 0 8px #7CFC60;animation:blink 1.2s infinite}
+  @keyframes blink{50%{opacity:.35}}
 
-  #centerMsg{position:absolute;left:50%;top:38%;transform:translate(-50%,-50%);font-size:34px;font-weight:800;letter-spacing:4px;
-        text-shadow:0 0 24px rgba(120,180,255,.7);color:#eaf5ff;text-align:center}
+  #centerMsg{position:absolute;left:50%;top:36%;transform:translate(-50%,-50%);font-size:30px;font-weight:700;
+        letter-spacing:5px;color:#e8ffe8;text-shadow:0 0 20px rgba(120,255,140,.5),0 2px 6px #000;text-align:center}
+  #lowhp{position:fixed;inset:0;z-index:15;pointer-events:none;
+        background:radial-gradient(ellipse at center,transparent 42%,rgba(180,20,20,.4) 100%)}
 
-  #overlay{position:fixed;inset:0;z-index:40;display:none;align-items:center;justify-content:center;background:rgba(3,6,16,.78);backdrop-filter:blur(4px)}
-  #overlay .box{width:340px;text-align:center;padding:30px;border-radius:18px;background:rgba(10,16,38,.9);border:1px solid rgba(110,160,255,.3)}
-  #overlay h3{font-size:26px;margin-bottom:6px;letter-spacing:4px}
-  #overlay p{color:#9db6e4;font-size:14px;margin:8px 0 18px}
-  #overlay button{display:block;width:100%;margin-top:10px;padding:12px;border-radius:10px;border:1px solid rgba(110,160,255,.35);
-        background:linear-gradient(135deg,rgba(40,80,180,.6),rgba(20,40,110,.6));color:#eaf3ff;font-size:15px;cursor:pointer;letter-spacing:2px}
-  #overlay button:hover{border-color:#5aa7ff;box-shadow:0 0 16px rgba(80,160,255,.4)}
+  #overlay{position:fixed;inset:0;z-index:40;display:none;align-items:center;justify-content:center;background:rgba(2,5,3,.82)}
+  #overlay .box{width:340px;text-align:center;padding:26px;border:1px solid rgba(120,230,140,.4);background:rgba(4,10,5,.92);
+        clip-path:polygon(0 0,100% 0,100% calc(100% - 12px),calc(100% - 12px) 100%,0 100%)}
+  #overlay h3{font-size:24px;letter-spacing:4px;color:#b8f0a0;margin-bottom:6px}
+  #overlay p{color:#7fa884;font-size:13px;margin:6px 0 16px}
+  #overlay button{display:block;width:100%;margin-top:8px;padding:11px;font-family:inherit;letter-spacing:2px;
+        color:#b8f0a0;background:transparent;border:1px solid rgba(120,230,140,.4);cursor:pointer;font-size:14px}
+  #overlay button:hover{background:rgba(120,230,140,.12)}
 </style>
 </head>
 <body>
@@ -95,41 +105,41 @@
 <div id="menu">
   <div class="panel">
     <h1>星域猎手</h1>
-    <h2>S T E L L A R &nbsp; A R E N A</h2>
-    <div class="namebox"><input type="text" id="pname" maxlength="10" placeholder="输入你的昵称" autocomplete="off"></div>
-    <button class="primary" onclick="startSingle()">🎯 单人训练（对战机器人）</button>
-    <button onclick="startLocal2()">👥 本地双人合作</button>
-    <button onclick="startHost()">🛰️ 创建房间（联机对战）</button>
+    <h2>OPERATION: HUNTER PROTOCOL</h2>
+    <div class="namebox"><input type="text" id="pname" maxlength="10" placeholder="输入作战代号" autocomplete="off"></div>
+    <button class="primary" onclick="startSingle()">[01] 单人训练 // 对抗机器人</button>
+    <button onclick="startLocal2()">[02] 本地双人 // 协同作战</button>
+    <button onclick="startHost()">[03] 创建房间 // 联机部署</button>
     <div class="joinrow">
-      <input type="text" id="roomid" placeholder="输入房间 ID 加入" autocomplete="off">
-      <button onclick="joinGame()">加入</button>
+      <input type="text" id="roomid" placeholder="输入目标房间 ID" autocomplete="off">
+      <button onclick="joinGame()">[04] 加入</button>
     </div>
     <div id="err"></div>
     <div class="help">
-      <b>操控（P1）：</b> WASD 移动 · 鼠标瞄准 · 左键射击 · Shift/Space 冲刺 · R 换弹 · Q/E 切枪 · M 静音 · Esc 暂停<br>
-      <b>P2（本地双人）：</b> 方向键移动 · IJKL 瞄准 · 回车 射击 · 右Shift 冲刺<br>
-      <b>联机：</b> 创建房间后把右上角<b>房间 ID</b>发给朋友，对方输入 ID 加入即可（双方需联网，走免费的 PeerJS 云中转）。最多 1 主机 + 3 客机。<br>
-      <b>目标：</b> 与机器人和对手混战，存活并拿到最多击杀！<br>
-      <b>场地：</b> 大幅扩大的竞技场 · 中央堡垒 + 20 个掩体，打不过就绕！
+      <b>操控（P1）：</b> WASD 移动 · 鼠标瞄准 · 左键射击 · Shift 奔跑（耗体力） · R 换弹 · Q/E 切枪 · M 静音 · Esc 暂停<br>
+      <b>P2（本地双人）：</b> 方向键移动 · IJKL 瞄准 · 回车 射击 · 右Shift 奔跑<br>
+      <b>硬核规则：</b> 换弹丢弃当前弹匣余弹 · 移动/连射散布扩大、站定收束 · 开枪有后坐力需压枪 · 受击减速 · 体力耗尽无法奔跑<br>
+      <b>联机：</b> 创建房间 → 把右上角<b>房间 ID</b>发给朋友 → 对方输入 ID 加入（双方需联网）<br>
+      <b>目标：</b> 与机器人和对手混战，存活并拿到最多击杀！
     </div>
-    <div class="foot">提示：本页无任何外链资源（联机组件除外），断网也能玩单机模式</div>
-    <button class="mbtn" onclick="toggleSound()">🔊 音效：开 / 关（M）</button>
+    <div class="foot">断网可玩单机/本地双人 · 联机组件仅在需要时加载</div>
+    <button class="mbtn" onclick="toggleSound()">[00] 音效：开 / 关（M）</button>
   </div>
 </div>
 
 <!-- HUD -->
 <div id="hud">
-  <div id="hpwrap">
-    <div class="lbl">护甲 / 生命</div>
-    <div id="hpbar"><div class="fill" id="hpfill"></div><span id="hptext"></span></div>
-    <div id="shieldbar"><div class="fill" id="shieldfill"></div></div>
+  <div id="vitals">
+    <div class="vt"><span class="tag">HULL</span><div class="bar"><div class="fill" id="hpfill"></div></div><span class="num" id="hptext"></span></div>
+    <div class="vt" id="armorrow"><span class="tag">ARMOR</span><div class="bar"><div class="fill armor" id="shieldfill"></div></div><span class="num" id="shieldtext"></span></div>
+    <div class="vt"><span class="tag">STAM</span><div class="bar"><div class="fill stam" id="stamfill"></div></div><span class="num" id="stamtext"></span></div>
   </div>
   <div id="weaponinfo">
-    <span id="weaponname"></span><br>
-    <span id="ammo"></span>
+    <div id="weaponname"></div>
+    <div id="ammo"><span id="ammoCur"></span><span class="ammosep">/</span><span class="res" id="ammoRes"></span></div>
     <div class="sub" id="weaponsub"></div>
   </div>
-  <div id="scoreboard"><div class="sb-title">击杀榜</div><div id="sblist"></div></div>
+  <div id="scoreboard"><div class="sb-title">SCOREBOARD // 击杀</div><div id="sblist"></div></div>
   <div id="killfeed"></div>
   <div id="minimap"><canvas id="mm" width="168" height="116"></canvas></div>
   <div id="netinfo" class="hidden"><span class="dot"></span><span id="nettext"></span></div>
@@ -145,6 +155,9 @@
     <button onclick="backToMenu()">返回主菜单</button>
   </div>
 </div>
+
+<!-- 低血警示 -->
+<div id="lowhp" class="hidden"></div>
 
 <!-- PeerJS 加载器（多 CDN 回退） -->
 <script>
@@ -263,6 +276,8 @@ function sndPickup(){tone(520,0.08,'sine',0.16,780);tone(780,0.1,'sine',0.14,104
 function sndDash(){noise(0.14,0.13,1300);}
 function sndReload(){tone(760,0.04,'square',0.08,420);tone(520,0.05,'square',0.08,300,0.09);}
 function sndEmpty(){tone(220,0.05,'square',0.1,160);}
+function sndExhaust(){noise(0.45,0.12,650);tone(150,0.2,'sine',0.08,90);}
+function sndHeart(){tone(58,0.13,'sine',0.3,42);tone(52,0.12,'sine',0.22,40,0.22);}
 function toggleSound(){
   muted=!muted;ensureAudio();
   var b=document.querySelector('#menu .mbtn');
@@ -304,10 +319,10 @@ var PALETTE=['#4cc9f0','#ff5c8a','#f9c74f','#7ae582','#c77dff','#ff8c42','#5ad1c
 var BOT_COLORS=['#7f8ea3','#8a7f6b','#6b8a7a','#8a6b7a','#6b7a8a','#7a8a6b','#7d6b8a','#8a6b6b'];
 var BOT_NAMES=['铁锈','幽灵','毒牙','响尾蛇','寒鸦','火狐','钢锯','夜枭','影刃','狂飙'];
 var WEAPONS={
-  pistol:{name:'手枪',dmg:15,fire:0.17,speed:780,spread:0.025,mag:12,reload:0.9,pellets:1,auto:false,color:'#ffd75e',size:2.6},
-  smg:{name:'冲锋枪',dmg:8,fire:0.075,speed:840,spread:0.05,mag:30,reload:1.2,pellets:1,auto:true,color:'#7ee0ff',size:2.4},
-  shotgun:{name:'霰弹枪',dmg:9,fire:0.85,speed:660,spread:0.16,mag:6,reload:1.5,pellets:6,auto:false,color:'#ffb347',size:2.8},
-  sniper:{name:'狙击枪',dmg:50,fire:1.15,speed:1500,spread:0.003,mag:5,reload:1.9,pellets:1,auto:false,color:'#c77dff',size:3.4}
+  pistol:{name:'手枪',dmg:15,fire:0.17,speed:780,spread:0.025,mag:12,reload:0.9,pellets:1,auto:false,color:'#ffd75e',size:2.6,reserveMax:48,recoil:6,spreadBase:0.02,spreadMove:0.045,spreadFire:0.006},
+  smg:{name:'冲锋枪',dmg:8,fire:0.075,speed:840,spread:0.05,mag:30,reload:1.2,pellets:1,auto:true,color:'#7ee0ff',size:2.4,reserveMax:150,recoil:3.5,spreadBase:0.04,spreadMove:0.07,spreadFire:0.014},
+  shotgun:{name:'霰弹枪',dmg:9,fire:0.85,speed:660,spread:0.16,mag:6,reload:1.5,pellets:6,auto:false,color:'#ffb347',size:2.8,reserveMax:24,recoil:9,spreadBase:0,spreadMove:0,spreadFire:0},
+  sniper:{name:'狙击枪',dmg:50,fire:1.15,speed:1500,spread:0.003,mag:5,reload:1.9,pellets:1,auto:false,color:'#c77dff',size:3.4,reserveMax:15,recoil:15,spreadBase:0.004,spreadMove:0.012,spreadFire:0.004}
 };
 var WEAPON_ORDER=['pistol','smg','shotgun','sniper'];
 var WEAPON_CHANCE=[['pistol',35],['smg',30],['shotgun',20],['sniper',15]];
@@ -383,7 +398,7 @@ var mode='menu';          // menu | single | local2 | host | client
 var players=[],bullets=[],pickups=[],parts=[],texts=[];
 var events=[];
 var simT=0;
-var localInputs=[{mx:0,my:0,aim:0,shoot:false,dash:false},{mx:0,my:0,aim:0,shoot:false,dash:false}];
+var localInputs=[{mx:0,my:0,aim:0,shoot:false,dash:false,reloadEdge:false,prevReload:false},{mx:0,my:0,aim:0,shoot:false,dash:false}];
 var remoteInputs={};
 var myName='';
 
@@ -398,6 +413,7 @@ var disconnected=false;
 /* ---------- 相机 / 特效 ---------- */
 var cam={x:CX,y:CY,zoom:1};
 var shake=0,shakeT=0;
+var heartLast=0;   // 低血心跳计时
 var gameStartMsg=0;
 
 /* ---------- 粒子 ---------- */
@@ -428,6 +444,9 @@ function explosion(x,y){
 function trail(p){
   addPart({type:'trail',x:p.x,y:p.y,life:.28,max:.28,size:12,color:p.color});
 }
+function dust(p){
+  addPart({type:'dust',x:p.x+rand(-6,6),y:p.y+rand(-6,6),vx:rand(-20,20),vy:rand(-20,20),life:rand(.3,.6),max:.6,size:rand(2,4),color:'#9aa37a'});
+}
 function shell(x,y,a){
   addPart({type:'shell',x:x,y:y,vx:Math.cos(a+Math.PI/2)*rand(60,130),vy:Math.sin(a+Math.PI/2)*rand(60,130),rot:rand(0,TAU),vr:rand(-12,12),life:.6,max:.6,size:3,color:'#ffd75e'});
 }
@@ -456,6 +475,8 @@ function newPlayer(id,name,color,isBot,weapon){
     x:CX,y:CY,vx:0,vy:0,angle:0,r:14,
     hp:100,maxHp:100,shield:0,
     speed:265,weapon:weapon||'pistol',ammo:12,mag:12,
+    reserve:0,stamina:100,staminaMax:100,exhaustT:0,
+    recoilUp:0,spreadCur:0.02,hurtSlow:0,
     fireCd:0,reloading:false,reloadT:0,flash:0,recoil:0,hurtT:0,
     dashCd:0,dashT:0,dashInv:0,boostT:0,
     bobPhase:rand(0,TAU),walkAmp:0,
@@ -464,6 +485,8 @@ function newPlayer(id,name,color,isBot,weapon){
     localIdx:-1,remoteConn:null,botPhase:rand(0,TAU),botTarget:null
   };
   p.isLocal=function(){return this.localIdx>=0;};
+  p.reserve=WEAPONS[p.weapon]?WEAPONS[p.weapon].reserveMax:0;
+  p.spreadCur=WEAPONS[p.weapon]?WEAPONS[p.weapon].spreadBase:0.02;
   var sp=spawnPoints[players.length%spawnPoints.length];
   p.x=sp.x;p.y=sp.y;
   return p;
@@ -498,7 +521,8 @@ var PICKUP_TYPES=[
   {t:'speed',name:'疾速药剂',color:'#f9c74f',icon:'»'},
   {t:'smg',name:'冲锋枪',color:'#7ee0ff',icon:'W'},
   {t:'shotgun',name:'霰弹枪',color:'#ffb347',icon:'W'},
-  {t:'sniper',name:'狙击枪',color:'#c77dff',icon:'W'}
+  {t:'sniper',name:'狙击枪',color:'#c77dff',icon:'W'},
+  {t:'ammo',name:'弹药补给',color:'#ffd75e',icon:'≡'}
 ];
 var pickupTimer=2;
 function addPickup(type,x,y){
@@ -533,7 +557,7 @@ function updatePickups(dt){
 function applyPickup(p,pk){
   var cfg=WEAPONS[pk.type];
   if(cfg){
-    p.weapon=pk.type;p.mag=cfg.mag;p.ammo=cfg.mag;p.reloading=false;
+    p.weapon=pk.type;p.mag=cfg.mag;p.ammo=cfg.mag;p.reserve=cfg.reserveMax;p.reloading=false;
     addPart({type:'ring',x:pk.x,y:pk.y,life:.4,max:.4,size:50,color:cfg.color});
     texts.push({x:p.x,y:p.y-26,txt:'获得 '+cfg.name,color:cfg.color,life:1,max:1,vy:-40,size:14});
   }else if(pk.type==='medkit'){
@@ -545,6 +569,11 @@ function applyPickup(p,pk){
   }else if(pk.type==='speed'){
     p.boostT=10;
     texts.push({x:p.x,y:p.y-26,txt:'疾速 ×1.25',color:'#f9c74f',life:1,max:1,vy:-40,size:14});
+  }else if(pk.type==='ammo'){
+    var w=WEAPONS[p.weapon];
+    var amt=Math.round(w.reserveMax*0.5);
+    p.reserve=Math.min(w.reserveMax,p.reserve+amt);
+    texts.push({x:p.x,y:p.y-26,txt:'弹药 +'+amt,color:'#ffd75e',life:1,max:1,vy:-40,size:14});
   }
   if(p.isLocal())sndPickup();
 }
@@ -556,39 +585,50 @@ function applyMove(p,inp,dt){
     if(p.respawn<=0)respawnPlayer(p);
     return;
   }
-  p.fireCd-=dt;p.flash-=dt;p.hurtT-=dt;
+  p.fireCd-=dt;p.flash-=dt;p.hurtT-=dt;p.hurtSlow-=dt;p.exhaustT-=dt;
   p.recoil=lerp(p.recoil,0,1-Math.exp(-12*dt));
+  p.recoilUp=lerp(p.recoilUp,0,1-Math.exp(-9*dt));
   if(p.reloading){
     p.reloadT-=dt;
-    if(p.reloadT<=0){p.reloading=false;p.ammo=p.mag;if(p.isLocal())sndReload();}
+    if(p.reloadT<=0){
+      var w=WEAPONS[p.weapon];
+      var need=p.mag-p.ammo;
+      var take=Math.min(need,p.reserve);
+      p.ammo+=take;p.reserve-=take;
+      p.reloading=false;
+      if(p.isLocal())sndReload();
+    }
   }
   var mvx=inp.mx||0,mvy=inp.my||0;
   var ml=Math.hypot(mvx,mvy);
   if(ml>1){mvx/=ml;mvy/=ml;}
-  var sp=p.speed*(p.dashT>0?2.5:1)*(p.boostT>0?1.25:1);
-  var k=1-Math.exp(-14*dt);
+  // 奔跑（体力系统，替代原冲刺无敌帧）
+  var running=inp.dash&&ml>0.2&&p.stamina>1&&p.hurtSlow<=0;
+  if(running){
+    p.stamina-=26*dt;
+    if(p.stamina<=0&&p.exhaustT<=0){p.exhaustT=0.9;if(p.isLocal())sndExhaust();}
+  }else{
+    p.stamina=Math.min(p.staminaMax,p.stamina+20*dt);
+  }
+  var sp=p.speed*(running?1.42:1)*(p.boostT>0?1.2:1)*(p.hurtSlow>0?0.55:1);
+  var k=1-Math.exp(-8*dt);            // 更重的惯性，走位需预判
   p.vx=lerp(p.vx,mvx*sp,k);
   p.vy=lerp(p.vy,mvy*sp,k);
   p.x+=p.vx*dt;p.y+=p.vy*dt;
-  p.dashCd-=dt;p.dashT-=dt;p.dashInv-=dt;p.boostT-=dt;
-  if(inp.dash&&!p.prevDash&&p.dashCd<=0){
-    p.dashCd=1.4;p.dashT=0.16;p.dashInv=0.32;
-    if(p.isLocal())sndDash();
-  }
-  p.prevDash=!!inp.dash;
-  if(p.dashT>0){
-    p.x+=p.vx*dt*0.8;p.y+=p.vy*dt*0.8;
-    trail(p);
-  }
+  // 准星/散布收束（移动+奔跑加大扩散，站定收束）
+  var w2=WEAPONS[p.weapon];
+  var target=w2.spreadBase+(ml>0.1?(w2.spreadMove*(running?1.6:ml)):0);
+  p.spreadCur=lerp(p.spreadCur,target,1-Math.exp(-2.5*dt));
   p.walkAmp=clamp(ml,0,1);
   p.bobPhase+=dt*11*ml;
+  if(running&&Math.random()<dt*14)dust(p);
   circleBlock(p);
 }
 function fire(p,w){
   var a=p.angle,pel=w.pellets||1;
   for(var i=0;i<pel;i++){
     var ang;
-    if(pel===1)ang=a+rand(-w.spread,w.spread);
+    if(pel===1)ang=a+rand(-p.spreadCur,p.spreadCur);
     else ang=a+(i-(pel-1)/2)*w.spread+rand(-0.02,0.02);
     bullets.push({
       x:p.x+Math.cos(a)*22,y:p.y+Math.sin(a)*22,
@@ -597,11 +637,13 @@ function fire(p,w){
     });
   }
   p.fireCd=w.fire;p.ammo--;p.recoil=1;p.flash=0.07;
+  p.recoilUp+=w.recoil;
+  p.spreadCur=Math.min(0.15,p.spreadCur+w.spreadFire);
   if(p.isLocal()){
     sndShot(true,w);addShake(2.2,0.06);
     shell(p.x+Math.cos(p.angle)*18,p.y+Math.sin(p.angle)*18,p.angle);
   }
-  if(p.ammo<=0&&!p.reloading){
+  if(p.ammo<=0&&!p.reloading&&p.reserve>0){
     p.reloading=true;p.reloadT=w.reload;
     if(p.isLocal())sndReload();
   }
@@ -609,10 +651,18 @@ function fire(p,w){
 function shootCheck(p,inp){
   var w=WEAPONS[p.weapon];
   if(!w)return;
-  if(inp.shoot&&p.fireCd<=0&&!p.reloading){
-    if(w.auto||(!p.prevShoot)){
-      if(p.isLocal()&&w.name==='狙击枪')addShake(4,0.1);
-      fire(p,w);
+  if(inp.shoot){
+    // 换弹打断仅在"新的扣扳机"时生效，按住不放不打断自动换弹
+    if(p.reloading&&!p.prevShoot){
+      p.reloading=false;p.reloadT=0;
+    }
+    if(p.fireCd<=0){
+      if(w.auto||(!p.prevShoot)){
+        if(p.ammo<=0){
+          if(!p.prevShoot&&p.isLocal())sndEmpty();
+        }
+        else fire(p,w);
+      }
     }
   }
   p.prevShoot=!!inp.shoot;
@@ -629,7 +679,7 @@ function damagePlayer(p,dmg,killerId,wName){
     p.shield-=s;d2-=s;
   }
   if(d2>0){
-    p.hp-=d2;p.hurtT=0.22;
+    p.hp-=d2;p.hurtT=0.22;p.hurtSlow=0.35;   // 受击硬直：短暂减速
     blood(p.x,p.y);
     sparks(p.x,p.y,'#ffd9a0',4);
     dmgText(p.x,p.y,'-'+Math.round(d2),'#ffdf9e');
@@ -669,7 +719,9 @@ function respawnPlayer(p){
     if(md>bestD){bestD=md;best=sp;}
   }
   p.x=best.x;p.y=best.y;p.alive=true;p.hp=p.maxHp;p.shield=0;
-  var w=WEAPONS[p.weapon];p.ammo=w.mag;p.reloading=false;p.fireCd=0.4;p.vx=0;p.vy=0;
+  var w=WEAPONS[p.weapon];p.ammo=w.mag;p.reserve=w.reserveMax;p.reloading=false;
+  p.fireCd=0.4;p.vx=0;p.vy=0;p.stamina=100;p.spreadCur=w.spreadBase;
+  p.recoilUp=0;p.hurtSlow=0;
   addPart({type:'ring',x:p.x,y:p.y,life:.5,max:.5,size:60,color:p.color});
 }
 function updateBullets(dt){
@@ -780,6 +832,7 @@ function initGame(online){
   addPickup('smg',CX,CY-260);
   addPickup('shotgun',CX+250,CY-80);
   addPickup('sniper',CX-250,CY+120);
+  addPickup('ammo',CX+60,CY+180);
 }
 function startSingle(){
   ensureAudio();
@@ -878,9 +931,10 @@ function startHost(){
           if(rp){
             if(m.weapon&&WEAPONS[m.weapon]&&rp.weapon!==m.weapon){
               rp.weapon=m.weapon;rp.mag=WEAPONS[m.weapon].mag;
-              rp.ammo=WEAPONS[m.weapon].mag;rp.reloading=false;
+              rp.ammo=WEAPONS[m.weapon].mag;rp.reserve=WEAPONS[m.weapon].reserveMax;
+              rp.reloading=false;
             }
-            if(m.reload&&!rp._prevReload&&!rp.reloading&&rp.ammo<rp.mag){
+            if(m.reload&&!rp._prevReload&&!rp.reloading&&rp.ammo<rp.mag&&rp.reserve>0){
               rp.reloading=true;rp.reloadT=WEAPONS[rp.weapon].reload;
             }
             rp._prevReload=!!m.reload;
@@ -930,7 +984,9 @@ function broadcastSnap(){
   for(var i=0;i<players.length;i++){
     var p=players[i];
     pl.push({id:p.id,x:Math.round(p.x*10)/10,y:Math.round(p.y*10)/10,angle:p.angle,
-      hp:Math.round(p.hp),shield:Math.round(p.shield),maxHp:p.maxHp,weapon:p.weapon,ammo:p.ammo,
+      hp:Math.round(p.hp),shield:Math.round(p.shield),maxHp:p.maxHp,weapon:p.weapon,
+      ammo:p.ammo,reserve:p.reserve,stamina:Math.round(p.stamina),
+      hurtSlow:p.hurtSlow||0,hurtT:p.hurtT||0,
       alive:p.alive,respawn:Math.round(p.respawn*10)/10,kills:p.kills,deaths:p.deaths,
       name:p.name,color:p.color,isBot:p.isBot});
   }
@@ -1027,6 +1083,7 @@ function processSnap(s){
     v.pang=(v.angle!=null?v.angle:sp.angle);
     v.x=sp.x;v.y=sp.y;v.angle=sp.angle;
     v.hp=sp.hp;v.shield=sp.shield;v.maxHp=sp.maxHp;v.weapon=sp.weapon;v.ammo=sp.ammo;
+    v.reserve=sp.reserve;v.stamina=sp.stamina;
     v.alive=sp.alive;v.respawn=sp.respawn;v.kills=sp.kills;v.deaths=sp.deaths;
     v.name=sp.name;v.color=sp.color;v.isBot=sp.isBot;
     v.t0=prevSnapRecv||lastSnapRecv;v.t1=lastSnapRecv;
@@ -1048,6 +1105,10 @@ function processSnap(s){
       var wasAlive=self.alive;
       self.hp=sp2.hp;self.shield=sp2.shield;self.ammo=sp2.ammo;self.weapon=sp2.weapon;
       self.mag=WEAPONS[sp2.weapon]?WEAPONS[sp2.weapon].mag:self.mag;
+      self.reserve=(sp2.reserve!=null)?sp2.reserve:self.reserve;
+      self.stamina=(sp2.stamina!=null)?sp2.stamina:self.stamina;
+      self.hurtSlow=(sp2.hurtSlow!=null)?sp2.hurtSlow:0;
+      self.hurtT=(sp2.hurtT!=null)?sp2.hurtT:0;
       self.alive=sp2.alive;self.respawn=sp2.respawn;self.kills=sp2.kills;self.deaths=sp2.deaths;
       self.maxHp=sp2.maxHp;
       if(sp2.alive&&self.alive){
@@ -1084,43 +1145,69 @@ function predictSelf(dt){
     updateCameraFor(self,dt);
     return;
   }
-  self.fireCd-=dt;self.flash-=dt;self.hurtT-=dt;
+  self.fireCd-=dt;self.flash-=dt;self.hurtT-=dt;self.hurtSlow-=dt;self.exhaustT-=dt;
   self.recoil=lerp(self.recoil,0,1-Math.exp(-12*dt));
+  self.recoilUp=lerp(self.recoilUp,0,1-Math.exp(-9*dt));
   if(self.reloading){
     self.reloadT-=dt;
-    if(self.reloadT<=0){self.reloading=false;self.ammo=WEAPONS[self.weapon].mag;}
+    if(self.reloadT<=0){
+      var w=WEAPONS[self.weapon];
+      var need=self.mag-self.ammo;
+      var take=Math.min(need,self.reserve);
+      self.ammo+=take;self.reserve-=take;
+      self.reloading=false;
+      sndReload();
+    }
   }
   var mvx=inp.mx||0,mvy=inp.my||0;
   var ml=Math.hypot(mvx,mvy);
   if(ml>1){mvx/=ml;mvy/=ml;}
-  var sp=self.speed*(self.dashT>0?2.5:1)*(self.boostT>0?1.25:1);
-  var k=1-Math.exp(-14*dt);
+  var running=inp.dash&&ml>0.2&&self.stamina>1&&self.hurtSlow<=0;
+  if(running){
+    self.stamina-=26*dt;
+    if(self.stamina<=0&&self.exhaustT<=0){self.exhaustT=0.9;sndExhaust();}
+  }else{
+    self.stamina=Math.min(self.staminaMax,self.stamina+20*dt);
+  }
+  var sp=self.speed*(running?1.42:1)*(self.boostT>0?1.2:1)*(self.hurtSlow>0?0.55:1);
+  var k=1-Math.exp(-8*dt);
   self.vx=lerp(self.vx,mvx*sp,k);
   self.vy=lerp(self.vy,mvy*sp,k);
   self.x+=self.vx*dt;self.y+=self.vy*dt;
-  self.dashCd-=dt;self.dashT-=dt;self.dashInv-=dt;self.boostT-=dt;
-  if(inp.dash&&!self.prevDash&&self.dashCd<=0){
-    self.dashCd=1.4;self.dashT=0.16;self.dashInv=0.32;
-    sndDash(true);
-  }
-  self.prevDash=!!inp.dash;
-  if(self.dashT>0){self.x+=self.vx*dt*0.8;self.y+=self.vy*dt*0.8;trail(self);}
+  var w2=WEAPONS[self.weapon];
+  var target=w2.spreadBase+(ml>0.1?(w2.spreadMove*(running?1.6:ml)):0);
+  self.spreadCur=lerp(self.spreadCur,target,1-Math.exp(-2.5*dt));
   self.walkAmp=clamp(ml,0,1);
   self.bobPhase+=dt*11*ml;
+  if(running&&Math.random()<dt*14)dust(self);
   circleBlock(self);
   // 本地射击表现（实际判定在主机）
-  if(inp.shoot&&self.fireCd<=0&&!self.reloading){
-    var w=WEAPONS[self.weapon];
-    if(w.auto||!self.prevShoot){
-      self.fireCd=w.fire;self.ammo--;self.recoil=1;self.flash=0.07;
-      sndShot(true,w);addShake(2.2,0.06);
-      shell(self.x+Math.cos(self.angle)*18,self.y+Math.sin(self.angle)*18,self.angle);
-      if(self.ammo<=0){self.reloading=true;self.reloadT=w.reload;sndReload();}
+  var w3=WEAPONS[self.weapon];
+  if(inp.shoot){
+    if(self.reloading&&!self.prevShoot){
+      self.reloading=false;self.reloadT=0;
+    }
+    if(self.fireCd<=0){
+      if(w3.auto||!self.prevShoot){
+        if(self.ammo<=0){
+          if(!self.prevShoot)sndEmpty();
+        }
+        else{
+          self.fireCd=w3.fire;self.ammo--;self.recoil=1;self.flash=0.07;
+          self.recoilUp+=w3.recoil;
+          self.spreadCur=Math.min(0.15,self.spreadCur+w3.spreadFire);
+          sndShot(true,w3);addShake(2.2,0.06);
+          shell(self.x+Math.cos(self.angle)*18,self.y+Math.sin(self.angle)*18,self.angle);
+          if(self.ammo<=0&&!self.reloading&&self.reserve>0){
+            self.reloading=true;self.reloadT=w3.reload;sndReload();
+          }
+        }
+      }
     }
   }
   self.prevShoot=!!inp.shoot;
-  if(inp.reloadEdge&&!self.reloading&&self.ammo<WEAPONS[self.weapon].mag){
-    self.reloading=true;self.reloadT=WEAPONS[self.weapon].reload;sndReload();
+  if(inp.reloadEdge&&!self.reloading&&self.ammo<self.mag&&self.reserve>0){
+    self.reloading=true;self.reloadT=w3.reload;sndReload();
   }
   // 相机
   updateCameraFor(self,dt);
@@ -1195,7 +1282,7 @@ function collectInputs(){
   }
   if(localInputs[0].reloadEdge){
     var lp3=localPlayers()[0];
-    if(lp3&&!lp3.reloading&&WEAPONS[lp3.weapon].mag>0&&lp3.ammo<lp3.mag){
+    if(lp3&&!lp3.reloading&&WEAPONS[lp3.weapon].mag>0&&lp3.ammo<lp3.mag&&lp3.reserve>0){
       lp3.reloading=true;lp3.reloadT=WEAPONS[lp3.weapon].reload;sndReload();
     }
   }
@@ -1211,7 +1298,7 @@ function switchWeapon(p,dir){
   var idx=WEAPON_ORDER.indexOf(p.weapon);
   var ni=(idx+dir+WEAPON_ORDER.length)%WEAPON_ORDER.length;
   var w=WEAPONS[WEAPON_ORDER[ni]];
-  p.weapon=WEAPON_ORDER[ni];p.mag=w.mag;p.ammo=w.mag;p.reloading=false;
+  p.weapon=WEAPON_ORDER[ni];p.mag=w.mag;p.ammo=w.mag;p.reserve=w.reserveMax;p.reloading=false;
   sndReload();
 }
 function mouseWorldX(){return cam.x+(mouse.x-W/2)/cam.zoom;}
@@ -1224,8 +1311,8 @@ function addKillFeed(killer,victim,weapon,kc,vc){
   var d=document.createElement('div');
   d.className='kf';
   d.innerHTML='<span class="k" style="color:'+kc+'">'+esc(killer)+'</span>'+
-    (weapon?' <span style="color:#9db6e4">['+esc(weapon)+']</span> ':' ')+
-    '→ <span class="k" style="color:'+vc+'">'+esc(victim)+'</span>';
+    (weapon?' <span class="wpn">['+esc(weapon)+']</span> ':' ')+
+    'KIA <span class="k" style="color:'+vc+'">'+esc(victim)+'</span>';
   el.insertBefore(d,el.firstChild);
   while(el.children.length>6)el.removeChild(el.lastChild);
   setTimeout(function(){if(d.parentNode)d.parentNode.removeChild(d);},4500);
@@ -1267,24 +1354,44 @@ function updateHud(){
   var pct=clamp(p.hp/p.maxHp*100,0,100);
   hpEl.style.width=pct+'%';
   hpEl.classList.toggle('low',pct<35);
-  document.getElementById('hptext').textContent=Math.max(0,Math.round(p.hp))+'/'+p.maxHp;
-  var shEl=document.getElementById('shieldbar');
+  document.getElementById('hptext').textContent=Math.max(0,Math.round(p.hp));
+  var shEl=document.getElementById('armorrow');
   if(p.shield>0){
-    shEl.style.display='block';
+    shEl.style.display='flex';
     document.getElementById('shieldfill').style.width=clamp(p.shield/100*100,0,100)+'%';
+    document.getElementById('shieldtext').textContent=Math.round(p.shield);
   }else shEl.style.display='none';
+  var stEl=document.getElementById('stamfill');
+  stEl.style.width=clamp(p.stamina/p.staminaMax*100,0,100)+'%';
+  document.getElementById('stamtext').textContent=Math.round(p.stamina);
   var w=WEAPONS[p.weapon]||WEAPONS.pistol;
   document.getElementById('weaponname').textContent=w.name;
-  document.getElementById('ammo').textContent=p.reloading?'装填中…':(p.ammo+'/'+w.mag);
-  document.getElementById('weaponsub').textContent=(p.boostT>0?'⚡ 疾速 ':'')+(p.dashCd>0?'· 冲刺冷却':'· 冲刺就绪');
+  document.getElementById('ammoCur').textContent=p.ammo;
+  document.getElementById('ammoRes').textContent=p.reserve;
+  var sub='';
+  if(p.reloading)sub='RELOADING…';
+  else if(p.ammo<=0&&p.reserve<=0)sub='无弹药 // 寻找补给';
+  else if(p.exhaustT>0)sub='体力耗尽';
+  else if(p.hurtSlow>0)sub='受到打击';
+  if(p.boostT>0)sub+=(sub?' · ':'')+'疾速';
+  document.getElementById('weaponsub').textContent=sub||'READY';
+  // 低血红晕 + 心跳
+  var low=(p.hp/p.maxHp)<0.35&&p.alive;
+  var lh=document.getElementById('lowhp');
+  if(low)lh.classList.remove('hidden');
+  else lh.classList.add('hidden');
+  if(low){
+    var ht=performance.now();
+    if(ht-heartLast>900){heartLast=ht;sndHeart();}
+  }
   // 死亡提示
   var cm=document.getElementById('centerMsg');
   if(!p.alive&&mode!=='local2'){
     if(cm.classList.contains('hidden'))cm.classList.remove('hidden');
-    cm.textContent='你已阵亡 · '+(p.respawn>0?Math.ceil(p.respawn)+' 秒后重生':'重生中…');
+    cm.textContent='KIA · '+(p.respawn>0?Math.ceil(p.respawn)+' 秒后重生':'重生中…');
   }else if(gameStartMsg>0&&mode!=='menu'){
     if(cm.classList.contains('hidden'))cm.classList.remove('hidden');
-    cm.textContent='战斗开始！';
+    cm.textContent='部署完成';
   }else{
     if(!cm.classList.contains('hidden')&&p.alive&&gameStartMsg<=0)cm.classList.add('hidden');
   }
@@ -1429,7 +1536,6 @@ function drawPlayer(p,now,isSelf){
   // 阴影
   g.fillStyle='rgba(0,0,0,0.35)';
   g.beginPath();g.ellipse(0,10,13,6,0,0,TAU);g.fill();
-  if(p.dashInv>0&&Math.floor(now*18)%2===0)g.globalAlpha=0.55;
   // 身体光晕
   g.shadowColor=p.color;g.shadowBlur=16;
   var gr=g.createRadialGradient(-3,-4,2,0,0,15);
@@ -1537,6 +1643,10 @@ function drawParticles(){
       g.fillStyle=p.color;
       g.fillRect(-2.5,-1,5,2);
       g.restore();
+    }else if(p.type==='dust'){
+      g.globalAlpha=a*0.5;
+      g.fillStyle=p.color||'#9aa37a';
+      g.beginPath();g.arc(p.x,p.y,p.size*(0.6+0.4*(1-a)),0,TAU);g.fill();
     }
   }
   g.globalAlpha=1;
@@ -1604,21 +1714,27 @@ function drawRemoteView(v,now){
   },now,false);
 }
 function drawCrosshair(){
-  var cw=10+Math.min(mouse.down?6:0,6);
+  var lp=mode==='client'?self:(localPlayers()[0]||null);
+  var spd=lp&&lp.spreadCur?lp.spreadCur:0.02;
+  var ry=lp?lp.recoilUp||0:0;
+  var cw=6+spd*320;
+  var x=mouse.x,y=mouse.y-ry;
   g.save();
-  g.strokeStyle='rgba(255,255,255,0.9)';
-  g.lineWidth=1.6;
-  g.beginPath();g.arc(mouse.x,mouse.y,cw,0,TAU);g.stroke();
-  g.strokeStyle='rgba(255,255,255,0.5)';
-  g.beginPath();g.arc(mouse.x,mouse.y,cw+3,0,TAU);g.stroke();
-  g.fillStyle='#fff';
-  g.fillRect(mouse.x-1,mouse.y-1,2,2);
+  g.strokeStyle='rgba(214,255,224,0.85)';
+  g.lineWidth=1.2;
+  g.beginPath();g.arc(x,y,cw,0,TAU);g.stroke();
   g.beginPath();
-  g.moveTo(mouse.x,mouse.y-cw-7);g.lineTo(mouse.x,mouse.y-cw-2);
-  g.moveTo(mouse.x,mouse.y+cw+2);g.lineTo(mouse.x,mouse.y+cw+7);
-  g.moveTo(mouse.x-cw-7,mouse.y);g.lineTo(mouse.x-cw-2,mouse.y);
-  g.moveTo(mouse.x+cw+2,mouse.y);g.lineTo(mouse.x+cw+7,mouse.y);
+  g.moveTo(x,y-cw-6);g.lineTo(x,y-cw-1);
+  g.moveTo(x,y+cw+1);g.lineTo(x,y+cw+6);
+  g.moveTo(x-cw-6,y);g.lineTo(x-cw-1,y);
+  g.moveTo(x+cw+1,y);g.lineTo(x+cw+6,y);
   g.stroke();
+  g.fillStyle='#e8ffe8';
+  g.fillRect(x-1,y-1,2,2);
+  g.globalAlpha=0.35;
+  g.strokeStyle='rgba(214,255,224,0.5)';
+  g.beginPath();g.arc(x,y,cw+4,0,TAU);g.stroke();
+  g.globalAlpha=1;
   g.restore();
 }
 function drawMinimap(){
