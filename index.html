@@ -27,7 +27,7 @@
                 var s = document.createElement('script');
                 s.src = cdnList[i];
                 s.onload = function() {
-                    console.log('✅ Supabase 库加载成功：' + cdnList[i]);
+                    console.log('? Supabase 库加载成功：' + cdnList[i]);
                     if (typeof initSupabase === 'function') initSupabase();
                 };
                 s.onerror = function() { i++;
@@ -834,7 +834,7 @@
             font-weight: 700;
         }
         .nickname-crown::before {
-            content: '👑';
+            content: '??';
             margin-right: 3px;
         }
         .user-name {
@@ -2135,7 +2135,7 @@
     .cal-day.done { border-color: var(--success); background: rgba(34, 197, 94, 0.12); color: var(--success); }
     .cal-day.today { border-color: var(--accent); box-shadow: 0 0 0 1px var(--accent); color: var(--accent); }
     .cal-day.future { opacity: .4; }
-    .cal-day.done::after { content: '✓'; position: absolute; top: 2px; right: 4px; font-size: .58rem; color: var(--success); }
+    .cal-day.done::after { content: '?'; position: absolute; top: 2px; right: 4px; font-size: .58rem; color: var(--success); }
     .streak-bonus { display: grid; grid-template-columns: repeat(7, 1fr); gap: 6px; margin: 10px 0 4px; }
     .streak-bonus .sb-day {
         text-align: center;
@@ -2177,7 +2177,7 @@
     /* ===== 记忆翻牌 ===== */
     .mem-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; max-width: 380px; margin: 0 auto; }
     .mem-card { aspect-ratio: 1; border-radius: 14px; border: 1px solid var(--border-color); background: linear-gradient(135deg, var(--grad-pink), var(--grad-purple)); cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 1.6rem; transition: transform var(--dur-fast) var(--ease-bounce), background var(--transition), border-color var(--transition), box-shadow var(--dur-mid) var(--ease-out-soft); box-shadow: 0 4px 12px var(--shadow-color); }
-    .mem-card::before { content: '❔'; font-size: 1.5rem; opacity: .9; }
+    .mem-card::before { content: '?'; font-size: 1.5rem; opacity: .9; }
     .mem-card:hover { transform: translateY(-3px) scale(1.02); }
     .mem-card.flip { background: var(--bg-card); box-shadow: none; transform: rotateY(0deg); }
     .mem-card.flip::before { content: none; }
@@ -2267,31 +2267,31 @@
     <div class="container">
         <!-- 头部 -->
         <header>
-            <h1>💡 窍某论坛 · 完整版</h1>
+            <h1>?? 窍某论坛 · 完整版</h1>
             <div class="nav-controls">
                 <input class="search-box" id="searchInput" placeholder="搜索..." onkeydown="if(event.key==='Enter')searchPosts()">
-                <button class="btn btn-outline" id="themeToggle" onclick="openThemePicker()">🎨</button>
-                <button class="btn" onclick="togglePublish()">✏️ 发布</button>
-                <span class="notification-badge" onclick="openNotificationPanel()">🔔 <span class="count hidden" id="notifCount">0</span></span>
-                <button class="btn btn-outline" onclick="openMessages()">💬</button>
+                <button class="btn btn-outline" id="themeToggle" onclick="openThemePicker()">??</button>
+                <button class="btn" onclick="togglePublish()">?? 发布</button>
+                <span class="notification-badge" onclick="openNotificationPanel()">?? <span class="count hidden" id="notifCount">0</span></span>
+                <button class="btn btn-outline" onclick="openMessages()">??</button>
                 <div class="auth-section">
                     <button class="btn" id="loginBtn" onclick="openModal()">登录</button>
                     <img class="user-avatar hidden" id="userAvatar">
                     <span class="user-name hidden" id="userName"></span>
-                    <a class="profile-link hidden" id="profileLink" onclick="openProfile()">👤</a>
+                    <a class="profile-link hidden" id="profileLink" onclick="openProfile()">??</a>
                     <button class="logout-btn hidden" id="logoutBtn" onclick="logout()">退出</button>
                 </div>
             </div>
         </header>
         <!-- 统计 -->
         <div class="forum-stats">
-            <span>📌 帖子 <strong id="statPosts">0</strong></span>
-            <span>💬 评论 <strong id="statComments">0</strong></span>
-            <span>👥 用户 <strong id="statUsers">0</strong></span>
-            <span>🔥 今日 <strong id="statToday">0</strong></span>
-            <span>🍫 巧克力 <strong id="myChocolates">0</strong></span>
-            <span>⭐ 积分 <strong id="myTotalPoints">0</strong></span>
-            <span>❤️ 收藏 <strong id="myFavCount">0</strong></span>
+            <span>?? 帖子 <strong id="statPosts">0</strong></span>
+            <span>?? 评论 <strong id="statComments">0</strong></span>
+            <span>?? 用户 <strong id="statUsers">0</strong></span>
+            <span>?? 今日 <strong id="statToday">0</strong></span>
+            <span>?? 巧克力 <strong id="myChocolates">0</strong></span>
+            <span>? 积分 <strong id="myTotalPoints">0</strong></span>
+            <span>?? 收藏 <strong id="myFavCount">0</strong></span>
         </div>
         <!-- 主布局 -->
         <div class="main-layout">
@@ -2302,13 +2302,13 @@
                     <button class="board-btn" data-category="life" onclick="setCategory('life')">生活</button>
                     <button class="board-btn" data-category="career" onclick="setCategory('career')">职业</button>
                     <button class="board-btn" data-category="topic" onclick="setCategory('topic')">话题</button>
-                    <button class="board-btn" onclick="openNewTopic()">➕ 话题</button>
-                    <button class="board-btn" onclick="openShop()" style="background:linear-gradient(135deg,#ff9f43,#ff5e8a);color:#fff;">🍫 商城</button>
-                    <button class="board-btn" onclick="openFavorites()" style="background:linear-gradient(135deg,#fbbf24,#ff5e8a);color:#fff;">❤️ 收藏</button>
+                    <button class="board-btn" onclick="openNewTopic()">? 话题</button>
+                    <button class="board-btn" onclick="openShop()" style="background:linear-gradient(135deg,#ff9f43,#ff5e8a);color:#fff;">?? 商城</button>
+                    <button class="board-btn" onclick="openFavorites()" style="background:linear-gradient(135deg,#fbbf24,#ff5e8a);color:#fff;">?? 收藏</button>
                 </div>
                 <div class="view-toggle">
-                    <button class="active" onclick="setView('list')">📋 列表</button>
-                    <button onclick="setView('grid')">🔲 网格</button>
+                    <button class="active" onclick="setView('list')">?? 列表</button>
+                    <button onclick="setView('grid')">?? 网格</button>
                 </div>
                 <!-- 发布表单 -->
                 <div class="publish-form" id="publishForm">
@@ -2316,7 +2316,7 @@
                     <input id="publishTitle" placeholder="标题" maxlength="100">
                     <div class="input-wrapper">
                         <textarea id="publishContent" placeholder="内容（支持LaTeX $...$，@用户名）" rows="5"></textarea>
-                        <span class="publish-emoji-wrapper"><button class="emoji-btn" onclick="toggleEmojiPicker('publish')">😊</button><div class="emoji-picker" id="emojiPickerPublish"></div></span>
+                        <span class="publish-emoji-wrapper"><button class="emoji-btn" onclick="toggleEmojiPicker('publish')">??</button><div class="emoji-picker" id="emojiPickerPublish"></div></span>
                     </div>
                     <input id="publishTags" placeholder="标签（逗号分隔）">
                     <button class="btn" onclick="publishPost()">发布</button>
@@ -2325,33 +2325,33 @@
                 <div id="postDetail" style="display:none;"></div>
             </div>
             <div class="sidebar">
-                <div class="hot-list"><h3>🔥 热门</h3><div id="hotItems"><p style="color:var(--text-muted)">加载中...</p></div></div>
-                <div style="background:var(--bg-card);border-radius:16px;padding:14px 18px;border:1px solid var(--border-color);margin-bottom:20px;"><h3 style="font-size:1rem;margin-bottom:10px;">🏷️ 标签</h3><div id="tagList"><p style="color:var(--text-muted)">加载中...</p></div></div>
-                <div class="online-users"><h4>🟢 在线用户</h4><div><span class="online-count" id="onlineCount">0</span> 人在线</div><div id="onlineUserList" style="margin-top:6px;display:flex;flex-wrap:wrap;gap:4px;"><span style="color:var(--text-muted)">加载中...</span></div></div>
-                <button class="btn" style="width:100%;margin-top:14px;" onclick="doCheckin()">✅ 签到</button>
-                <button class="btn" style="width:100%;margin-top:6px;background:linear-gradient(135deg,#ff9f43,#fbbf24);color:#fff;" onclick="openExchange()">🍫 积分换巧克力</button>
-                <button class="btn" style="width:100%;margin-top:6px;background:linear-gradient(135deg,#3b82f6,#22d3ee);color:#fff;" onclick="openTasks()">📋 任务</button>
-                <button class="btn" style="width:100%;margin-top:6px;background:linear-gradient(135deg,#ff5e8a,#a855f7);color:#fff;" onclick="openShop()">🛒 商城</button>
+                <div class="hot-list"><h3>?? 热门</h3><div id="hotItems"><p style="color:var(--text-muted)">加载中...</p></div></div>
+                <div style="background:var(--bg-card);border-radius:16px;padding:14px 18px;border:1px solid var(--border-color);margin-bottom:20px;"><h3 style="font-size:1rem;margin-bottom:10px;">??? 标签</h3><div id="tagList"><p style="color:var(--text-muted)">加载中...</p></div></div>
+                <div class="online-users"><h4>?? 在线用户</h4><div><span class="online-count" id="onlineCount">0</span> 人在线</div><div id="onlineUserList" style="margin-top:6px;display:flex;flex-wrap:wrap;gap:4px;"><span style="color:var(--text-muted)">加载中...</span></div></div>
+                <button class="btn" style="width:100%;margin-top:14px;" onclick="doCheckin()">? 签到</button>
+                <button class="btn" style="width:100%;margin-top:6px;background:linear-gradient(135deg,#ff9f43,#fbbf24);color:#fff;" onclick="openExchange()">?? 积分换巧克力</button>
+                <button class="btn" style="width:100%;margin-top:6px;background:linear-gradient(135deg,#3b82f6,#22d3ee);color:#fff;" onclick="openTasks()">?? 任务</button>
+                <button class="btn" style="width:100%;margin-top:6px;background:linear-gradient(135deg,#ff5e8a,#a855f7);color:#fff;" onclick="openShop()">?? 商城</button>
                 <div class="games-panel">
-                    <div class="gp-title">🎮 玩法中心</div>
+                    <div class="gp-title">?? 玩法中心</div>
                     <div class="games-grid">
-                        <div class="gp-btn" onclick="openLeaderboard()"><span class="gp-icon">🏆</span>排行榜</div>
-                        <div class="gp-btn" onclick="openLottery()"><span class="gp-icon">🎡</span>幸运转盘</div>
-                        <div class="gp-btn" onclick="openAchievements()"><span class="gp-icon">🏅</span>成就</div>
-                        <div class="gp-btn" onclick="openCheckinCalendar()"><span class="gp-icon">📅</span>签到日历</div>
-                        <div class="gp-btn" onclick="openSnake()"><span class="gp-icon">🐍</span>贪吃蛇</div>
-                        <div class="gp-btn" onclick="openMemory()"><span class="gp-icon">🧠</span>记忆翻牌</div>
-                        <div class="gp-btn" onclick="openRPS()"><span class="gp-icon">✂️</span>石头剪刀布</div>
-                        <div class="gp-btn" onclick="openReaction()"><span class="gp-icon">⚡</span>反应测试</div>
-                        <div class="gp-btn" onclick="openStellarGame()"><span class="gp-icon">🎯</span>星域猎手</div>
+                        <div class="gp-btn" onclick="openLeaderboard()"><span class="gp-icon">??</span>排行榜</div>
+                        <div class="gp-btn" onclick="openLottery()"><span class="gp-icon">??</span>幸运转盘</div>
+                        <div class="gp-btn" onclick="openAchievements()"><span class="gp-icon">??</span>成就</div>
+                        <div class="gp-btn" onclick="openCheckinCalendar()"><span class="gp-icon">??</span>签到日历</div>
+                        <div class="gp-btn" onclick="openSnake()"><span class="gp-icon">??</span>贪吃蛇</div>
+                        <div class="gp-btn" onclick="openMemory()"><span class="gp-icon">??</span>记忆翻牌</div>
+                        <div class="gp-btn" onclick="openRPS()"><span class="gp-icon">??</span>石头剪刀布</div>
+                        <div class="gp-btn" onclick="openReaction()"><span class="gp-icon">?</span>反应测试</div>
+                        <div class="gp-btn" onclick="openStellarGame()"><span class="gp-icon">??</span>星域猎手</div>
                     </div>
                 </div>
             </div>
         </div>
         <footer>
             <div class="social-links"><a href="#">关于</a><a href="#" onclick="openHelp()">帮助</a><a href="#" onclick="showFeedback()">反馈</a><a href="#" onclick="showStatus()">状态</a></div>
-            <p class="footer-status">🔧 完整版 · 所有数据在Supabase</p>
-            <p style="color:var(--text-muted);font-size:.85rem;">© 2026 窍某</p>
+            <p class="footer-status">?? 完整版 · 所有数据在Supabase</p>
+            <p style="color:var(--text-muted);font-size:.85rem;">? 2026 窍某</p>
         </footer>
     </div>
 
@@ -2391,7 +2391,7 @@
     <div class="modal" id="profileModal">
         <div class="modal-box">
             <span class="close" onclick="closeProfile()">&times;</span>
-            <h2>👤 个人中心</h2>
+            <h2>?? 个人中心</h2>
             <div class="profile-header">
                 <div class="profile-upload-btn">
                     <img class="profile-avatar-large" id="profileAvatarPreview">
@@ -2401,10 +2401,10 @@
                     <h2 id="profileDisplayName">用户</h2>
                     <div class="email" id="profileEmail">email</div>
                     <div style="display:flex;gap:12px;flex-wrap:wrap;margin-top:4px;">
-                        <span>⭐ <strong id="profilePoints">0</strong></span>
-                        <span>📊 <strong id="profileLevel">Lv.1</strong></span>
-                        <span>🍫 <strong id="profileChocolates">0</strong></span>
-                        <span>🔥 签到 <strong id="profileStreak">0</strong></span>
+                        <span>? <strong id="profilePoints">0</strong></span>
+                        <span>?? <strong id="profileLevel">Lv.1</strong></span>
+                        <span>?? <strong id="profileChocolates">0</strong></span>
+                        <span>?? 签到 <strong id="profileStreak">0</strong></span>
                     </div>
                 </div>
             </div>
@@ -2429,7 +2429,7 @@
     <div class="modal" id="notificationModal">
         <div class="modal-box">
             <span class="close" onclick="closeNotificationPanel()">&times;</span>
-            <h2>🔔 通知</h2>
+            <h2>?? 通知</h2>
             <div id="notificationList"><p style="color:var(--text-muted)">加载中...</p></div>
         </div>
     </div>
@@ -2437,7 +2437,7 @@
     <div class="modal" id="topicModal">
         <div class="modal-box">
             <span class="close" onclick="closeTopicModal()">&times;</span>
-            <h2>📂 创建话题</h2>
+            <h2>?? 创建话题</h2>
             <input id="topicNameInput" placeholder="话题名称" maxlength="30">
             <button class="btn" style="margin-top:12px;" onclick="createTopic()">创建</button>
         </div>
@@ -2446,35 +2446,35 @@
     <div class="modal" id="shopModal">
         <div class="modal-box">
             <span class="close" onclick="closeShop()">&times;</span>
-            <h2>🍫 商城</h2>
+            <h2>?? 商城</h2>
             <p style="color:var(--text-muted);margin-bottom:16px;">用巧克力兑换装扮</p>
             <div id="shopItems">
-                <div class="shop-item"><span class="name">🌈 头像框</span><span class="price">🍫 5</span><button class="btn-sm" onclick="buyItem('头像框',5)">购买</button></div>
-                <div class="shop-item"><span class="name">✨ 金色昵称</span><span class="price">🍫 10</span><button class="btn-sm" onclick="buyItem('金色昵称',10)">购买</button></div>
-                <div class="shop-item"><span class="name">👑 皇冠</span><span class="price">🍫 20</span><button class="btn-sm" onclick="buyItem('皇冠',20)">购买</button></div>
-                <div class="shop-item"><span class="name">💎 钻石边框</span><span class="price">🍫 50</span><button class="btn-sm" onclick="buyItem('钻石边框',50)">购买</button></div>
+                <div class="shop-item"><span class="name">?? 头像框</span><span class="price">?? 5</span><button class="btn-sm" onclick="buyItem('头像框',5)">购买</button></div>
+                <div class="shop-item"><span class="name">? 金色昵称</span><span class="price">?? 10</span><button class="btn-sm" onclick="buyItem('金色昵称',10)">购买</button></div>
+                <div class="shop-item"><span class="name">?? 皇冠</span><span class="price">?? 20</span><button class="btn-sm" onclick="buyItem('皇冠',20)">购买</button></div>
+                <div class="shop-item"><span class="name">?? 钻石边框</span><span class="price">?? 50</span><button class="btn-sm" onclick="buyItem('钻石边框',50)">购买</button></div>
             </div>
             <div id="shopMsg"></div>
             <div class="shop-buy-section">
-                <h4>💳 购买巧克力（Stripe）</h4>
+                <h4>?? 购买巧克力（Stripe）</h4>
                 <div class="buy-row">
-                    <span class="price-tag">¥2.00 <small>/块</small></span>
+                    <span class="price-tag">￥2.00 <small>/块</small></span>
                     <input type="number" id="buyChocoCount" class="buy-input" value="1" min="1" max="50" onchange="updateBuyTotal()">
-                    <span class="total-price">总计：<strong id="buyTotalPrice">¥2.00</strong></span>
-                    <button class="btn btn-stripe" onclick="startStripePayment()">💳 Stripe支付</button>
+                    <span class="total-price">总计：<strong id="buyTotalPrice">￥2.00</strong></span>
+                    <button class="btn btn-stripe" onclick="startStripePayment()">?? Stripe支付</button>
                 </div>
-                <div style="font-size:.8rem;color:var(--text-muted);margin-top:8px;">💡 支付成功自动到账</div>
+                <div style="font-size:.8rem;color:var(--text-muted);margin-top:8px;">?? 支付成功自动到账</div>
                 <div class="purchase-history">
-                    <div style="color:var(--text-muted);font-size:.8rem;margin-bottom:6px;">📋 购买记录</div>
+                    <div style="color:var(--text-muted);font-size:.8rem;margin-bottom:6px;">?? 购买记录</div>
                     <div id="historyList"><div class="history-empty">暂无记录</div></div>
                 </div>
             </div>
             <div class="qr-manager">
-                <h5>📱 收款码（备选）</h5>
+                <h5>?? 收款码（备选）</h5>
                 <div class="qr-upload-row"><label>微信</label><div class="file-input-wrapper"><input type="file" accept="image/*" onchange="uploadQR('wechat', this)"><span class="file-label">选择</span></div><button class="btn-sm" onclick="clearQR('wechat')">清除</button></div>
                 <div class="qr-upload-row"><label>支付宝</label><div class="file-input-wrapper"><input type="file" accept="image/*" onchange="uploadQR('alipay', this)"><span class="file-label">选择</span></div><button class="btn-sm" onclick="clearQR('alipay')">清除</button></div>
                 <div class="qr-preview" id="qrPreviewContainer"></div>
-                <div class="qr-hint">💡 上传收款码（模拟支付用）</div>
+                <div class="qr-hint">?? 上传收款码（模拟支付用）</div>
             </div>
         </div>
     </div>
@@ -2482,7 +2482,7 @@
     <div class="modal" id="exchangeModal">
         <div class="modal-box">
             <span class="close" onclick="closeExchange()">&times;</span>
-            <h2>🍫 积分换巧克力</h2>
+            <h2>?? 积分换巧克力</h2>
             <p>50 积分 = 1 巧克力</p>
             <input type="number" id="exchangeCount" min="1" value="1" style="width:100%;padding:8px;border-radius:8px;border:1px solid var(--border-color);background:var(--bg-card);color:var(--text-primary);">
             <button class="btn" onclick="doExchange()" style="width:100%;margin-top:12px;">兑换</button>
@@ -2492,7 +2492,7 @@
     <div class="modal" id="giveChocolateModal">
         <div class="modal-box">
             <span class="close" onclick="closeGiveChocolate()">&times;</span>
-            <h2>🍫 投巧克力</h2>
+            <h2>?? 投巧克力</h2>
             <p id="giveTarget">给用户：</p>
             <input type="number" id="giveCount" min="1" value="1" style="width:100%;padding:8px;border-radius:8px;border:1px solid var(--border-color);background:var(--bg-card);color:var(--text-primary);">
             <button class="btn" onclick="doGiveChocolate()" style="width:100%;margin-top:12px;">送出</button>
@@ -2502,11 +2502,11 @@
     <div class="modal" id="tasksModal">
         <div class="modal-box">
             <span class="close" onclick="closeTasks()">&times;</span>
-            <h2>📋 积分任务</h2>
+            <h2>?? 积分任务</h2>
             <p style="color:var(--text-muted);margin-bottom:16px;">完成每日任务获得积分</p>
             <div id="tasksList"><p style="color:var(--text-muted)">加载中...</p></div>
             <div style="margin-top:20px;border-top:1px solid var(--border-color);padding-top:12px;">
-                <div style="font-size:.9rem;font-weight:600;margin-bottom:4px;">💸 积分流水</div>
+                <div style="font-size:.9rem;font-weight:600;margin-bottom:4px;">?? 积分流水</div>
                 <div class="point-log-list" id="pointLogList"><p style="color:var(--text-muted)">加载中...</p></div>
             </div>
         </div>
@@ -2515,7 +2515,7 @@
     <div class="modal" id="messagesModal">
         <div class="modal-box">
             <span class="close" onclick="closeMessages()">&times;</span>
-            <h2>💬 私信</h2>
+            <h2>?? 私信</h2>
             <div id="messageList"><p style="color:var(--text-muted)">加载中...</p></div>
             <div style="margin-top:16px;display:flex;gap:8px;flex-wrap:wrap;">
                 <input id="msgRecipient" placeholder="收件人" style="flex:1;min-width:120px;">
@@ -2528,7 +2528,7 @@
     <div class="modal" id="favoritesModal">
         <div class="modal-box">
             <span class="close" onclick="closeFavorites()">&times;</span>
-            <h2>❤️ 收藏</h2>
+            <h2>?? 收藏</h2>
             <div id="favoritesList"><p style="color:var(--text-muted)">加载中...</p></div>
         </div>
     </div>
@@ -2536,30 +2536,30 @@
     <div class="modal qr-modal" id="paymentModal">
         <div class="modal-box">
             <span class="close" onclick="closePayment()">&times;</span>
-            <h2>💳 支付（备选）</h2>
+            <h2>?? 支付（备选）</h2>
             <div class="qr-container">
                 <div class="qr-code" id="qrCodeDisplay"></div>
-                <div class="payment-info">购买 <strong id="payAmount">1</strong> 块，总计 <strong id="payTotal">¥2.00</strong></div>
+                <div class="payment-info">购买 <strong id="payAmount">1</strong> 块，总计 <strong id="payTotal">￥2.00</strong></div>
                 <div class="payment-actions">
                     <button class="btn btn-outline" onclick="switchPaymentMethod('wechat')">微信</button>
                     <button class="btn btn-outline" onclick="switchPaymentMethod('alipay')">支付宝</button>
-                    <button class="btn btn-success" disabled style="opacity:0.5;cursor:not-allowed;">⛔ 支付已关闭</button>
+                    <button class="btn btn-success" disabled style="opacity:0.5;cursor:not-allowed;">? 支付已关闭</button>
                 </div>
-                <div class="payment-status" id="paymentStatus">🎉 成功</div>
+                <div class="payment-status" id="paymentStatus">?? 成功</div>
             </div>
         </div>
     </div>
 
     <div class="context-menu" id="contextMenu">
         <div class="menu-item" onclick="handleReplyToPost()">回应此帖</div>
-        <div class="menu-item" onclick="copyPostContent()">📄 复制帖子内容</div>
-        <div class="menu-item" onclick="copyPostLink()">🔗 复制帖子链接</div>
+        <div class="menu-item" onclick="copyPostContent()">?? 复制帖子内容</div>
+        <div class="menu-item" onclick="copyPostLink()">?? 复制帖子链接</div>
     </div>
 
     <div class="modal" id="playlistModal">
         <div class="modal-box">
             <span class="close" onclick="document.getElementById('playlistModal').classList.remove('active')">&times;</span>
-            <h2>🎵 播放列表</h2>
+            <h2>?? 播放列表</h2>
             <div id="playlistContent"><div class="playlist-empty">加载中...</div></div>
         </div>
     </div>
@@ -2570,7 +2570,7 @@
     <div class="modal" id="themeModal">
         <div class="modal-box">
             <span class="close" onclick="closeThemePicker()">&times;</span>
-            <h2>🎨 主题切换</h2>
+            <h2>?? 主题切换</h2>
             <p style="color:var(--text-muted);margin-bottom:16px;">选择你喜欢的皮肤风格，立即生效</p>
             <div id="themeList" class="theme-grid"></div>
         </div>
@@ -2580,7 +2580,7 @@
     <div class="modal" id="helpModal">
         <div class="modal-box help-modal-box">
             <span class="close" onclick="closeHelp()">&times;</span>
-            <h2>📖 操作说明</h2>
+            <h2>?? 操作说明</h2>
             <p style="color:var(--text-muted);margin-bottom:6px;">窍某论坛 · 完整最终版 使用指南（数据存于 Supabase）</p>
             <div class="help-content">
 
@@ -2595,8 +2595,8 @@
                     <tr><td>邮箱 + 密码</td><td>注册需填昵称、邮箱、密码（至少 6 位）、确认密码</td></tr>
                     <tr><td>Google / GitHub</td><td>社交登录，一键授权</td></tr>
                 </table>
-                <p>登录后右上角显示头像、昵称，出现 👤 个人中心与退出按钮。未登录可以浏览、搜索帖子，但 <strong>发帖、评论、点赞、签到、任务、商城等操作都需要登录</strong>。</p>
-                <h3>个人中心（👤）</h3>
+                <p>登录后右上角显示头像、昵称，出现 ?? 个人中心与退出按钮。未登录可以浏览、搜索帖子，但 <strong>发帖、评论、点赞、签到、任务、商城等操作都需要登录</strong>。</p>
+                <h3>个人中心（??）</h3>
                 <ul>
                     <li>点击头像可上传头像图片。</li>
                     <li>可修改昵称（≤30 字）。</li>
@@ -2609,11 +2609,11 @@
                 <h3>顶部导航栏</h3>
                 <table>
                     <tr><th>元素</th><th>功能</th></tr>
-                    <tr><td>🔍 搜索框</td><td>输入关键词按回车搜索帖子</td></tr>
-                    <tr><td>🎨</td><td>打开主题切换（5 种皮肤）</td></tr>
-                    <tr><td>✏️ 发布</td><td>展开 / 收起发帖表单</td></tr>
-                    <tr><td>🔔</td><td>通知面板（被 @、被回复等提醒，带未读数角标）</td></tr>
-                    <tr><td>💬</td><td>私信面板</td></tr>
+                    <tr><td>?? 搜索框</td><td>输入关键词按回车搜索帖子</td></tr>
+                    <tr><td>??</td><td>打开主题切换（5 种皮肤）</td></tr>
+                    <tr><td>?? 发布</td><td>展开 / 收起发帖表单</td></tr>
+                    <tr><td>??</td><td>通知面板（被 @、被回复等提醒，带未读数角标）</td></tr>
+                    <tr><td>??</td><td>私信面板</td></tr>
                     <tr><td>登录 / 头像区</td><td>账号操作</td></tr>
                 </table>
                 <h3>统计栏</h3>
@@ -2621,26 +2621,26 @@
                 <h3>主内容区</h3>
                 <ul>
                     <li><strong>版块导航</strong>：全部 / 技术 / 生活 / 职业 / 话题，点击筛选对应分类。</li>
-                    <li><strong>➕ 话题</strong>：创建新话题（需登录）。</li>
-                    <li><strong>🍫 商城</strong>：购买装扮、购买巧克力。</li>
-                    <li><strong>❤️ 收藏</strong>：查看我收藏的帖子。</li>
-                    <li><strong>视图切换</strong>：📋 列表 / 🔲 网格 两种帖子展示方式。</li>
+                    <li><strong>? 话题</strong>：创建新话题（需登录）。</li>
+                    <li><strong>?? 商城</strong>：购买装扮、购买巧克力。</li>
+                    <li><strong>?? 收藏</strong>：查看我收藏的帖子。</li>
+                    <li><strong>视图切换</strong>：?? 列表 / ?? 网格 两种帖子展示方式。</li>
                 </ul>
                 <h3>右侧边栏</h3>
                 <ul>
-                    <li>🔥 热门：点击热门帖直达。</li>
-                    <li>🏷️ 标签：按标签筛选帖子。</li>
-                    <li>🟢 在线用户：当前在线人数与名单（登录后可见自己的在线状态）。</li>
-                    <li>✅ 签到：每日签到入口。</li>
-                    <li>🍫 积分换巧克力：50 积分兑换 1 块巧克力。</li>
-                    <li>📋 任务：每日任务与积分流水。</li>
-                    <li>🛒 商城：快捷入口。</li>
-                    <li>🎮 玩法中心：排行榜、幸运转盘、成就、签到日历、贪吃蛇、记忆翻牌、石头剪刀布、反应测试、星域猎手（射击）。</li>
+                    <li>?? 热门：点击热门帖直达。</li>
+                    <li>??? 标签：按标签筛选帖子。</li>
+                    <li>?? 在线用户：当前在线人数与名单（登录后可见自己的在线状态）。</li>
+                    <li>? 签到：每日签到入口。</li>
+                    <li>?? 积分换巧克力：50 积分兑换 1 块巧克力。</li>
+                    <li>?? 任务：每日任务与积分流水。</li>
+                    <li>?? 商城：快捷入口。</li>
+                    <li>?? 玩法中心：排行榜、幸运转盘、成就、签到日历、贪吃蛇、记忆翻牌、石头剪刀布、反应测试、星域猎手（射击）。</li>
                 </ul>
                 <p>页脚：关于 / 帮助 / 反馈 / 状态（可提交反馈、查看站点状态）。</p>
 
                 <h2>4. 发帖</h2>
-                <p>点击顶部 <strong>「✏️ 发布」</strong> 展开发布表单：</p>
+                <p>点击顶部 <strong>「?? 发布」</strong> 展开发布表单：</p>
                 <ol>
                     <li><strong>分类</strong>：技术 / 生活 / 职业 / 话题（必选）。</li>
                     <li><strong>标题</strong>：不超过 100 字。</li>
@@ -2657,8 +2657,8 @@
                     <tr><td><code>$\big 文字$</code></td><td>加大字号</td></tr>
                     <tr><td><code>$\glow 文字$</code></td><td>发光文字</td></tr>
                     <tr><td><code>$\blink 文字$</code></td><td>闪烁文字</td></tr>
-                    <tr><td><code>[#happy]</code> 等</td><td>表情代码：happy😄 happyn😁 why🤔 sad😢 love❤️ cool😎 angry😡 cry😭 laugh😂 wow😮</td></tr>
-                    <tr><td>😊 按钮</td><td>打开 emoji 选择面板，插入表情</td></tr>
+                    <tr><td><code>[#happy]</code> 等</td><td>表情代码：happy?? happyn?? why?? sad?? love?? cool?? angry?? cry?? laugh?? wow??</td></tr>
+                    <tr><td>?? 按钮</td><td>打开 emoji 选择面板，插入表情</td></tr>
                     <tr><td>换行</td><td>自动转成 <code>&lt;br&gt;</code> 换行显示</td></tr>
                 </table>
                 <p>帖子内容经 DOMPurify 过滤，安全显示。</p>
@@ -2668,7 +2668,7 @@
                     <li><strong>分类筛选</strong>：点击版块按钮（全部/技术/生活/职业/话题）。</li>
                     <li><strong>搜索</strong>：顶部搜索框回车，按标题/内容关键词检索。</li>
                     <li><strong>标签</strong>：点击帖子下方的 <code>#标签</code>，或侧边栏「标签」，按标签筛选。</li>
-                    <li><strong>话题</strong>：点击「话题」分类查看话题帖；「➕ 话题」可创建新话题。</li>
+                    <li><strong>话题</strong>：点击「话题」分类查看话题帖；「? 话题」可创建新话题。</li>
                     <li><strong>帖子详情</strong>：点击帖子卡片进入，自动 +1 浏览量。</li>
                     <li><strong>返回</strong>：详情页左上角「← 返回列表」。</li>
                     <li><strong>右键菜单</strong>：在帖子卡片上点右键 →「回应此帖」，评论框会自动带上「回复：」前缀。</li>
@@ -2678,127 +2678,127 @@
                 <p>在帖子详情页可对帖子执行：</p>
                 <table>
                     <tr><th>操作</th><th>说明</th></tr>
-                    <tr><td>❤️ 点赞</td><td>喜欢此帖（计入每日任务「点赞」）</td></tr>
-                    <tr><td>👍 推荐</td><td>推荐此帖（计入每日任务「推荐」）</td></tr>
-                    <tr><td>👎 踩</td><td>不赞同</td></tr>
-                    <tr><td>🍫 投巧克力</td><td>把巧克力送给作者（不能投给自己）</td></tr>
-                    <tr><td>❤️/🤍 收藏</td><td>收藏 / 取消收藏，收藏夹在顶部「❤️ 收藏」查看</td></tr>
-                    <tr><td>➕ 关注 / ✅ 已关注</td><td>关注或取关作者</td></tr>
-                    <tr><td>💬 私信</td><td>快速给作者发私信</td></tr>
-                    <tr><td>✏️ 编辑 / 🗑️ 删除</td><td>仅作者本人可见，删除不可恢复</td></tr>
+                    <tr><td>?? 点赞</td><td>喜欢此帖（计入每日任务「点赞」）</td></tr>
+                    <tr><td>?? 推荐</td><td>推荐此帖（计入每日任务「推荐」）</td></tr>
+                    <tr><td>?? 踩</td><td>不赞同</td></tr>
+                    <tr><td>?? 投巧克力</td><td>把巧克力送给作者（不能投给自己）</td></tr>
+                    <tr><td>??/?? 收藏</td><td>收藏 / 取消收藏，收藏夹在顶部「?? 收藏」查看</td></tr>
+                    <tr><td>? 关注 / ? 已关注</td><td>关注或取关作者</td></tr>
+                    <tr><td>?? 私信</td><td>快速给作者发私信</td></tr>
+                    <tr><td>?? 编辑 / ??? 删除</td><td>仅作者本人可见，删除不可恢复</td></tr>
                 </table>
                 <h3>评论</h3>
                 <ul>
                     <li>登录后可在底部输入框写评论、发表。</li>
-                    <li>评论旁 😊 按钮可插入 emoji。</li>
-                    <li>每条评论可以点 ❤️/🤍 点赞。</li>
+                    <li>评论旁 ?? 按钮可插入 emoji。</li>
+                    <li>每条评论可以点 ??/?? 点赞。</li>
                     <li>未登录时提示「请登录后评论」。</li>
                 </ul>
 
-                <h2>7. 积分系统 ⭐</h2>
+                <h2>7. 积分系统 ?</h2>
                 <p>积分是网站的核心货币，可用来抽奖、兑换巧克力等。</p>
                 <h3>积分获取方式</h3>
                 <table>
                     <tr><th>方式</th><th>奖励</th></tr>
-                    <tr><td>✅ 每日签到</td><td>基础 +5，连续签到另有阶梯奖励</td></tr>
-                    <tr><td>📝 发布帖子</td><td>每日任务，+3</td></tr>
-                    <tr><td>💬 评论（2 条）</td><td>每日任务，+2</td></tr>
-                    <tr><td>❤️ 点赞（3 次）</td><td>每日任务，+1</td></tr>
-                    <tr><td>👍 推荐</td><td>每日任务，+2</td></tr>
-                    <tr><td>🎡 幸运转盘</td><td>抽中即得（消耗 20 积分/次）</td></tr>
-                    <tr><td>🏅 成就</td><td>解锁成就获得成就积分</td></tr>
-                    <tr><td>🐍 贪吃蛇 / 🧠 记忆翻牌</td><td>登录状态打出好成绩奖励积分</td></tr>
-                    <tr><td>⭐ 积分流水</td><td>「任务」面板中可查看每笔积分进出记录</td></tr>
+                    <tr><td>? 每日签到</td><td>基础 +5，连续签到另有阶梯奖励</td></tr>
+                    <tr><td>?? 发布帖子</td><td>每日任务，+3</td></tr>
+                    <tr><td>?? 评论（2 条）</td><td>每日任务，+2</td></tr>
+                    <tr><td>?? 点赞（3 次）</td><td>每日任务，+1</td></tr>
+                    <tr><td>?? 推荐</td><td>每日任务，+2</td></tr>
+                    <tr><td>?? 幸运转盘</td><td>抽中即得（消耗 20 积分/次）</td></tr>
+                    <tr><td>?? 成就</td><td>解锁成就获得成就积分</td></tr>
+                    <tr><td>?? 贪吃蛇 / ?? 记忆翻牌</td><td>登录状态打出好成绩奖励积分</td></tr>
+                    <tr><td>? 积分流水</td><td>「任务」面板中可查看每笔积分进出记录</td></tr>
                 </table>
                 <h3>积分消费</h3>
                 <ul>
-                    <li>🍫 积分换巧克力：50 积分 = 1 块。</li>
-                    <li>🎡 幸运转盘：20 积分抽一次。</li>
+                    <li>?? 积分换巧克力：50 积分 = 1 块。</li>
+                    <li>?? 幸运转盘：20 积分抽一次。</li>
                 </ul>
 
-                <h2>8. 巧克力系统 🍫</h2>
+                <h2>8. 巧克力系统 ??</h2>
                 <h3>巧克力获取</h3>
                 <table>
                     <tr><th>方式</th><th>说明</th></tr>
-                    <tr><td>💳 在线购买</td><td>商城「购买巧克力」，¥2.00/块，Stripe 支付，支付成功自动到账</td></tr>
-                    <tr><td>💱 积分兑换</td><td>50 积分换 1 块</td></tr>
-                    <tr><td>📅 签到日历</td><td>连续 7 天奖励 +16 积分并送 🍫1</td></tr>
-                    <tr><td>🎁 游戏 / 抽奖</td><td>转盘等玩法掉落</td></tr>
+                    <tr><td>?? 在线购买</td><td>商城「购买巧克力」，￥2.00/块，Stripe 支付，支付成功自动到账</td></tr>
+                    <tr><td>?? 积分兑换</td><td>50 积分换 1 块</td></tr>
+                    <tr><td>?? 签到日历</td><td>连续 7 天奖励 +16 积分并送 ??1</td></tr>
+                    <tr><td>?? 游戏 / 抽奖</td><td>转盘等玩法掉落</td></tr>
                 </table>
-                <div class="help-note">⚠️ 注意：目前支付功能默认处于关闭状态（「⛔ 支付已关闭」按钮禁用，Stripe key 为占位值）。如需开通，需要配置真实的 Stripe key 并开启 <code>PAYMENT_ENABLED</code>；未开通前可用「收款码（备选）」上传微信/支付宝收款码走模拟支付流程。</div>
+                <div class="help-note">?? 注意：目前支付功能默认处于关闭状态（「? 支付已关闭」按钮禁用，Stripe key 为占位值）。如需开通，需要配置真实的 Stripe key 并开启 <code>PAYMENT_ENABLED</code>；未开通前可用「收款码（备选）」上传微信/支付宝收款码走模拟支付流程。</div>
                 <h3>巧克力消费</h3>
                 <ul>
-                    <li>🛒 商城装扮：见下表。</li>
-                    <li>🍫 投巧克力：打赏给其他用户。</li>
+                    <li>?? 商城装扮：见下表。</li>
+                    <li>?? 投巧克力：打赏给其他用户。</li>
                 </ul>
 
-                <h2>9. 商城与装扮 🛒</h2>
-                <p>打开「🍫 商城」：</p>
+                <h2>9. 商城与装扮 ??</h2>
+                <p>打开「?? 商城」：</p>
                 <table>
                     <tr><th>装扮</th><th>价格</th><th>效果</th></tr>
-                    <tr><td>🌈 头像框</td><td>🍫 5</td><td>头像外框</td></tr>
-                    <tr><td>✨ 金色昵称</td><td>🍫 10</td><td>昵称金色特效</td></tr>
-                    <tr><td>👑 皇冠</td><td>🍫 20</td><td>头像皇冠</td></tr>
-                    <tr><td>💎 钻石边框</td><td>🍫 50</td><td>钻石头像框</td></tr>
+                    <tr><td>?? 头像框</td><td>?? 5</td><td>头像外框</td></tr>
+                    <tr><td>? 金色昵称</td><td>?? 10</td><td>昵称金色特效</td></tr>
+                    <tr><td>?? 皇冠</td><td>?? 20</td><td>头像皇冠</td></tr>
+                    <tr><td>?? 钻石边框</td><td>?? 50</td><td>钻石头像框</td></tr>
                 </table>
                 <ul>
                     <li>购买后自动装备，头像/昵称效果<strong>全站可见</strong>。</li>
-                    <li>底部「📋 购买记录」可查看历史购买。</li>
-                    <li>「📱 收款码（备选）」：可上传微信/支付宝收款码图片，供模拟支付使用，可随时清除。</li>
+                    <li>底部「?? 购买记录」可查看历史购买。</li>
+                    <li>「?? 收款码（备选）」：可上传微信/支付宝收款码图片，供模拟支付使用，可随时清除。</li>
                 </ul>
 
                 <h2>10. 任务 / 成就 / 签到日历</h2>
-                <h3>📋 每日任务</h3>
+                <h3>?? 每日任务</h3>
                 <p>每天刷新，完成任务自动累计进度并发放积分：发布帖子 ×1、评论 ×2、点赞 ×3、推荐 ×1、签到 ×1。</p>
-                <h3>🏅 成就墙</h3>
+                <h3>?? 成就墙</h3>
                 <ul>
                     <li>完成各类行为解锁成就。</li>
                     <li>顶部显示「已解锁 X / Y」「成就积分」，解锁进度全站可见。</li>
                 </ul>
-                <h3>📅 签到日历</h3>
+                <h3>?? 签到日历</h3>
                 <ul>
                     <li>每天可签到一次，重复签到会提示「今天已签到」。</li>
-                    <li>连续签到不断档，7 天一个周期，奖励阶梯：+2 → +2 → +4 → +2 → +8 → +16 →（第 7 天）+16 积分 + 🍫1。</li>
-                    <li>日历中用 ✓ 标记已签、● 标记今天。</li>
+                    <li>连续签到不断档，7 天一个周期，奖励阶梯：+2 → +2 → +4 → +2 → +8 → +16 →（第 7 天）+16 积分 + ??1。</li>
+                    <li>日历中用 ? 标记已签、● 标记今天。</li>
                 </ul>
 
-                <h2>11. 玩法中心 🎮</h2>
+                <h2>11. 玩法中心 ??</h2>
                 <table>
                     <tr><th>玩法</th><th>说明</th></tr>
-                    <tr><td>🏆 排行榜</td><td>积分 / 巧克力 / 连签 / 发帖 四榜，看谁是站内最强</td></tr>
-                    <tr><td>🎡 幸运转盘</td><td>20 积分抽一次，奖品自动到账，有抽奖记录</td></tr>
-                    <tr><td>🐍 贪吃蛇</td><td>方向键 / WASD 控制，手机上用下方按钮；吃到食物 +1 分，登录后破纪录奖励积分</td></tr>
-                    <tr><td>🧠 记忆翻牌</td><td>翻出所有配对 emoji 获胜，记录步数、用时、最佳成绩</td></tr>
-                    <tr><td>✂️ 石头剪刀布</td><td>与电脑对战，三局两胜赢一局；可重新计分</td></tr>
-                    <tr><td>⚡ 反应测试</td><td>等方块变绿立刻点击，测 3 次取平均，记录最快成绩</td></tr>
-                    <tr><td>🎯 星域猎手</td><td>2D 俯视角射击竞技场：单人（机器人）/ 本地双人 / 联机对战；大地图多掩体（中央堡垒 + 20 个掩体），WASD 移动、鼠标瞄准射击，存活拿最多击杀</td></tr>
+                    <tr><td>?? 排行榜</td><td>积分 / 巧克力 / 连签 / 发帖 四榜，看谁是站内最强</td></tr>
+                    <tr><td>?? 幸运转盘</td><td>20 积分抽一次，奖品自动到账，有抽奖记录</td></tr>
+                    <tr><td>?? 贪吃蛇</td><td>方向键 / WASD 控制，手机上用下方按钮；吃到食物 +1 分，登录后破纪录奖励积分</td></tr>
+                    <tr><td>?? 记忆翻牌</td><td>翻出所有配对 emoji 获胜，记录步数、用时、最佳成绩</td></tr>
+                    <tr><td>?? 石头剪刀布</td><td>与电脑对战，三局两胜赢一局；可重新计分</td></tr>
+                    <tr><td>? 反应测试</td><td>等方块变绿立刻点击，测 3 次取平均，记录最快成绩</td></tr>
+                    <tr><td>?? 星域猎手</td><td>2D 俯视角射击竞技场：单人（机器人）/ 本地双人 / 联机对战；大地图多掩体（中央堡垒 + 20 个掩体），WASD 移动、鼠标瞄准射击，存活拿最多击杀</td></tr>
                 </table>
 
-                <h2>12. 音乐播放器 🎵</h2>
+                <h2>12. 音乐播放器 ??</h2>
                 <p>页面右下角悬浮播放器：</p>
                 <ul>
-                    <li>📁 上传：选择本地音频文件加入播放列表。</li>
-                    <li>▶ / ⏮ / ⏭：播放、上一首、下一首。</li>
-                    <li>🔁 循环、🔀 随机播放。</li>
+                    <li>?? 上传：选择本地音频文件加入播放列表。</li>
+                    <li>? / ? / ?：播放、上一首、下一首。</li>
+                    <li>?? 循环、?? 随机播放。</li>
                     <li>进度条拖拽跳转，音量滑块调节音量。</li>
-                    <li>📋 打开播放列表，点击歌曲切换。</li>
+                    <li>?? 打开播放列表，点击歌曲切换。</li>
                 </ul>
 
-                <h2>13. 主题切换 🎨</h2>
-                <p>点击顶部 🎨 打开主题面板，共 5 种皮肤，点击即时生效：</p>
+                <h2>13. 主题切换 ??</h2>
+                <p>点击顶部 ?? 打开主题面板，共 5 种皮肤，点击即时生效：</p>
                 <table>
                     <tr><th>主题</th><th>风格</th></tr>
-                    <tr><td>🌌 深空紫</td><td>默认暗色</td></tr>
-                    <tr><td>☀️ 明亮</td><td>清爽白色</td></tr>
-                    <tr><td>🍑 蜜桃粉</td><td>粉嫩少女</td></tr>
-                    <tr><td>🤖 赛博青</td><td>霓虹科技</td></tr>
-                    <tr><td>🌿 薄荷绿</td><td>清新自然</td></tr>
+                    <tr><td>?? 深空紫</td><td>默认暗色</td></tr>
+                    <tr><td>?? 明亮</td><td>清爽白色</td></tr>
+                    <tr><td>?? 蜜桃粉</td><td>粉嫩少女</td></tr>
+                    <tr><td>?? 赛博青</td><td>霓虹科技</td></tr>
+                    <tr><td>?? 薄荷绿</td><td>清新自然</td></tr>
                 </table>
 
-                <h2>14. 通知与私信 💬</h2>
+                <h2>14. 通知与私信 ??</h2>
                 <ul>
-                    <li><strong>🔔 通知</strong>：被 @ 提及、被回复等会生成通知，角标显示未读数。</li>
-                    <li><strong>💬 私信</strong>：在消息面板选择/输入收件人昵称和内容发送；帖子详情页「💬 私信」可快速给作者发信。</li>
+                    <li><strong>?? 通知</strong>：被 @ 提及、被回复等会生成通知，角标显示未读数。</li>
+                    <li><strong>?? 私信</strong>：在消息面板选择/输入收件人昵称和内容发送；帖子详情页「?? 私信」可快速给作者发信。</li>
                 </ul>
 
                 <h2>15. 常见问题</h2>
@@ -2822,20 +2822,20 @@
     <div class="modal" id="leaderboardModal">
         <div class="modal-box">
             <span class="close" onclick="closeLeaderboard()">&times;</span>
-            <h2>🏆 排行榜</h2>
+            <h2>?? 排行榜</h2>
             <p style="color:var(--text-muted);margin-bottom:12px;">看看谁是最强用户</p>
             <div class="lb-tabs">
-                <button class="active" onclick="renderLeaderboard('points')">⭐ 积分</button>
-                <button onclick="renderLeaderboard('chocolates')">🍫 巧克力</button>
-                <button onclick="renderLeaderboard('streak')">🔥 连签</button>
-                <button onclick="renderLeaderboard('posts')">📝 发帖</button>
-                <button onclick="renderLeaderboard('games')">🎮 游戏</button>
+                <button class="active" onclick="renderLeaderboard('points')">? 积分</button>
+                <button onclick="renderLeaderboard('chocolates')">?? 巧克力</button>
+                <button onclick="renderLeaderboard('streak')">?? 连签</button>
+                <button onclick="renderLeaderboard('posts')">?? 发帖</button>
+                <button onclick="renderLeaderboard('games')">?? 游戏</button>
             </div>
             <div id="gameTabs" style="display:none;margin:0 0 10px;gap:6px;flex-wrap:wrap;">
-                <button class="btn-sm active" onclick="renderLeaderboard('game_snake')">🐍 贪吃蛇</button>
-                <button class="btn-sm" onclick="renderLeaderboard('game_memory')">🧠 记忆翻牌</button>
-                <button class="btn-sm" onclick="renderLeaderboard('game_rps')">✂️ 石头剪刀布</button>
-                <button class="btn-sm" onclick="renderLeaderboard('game_reaction')">⚡ 反应测试</button>
+                <button class="btn-sm active" onclick="renderLeaderboard('game_snake')">?? 贪吃蛇</button>
+                <button class="btn-sm" onclick="renderLeaderboard('game_memory')">?? 记忆翻牌</button>
+                <button class="btn-sm" onclick="renderLeaderboard('game_rps')">?? 石头剪刀布</button>
+                <button class="btn-sm" onclick="renderLeaderboard('game_reaction')">? 反应测试</button>
             </div>
             <div id="leaderboardList" style="max-height:380px;overflow-y:auto;"><p style="color:var(--text-muted)">加载中...</p></div>
         </div>
@@ -2845,13 +2845,13 @@
     <div class="modal" id="lotteryModal">
         <div class="modal-box">
             <span class="close" onclick="closeLottery()">&times;</span>
-            <h2>🎡 幸运转盘</h2>
+            <h2>?? 幸运转盘</h2>
             <p style="color:var(--text-muted);margin-bottom:8px;">消耗 <strong style="color:var(--warning);">20 积分</strong> 抽一次，奖品自动到账</p>
             <div class="lottery-box">
                 <div class="wheel-wrap">
                     <div class="wheel-pointer"></div>
                     <div class="wheel" id="lotteryWheel"></div>
-                    <div class="wheel-center" id="lotteryBtn" onclick="spinLottery()">🎲 抽奖</div>
+                    <div class="wheel-center" id="lotteryBtn" onclick="spinLottery()">?? 抽奖</div>
                 </div>
                 <div class="lottery-info">
                     <span>我的积分：<strong style="color:var(--accent);" id="lotteryPoints">0</strong></span>
@@ -2866,7 +2866,7 @@
     <div class="modal" id="achievementsModal">
         <div class="modal-box">
             <span class="close" onclick="closeAchievements()">&times;</span>
-            <h2>🏅 成就墙</h2>
+            <h2>?? 成就墙</h2>
             <div class="ach-stats">
                 <span>已解锁 <strong id="achUnlockedCount" style="color:var(--accent);">0</strong> / <span id="achTotalCount">0</span></span>
                 <span>成就积分 <strong id="achPointsTotal" style="color:var(--warning);">0</strong></span>
@@ -2879,10 +2879,10 @@
     <div class="modal" id="checkinModal">
         <div class="modal-box">
             <span class="close" onclick="closeCheckinCalendar()">&times;</span>
-            <h2>📅 签到日历</h2>
+            <h2>?? 签到日历</h2>
             <p style="color:var(--text-muted);margin:4px 0 12px;">当前连续签到 <strong style="color:var(--accent);" id="calStreak">0</strong> 天</p>
             <div class="cal-legend">
-                <span><span style="color:var(--success);">✓</span> 已签到</span>
+                <span><span style="color:var(--success);">?</span> 已签到</span>
                 <span style="color:var(--accent);">● 今天</span>
                 <span>○ 未签</span>
             </div>
@@ -2895,7 +2895,7 @@
                 <div class="sb-day"><b>+2</b>积分</div>
                 <div class="sb-day"><b>+8</b>积分</div>
                 <div class="sb-day"><b>+16</b>积分</div>
-                <div class="sb-day big"><b>+16</b>积分<br>+🍫1</div>
+                <div class="sb-day big"><b>+16</b>积分<br>+??1</div>
             </div>
         </div>
     </div>
@@ -2904,24 +2904,24 @@
     <div class="modal" id="snakeModal">
         <div class="modal-box">
             <span class="close" onclick="closeSnake()">&times;</span>
-            <h2>🐍 贪吃蛇</h2>
+            <h2>?? 贪吃蛇</h2>
             <p style="color:var(--text-muted);margin-bottom:8px;">方向键 / WASD 控制，手机上点按钮。吃到食物 +1 分</p>
             <div class="game-stats">
                 <span>得分 <strong id="snakeScore" style="color:var(--accent);">0</strong></span>
                 <span>最高 <strong id="snakeBest" style="color:var(--warning);">0</strong></span>
             </div>
-            <div style="text-align:center;margin-bottom:10px;"><button class="btn btn-outline" onclick="openSnakePvp()">⚔️ 联机对战</button></div>
+            <div style="text-align:center;margin-bottom:10px;"><button class="btn btn-outline" onclick="openSnakePvp()">?? 联机对战</button></div>
             <div class="snake-wrap">
                 <canvas id="snakeCanvas" width="320" height="320"></canvas>
                 <div class="snake-overlay" id="snakeOverlay">
-                    <div class="snake-title" id="snakeOverlayTitle">🐍</div>
+                    <div class="snake-title" id="snakeOverlayTitle">??</div>
                     <button class="btn" id="snakeStartBtn" onclick="snakeStart()">开始游戏</button>
                 </div>
             </div>
             <div class="joy-wrap" id="joyWrapSnake"><div class="joy-base"><div class="joy-knob" id="joyKnobSnake"></div></div></div>
             <div class="snake-pad">
                 <div></div><button class="pad-btn" data-dir="up">▲</button><div></div>
-                <button class="pad-btn" data-dir="left">◀</button><button class="pad-btn" data-dir="down">▼</button><button class="pad-btn" data-dir="right">▶</button>
+                <button class="pad-btn" data-dir="left">?</button><button class="pad-btn" data-dir="down">▼</button><button class="pad-btn" data-dir="right">?</button>
             </div>
         </div>
     </div>
@@ -2930,19 +2930,19 @@
     <div class="modal" id="snakePvpModal">
         <div class="modal-box">
             <span class="close" onclick="closeSnakePvp()">&times;</span>
-            <h2>⚔️ 贪吃蛇 · 联机对战</h2>
+            <h2>?? 贪吃蛇 · 联机对战</h2>
             <div id="pvpHome" style="text-align:center;">
                 <p style="color:var(--text-muted);margin-bottom:12px;">创建房间邀请好友，或输入房间码加入对局<br>地图 30×30，场上 <strong>3</strong> 个苹果，吃苹果变长<br>大蛇对准小蛇的<strong>头</strong>咬下去即可吃掉对方获胜！</p>
-                <button class="btn" style="width:100%;margin-bottom:8px;" onclick="pvpCreateRoom()">🏠 创建房间</button>
+                <button class="btn" style="width:100%;margin-bottom:8px;" onclick="pvpCreateRoom()">?? 创建房间</button>
                 <div style="display:flex;gap:8px;margin-top:8px;">
                     <input id="pvpRoomInput" placeholder="4 位房间码" maxlength="4" style="flex:1;text-transform:uppercase;">
-                    <button class="btn btn-outline" onclick="pvpJoinRoom()">🔑 加入</button>
+                    <button class="btn btn-outline" onclick="pvpJoinRoom()">?? 加入</button>
                 </div>
             </div>
             <div id="pvpWaiting" style="display:none;text-align:center;">
                 <p style="color:var(--text-muted);margin-bottom:8px;">把房间码发给好友：</p>
                 <div id="pvpRoomCode" style="font-size:2rem;font-weight:800;letter-spacing:6px;color:var(--accent);margin-bottom:10px;"></div>
-                <p id="pvpWaitingText" style="color:var(--text-muted);margin-bottom:14px;">⏳ 等待对手加入…</p>
+                <p id="pvpWaitingText" style="color:var(--text-muted);margin-bottom:14px;">? 等待对手加入…</p>
                 <button class="btn btn-outline" onclick="pvpCancelWait()">取消</button>
             </div>
             <div id="pvpGame" style="display:none;">
@@ -2955,15 +2955,15 @@
                 <div class="snake-wrap" style="margin-top:8px;">
                     <canvas id="pvpCanvas" width="480" height="480"></canvas>
                     <div class="snake-overlay" id="pvpOverlay">
-                        <div class="snake-title" id="pvpOverlayTitle">⚔️</div>
-                        <button class="btn" id="pvpRestartBtn" onclick="pvpRestart()" style="display:none;margin-bottom:8px;">🔄 再来一局</button>
+                        <div class="snake-title" id="pvpOverlayTitle">??</div>
+                        <button class="btn" id="pvpRestartBtn" onclick="pvpRestart()" style="display:none;margin-bottom:8px;">?? 再来一局</button>
                         <button class="btn btn-outline" onclick="pvpExitToHome()">退出房间</button>
                     </div>
                 </div>
                 <div class="joy-wrap" id="joyWrapPvp"><div class="joy-base"><div class="joy-knob" id="joyKnobPvp"></div></div></div>
                 <div class="snake-pad">
                     <div></div><button class="pad-btn" data-dir="up">▲</button><div></div>
-                    <button class="pad-btn" data-dir="left">◀</button><button class="pad-btn" data-dir="down">▼</button><button class="pad-btn" data-dir="right">▶</button>
+                    <button class="pad-btn" data-dir="left">?</button><button class="pad-btn" data-dir="down">▼</button><button class="pad-btn" data-dir="right">?</button>
                 </div>
             </div>
         </div>
@@ -2973,7 +2973,7 @@
     <div class="modal" id="memoryModal">
         <div class="modal-box">
             <span class="close" onclick="closeMemory()">&times;</span>
-            <h2>🧠 记忆翻牌</h2>
+            <h2>?? 记忆翻牌</h2>
             <p style="color:var(--text-muted);margin-bottom:8px;">翻出所有配对的 emoji 即可获胜，试试最快纪录</p>
             <div class="game-stats">
                 <span>步数 <strong id="memMoves" style="color:var(--accent);">0</strong></span>
@@ -2981,7 +2981,7 @@
                 <span>最佳 <strong id="memBest" style="color:var(--warning);">--</strong></span>
             </div>
             <div class="mem-grid" id="memGrid"></div>
-            <div style="text-align:center;margin-top:12px;"><button class="btn btn-outline" onclick="memNewGame()">🔄 重新开始</button></div>
+            <div style="text-align:center;margin-top:12px;"><button class="btn btn-outline" onclick="memNewGame()">?? 重新开始</button></div>
         </div>
     </div>
 
@@ -2989,24 +2989,24 @@
     <div class="modal" id="rpsModal">
         <div class="modal-box">
             <span class="close" onclick="closeRPS()">&times;</span>
-            <h2>✂️ 石头剪刀布</h2>
+            <h2>?? 石头剪刀布</h2>
             <p style="color:var(--text-muted);margin-bottom:8px;">和电脑对战，三局两胜赢一局</p>
             <div class="rps-score">
                 <span>你 <strong id="rpsYou" style="color:var(--accent);">0</strong></span>
                 <span>电脑 <strong id="rpsCpu" style="color:var(--danger);">0</strong></span>
             </div>
             <div class="rps-stage">
-                <div class="rps-side"><div class="rps-big" id="rpsYourPick">❔</div><div class="rps-label">你</div></div>
+                <div class="rps-side"><div class="rps-big" id="rpsYourPick">?</div><div class="rps-label">你</div></div>
                 <div class="rps-vs">VS</div>
-                <div class="rps-side"><div class="rps-big" id="rpsCpuPick">❔</div><div class="rps-label">电脑</div></div>
+                <div class="rps-side"><div class="rps-big" id="rpsCpuPick">?</div><div class="rps-label">电脑</div></div>
             </div>
-            <div class="rps-result" id="rpsResult" style="min-height:24px;">👆 出招吧</div>
+            <div class="rps-result" id="rpsResult" style="min-height:24px;">?? 出招吧</div>
             <div class="rps-choices">
-                <button class="rps-choice" onclick="rpsPlay('rock')">✊<span>石头</span></button>
-                <button class="rps-choice" onclick="rpsPlay('scissors')">✌️<span>剪刀</span></button>
-                <button class="rps-choice" onclick="rpsPlay('paper')">✋<span>布</span></button>
+                <button class="rps-choice" onclick="rpsPlay('rock')">?<span>石头</span></button>
+                <button class="rps-choice" onclick="rpsPlay('scissors')">??<span>剪刀</span></button>
+                <button class="rps-choice" onclick="rpsPlay('paper')">?<span>布</span></button>
             </div>
-            <div style="text-align:center;margin-top:10px;"><button class="btn btn-outline" onclick="rpsReset()">🔄 重新计分</button></div>
+            <div style="text-align:center;margin-top:10px;"><button class="btn btn-outline" onclick="rpsReset()">?? 重新计分</button></div>
         </div>
     </div>
 
@@ -3014,7 +3014,7 @@
     <div class="modal" id="reactionModal">
         <div class="modal-box">
             <span class="close" onclick="closeReaction()">&times;</span>
-            <h2>⚡ 反应测试</h2>
+            <h2>? 反应测试</h2>
             <p style="color:var(--text-muted);margin-bottom:8px;">等方块变绿立刻点击，测 3 次取平均</p>
             <div class="game-stats">
                 <span>次数 <strong id="rxCount" style="color:var(--accent);">0/3</strong></span>
@@ -3032,10 +3032,10 @@
     <div class="modal" id="stellarModal">
         <div class="modal-box stellar-box">
             <div class="stellar-topbar">
-                <span class="st-title">🎯 星域猎手 · 射击竞技场</span>
+                <span class="st-title">?? 星域猎手 · 射击竞技场</span>
                 <span class="st-hint">WASD 移动 · 鼠标瞄准/左键射击 · Shift/空格 冲刺 · R 换弹 · Q/E 切枪 · Esc 暂停（游戏内）</span>
                 <span style="flex:1"></span>
-                <button class="btn-sm" onclick="closeStellarGame()">✕ 返回论坛</button>
+                <button class="btn-sm" onclick="closeStellarGame()">? 返回论坛</button>
             </div>
             <div class="stellar-frame">
                 <iframe id="stellarIframe" src="stellar_arena.html" allow="autoplay"></iframe>
@@ -3046,11 +3046,11 @@
     <!-- 音乐播放器 -->
     <div id="musicPlayer">
         <div class="player-controls">
-            <button onclick="playerPrev()">⏮</button>
-            <button id="playBtn" onclick="playerToggle()" style="font-size:1.6rem;">▶</button>
-            <button onclick="playerNext()">⏭</button>
-            <button id="loopBtn" onclick="playerToggleLoop()" style="font-size:.9rem;">🔁</button>
-            <button id="shuffleBtn" onclick="playerToggleShuffle()" style="font-size:.9rem;">🔀</button>
+            <button onclick="playerPrev()">?</button>
+            <button id="playBtn" onclick="playerToggle()" style="font-size:1.6rem;">?</button>
+            <button onclick="playerNext()">?</button>
+            <button id="loopBtn" onclick="playerToggleLoop()" style="font-size:.9rem;">??</button>
+            <button id="shuffleBtn" onclick="playerToggleShuffle()" style="font-size:.9rem;">??</button>
         </div>
         <div class="player-info">
             <div class="song-title" id="currentSongTitle">未播放</div>
@@ -3062,21 +3062,21 @@
             <span class="time-text" id="totalTime">0:00</span>
         </div>
         <div class="player-volume">
-            <i>🔊</i>
+            <i>??</i>
             <input type="range" id="volumeBar" min="0" max="100" value="70" oninput="playerVolume(this.value)">
         </div>
         <div class="player-upload">
             <input type="file" accept="audio/*" multiple onchange="uploadMusic(event)">
-            <button>📁 上传</button>
+            <button>?? 上传</button>
         </div>
         <div class="player-playlist-toggle">
-            <button onclick="document.getElementById('playlistModal').classList.add('active');renderPlaylist();">📋</button>
+            <button onclick="document.getElementById('playlistModal').classList.add('active');renderPlaylist();">??</button>
         </div>
     </div>
 
     <script>
         // 版本标记: 用于确认页面加载的是否为最新代码(游戏成绩 rpc 参数修复版)
-        console.log('%c✅ 论坛版本 2026-08-06(游戏成绩修复版 p_game_type/p_score)', 'color:#22c55e;font-weight:bold');
+        console.log('%c? 论坛版本 2026-08-06(游戏成绩修复版 p_game_type/p_score)', 'color:#22c55e;font-weight:bold');
         // ============================================================
         // JS 结构导航(自上而下,按功能分区维护):
         //   [01] 全局配置 / 多主题切换 / 工具函数 / 操作说明 / XSS 安全 / 本地缓存
@@ -3140,11 +3140,11 @@
 
         // ================== 多主题切换 ==================
         var THEMES = [
-            { id: 'dark', name: '深空紫', icon: '🌌', desc: '默认暗色', preview: 'linear-gradient(135deg,#14111f,#201a33,#a855f7)' },
-            { id: 'light', name: '明亮', icon: '☀️', desc: '清爽白色', preview: 'linear-gradient(135deg,#f6f3ff,#ffffff,#8b5cf6)' },
-            { id: 'peach', name: '蜜桃粉', icon: '🍑', desc: '粉嫩少女', preview: 'linear-gradient(135deg,#fdf0f4,#ffffff,#ff5e8a)' },
-            { id: 'cyber', name: '赛博青', icon: '🤖', desc: '霓虹科技', preview: 'linear-gradient(135deg,#0a0f1e,#111a30,#22d3ee)' },
-            { id: 'mint', name: '薄荷绿', icon: '🌿', desc: '清新自然', preview: 'linear-gradient(135deg,#0d1713,#14221d,#34d399)' }
+            { id: 'dark', name: '深空紫', icon: '??', desc: '默认暗色', preview: 'linear-gradient(135deg,#14111f,#201a33,#a855f7)' },
+            { id: 'light', name: '明亮', icon: '??', desc: '清爽白色', preview: 'linear-gradient(135deg,#f6f3ff,#ffffff,#8b5cf6)' },
+            { id: 'peach', name: '蜜桃粉', icon: '??', desc: '粉嫩少女', preview: 'linear-gradient(135deg,#fdf0f4,#ffffff,#ff5e8a)' },
+            { id: 'cyber', name: '赛博青', icon: '??', desc: '霓虹科技', preview: 'linear-gradient(135deg,#0a0f1e,#111a30,#22d3ee)' },
+            { id: 'mint', name: '薄荷绿', icon: '??', desc: '清新自然', preview: 'linear-gradient(135deg,#0d1713,#14221d,#34d399)' }
         ];
 
         function getTheme() { return document.documentElement.getAttribute('data-theme') || 'dark'; }
@@ -3179,7 +3179,7 @@
         (function() {
             var saved = localStorage.getItem('theme');
             if (saved) document.documentElement.setAttribute('data-theme', saved);
-            document.getElementById('themeToggle').textContent = '🎨';
+            document.getElementById('themeToggle').textContent = '??';
         })();
 
         // ================== 工具函数 ==================
@@ -3214,7 +3214,41 @@
                 3: { name: 'Lv.3', signBonus: 6 }, 4: { name: 'Lv.4', signBonus: 8 }, 5: { name: 'Lv.5', signBonus: 10 },
                 6: { name: 'Lv.6', signBonus: 12 } }; return m[l] || m[1]; }
 
-        function showFeedback() { alert('📮 反馈请发送邮件至：3880374029@qq.com'); }
+        // ================== 等级计算与同步（修复等级无法升级） ==================
+        // 等级规则：每累计 50 积分升 1 级，最高 6 级（与个人中心进度条“每级 50 积分”的规则一致）
+        var MAX_LEVEL = 6;
+        var POINTS_PER_LEVEL = 50;
+
+        // 根据当前积分计算应达到的等级：level = floor(points / 50) + 1，封顶 MAX_LEVEL
+        function computeLevel(points) {
+            return Math.min(MAX_LEVEL, Math.floor((points || 0) / POINTS_PER_LEVEL) + 1);
+        }
+
+        // 依据当前积分重新计算等级并同步到数据库；等级只升不降（消费积分不会导致掉级）
+        // opts.silent = true 时静默校准（登录/初始化时修正历史数据），不弹升级提示
+        async function syncUserLevel(opts) {
+            if (!currentUser || !userProfile) return;
+            var silent = opts && opts.silent;
+            var cur = userProfile.level || 1;
+            var target = computeLevel(userProfile.points);
+            if (target <= cur) return; // 未达到下一级，无需升级
+            var oldLevel = cur;
+            userProfile.level = target; // 先更新本地，避免界面跳动
+            try {
+                await authFetch(SUPABASE_URL + '/rest/v1/profiles?id=eq.' + encodeURIComponent(currentUser.id), {
+                    method: 'PATCH',
+                    body: JSON.stringify({ level: target })
+                });
+            } catch (e) {
+                userProfile.level = oldLevel; // 写入失败则回滚本地等级
+                console.warn('等级同步失败', e);
+                return;
+            }
+            if (!silent) showToast('恭喜升级至 ' + getLevelInfo(target).name + '！', false);
+            updateUI();
+        }
+
+        function showFeedback() { alert('?? 反馈请发送邮件至：3880374029@qq.com'); }
         function genTempId() { if (crypto.randomUUID) return crypto.randomUUID(); return 'temp_' + Date.now() + '_' + Math
                 .random().toString(36).substr(2, 9); }
 
@@ -3224,7 +3258,7 @@
 
         function closeHelp() { document.getElementById('helpModal').classList.remove('active'); }
 
-        function showStatus() { alert('✅ 所有功能已就绪'); }
+        function showStatus() { alert('? 所有功能已就绪'); }
         // ================== XSS 安全修复 ==================
         function parseCustomMarkup(t) {
             if (!t) return '';
@@ -3236,9 +3270,9 @@
                 '</span>'; });
             r = r.replace(/\$\\blink\s+(.*?)\$/g, function(m, c) { return '<span class="blink-text">' + escapeHtml(c) +
                 '</span>'; });
-            var em = { happy: '😄', happyn: '😁', why: '🤔', sad: '😢', love: '❤️', cool: '😎', angry: '😡', cry: '😭',
-                laugh: '😂', wow: '😮' };
-            r = r.replace(/\[#(.*?)\]/g, function(m, k) { return em[k.trim()] || '❓'; });
+            var em = { happy: '??', happyn: '??', why: '??', sad: '??', love: '??', cool: '??', angry: '??', cry: '??',
+                laugh: '??', wow: '??' };
+            r = r.replace(/\[#(.*?)\]/g, function(m, k) { return em[k.trim()] || '?'; });
             r = r.replace(/\n/g, '<br>');
             return DOMPurify.sanitize(r);
         }
@@ -3447,7 +3481,7 @@
                 var savedTheme = localStorage.getItem('theme');
                 if (savedTheme) {
                     document.documentElement.setAttribute('data-theme', savedTheme);
-                    document.getElementById('themeToggle').textContent = savedTheme === 'light' ? '☀️' : '🌙';
+                    document.getElementById('themeToggle').textContent = savedTheme === 'light' ? '??' : '??';
                 }
                 var token = localStorage.getItem('sb_token');
                 var refresh = localStorage.getItem('sb_refresh_token');
@@ -3473,6 +3507,7 @@
                                 });
                                 userProfile = await getProfile(user.id);
                             }
+                            await syncUserLevel({ silent: true });
                             updateUI();
                             await loadPosts('all', '');
                             await loadTopics();
@@ -3493,7 +3528,7 @@
                 renderQRPreviews();
                 if (currentUser) loadPurchaseHistory();
                 sbReady = true;
-                console.log('✅ Supabase 初始化完成');
+                console.log('? Supabase 初始化完成');
             })();
             return sbInitPromise;
         }
@@ -3574,7 +3609,8 @@
                         });
                         userProfile = await getProfile(currentUser.id);
                     }
-                    showToast('✅ 登录成功', false);
+                    await syncUserLevel({ silent: true });
+                    showToast('? 登录成功', false);
                     closeModal();
                     await loadMyEquipped();
                     updateUI();
@@ -3608,7 +3644,7 @@
             try {
                 var data = await signUp(email, password, name);
                 if (data.user) {
-                    showToast('✅ 注册成功，请登录', false);
+                    showToast('? 注册成功，请登录', false);
                     switchTab('login');
                     document.getElementById('loginEmail').value = email;
                     document.getElementById('loginPassword').value = '';
@@ -3821,7 +3857,7 @@
             var container = document.getElementById('postList');
             if (!posts || posts.length === 0) {
                 container.innerHTML =
-                    '<div class="empty-state"><h3>📭 暂无帖子</h3><p style="color:var(--text-muted);">成为第一个发帖的人吧！</p></div>';
+                    '<div class="empty-state"><h3>?? 暂无帖子</h3><p style="color:var(--text-muted);">成为第一个发帖的人吧！</p></div>';
                 return;
             }
             var html = '';
@@ -3839,7 +3875,7 @@
                 var excerpt = post.content ? post.content.replace(/<[^>]+>/g, '').substring(0, 120) : '';
                 var catMap = { tech: '技术', life: '生活', career: '职业', topic: '话题' };
                 var catName = catMap[post.category] || post.category || '综合';
-                var isPinned = post.pinned ? '<span class="pin-icon">📌</span>' : '';
+                var isPinned = post.pinned ? '<span class="pin-icon">??</span>' : '';
                 var tags = post.tags ? post.tags.split(',').filter(function(t) { return t.trim(); }) : [];
                 var tagsHtml = '';
                 tags.forEach(function(tag) {
@@ -3848,14 +3884,14 @@
                         tag.trim()) + '</span>';
                 });
                 var safePostId = escapeJsString(post.id);
-                var isFav = favoriteMap.get(post.id) ? '❤️' : '🤍';
+                var isFav = favoriteMap.get(post.id) ? '??' : '??';
                 var actions = userPostActions.get(post.id) || { liked: false, recommended: false,
                     downvoted: false };
                 var likeClass = actions.liked ? 'active' : '';
                 var recommendClass = actions.recommended ? 'active' : '';
                 var downvoteClass = actions.downvoted ? 'active' : '';
                 var syncStatus = post._syncing ? ' syncing' : '';
-                var syncText = post._syncing ? '<span class="sync-status">⏳ 同步中</span>' : '';
+                var syncText = post._syncing ? '<span class="sync-status">? 同步中</span>' : '';
                 html += '<div class="post-card' + syncStatus + '" data-id="' + escapeHtml(post.id) + '">' +
                     '<div class="post-title" onclick="showPost(\'' + safePostId + '\')">' + isPinned + escapeHtml(
                         post.title) + ' ' + syncText + '</div>' +
@@ -3875,15 +3911,15 @@
                     '<div class="post-excerpt">' + escapeHtml(excerpt) + (excerpt.length >= 120 ? '...' : '') +
                     '</div>' +
                     '<div class="post-footer">' +
-                    '<span>💬 ' + commentCount + '</span>' +
-                    '<span class="like-btn ' + likeClass + '" onclick="handleLike(\'' + safePostId + '\')">❤️ ' + (
+                    '<span>?? ' + commentCount + '</span>' +
+                    '<span class="like-btn ' + likeClass + '" onclick="handleLike(\'' + safePostId + '\')">?? ' + (
                         post.likes || 0) + '</span>' +
                     '<span class="recommend-btn ' + recommendClass + '" onclick="handleRecommend(\'' + safePostId +
-                    '\')">👍 ' + (post.recommends || 0) + '</span>' +
+                    '\')">?? ' + (post.recommends || 0) + '</span>' +
                     '<span class="downvote-btn ' + downvoteClass + '" onclick="handleDownvote(\'' + safePostId +
-                    '\')">👎 ' + (post.downvotes || 0) + '</span>' +
-                    '<span>👁️ ' + (post.views || 0) + '</span>' +
-                    '<span>🍫 ' + (post.chocolate_count || 0) + '</span>' +
+                    '\')">?? ' + (post.downvotes || 0) + '</span>' +
+                    '<span>??? ' + (post.views || 0) + '</span>' +
+                    '<span>?? ' + (post.chocolate_count || 0) + '</span>' +
                     '<span class="fav-btn" onclick="toggleFavorite(\'' + safePostId + '\')">' + isFav + '</span>' +
                     '<span style="margin-left:auto;color:var(--text-muted);font-size:.7rem;">#' + (idx + 1) +
                     '</span>' +
@@ -3930,7 +3966,7 @@
                 var safeId = escapeJsString(p.id);
                 html += '<div class="hot-item"><a href="#" onclick="showPost(\'' + safeId +
                     '\')"><span><span class="hot-num">' + (i + 1) + '</span>' + escapeHtml(p.title) +
-                    '</span><span style="color:var(--text-muted);">🔥 ' + ((p.likes || 0) + (p.recommends || 0) *
+                    '</span><span style="color:var(--text-muted);">?? ' + ((p.likes || 0) + (p.recommends || 0) *
                         2) + '</span></a></div>';
             });
             container.innerHTML = html;
@@ -4023,7 +4059,7 @@
             var authorItems = equippedMap.get(post.author_id) || [];
             var frameCls = avatarFrameClassFor(authorItems);
             var nickCls = nicknameEffectFor(authorItems);
-            var isFav = favoriteMap.get(post.id) ? '❤️' : '🤍';
+            var isFav = favoriteMap.get(post.id) ? '??' : '??';
             var favText = favoriteMap.get(post.id) ? '取消收藏' : '收藏';
             var actions = userPostActions.get(post.id) || { liked: false, recommended: false,
                 downvoted: false };
@@ -4046,33 +4082,33 @@
                 '</span>' +
                 (topicNameFor(post) ? '<span class="badge" style="cursor:pointer;" title="点击筛选此话题" onclick="setCategory(\'topic_' + escapeHtml(escapeJsString(post.topic_id)) + '\')">#' + escapeHtml(topicNameFor(post)) + '</span>' : '') +
                 tagsHtml +
-                (isAuthor ? '<span style="color:var(--warning);font-size:.7rem;">✏️ 作者</span>' : '') +
+                (isAuthor ? '<span style="color:var(--warning);font-size:.7rem;">?? 作者</span>' : '') +
                 '</div>' +
                 '<div class="post-body">' + parsedContent + '</div>' +
                 '<div class="post-actions">' +
-                '<span class="like-btn ' + likeClass + '" onclick="handleLike(\'' + safePostId + '\')">❤️ ' + (
+                '<span class="like-btn ' + likeClass + '" onclick="handleLike(\'' + safePostId + '\')">?? ' + (
                     post.likes || 0) + '</span>' +
                 '<span class="recommend-btn ' + recommendClass + '" onclick="handleRecommend(\'' + safePostId +
-                '\')">👍 ' + (post.recommends || 0) + '</span>' +
+                '\')">?? ' + (post.recommends || 0) + '</span>' +
                 '<span class="downvote-btn ' + downvoteClass + '" onclick="handleDownvote(\'' + safePostId +
-                '\')">👎 ' + (post.downvotes || 0) + '</span>' +
-                '<span>👁️ ' + (post.views || 0) + '</span>' +
-                '<span>🍫 ' + (post.chocolate_count || 0) + '</span>' +
+                '\')">?? ' + (post.downvotes || 0) + '</span>' +
+                '<span>??? ' + (post.views || 0) + '</span>' +
+                '<span>?? ' + (post.chocolate_count || 0) + '</span>' +
                 '<span class="fav-btn" onclick="toggleFavorite(\'' + safePostId + '\')">' + isFav + ' ' + favText +
                 '</span>' +
                 (currentUser && currentUser.id !== post.author_id ?
                     '<button class="btn-sm" onclick="followUser(\'' + safeAuthorId + '\')">' + (followingMap.has(
-                        post.author_id) ? '✅ 已关注' : '➕ 关注') + '</button>' : '') +
+                        post.author_id) ? '? 已关注' : '? 关注') + '</button>' : '') +
                 (currentUser && currentUser.id !== post.author_id ?
                     '<button class="btn-sm" onclick="openGiveChocolate(\'' + safeAuthorId + '\',\'' + safeAuthorName +
-                    '\')">🍫 投巧克力</button>' : '') +
+                    '\')">?? 投巧克力</button>' : '') +
                 (isAuthor ?
-                    '<button class="btn-sm" onclick="showEditForm()">✏️ 编辑</button>' : '') +
+                    '<button class="btn-sm" onclick="showEditForm()">?? 编辑</button>' : '') +
                 (isAuthor ?
                     '<button class="btn-sm" style="border-color:var(--danger);color:var(--danger);" onclick="deletePost(\'' +
-                    safePostId + '\')">🗑️ 删除</button>' : '') +
+                    safePostId + '\')">??? 删除</button>' : '') +
                 (currentUser ?
-                    '<button class="btn-sm" onclick="openMessageUser(\'' + safeAuthorName + '\')">💬 私信</button>' :
+                    '<button class="btn-sm" onclick="openMessageUser(\'' + safeAuthorName + '\')">?? 私信</button>' :
                     '') +
                 '</div>' +
                 '<div class="edit-area" id="editArea" style="display:none;">' +
@@ -4084,11 +4120,11 @@
                 escapeHtml(post.title) + '">' +
                 '<textarea id="editContent" placeholder="内容" rows="5" style="margin-bottom:8px;">' + escapeHtml(
                     post.content) + '</textarea>' +
-                '<button class="btn btn-success" onclick="saveEdit()">💾 保存</button>' +
+                '<button class="btn btn-success" onclick="saveEdit()">?? 保存</button>' +
                 '<button class="btn btn-outline" onclick="cancelEdit()">取消</button>' +
                 '<div id="editMsg" style="margin-top:8px;"></div>' +
                 '</div>' +
-                '<div style="margin-top:20px;"><h3 style="margin-bottom:12px;">💬 评论 (' + (comments ? comments.length :
+                '<div style="margin-top:20px;"><h3 style="margin-bottom:12px;">?? 评论 (' + (comments ? comments.length :
                     0) + ')</h3><div id="commentList">';
             if (comments && comments.length > 0) {
                 comments.forEach(function(c) {
@@ -4105,7 +4141,7 @@
                         '<div class="reply-content">' + nl2br(c.content) + '</div>' +
                         '<div class="reply-actions">' +
                         '<span class="comment-like-btn" onclick="toggleCommentLike(\'' + escapeJsString(c.id) +
-                        '\')">' + (isLiked ? '❤️' : '🤍') + ' ' + likeCount + '</span>' +
+                        '\')">' + (isLiked ? '??' : '??') + ' ' + likeCount + '</span>' +
                         '</div></div>';
                 });
             } else {
@@ -4115,7 +4151,7 @@
             if (currentUser) {
                 html += '<div style="margin-top:16px;"><div class="comment-input-row">' +
                     '<textarea id="commentInput" placeholder="写评论..." rows="3" style="flex:1;min-width:150px;"></textarea>' +
-                    '<span class="comment-emoji-wrapper"><button class="emoji-btn emoji-btn-sm" onclick="toggleEmojiPicker(\'comment\')">😊</button><div class="emoji-picker" id="emojiPickerComment"></div></span>' +
+                    '<span class="comment-emoji-wrapper"><button class="emoji-btn emoji-btn-sm" onclick="toggleEmojiPicker(\'comment\')">??</button><div class="emoji-picker" id="emojiPickerComment"></div></span>' +
                     '<button class="btn" onclick="publishComment(\'' + safePostId + '\')">发表评论</button>' +
                     '</div></div>';
             } else {
@@ -4169,7 +4205,7 @@
             // 标题唯一性检查:与已有帖子重复则拦截(本地缓存 + 数据库)
             if (await isTitleTaken(title)) {
                 publishLock = false;
-                showToast('⚠️ 标题已存在，请更换标题', true);
+                showToast('?? 标题已存在，请更换标题', true);
                 return;
             }
             var tempId = genTempId();
@@ -4204,7 +4240,7 @@
             document.getElementById('publishTags').value = '';
             var pubTopicSel = document.getElementById('publishTopic');
             if (pubTopicSel) pubTopicSel.value = '';
-            showToast('📤 发布中...', false);
+            showToast('?? 发布中...', false);
             await processMentions(content, currentUser.id, tempId, 'post');
             try {
                 var data = {
@@ -4239,7 +4275,7 @@
                 }
                 await updateTaskProgress(currentUser.id, 'daily_post', 1);
                 await checkAchievements();
-                showToast('✅ 发布成功', false);
+                showToast('? 发布成功', false);
                 updateStats(postsCache);
                 var finalFiltered = postsCache.filter(matchesCurrentView);
                 renderPosts(finalFiltered);
@@ -4248,9 +4284,9 @@
                 console.error('发布失败', e);
                 var dupMsg = e && e.message ? String(e.message) : '';
                 if (/duplicate|23505|unique/i.test(dupMsg)) {
-                    showToast('⚠️ 标题已存在，请更换标题', true);
+                    showToast('?? 标题已存在，请更换标题', true);
                 } else {
-                    showToast('❌ 发布失败，请重试', true);
+                    showToast('? 发布失败，请重试', true);
                 }
                 var idx = postsCache.findIndex(function(p) { return p.id === tempId; });
                 if (idx !== -1) postsCache.splice(idx, 1);
@@ -4291,18 +4327,18 @@
                     '" alt="avatar" onerror="this.src=\'https://ui-avatars.com/api/?name=U&background=7c6aff&color=fff&size=100&length=2\'">' +
                     '<span class="reply-author">' + escapeHtml(newComment.author_name) + '</span>' +
                     '<span class="reply-time">' + formatTime(newComment.created_at) + '</span>' +
-                    '<span class="sync-status">⏳ 发布中...</span>' +
+                    '<span class="sync-status">? 发布中...</span>' +
                     '</div><div class="reply-content">' + nl2br(newComment.content) + '</div>' +
-                    '<div class="reply-actions"><span class="comment-like-btn">🤍 0</span></div></div>';
+                    '<div class="reply-actions"><span class="comment-like-btn">?? 0</span></div></div>';
                 commentList.innerHTML = commentHtml + commentList.innerHTML;
                 document.getElementById('commentInput').value = '';
                 var commentCountEl = document.querySelector('#postDetail h3');
                 if (commentCountEl) {
                     var match = commentCountEl.textContent.match(/\d+/);
                     var count = match ? parseInt(match[0]) : 0;
-                    commentCountEl.textContent = '💬 评论 (' + (count + 1) + ')';
+                    commentCountEl.textContent = '?? 评论 (' + (count + 1) + ')';
                 }
-                showToast('📤 评论发送中...', false);
+                showToast('?? 评论发送中...', false);
             } else {
                 showToast('评论区域未找到，请刷新', true);
                 return;
@@ -4320,18 +4356,18 @@
                 await showPost(postId);
                 await updateTaskProgress(currentUser.id, 'daily_comment', 1);
                 await checkAchievements();
-                showToast('✅ 评论成功', false);
+                showToast('? 评论成功', false);
                 renderLatex();
             } catch (e) {
                 console.error('评论失败', e);
-                showToast('❌ 评论失败，请重试', true);
+                showToast('? 评论失败，请重试', true);
                 var tempEl = commentList.querySelector('[data-id="' + tempId + '"]');
                 if (tempEl) tempEl.remove();
                 var commentCountEl = document.querySelector('#postDetail h3');
                 if (commentCountEl) {
                     var match = commentCountEl.textContent.match(/\d+/);
                     var count = match ? parseInt(match[0]) : 0;
-                    commentCountEl.textContent = '💬 评论 (' + Math.max(0, count - 1) + ')';
+                    commentCountEl.textContent = '?? 评论 (' + Math.max(0, count - 1) + ')';
                 }
             } finally {
                 await updateUserActivity();
@@ -4457,7 +4493,7 @@
                     await authFetch(SUPABASE_URL + '/rest/v1/favorites', { method: 'POST', body: JSON.stringify({ user_id: currentUser
                                 .id, post_id: postId }) });
                     favoriteMap.set(postId, true);
-                    showToast('❤️ 收藏成功', false);
+                    showToast('?? 收藏成功', false);
                 }
                 updateUI();
                 if (currentPostId) { await showPost(currentPostId); } else { await loadPosts(currentCategory,
@@ -4665,7 +4701,7 @@
             if (!name) { showToast('请输入话题名称', true); return; }
             try {
                 await createTopicAPI(name);
-                showToast('✅ 话题创建成功', false);
+                showToast('? 话题创建成功', false);
                 document.getElementById('topicNameInput').value = '';
                 closeTopicModal();
                 await loadTopics();
@@ -4723,7 +4759,7 @@
                         unread + '</span>' : '';
                     html +=
                         '<div style="margin-bottom:16px;border-bottom:1px solid var(--border-color);padding-bottom:12px;">' +
-                        '<div style="display:flex;justify-content:space-between;align-items:center;"><strong style="color:var(--accent);">💬 ' +
+                        '<div style="display:flex;justify-content:space-between;align-items:center;"><strong style="color:var(--accent);">?? ' +
                         escapeHtml(conv.name) + ' ' + unreadBadge +
                         '</strong><span style="font-size:.7rem;color:var(--text-muted);">' + formatTime(lastMsg
                             .created_at) + '</span></div>' +
@@ -4783,7 +4819,7 @@
                     created_at: new Date().toISOString()
                 });
                 if (insertErr) throw insertErr;
-                showToast('✅ 消息已发送', false);
+                showToast('? 消息已发送', false);
                 document.getElementById('msgContent').value = '';
                 await renderMessages();
                 updateUnreadBadge();
@@ -4909,11 +4945,12 @@
                     userProfile.chocolates = newChocolates;
                     userProfile.streak = streak;
                 }
+                await syncUserLevel();
                 await updateTaskProgress(currentUser.id, 'daily_checkin', 1);
                 await logPoints(bonusPoints, '每日签到（连签' + streak + '天）');
                 await checkAchievements();
-                var msg = '✅ 签到成功！连续签到 ' + streak + ' 天，+' + bonusPoints + ' 积分';
-                if (bonusChocolate > 0) msg += ' 🍫 +' + bonusChocolate + ' 巧克力';
+                var msg = '? 签到成功！连续签到 ' + streak + ' 天，+' + bonusPoints + ' 积分';
+                if (bonusChocolate > 0) msg += ' ?? +' + bonusChocolate + ' 巧克力';
                 showToast(msg, false);
                 updateUI();
                 loadPosts(currentCategory, currentSearch);
@@ -4949,7 +4986,7 @@
                     userProfile.chocolates = newChocolates;
                 }
                 await logPoints(-cost, '积分兑换巧克力');
-                showToast('🍫 兑换成功！+' + count + ' 巧克力', false);
+                showToast('?? 兑换成功！+' + count + ' 巧克力', false);
                 closeExchange();
                 updateUI();
                 await updateUserActivity();
@@ -4970,7 +5007,7 @@
 
         async function buyItem(item, cost) {
             if (!currentUser) { showToast('请先登录', true); return; }
-            if ((userProfile?.chocolates || 0) < cost) { showToast('🍫 巧克力不足', true); return; }
+            if ((userProfile?.chocolates || 0) < cost) { showToast('?? 巧克力不足', true); return; }
             try {
                 var newChocolates = (userProfile?.chocolates || 0) - cost;
                 await authFetch(SUPABASE_URL + '/rest/v1/profiles?id=eq.' + encodeURIComponent(currentUser.id), {
@@ -4991,10 +5028,10 @@
                     updateUI();
                     return;
                 }
-                showToast('🎉 成功购买并装备 ' + item + '！', false);
+                showToast('?? 成功购买并装备 ' + item + '！', false);
                 updateUI();
                 renderProfile();
-                document.getElementById('shopMsg').innerHTML = '<p style="color:var(--success);">✅ 已购买并装备 ' +
+                document.getElementById('shopMsg').innerHTML = '<p style="color:var(--success);">? 已购买并装备 ' +
                     escapeHtml(item) + '，全站可见</p>';
                 await updateUserActivity();
             } catch (e) {
@@ -5017,7 +5054,7 @@
             if (!currentUser || !giveTargetId) { showToast('请先登录', true); return; }
             var count = parseInt(document.getElementById('giveCount').value) || 1;
             if (count <= 0) { showToast('请输入有效数量', true); return; }
-            if ((userProfile?.chocolates || 0) < count) { showToast('🍫 巧克力不足', true); return; }
+            if ((userProfile?.chocolates || 0) < count) { showToast('?? 巧克力不足', true); return; }
             try {
                 var newSelf = (userProfile?.chocolates || 0) - count;
                 await authFetch(SUPABASE_URL + '/rest/v1/profiles?id=eq.' + encodeURIComponent(currentUser.id), {
@@ -5032,7 +5069,7 @@
                     method: 'PATCH',
                     body: JSON.stringify({ chocolates: newTarget })
                 });
-                showToast('🍫 成功送给 ' + giveTargetName + ' ' + count + ' 块巧克力！', false);
+                showToast('?? 成功送给 ' + giveTargetName + ' ' + count + ' 块巧克力！', false);
                 await checkAchievements();
                 closeGiveChocolate();
                 updateUI();
@@ -5270,8 +5307,9 @@
                     await sb.from('profiles').update({ points: newPoints }).eq('id', userId);
                     if (userId === currentUser?.id) {
                         if (userProfile) userProfile.points = newPoints;
+                        await syncUserLevel();
                         await logPoints(bonus, '任务完成');
-                        showToast('🎉 任务完成！+' + bonus + ' 积分', false);
+                        showToast('?? 任务完成！+' + bonus + ' 积分', false);
                         updateUI();
                     }
                 }
@@ -5282,8 +5320,8 @@
             if (!currentUser) { document.getElementById('tasksList').innerHTML =
                     '<p style="color:var(--text-muted);">请先登录</p>'; return; }
             var tasks = await getTasks(currentUser.id);
-            var taskNames = { daily_post: '📝 发布帖子', daily_comment: '💬 评论', daily_like: '❤️ 点赞',
-                daily_recommend: '👍 推荐', daily_checkin: '✅ 签到' };
+            var taskNames = { daily_post: '?? 发布帖子', daily_comment: '?? 评论', daily_like: '?? 点赞',
+                daily_recommend: '?? 推荐', daily_checkin: '? 签到' };
             var taskRewards = { daily_post: 3, daily_comment: 2, daily_like: 1, daily_recommend: 2,
                 daily_checkin: 5 };
             var html = '';
@@ -5294,7 +5332,7 @@
                 var reward = taskRewards[t.task_type] || 0;
                 html += '<div class="task-item"><span class="task-name">' + escapeHtml(name) +
                     '</span><span class="task-progress">' + escapeHtml(progress) +
-                    '</span><span class="task-status ' + statusClass + '">' + (t.completed ? '✅ ' : '⏳ ') +
+                    '</span><span class="task-status ' + statusClass + '">' + (t.completed ? '? ' : '? ') +
                     reward + '分</span></div>';
             });
             document.getElementById('tasksList').innerHTML = html;
@@ -5349,7 +5387,7 @@
                 document.getElementById('currentSongArtist').textContent = '选择歌曲';
                 audio.pause();
                 isPlaying = false;
-                document.getElementById('playBtn').textContent = '▶';
+                document.getElementById('playBtn').textContent = '?';
                 return;
             }
             var song = currentPlaylist[index];
@@ -5365,11 +5403,11 @@
             if (currentPlaylist.length === 0) { showToast('暂无歌曲', true); return; }
             if (isPlaying) {
                 audio.pause();
-                document.getElementById('playBtn').textContent = '▶';
+                document.getElementById('playBtn').textContent = '?';
                 isPlaying = false;
             } else {
                 audio.play().catch(function() {});
-                document.getElementById('playBtn').textContent = '⏸';
+                document.getElementById('playBtn').textContent = '?';
                 isPlaying = true;
             }
         }
@@ -5406,14 +5444,14 @@
             isLoop = !isLoop;
             document.getElementById('loopBtn').style.color = isLoop ? 'var(--accent)' : '';
             savePlaylist();
-            showToast(isLoop ? '🔁 循环播放' : '🔁 已关闭循环', false);
+            showToast(isLoop ? '?? 循环播放' : '?? 已关闭循环', false);
         }
 
         function playerToggleShuffle() {
             isShuffle = !isShuffle;
             document.getElementById('shuffleBtn').style.color = isShuffle ? 'var(--accent)' : '';
             savePlaylist();
-            showToast(isShuffle ? '🔀 随机播放' : '🔀 已关闭随机', false);
+            showToast(isShuffle ? '?? 随机播放' : '?? 已关闭随机', false);
         }
 
         function renderPlaylist() {
@@ -5430,7 +5468,7 @@
                     '<div><div class="pl-title">' + escapeHtml(song.title || '未知歌曲') +
                     '</div><div class="pl-artist">' + escapeHtml(song.artist || '未知艺术家') + '</div></div>' +
                     '<span class="pl-remove" onclick="event.stopPropagation();removeFromPlaylist(\'' + song.id +
-                    '\')">✕</span>' +
+                    '\')">?</span>' +
                     '</div>';
             });
             container.innerHTML = html;
@@ -5484,7 +5522,7 @@
             var reader = new FileReader();
             reader.onload = async function(e) {
                 await saveQRData(platform, e.target.result);
-                showToast('✅ ' + (platform === 'wechat' ? '微信' : '支付宝') + '收款码已更新', false);
+                showToast('? ' + (platform === 'wechat' ? '微信' : '支付宝') + '收款码已更新', false);
             };
             reader.readAsDataURL(file);
             input.value = '';
@@ -5533,8 +5571,8 @@
             data.forEach(function(item) {
                 html += '<div class="history-item">' +
                     '<span>' + new Date(item.created_at).toLocaleString() + '</span>' +
-                    '<span>' + item.count + ' 块 × ¥' + (item.total / item.count).toFixed(2) +
-                    ' = <strong class="h-amount">¥' + item.total.toFixed(2) + '</strong></span>' +
+                    '<span>' + item.count + ' 块 × ￥' + (item.total / item.count).toFixed(2) +
+                    ' = <strong class="h-amount">￥' + item.total.toFixed(2) + '</strong></span>' +
                     '</div>';
             });
             container.innerHTML = html;
@@ -5547,13 +5585,13 @@
             if (count > 50) count = 50;
             document.getElementById('buyChocoCount').value = count;
             var total = count * 2.00;
-            document.getElementById('buyTotalPrice').textContent = '¥' + total.toFixed(2);
+            document.getElementById('buyTotalPrice').textContent = '￥' + total.toFixed(2);
         }
 
         async function startStripePayment() {
             if (!currentUser) { showToast('请先登录', true); return; }
             if (!PAYMENT_ENABLED) {
-                showToast('⚠️ 支付功能暂未开放，请使用积分兑换', false);
+                showToast('?? 支付功能暂未开放，请使用积分兑换', false);
                 return;
             }
             if (!stripe) { showToast('Stripe 未初始化', true); return; }
@@ -5586,7 +5624,7 @@
             if (data) {
                 el.innerHTML = '<img src="' + data + '" alt="' + label + '收款码" style="max-width:100%;max-height:200px;">';
             } else {
-                el.innerHTML = '<div class="qr-placeholder">📱</div>' +
+                el.innerHTML = '<div class="qr-placeholder">??</div>' +
                     '<div style="font-size:1.2rem;font-weight:600;">' + label + '收款码</div>' +
                     '<div class="qr-text">请先上传 ' + label + ' 收款码</div>' +
                     '<button class="btn-sm" onclick="document.getElementById(\'shopModal\').classList.add(\'active\');document.getElementById(\'paymentModal\').classList.remove(\'active\');">去上传</button>';
@@ -5620,11 +5658,14 @@
             profileAvatar.classList.remove('avatar-frame-rainbow', 'avatar-frame-diamond');
             applyAvatarFrame(profileAvatar);
             document.getElementById('profileNameInput').value = userProfile.username || '';
-            var expNeeded = level * 50;
-            var exp = userProfile.points || 0;
-            var progress = Math.min(100, (exp / expNeeded) * 100);
+            // 每级固定 50 积分；当前等级内已累计的积分 = 总积分 - 前面等级所需积分
+            var expNeeded = POINTS_PER_LEVEL;
+            var base = (level - 1) * POINTS_PER_LEVEL;
+            var expInLevel = Math.max(0, (userProfile.points || 0) - base);
+            var isMax = level >= MAX_LEVEL;
+            var progress = isMax ? 100 : Math.min(100, (expInLevel / expNeeded) * 100);
             document.getElementById('levelProgressBar').style.width = progress + '%';
-            document.getElementById('levelProgressText').textContent = exp + ' / ' + expNeeded;
+            document.getElementById('levelProgressText').textContent = isMax ? '已满级' : (expInLevel + ' / ' + expNeeded);
             var posts = await fetchPosts();
             var myPosts = posts.filter(function(p) { return p.author_id === currentUser.id; });
             document.getElementById('statPostsCount').textContent = myPosts.length;
@@ -5648,7 +5689,7 @@
                     var safeId = escapeJsString(p.id);
                     myPostsHtml += '<div class="mini-post" onclick="showPost(\'' + safeId +
                         '\')"><div class="mp-title">' + escapeHtml(p.title) + '</div><div class="mp-meta">' +
-                        escapeHtml(formatTime(p.created_at)) + ' · 💬 ' + (commentCountMap[p.id] || 0) +
+                        escapeHtml(formatTime(p.created_at)) + ' · ?? ' + (commentCountMap[p.id] || 0) +
                         '</div></div>';
                 });
                 if (myPosts.length > 10) {
@@ -5675,7 +5716,7 @@
                     body: JSON.stringify({ avatar_url: avatarUrl })
                 });
                 if (userProfile) userProfile.avatar_url = avatarUrl;
-                showToast('✅ 头像上传成功', false);
+                showToast('? 头像上传成功', false);
                 renderProfile();
                 updateUI();
                 await loadPosts(currentCategory, currentSearch);
@@ -5696,7 +5737,7 @@
                     body: JSON.stringify({ username: name })
                 });
                 if (userProfile) userProfile.username = name;
-                showToast('✅ 保存成功', false);
+                showToast('? 保存成功', false);
                 renderProfile();
                 updateUI();
                 await loadPosts(currentCategory, currentSearch);
@@ -5767,23 +5808,23 @@
 
         // ================== Emoji ==================
         var EMOJI_DATA = {
-            '😊 笑脸': ['😀', '😁', '😂', '🤣', '😃', '😄', '😅', '😆', '😉', '😊', '😋', '😎', '😍', '🥰', '😘', '😗', '😙', '😚',
-                '☺️', '🙂', '🤗', '🤩', '🤔', '🤨', '😐', '😑', '😶', '🙄', '😏', '😣', '😥', '😮', '🤐', '😯', '😪', '😫', '😴',
-                '😌', '😛', '😜', '😝', '🤤', '😒', '😓', '😔', '😕', '🙃', '🤑', '😲', '☹️', '🙁', '😖', '😞', '😟', '😤', '😢',
-                '😭', '😦', '😧', '😨', '😩', '🤯', '😬', '😰', '😱', '🥵', '🥶', '😳', '🤪', '😵', '😡', '😠', '🤬', '🤧', '🤮',
-                '🥴', '🥳', '🥺'
+            '?? 笑脸': ['??', '??', '??', '??', '??', '??', '??', '??', '??', '??', '??', '??', '??', '??', '??', '??', '??', '??',
+                '??', '??', '??', '??', '??', '??', '??', '??', '??', '??', '??', '??', '??', '??', '??', '??', '??', '??', '??',
+                '??', '??', '??', '??', '??', '??', '??', '??', '??', '??', '??', '??', '??', '??', '??', '??', '??', '??', '??',
+                '??', '??', '??', '??', '??', '??', '??', '??', '??', '??', '??', '??', '??', '??', '??', '??', '??', '??', '??',
+                '??', '??', '??'
             ],
-            '👋 手势': ['👍', '👎', '👊', '✊', '🤛', '🤜', '👏', '🙌', '👐', '🤲', '🤝', '🙏', '✌️', '🤟', '🤘', '👌', '🤌',
-                '🤞', '🖕', '🖖', '☝️', '👆', '👇', '👉', '👈', '✋', '🤚', '🖐️', '💪'
+            '?? 手势': ['??', '??', '??', '?', '??', '??', '??', '??', '??', '??', '??', '??', '??', '??', '??', '??', '??',
+                '??', '??', '??', '??', '??', '??', '??', '??', '?', '??', '???', '??'
             ],
-            '🐶 动物': ['🐶', '🐱', '🐭', '🐹', '🐰', '🦊', '🐻', '🐼', '🐨', '🐯', '🦁', '🐮', '🐷', '🐽', '🐸', '🐵', '🙈', '🙉',
-                '🙊', '🐒', '🐔', '🐧', '🐦', '🐤', '🐣', '🐥', '🦆', '🦅', '🦉'
+            '?? 动物': ['??', '??', '??', '??', '??', '??', '??', '??', '??', '??', '??', '??', '??', '??', '??', '??', '??', '??',
+                '??', '??', '??', '??', '??', '??', '??', '??', '??', '??', '??'
             ],
-            '🍔 食物': ['🍎', '🍐', '🍊', '🍋', '🍌', '🍉', '🍇', '🍓', '🍈', '🍒', '🍑', '🥭', '🍍', '🥥', '🥝', '🍅', '🍆', '🥑',
-                '🌽', '🥕', '🥔', '🍠', '🥐', '🥖', '🥨', '🥯', '🥞', '🧇', '🧀'
+            '?? 食物': ['??', '??', '??', '??', '??', '??', '??', '??', '??', '??', '??', '??', '??', '??', '??', '??', '??', '??',
+                '??', '??', '??', '??', '??', '??', '??', '??', '??', '??', '??'
             ],
-            '❤️ 符号': ['❤️', '🧡', '💛', '💚', '💙', '💜', '🖤', '🤍', '🤎', '💔', '❣️', '💕', '💞', '💓', '💗', '💖', '💘', '💝',
-                '💟', '☮️', '✝️', '☪️', '🕉️', '☸️', '✡️', '🔯', '🕎', '☯️'
+            '?? 符号': ['??', '??', '??', '??', '??', '??', '??', '??', '??', '??', '??', '??', '??', '??', '??', '??', '??', '??',
+                '??', '??', '??', '??', '???', '??', '??', '??', '??', '??'
             ]
         };
         var EMOJI_CATEGORIES = Object.keys(EMOJI_DATA);
@@ -5887,7 +5928,7 @@
 
         function copyToClipboard(text, okMsg) {
             if (!text) { showToast('没有可复制的内容', true); return; }
-            function done() { showToast(okMsg || '✅ 已复制', false); }
+            function done() { showToast(okMsg || '? 已复制', false); }
             function fallback() {
                 var ta = document.createElement('textarea');
                 ta.value = text;
@@ -5917,14 +5958,14 @@
             var text = '【' + (post.title || '') + '】\n' +
                 (displayName ? '作者：' + displayName + '\n' : '') +
                 (post.content || '');
-            copyToClipboard(text, '✅ 帖子内容已复制');
+            copyToClipboard(text, '? 帖子内容已复制');
         }
 
         function copyPostLink() {
             var post = currentContextPost();
             if (!post) { showToast('无法获取帖子链接', true); return; }
             var url = location.origin + location.pathname + '#post-' + encodeURIComponent(post.id);
-            copyToClipboard(url, '✅ 帖子链接已复制');
+            copyToClipboard(url, '? 帖子链接已复制');
         }
 
         document.addEventListener('contextmenu', function(e) {
@@ -5980,7 +6021,7 @@
                 currentIndex = 0;
                 updateSongInfo(currentIndex);
             }
-            showToast('✅ 已添加 ' + files.length + ' 首歌曲', false);
+            showToast('? 已添加 ' + files.length + ' 首歌曲', false);
             renderPlaylist();
             event.target.value = '';
         }
@@ -6001,7 +6042,7 @@
                     '<select id="editTopic" style="margin-bottom:8px;"></select>' +
                     '<input id="editTitle" placeholder="标题" maxlength="100" style="margin-bottom:8px;">' +
                     '<textarea id="editContent" placeholder="内容" rows="5" style="margin-bottom:8px;"></textarea>' +
-                    '<button class="btn btn-success" onclick="saveEdit()">💾 保存</button>' +
+                    '<button class="btn btn-success" onclick="saveEdit()">?? 保存</button>' +
                     '<button class="btn btn-outline" onclick="cancelEdit()">取消</button>' +
                     '<div id="editMsg" style="margin-top:8px;"></div>';
                 container.appendChild(editArea);
@@ -6032,7 +6073,7 @@
             if (!content) { showToast('内容不能为空', true); return; }
             // 标题唯一性检查:改标题时排除当前帖子自身
             if (await isTitleTaken(title, postId)) {
-                showToast('⚠️ 标题已存在，请更换标题', true);
+                showToast('?? 标题已存在，请更换标题', true);
                 return;
             }
             var editCatSel = document.getElementById('editCategory');
@@ -6044,7 +6085,7 @@
                     method: 'PATCH',
                     body: JSON.stringify({ title: title, content: content, category: category, topic_id: topicId || null })
                 });
-                showToast('✅ 帖子已更新', false);
+                showToast('? 帖子已更新', false);
                 cancelEdit();
                 await showPost(postId);
                 await loadPosts(currentCategory, currentSearch);
@@ -6062,7 +6103,7 @@
                 await authFetch(SUPABASE_URL + '/rest/v1/comments?post_id=eq.' + encodeURIComponent(postId), { method: 'DELETE' });
                 await authFetch(SUPABASE_URL + '/rest/v1/favorites?post_id=eq.' + encodeURIComponent(postId), { method: 'DELETE' });
                 await authFetch(SUPABASE_URL + '/rest/v1/posts?id=eq.' + encodeURIComponent(postId), { method: 'DELETE' });
-                showToast('🗑️ 帖子已删除', false);
+                showToast('??? 帖子已删除', false);
                 document.getElementById('postDetail').style.display = 'none';
                 document.getElementById('postList').style.display = 'block';
                 currentPostId = null;
@@ -6098,8 +6139,8 @@
             }
         }
 
-        console.log('🚀 完整版已加载，第三方登录已修复，点赞功能正常。');
-        console.log('⚠️ 请确保 Supabase RLS 策略已正确配置。');
+        console.log('?? 完整版已加载，第三方登录已修复，点赞功能正常。');
+        console.log('?? 请确保 Supabase RLS 策略已正确配置。');
 
         // ============================================================
         // 新玩法：积分流水 / 排行榜 / 签到日历 / 成就 / 幸运转盘
@@ -6148,7 +6189,7 @@
         async function renderLeaderboard(type) {
             var el = document.getElementById('leaderboardList');
             if (!el) return;
-            // 「🎮 游戏」页签默认展示贪吃蛇榜
+            // 「?? 游戏」页签默认展示贪吃蛇榜
             if (type === 'games') type = 'game_snake';
             var isGame = type.indexOf('game_') === 0;
             var gameTabs = document.getElementById('gameTabs');
@@ -6213,10 +6254,10 @@
                     });
                 }
                 if (rows.length === 0) { el.innerHTML = '<p style="color:var(--text-muted)">暂无数据</p>'; return; }
-                var suffix = type === 'points' ? ' ⭐' : type === 'chocolates' ? ' 🍫' : type === 'streak' ? ' 🔥' :
+                var suffix = type === 'points' ? ' ?' : type === 'chocolates' ? ' ??' : type === 'streak' ? ' ??' :
                     type === 'game_snake' ? ' 分' : type === 'game_memory' ? ' 秒' : type === 'game_rps' ? ' 胜' :
-                    type === 'game_reaction' ? ' ms' : ' 📝';
-                var medals = ['🥇', '🥈', '🥉'];
+                    type === 'game_reaction' ? ' ms' : ' ??';
+                var medals = ['??', '??', '??'];
                 el.innerHTML = rows.map(function(r, i) {
                     var rank = i + 1;
                     var rankCls = rank === 1 ? 'top1' : rank === 2 ? 'top2' : rank === 3 ? 'top3' : '';
@@ -6318,12 +6359,12 @@
                 list.innerHTML = defs.map(function(d) {
                     var unlocked = !!unlockedMap[d.id];
                     return '<div class="ach-item ' + (unlocked ? 'unlocked' : 'locked') + '">' +
-                        '<span class="a-icon">' + (d.icon || '🏅') + '</span>' +
+                        '<span class="a-icon">' + (d.icon || '??') + '</span>' +
                         '<div class="a-name">' + escapeHtml(d.name) + '</div>' +
                         '<div class="a-desc">' + escapeHtml(d.description) + '</div>' +
                         '<span class="a-pts">+' + (d.points || 0) + ' 积分</span>' +
                         (unlocked ?
-                            '<div style="font-size:.6rem;color:var(--success);margin-top:4px;">✓ 已解锁</div>' : '') +
+                            '<div style="font-size:.6rem;color:var(--success);margin-top:4px;">? 已解锁</div>' : '') +
                         '</div>';
                 }).join('');
             } catch (e) {
@@ -6397,6 +6438,7 @@
                             body: JSON.stringify({ points: np })
                         });
                         if (userProfile) userProfile.points = np;
+                        await syncUserLevel();
                         await logPoints(pts, '成就：' + unlockedNow.map(function(d) { return d.name; }).join('、'));
                     }
                     if (unlockedNow.length === 1) {
@@ -6404,7 +6446,7 @@
                             (unlockedNow[0].points || 0) + ' 积分', false);
                     } else {
                         var names = unlockedNow.map(function(d) { return d.name; }).join('、');
-                        showToast('🏆 解锁 ' + unlockedNow.length + ' 个成就：' + names + '（+' + pts +
+                        showToast('?? 解锁 ' + unlockedNow.length + ' 个成就：' + names + '（+' + pts +
                             ' 积分）', false);
                     }
                     updateUI();
@@ -6415,14 +6457,14 @@
         // ================== 幸运转盘 ==================
         var LOTTERY_COST = 20;
         var LOTTERY_SEGMENTS = [
-            { label: '🍫 巧克力 x1', type: 'chocolate', value: 1 },
-            { label: '⭐ 积分 x5', type: 'points', value: 5 },
-            { label: '💨 再接再厉', type: 'nothing', value: 0 },
-            { label: '🍫 巧克力 x3', type: 'chocolate', value: 3 },
-            { label: '⭐ 积分 x10', type: 'points', value: 10 },
-            { label: '⭐ 积分 x20', type: 'points', value: 20 },
-            { label: '🍫 巧克力 x5', type: 'chocolate', value: 5 },
-            { label: '🏆 幸运徽章', type: 'badge', value: 1 }
+            { label: '?? 巧克力 x1', type: 'chocolate', value: 1 },
+            { label: '? 积分 x5', type: 'points', value: 5 },
+            { label: '?? 再接再厉', type: 'nothing', value: 0 },
+            { label: '?? 巧克力 x3', type: 'chocolate', value: 3 },
+            { label: '? 积分 x10', type: 'points', value: 10 },
+            { label: '? 积分 x20', type: 'points', value: 20 },
+            { label: '?? 巧克力 x5', type: 'chocolate', value: 5 },
+            { label: '?? 幸运徽章', type: 'badge', value: 1 }
         ];
         var lotterySpinning = false;
         var lotteryCurrentAngle = 0;
@@ -6529,7 +6571,7 @@
             if (btn) btn.textContent = '...';
             setTimeout(async function() {
                 lotterySpinning = false;
-                if (btn) btn.textContent = '🎲 抽奖';
+                if (btn) btn.textContent = '?? 抽奖';
                 try {
                     if (prize.type === 'points' && prize.value > 0) {
                         var np = (userProfile?.points || 0) + prize.value;
@@ -6539,6 +6581,7 @@
                             body: JSON.stringify({ points: np })
                         });
                         if (userProfile) userProfile.points = np;
+                        await syncUserLevel();
                     } else if (prize.type === 'chocolate' && prize.value > 0) {
                         var nc = (userProfile?.chocolates || 0) + prize.value;
                         await authFetch(SUPABASE_URL + '/rest/v1/profiles?id=eq.' + encodeURIComponent(currentUser
@@ -6563,9 +6606,9 @@
                     loadLotteryRecords();
                     updateUI();
                     if (prize.type === 'nothing') {
-                        showToast('💨 差一点！再接再厉', false);
+                        showToast('?? 差一点！再接再厉', false);
                     } else {
-                        showToast('🎉 恭喜抽中 ' + prize.label + '！', false);
+                        showToast('?? 恭喜抽中 ' + prize.label + '！', false);
                     }
                     await checkAchievements();
                 } catch (e) {
@@ -6595,12 +6638,13 @@
                 }
                 if (res && res.awarded) {
                     userProfile.points = (userProfile.points || 0) + res.points;
+                    await syncUserLevel();
                     updateUI();
-                    showToast('🎉 ' + res.message + '（' + res.tier + '）', false);
+                    showToast('?? ' + res.message + '（' + res.tier + '）', false);
                     return { awarded: true, points: res.points, message: res.message };
                 } else if (res) {
                     // 成绩已记录;未达标不发奖(静默,不打扰玩家)
-                    if (res.message !== '成绩未达标') showToast('⚠️ ' + res.message, true);
+                    if (res.message !== '成绩未达标') showToast('?? ' + res.message, true);
                     return { awarded: false, points: 0, message: res.message };
                 }
             } catch (e) {
@@ -6697,7 +6741,7 @@
             }
             var ov = document.getElementById('snakeOverlay');
             document.getElementById('snakeOverlayTitle').textContent = '游戏结束 · 得分 ' + snake.score;
-            document.getElementById('snakeStartBtn').textContent = '🔄 再来一局';
+            document.getElementById('snakeStartBtn').textContent = '?? 再来一局';
             ov.classList.remove('hidden');
             // 成绩上报(无论是否达标都入库,未达标仅记录不发奖;达标/发奖由数据库判定)
             await awardGameReward('snake', snake.score);
@@ -6904,7 +6948,7 @@
             pvp.state = 'waiting';
             pvpShowView('waiting');
             document.getElementById('pvpRoomCode').textContent = room;
-            document.getElementById('pvpWaitingText').textContent = '⏳ 等待对手加入…';
+            document.getElementById('pvpWaitingText').textContent = '? 等待对手加入…';
             pvp.channel = sb.channel('snake-pvp-' + room, { config: { broadcast: { self: false } } });
             pvp.channel
                 .on('broadcast', { event: 'join' }, function(m) { pvpOnGuestJoin(m); })
@@ -6932,7 +6976,7 @@
             pvp.waitTimer = setTimeout(function() {
                 if (pvp.state === 'waiting') {
                     pvpCancelWait();
-                    showToast('⏰ 等待超时，房间已关闭', true);
+                    showToast('? 等待超时，房间已关闭', true);
                 }
             }, 60000);
         }
@@ -7108,7 +7152,7 @@
             pvp.state = 'waiting';
             pvpShowView('waiting');
             document.getElementById('pvpRoomCode').textContent = code;
-            document.getElementById('pvpWaitingText').textContent = '🔍 正在加入房间…';
+            document.getElementById('pvpWaitingText').textContent = '?? 正在加入房间…';
             pvp.channel = sb.channel('snake-pvp-' + code, { config: { broadcast: { self: false } } });
             pvp.channel
                 .on('broadcast', { event: 'start' }, function(m) { pvpGuestStart(m.payload); })
@@ -7120,7 +7164,7 @@
                         pvp.state = 'idle';
                         pvp.role = null;
                         pvpShowView('home');
-                        showToast('❌ 房间已满', true);
+                        showToast('? 房间已满', true);
                     }
                 })
                 .on('broadcast', { event: 'over' }, function(m) {
@@ -7142,7 +7186,7 @@
                         pvp.waitTimer = setTimeout(function() {
                             if (pvp.state === 'waiting') {
                                 pvpCancelWait();
-                                showToast('❌ 房间不存在或已满', true);
+                                showToast('? 房间不存在或已满', true);
                             }
                         }, 10000);
                     }
@@ -7216,11 +7260,11 @@
             var title = document.getElementById('pvpOverlayTitle');
             var restartBtn = document.getElementById('pvpRestartBtn');
             if (reason === 'opponent_left') {
-                title.textContent = '🏆 对手已离开，你赢了';
+                title.textContent = '?? 对手已离开，你赢了';
             } else if (reason === 'host_left') {
-                title.textContent = '😢 房主已离开对局';
+                title.textContent = '?? 房主已离开对局';
             } else if (reason === 'win') {
-                title.textContent = (pvp.winner === pvp.role) ? '🎉 你赢了！' : '😢 你输了';
+                title.textContent = (pvp.winner === pvp.role) ? '?? 你赢了！' : '?? 你输了';
             }
             if (restartBtn) restartBtn.style.display = '';
             document.getElementById('pvpOverlay').classList.remove('hidden');
@@ -7524,7 +7568,7 @@
         initJoystick('joyWrapPvp', 'joyKnobPvp', function(d) { pvpSetDir(d); });
 
         // ================== 记忆翻牌 ==================
-        var MEM_EMOJIS = ['🍎', '🍌', '🍇', '🍓', '🍒', '🥝', '🍍', '🍋'];
+        var MEM_EMOJIS = ['??', '??', '??', '??', '??', '??', '??', '??'];
         var mem = { cards: [], moves: 0, matched: 0, first: null, lock: false, seconds: 0, timer: null, started: false };
 
         function memShuffle() {
@@ -7599,7 +7643,7 @@
                 localStorage.setItem('mem_best', String(mem.seconds));
                 memRenderBest();
             }
-            showToast('🎉 记忆翻牌完成！用时 ' + mem.seconds + 's，步数 ' + mem.moves, false);
+            showToast('?? 记忆翻牌完成！用时 ' + mem.seconds + 's，步数 ' + mem.moves, false);
             // 成绩上报(无论是否达标都入库,未达标仅记录不发奖)
             await awardGameReward('memory', mem.seconds);
         }
@@ -7614,7 +7658,7 @@
         }
 
         // ================== 石头剪刀布 ==================
-        var rps = { you: 0, cpu: 0, locked: false, picks: { rock: '✊', scissors: '✌️', paper: '✋' } };
+        var rps = { you: 0, cpu: 0, locked: false, picks: { rock: '?', scissors: '??', paper: '?' } };
         function rpsBeat(a, b) {
             if (a === b) return 0;
             if ((a === 'rock' && b === 'scissors') || (a === 'scissors' && b === 'paper') || (a === 'paper' && b === 'rock')) return 1;
@@ -7634,14 +7678,14 @@
             var resEl = document.getElementById('rpsResult');
             if (r === 1) {
                 rps.you++;
-                resEl.textContent = '🎉 你赢了这局！';
+                resEl.textContent = '?? 你赢了这局！';
                 resEl.style.color = 'var(--success)';
             } else if (r === -1) {
                 rps.cpu++;
-                resEl.textContent = '😅 电脑赢了这局';
+                resEl.textContent = '?? 电脑赢了这局';
                 resEl.style.color = 'var(--danger)';
             } else {
-                resEl.textContent = '🤝 平局';
+                resEl.textContent = '?? 平局';
                 resEl.style.color = 'var(--text-muted)';
             }
             document.getElementById('rpsYou').textContent = String(rps.you);
@@ -7649,10 +7693,10 @@
             if (rps.you >= 2 || rps.cpu >= 2) {
                 rps.locked = true;
                 if (rps.you >= 2) {
-                    showToast('🏆 你赢下三局两胜！', false);
+                    showToast('?? 你赢下三局两胜！', false);
                     await awardGameReward('rps', 1);
                 } else {
-                    showToast('🤖 电脑赢下三局两胜，再来一次！', true);
+                    showToast('?? 电脑赢下三局两胜，再来一次！', true);
                 }
                 setTimeout(function() { rpsReset(); }, 1400);
             }
@@ -7663,9 +7707,9 @@
             rps.locked = false;
             document.getElementById('rpsYou').textContent = '0';
             document.getElementById('rpsCpu').textContent = '0';
-            document.getElementById('rpsYourPick').textContent = '❔';
-            document.getElementById('rpsCpuPick').textContent = '❔';
-            document.getElementById('rpsResult').textContent = '👆 出招吧';
+            document.getElementById('rpsYourPick').textContent = '?';
+            document.getElementById('rpsCpuPick').textContent = '?';
+            document.getElementById('rpsResult').textContent = '?? 出招吧';
             document.getElementById('rpsResult').style.color = '';
         }
         function openRPS() {
@@ -7683,18 +7727,18 @@
             if (rx.state === 'idle') {
                 rx.state = 'waiting';
                 pad.classList.remove('too-soon', 'ready');
-                text.textContent = '⏳ 等它变绿…';
+                text.textContent = '? 等它变绿…';
                 rx.timer = setTimeout(function() {
                     rx.state = 'ready';
                     rx.startAt = performance.now();
                     pad.classList.add('ready');
-                    text.textContent = '⚡ 快点！';
+                    text.textContent = '? 快点！';
                 }, 800 + Math.random() * 2200);
             } else if (rx.state === 'waiting') {
                 if (rx.timer) { clearTimeout(rx.timer); rx.timer = null; }
                 rx.state = 'idle';
                 pad.classList.add('too-soon');
-                text.textContent = '😅 太早了，重新开始';
+                text.textContent = '?? 太早了，重新开始';
                 document.getElementById('rxResult').textContent = '';
                 setTimeout(function() { pad.classList.remove('too-soon'); }, 600);
             } else if (rx.state === 'ready') {
@@ -7706,7 +7750,7 @@
                 document.getElementById('rxLast').textContent = ms + 'ms';
                 document.getElementById('rxCount').textContent = rx.times.length + '/3';
                 document.getElementById('rxResult').textContent = ms <= 200 ?
-                    '🏎️ ' + ms + 'ms — 这是开挂了吧！' : (ms <= 300 ? '💪 ' + ms + 'ms，不错！' : '🐢 ' + ms + 'ms，再练练');
+                    '??? ' + ms + 'ms — 这是开挂了吧！' : (ms <= 300 ? '?? ' + ms + 'ms，不错！' : '?? ' + ms + 'ms，再练练');
                 var best = parseInt(localStorage.getItem('rx_best') || '0', 10);
                 if (!best || ms < best) {
                     localStorage.setItem('rx_best', String(ms));
@@ -7715,7 +7759,7 @@
                 if (rx.times.length >= 3) {
                     var avg = Math.round(rx.times.reduce(function(s, t) { return s + t; }, 0) / rx.times.length);
                     var extra = ms <= 200 ? '（其中一次超快！）' : '';
-                    document.getElementById('rxResult').textContent = '🎯 平均反应 ' + avg + 'ms' + extra;
+                    document.getElementById('rxResult').textContent = '?? 平均反应 ' + avg + 'ms' + extra;
                     // 成绩上报(无论是否达标都入库,未达标仅记录不发奖)
                     await awardGameReward('reaction', avg);
                     rx.times = [];
