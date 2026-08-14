@@ -6641,14 +6641,20 @@
             if (!currentUser || !sb) return { awarded: false, points: 0, message: '未登录' };
             try {
                 // supabase-js v2 的 rpc 返回 { data, error },data 才是函数返回值
-                // 参数名必须与 SQL 函数签名一致(game_type/score),否则 PostgREST 按名传参会 404
-                var { data: res, error } = await sb.rpc('award_game_reward', { game_type: gameType, score: score });
+                // 参数名必须与 SQL 函数签名一致(p_game_type/p_score),否则 PostgREST 按名传参会 404
+                var { data: res, error } = await sb.rpc('award_game_reward', { p_game_type: gameType, p_score: score });
                 if (error) {
-                    console.warn('游戏奖励 RPC 错误', error);
-                    return getLocalGameReward(gameType, score);
+                    console.warn('游戏奖励 RPC 错误，使用本地降级入账', error);
+                    return await applyLocalGameReward(gameType, score);
                 }
                 if (res && res.awarded) {
-                    userProfile.points = (userProfile.points || 0) + res.points;
+                    // 服务器已入账;重新拉取真实积分,保证本地镜像与服务器一致(避免积分过期导致等级计算错误)
+                    try {
+                        var { data: fresh } = await sb.from('profiles').select('points').eq('id', currentUser.id).single();
+                        if (fresh && userProfile) userProfile.points = fresh.points || 0;
+                    } catch (e) {
+                        if (userProfile) userProfile.points = (userProfile.points || 0) + res.points;
+                    }
                     await syncUserLevel();
                     await updateTaskProgress(currentUser.id, 'daily_game', 1);
                     updateUI();
@@ -6660,14 +6666,13 @@
                     return { awarded: false, points: 0, message: res.message };
                 }
             } catch (e) {
-                console.warn('游戏奖励发放失败', e);
-                showToast('奖励发放失败，尝试本地记录', true);
-                return getLocalGameReward(gameType, score);
+                console.warn('游戏奖励发放失败，使用本地降级入账', e);
+                return await applyLocalGameReward(gameType, score);
             }
         }
 
-        // 降级方案:服务不可用时,用客户端 localStorage 记录(使用本地日期与 SQL current_date 对齐)
-        function getLocalGameReward(gameType, score) {
+        // 降级方案:服务不可用时,本地计算奖励并真实写入数据库(积分入账+等级升级),避免升级失败
+        async function applyLocalGameReward(gameType, score) {
             var d = new Date();
             var today = d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
             var key = 'game_reward_' + gameType + '_' + today;
@@ -6684,11 +6689,23 @@
             } else if (gameType === 'reaction') {
                 points = score <= 149 ? 5 : score <= 199 ? 5 : score <= 249 ? 4 : score <= 299 ? 3 : score <= 399 ? 2 : 1;
             }
-            if (points > 0) {
+            if (points <= 0) return { awarded: false, points: 0, message: '成绩未达标' };
+            // 真实入账:写入 profiles.points 并触发等级升级,保证玩家数据完整
+            try {
+                if (!sb) await initSupabase();
+                var { data: prof } = await sb.from('profiles').select('points').eq('id', currentUser.id).single();
+                var newPoints = (prof?.points || 0) + points;
+                await sb.from('profiles').update({ points: newPoints }).eq('id', currentUser.id);
+                if (userProfile) userProfile.points = newPoints;
                 localStorage.setItem(key, '1');
+                await syncUserLevel();
+                await logPoints(points, '游戏奖励');
+                updateUI();
                 return { awarded: true, points: points, message: '获得 ' + points + ' 积分' };
+            } catch (e) {
+                console.warn('降级奖励入账失败', e);
+                return { awarded: false, points: 0, message: '奖励入账失败' };
             }
-            return { awarded: false, points: 0, message: '成绩未达标' };
         }
 
         // ================== 贪吃蛇 ==================
