@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
-    <meta charset="gbk">
+    <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>窍某论坛 · 完整最终版</title>
     <link rel="icon" type="image/png" href="favicon.png">
@@ -9,7 +9,7 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400;500;600;700&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
     <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400;500;600;700&display=swap"></noscript>
-    <script src="https://cdn.jsdelivr.net/npm/dompurify@3.1.6/dist/purify.min.js"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/dompurify@3.1.6/dist/purify.min.js"></script>
     <script>
         (function loadSupabase() {
             var cdnList = [
@@ -2263,6 +2263,32 @@
         #stellarModal .st-hint { display: none; }
     }
 
+    /* ===== 新小游戏：扫雷 / 2048 / 打地鼠 / 猜数字 ===== */
+    mark { background: rgba(255, 200, 0, 0.35); color: inherit; border-radius: 2px; padding: 0 1px; }
+    .game-wrap { display: flex; flex-direction: column; align-items: center; gap: 10px; max-width: 100%; overflow-x: auto; -webkit-overflow-scrolling: touch; }
+    .mine-bar { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; justify-content: center; }
+    .mine-grid { display: inline-grid; gap: 2px; user-select: none; --mine-cell: 24px; }
+    .mine-cell { width: var(--mine-cell); height: var(--mine-cell); display: flex; align-items: center; justify-content: center; font-size: .78rem; font-weight: 700; background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 4px; cursor: pointer; color: var(--text-primary); }
+    .mine-cell.open { background: var(--bg-secondary); cursor: default; }
+    .mine-cell.mine { background: var(--danger); }
+    .mine-cell.flag { color: var(--warning); }
+    .grid-2048 { display: inline-grid; gap: 8px; background: var(--bg-card); padding: 10px; border-radius: 12px; border: 1px solid var(--border-color); touch-action: none; }
+    .cell-2048 { width: 64px; height: 64px; display: flex; align-items: center; justify-content: center; font-size: 1.3rem; font-weight: 800; border-radius: 8px; background: var(--bg-secondary); color: #fff; transition: all .12s ease; }
+    .whack-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; max-width: 320px; margin: 0 auto; }
+    .whack-hole { width: 100%; aspect-ratio: 1; border-radius: 50%; background: var(--bg-secondary); border: 3px solid var(--border-color); display: flex; align-items: center; justify-content: center; font-size: 2rem; cursor: pointer; user-select: none; overflow: hidden; }
+    .whack-hole.up { background: var(--accent); border-color: var(--accent-glow); }
+    @media (max-width: 480px) {
+        .mine-grid { --mine-cell: 20px; }
+        .mine-cell { font-size: .68rem; border-radius: 3px; }
+        .cell-2048 { width: 58px; height: 58px; font-size: 1.15rem; }
+        .grid-2048 { gap: 6px; padding: 8px; }
+        .whack-grid { gap: 8px; max-width: 300px; }
+        .whack-hole { font-size: 1.6rem; border-width: 2px; }
+    }
+    .guess-box { text-align: center; }
+    .guess-num { font-size: 2.4rem; font-weight: 800; color: var(--accent); margin: 10px 0; }
+    .guess-history { min-height: 24px; color: var(--text-secondary); font-size: .85rem; margin: 8px 0; word-break: break-all; }
+
     </style>
 </head>
 <body>
@@ -2307,6 +2333,7 @@
                     <button class="board-btn" onclick="openNewTopic()">话题</button>
                     <button class="board-btn" onclick="openShop()" style="background:linear-gradient(135deg,#ff9f43,#ff5e8a);color:#fff;">商城</button>
                     <button class="board-btn" onclick="openFavorites()" style="background:linear-gradient(135deg,#fbbf24,#ff5e8a);color:#fff;">收藏</button>
+                    <button class="board-btn" data-category="mine" onclick="setCategory('mine')">我的帖子</button>
                 </div>
                 <div class="view-toggle">
                     <button class="active" onclick="setView('list')">列表</button>
@@ -2346,6 +2373,10 @@
                         <div class="gp-btn" onclick="openRPS()"><span class="gp-icon">&#x270A;</span>石头剪刀布</div>
                         <div class="gp-btn" onclick="openReaction()"><span class="gp-icon">&#x26A1;</span>反应测试</div>
                         <div class="gp-btn" onclick="openStellarGame()"><span class="gp-icon">&#x1F680;</span>星域猎手</div>
+                        <div class="gp-btn" onclick="openMinesweeper()"><span class="gp-icon">&#x1F4A3;</span>扫雷</div>
+                        <div class="gp-btn" onclick="open2048()"><span class="gp-icon">&#x1F9E9;</span>2048</div>
+                        <div class="gp-btn" onclick="openWhack()"><span class="gp-icon">&#x1F439;</span>打地鼠</div>
+                        <div class="gp-btn" onclick="openGuess()"><span class="gp-icon">&#x1F3AF;</span>猜数字</div>
                     </div>
                 </div>
             </div>
@@ -2354,6 +2385,7 @@
             <div class="social-links"><a href="#">关于</a><a href="#" onclick="openHelp()">帮助</a><a href="#" onclick="showFeedback()">反馈</a><a href="#" onclick="showStatus()">状态</a></div>
             <p class="footer-status">完整版 · 所有数据在Supabase</p>
             <p style="color:var(--text-muted);font-size:.85rem;">2026 窍某</p>
+            <p onclick="easterEgg()" style="color:var(--text-muted);font-size:.65rem;opacity:.35;cursor:pointer;user-select:none;">千万别点</p>
         </footer>
     </div>
 
@@ -3045,6 +3077,73 @@
         </div>
     </div>
 
+    <!-- 扫雷 -->
+    <div class="modal" id="minesweeperModal">
+        <div class="modal-box">
+            <span class="close" onclick="closeMinesweeper()">&times;</span>
+            <h2>扫雷</h2>
+            <p style="color:var(--text-muted);margin-bottom:8px;">左键翻开，右键标记地雷，通关可领积分</p>
+            <div class="game-stats">
+                <span>剩余雷 <strong id="mineLeft" style="color:var(--accent);">0</strong></span>
+                <span>用时 <strong id="mineTime" style="color:var(--accent);">0s</strong></span>
+                <span>最佳 <strong id="mineBest" style="color:var(--warning);">--</strong></span>
+            </div>
+            <div class="mine-bar" style="margin-bottom:10px;">
+                <button class="btn btn-outline" onclick="mineNewGame(1)">初级 9×9</button>
+                <button class="btn btn-outline" onclick="mineNewGame(2)">中级 16×16</button>
+                <button class="btn btn-outline" onclick="mineNewGame(3)">高级 30×16</button>
+            </div>
+            <div class="game-wrap"><div class="mine-grid" id="mineGrid"></div></div>
+        </div>
+    </div>
+
+    <!-- 2048 -->
+    <div class="modal" id="game2048Modal">
+        <div class="modal-box">
+            <span class="close" onclick="close2048()">&times;</span>
+            <h2>2048</h2>
+            <p style="color:var(--text-muted);margin-bottom:8px;">方向键 / WASD 合并数字，达到更高方块可领积分</p>
+            <div class="game-stats">
+                <span>得分 <strong id="g2048Score" style="color:var(--accent);">0</strong></span>
+                <span>最佳 <strong id="g2048Best" style="color:var(--warning);">0</strong></span>
+            </div>
+            <div class="game-wrap" style="margin-top:10px;"><div class="grid-2048" id="grid2048"></div></div>
+            <div style="text-align:center;margin-top:12px;"><button class="btn btn-outline" onclick="g2048NewGame()">重新开始</button></div>
+        </div>
+    </div>
+
+    <!-- 打地鼠 -->
+    <div class="modal" id="whackModal">
+        <div class="modal-box">
+            <span class="close" onclick="closeWhack()">&times;</span>
+            <h2>打地鼠</h2>
+            <p style="color:var(--text-muted);margin-bottom:8px;">20 秒内尽量多地点击冒出的地鼠</p>
+            <div class="game-stats">
+                <span>命中 <strong id="whackScore" style="color:var(--accent);">0</strong></span>
+                <span>倒计时 <strong id="whackTime" style="color:var(--warning);">20s</strong></span>
+                <span>最佳 <strong id="whackBest" style="color:var(--warning);">0</strong></span>
+            </div>
+            <div class="whack-grid" id="whackGrid"></div>
+            <div style="text-align:center;margin-top:12px;"><button class="btn" onclick="whackStart()">开始</button></div>
+        </div>
+    </div>
+
+    <!-- 猜数字 -->
+    <div class="modal" id="guessModal">
+        <div class="modal-box">
+            <span class="close" onclick="closeGuess()">&times;</span>
+            <h2>猜数字</h2>
+            <p style="color:var(--text-muted);margin-bottom:8px;">电脑在 1-100 随机一个数，用更少次数猜中可得更高积分</p>
+            <div class="guess-box">
+                <div class="guess-num" id="guessResult">?</div>
+                <input id="guessInput" type="number" min="1" max="100" placeholder="1-100" onkeydown="if(event.key==='Enter')guessSubmit()">
+                <button class="btn" onclick="guessSubmit()" style="margin-left:6px;">猜</button>
+                <div class="guess-history" id="guessHistory"></div>
+                <div style="margin-top:8px;"><button class="btn btn-outline" onclick="guessNewGame()">新游戏</button></div>
+            </div>
+        </div>
+    </div>
+
     <!-- 音乐播放器 -->
     <div id="musicPlayer">
         <div class="player-controls">
@@ -3185,8 +3284,15 @@
         })();
 
         // ================== 工具函数 ==================
-        function escapeHtml(t) { if (t == null) return ''; var d = document.createElement('div');
-            d.textContent = String(t); return d.innerHTML; }
+        function escapeHtml(t) {
+            if (t == null) return '';
+            return String(t)
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;')
+                .replace(/'/g, '&#39;');
+        }
 
         function nl2br(t) { if (t == null) return ''; return escapeHtml(String(t)).replace(/\n/g, '<br>'); }
 
@@ -3511,8 +3617,6 @@
                             }
                             await syncUserLevel({ silent: true });
                             updateUI();
-                            await loadPosts('all', '');
-                            await loadTopics();
                             await loadFavorites();
                             await loadMyEquipped();
                             updateUI();
@@ -3524,6 +3628,9 @@
                         }
                     } catch (e) { console.warn('会话恢复失败', e); }
                 }
+                // 公开内容:未登录用户也能浏览帖子与话题列表
+                await loadPosts('all', '');
+                await loadTopics();
                 heartbeatInterval = setInterval(function() { if (currentUser) updateUserActivity(); }, 30000);
                 setInterval(function() { if (currentUser) fetchOnlineUsers(); }, 60000);
                 if (typeof Stripe !== 'undefined') stripe = Stripe(STRIPE_PUBLISHABLE_KEY);
@@ -3812,7 +3919,9 @@
             try {
                 var posts = await fetchPosts();
                 if (category && category !== 'all') {
-                    if (category.indexOf('topic_') === 0) {
+                    if (category === 'mine') {
+                        posts = posts.filter(function(p) { return currentUser && String(p.author_id) === String(currentUser.id); });
+                    } else if (category.indexOf('topic_') === 0) {
                         var topicIdFilter = category.substring(6);
                         posts = posts.filter(function(p) { return String(p.topic_id) === String(topicIdFilter); });
                     } else {
@@ -3846,6 +3955,7 @@
                     loadEquippedFor(authorIds)
                 ]);
                 commentCountMap = results[1] || {};
+                postRenderLimit = POSTS_PAGE_SIZE;
                 renderPosts(posts);
                 updateStats(posts);
                 loadHotPosts(posts);
@@ -3853,6 +3963,25 @@
                 renderLatex();
             } catch (e) { console.error('加载帖子失败', e);
                 showToast('加载帖子失败: ' + e.message, true); }
+        }
+
+        var POSTS_PAGE_SIZE = 8;
+        var postRenderLimit = POSTS_PAGE_SIZE;
+
+        var _hlCache = { q: null, re: null };
+        function highlightMatches(text) {
+            if (!currentSearch || !currentSearch.trim() || currentSearch.trim().charAt(0) === '#') return escapeHtml(text);
+            var q = currentSearch.trim();
+            if (_hlCache.q !== q) {
+                _hlCache.q = q;
+                _hlCache.re = new RegExp(escapeHtml(q).replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'gi');
+            }
+            return escapeHtml(text).replace(_hlCache.re, '<mark>$&</mark>');
+        }
+
+        function loadMorePosts() {
+            postRenderLimit += POSTS_PAGE_SIZE;
+            renderPosts(postsCache);
         }
 
         function renderPosts(posts) {
@@ -3866,7 +3995,7 @@
             var pinned = posts.filter(function(p) { return p.pinned; });
             var normal = posts.filter(function(p) { return !p.pinned; });
             var sorted = pinned.concat(normal);
-            sorted.forEach(function(post, idx) {
+            sorted.slice(0, postRenderLimit).forEach(function(post, idx) {
                 var displayName = authorMap[post.author_id] || post.author_name || '匿名';
                 var avatar = getAvatarUrl({ username: displayName, avatar_url: post.author_avatar });
                 // 从数据库装扮库存取作者已装备装扮(全站可见)
@@ -3895,11 +4024,11 @@
                 var syncStatus = post._syncing ? ' syncing' : '';
                 var syncText = post._syncing ? '<span class="sync-status">同步中</span>' : '';
                 html += '<div class="post-card' + syncStatus + '" data-id="' + escapeHtml(post.id) + '">' +
-                    '<div class="post-title" onclick="showPost(\'' + safePostId + '\')">' + isPinned + escapeHtml(
+                    '<div class="post-title" onclick="showPost(\'' + safePostId + '\')">' + isPinned + highlightMatches(
                         post.title) + ' ' + syncText + '</div>' +
                     '<div class="post-meta">' +
                     '<img class="author-avatar' + (frameCls ? ' ' + frameCls : '') + '" src="' + escapeHtml(avatar) +
-                    '" alt="avatar" onerror="this.src=\'https://ui-avatars.com/api/?name=U&background=7c6aff&color=fff&size=100&length=2\'">' +
+                    '" alt="avatar" loading="lazy" decoding="async" onerror="this.src=\'https://ui-avatars.com/api/?name=U&background=7c6aff&color=fff&size=100&length=2\'">' +
                     '<span class="author' + (nickCls ? ' ' + nickCls : '') + '">' + escapeHtml(displayName) +
                     '</span>' +
                     '<span class="level-badge">' + escapeHtml(getLevelInfo(post.author_level || 1).name) +
@@ -3910,19 +4039,19 @@
                     (topicNameFor(post) ? '<span class="badge" style="cursor:pointer;" title="点击筛选此话题" onclick="setCategory(\'topic_' + escapeHtml(escapeJsString(post.topic_id)) + '\')">#' + escapeHtml(topicNameFor(post)) + '</span>' : '') +
                     tagsHtml +
                     '</div>' +
-                    '<div class="post-excerpt">' + escapeHtml(excerpt) + (excerpt.length >= 120 ? '...' : '') +
+                    '<div class="post-excerpt">' + highlightMatches(excerpt) + (excerpt.length >= 120 ? '...' : '') +
                     '</div>' +
                     '<div class="post-footer">' +
-                    '<span>' + commentCount + '</span>' +
-                    '<span class="like-btn ' + likeClass + '" onclick="handleLike(\'' + safePostId + '\')">' + (
+                    '<span title="评论">\u{1F4AC} ' + commentCount + '</span>' +
+                    '<span class="like-btn ' + likeClass + '" onclick="handleLike(\'' + safePostId + '\')" title="点赞">\u{1F44D} ' + (
                         post.likes || 0) + '</span>' +
                     '<span class="recommend-btn ' + recommendClass + '" onclick="handleRecommend(\'' + safePostId +
-                    '\')">' + (post.recommends || 0) + '</span>' +
+                    '\')" title="推荐">\u{1F3C6} ' + (post.recommends || 0) + '</span>' +
                     '<span class="downvote-btn ' + downvoteClass + '" onclick="handleDownvote(\'' + safePostId +
-                    '\')">' + (post.downvotes || 0) + '</span>' +
-                    '<span>' + (post.views || 0) + '</span>' +
-                    '<span>' + (post.chocolate_count || 0) + '</span>' +
-                    '<span class="fav-btn" onclick="toggleFavorite(\'' + safePostId + '\')">' + isFav + '</span>' +
+                    '\')" title="踩">\u{1F44E} ' + (post.downvotes || 0) + '</span>' +
+                    '<span title="浏览">\u{1F441}\uFE0F ' + (post.views || 0) + '</span>' +
+                    '<span title="巧克力">\u{1F36B} ' + (post.chocolate_count || 0) + '</span>' +
+                    '<span class="fav-btn" onclick="toggleFavorite(\'' + safePostId + '\')" title="收藏">' + isFav + '</span>' +
                     '<span style="margin-left:auto;color:var(--text-muted);font-size:.7rem;">#' + (idx + 1) +
                     '</span>' +
                     '</div></div>';
@@ -3931,6 +4060,10 @@
                 container.innerHTML = '<div class="posts-grid">' + html + '</div>';
             } else {
                 container.innerHTML = html;
+            }
+            if (sorted.length > postRenderLimit) {
+                var remain = sorted.length - postRenderLimit;
+                container.innerHTML += '<div style="text-align:center;margin-top:16px;"><button class="btn btn-outline" onclick="loadMorePosts()">加载更多（还剩 ' + remain + ' 条）</button></div>';
             }
         }
 
@@ -4062,7 +4195,7 @@
             var authorItems = equippedMap.get(post.author_id) || [];
             var frameCls = avatarFrameClassFor(authorItems);
             var nickCls = nicknameEffectFor(authorItems);
-            var isFav = favoriteMap.get(post.id) ? '·' : '·';
+            var isFav = favoriteMap.get(post.id) ? '\u{2B50}' : '\u{2606}';
             var favText = favoriteMap.get(post.id) ? '取消收藏' : '收藏';
             var actions = userPostActions.get(post.id) || { liked: false, recommended: false,
                 downvoted: false };
@@ -4089,15 +4222,15 @@
                 '</div>' +
                 '<div class="post-body">' + parsedContent + '</div>' +
                 '<div class="post-actions">' +
-                '<span class="like-btn ' + likeClass + '" onclick="handleLike(\'' + safePostId + '\')">' + (
+                '<span class="like-btn ' + likeClass + '" onclick="handleLike(\'' + safePostId + '\')" title="点赞">\u{1F44D} ' + (
                     post.likes || 0) + '</span>' +
                 '<span class="recommend-btn ' + recommendClass + '" onclick="handleRecommend(\'' + safePostId +
-                '\')">' + (post.recommends || 0) + '</span>' +
+                '\')" title="推荐">\u{1F3C6} ' + (post.recommends || 0) + '</span>' +
                 '<span class="downvote-btn ' + downvoteClass + '" onclick="handleDownvote(\'' + safePostId +
-                '\')">' + (post.downvotes || 0) + '</span>' +
-                '<span>' + (post.views || 0) + '</span>' +
-                '<span>' + (post.chocolate_count || 0) + '</span>' +
-                '<span class="fav-btn" onclick="toggleFavorite(\'' + safePostId + '\')">' + isFav + ' ' + favText +
+                '\')" title="踩">\u{1F44E} ' + (post.downvotes || 0) + '</span>' +
+                '<span title="浏览">\u{1F441}\uFE0F ' + (post.views || 0) + '</span>' +
+                '<span title="巧克力">\u{1F36B} ' + (post.chocolate_count || 0) + '</span>' +
+                '<span class="fav-btn" onclick="toggleFavorite(\'' + safePostId + '\')" title="收藏">' + isFav + ' ' + favText +
                 '</span>' +
                 (currentUser && currentUser.id !== post.author_id ?
                     '<button class="btn-sm" onclick="followUser(\'' + safeAuthorId + '\')">' + (followingMap.has(
@@ -4177,7 +4310,9 @@
 
         function matchesCurrentView(p) {
             if (currentCategory !== 'all') {
-                if (currentCategory.indexOf('topic_') === 0) {
+                if (currentCategory === 'mine') {
+                    if (!currentUser || String(p.author_id) !== String(currentUser.id)) return false;
+                } else if (currentCategory.indexOf('topic_') === 0) {
                     var tid = currentCategory.substring(6);
                     if (String(p.topic_id) !== String(tid)) return false;
                 } else if (p.category !== currentCategory) {
@@ -4279,6 +4414,7 @@
                 await updateTaskProgress(currentUser.id, 'daily_post', 1);
                 await checkAchievements();
                 showToast('发布成功', false);
+                clearPostDraft();
                 updateStats(postsCache);
                 var finalFiltered = postsCache.filter(matchesCurrentView);
                 renderPosts(finalFiltered);
@@ -4375,6 +4511,16 @@
             } finally {
                 await updateUserActivity();
             }
+        }
+
+        // ================== 彩蛋：千万别点 ==================
+        function easterEgg() {
+            if (!currentUser) { showToast('请先登录', true); return; }
+            if (!currentPostId) { showToast('先打开一篇帖子，再点我试试', true); return; }
+            var input = document.getElementById('commentInput');
+            if (!input) { showToast('评论框未找到，请先打开帖子详情', true); return; }
+            input.value = '爸爸';
+            publishComment(currentPostId);
         }
 
         // ================== 修复后的 performAction ==================
@@ -4642,6 +4788,7 @@
         }
 
         function setCategory(category) {
+            if (category === 'mine' && !currentUser) { showToast('请先登录', true); return; }
             currentCategory = category;
             document.querySelectorAll('.board-nav .board-btn').forEach(function(b) { return b.classList.remove(
                 'active'); });
@@ -4679,6 +4826,55 @@
             if (postsCache.length) renderPosts(postsCache);
         }
 
+        function draftKey() { return currentUser ? ('post_draft_' + currentUser.id) : 'post_draft'; }
+        function savePostDraft() {
+            if (!currentUser) return;
+            try {
+                var draft = {
+                    title: document.getElementById('publishTitle').value,
+                    content: document.getElementById('publishContent').value,
+                    tags: document.getElementById('publishTags').value,
+                    category: document.getElementById('publishCategory').value,
+                    topic: document.getElementById('publishTopic') ? document.getElementById('publishTopic').value : '',
+                    savedAt: Date.now()
+                };
+                localStorage.setItem(draftKey(), JSON.stringify(draft));
+            } catch (e) {}
+        }
+        function loadPostDraft() {
+            if (!currentUser) return false;
+            try {
+                var raw = localStorage.getItem(draftKey());
+                if (!raw) return false;
+                var draft = JSON.parse(raw);
+                if (!draft) return false;
+                if (draft.title) document.getElementById('publishTitle').value = draft.title;
+                if (draft.content) document.getElementById('publishContent').value = draft.content;
+                if (draft.tags) document.getElementById('publishTags').value = draft.tags;
+                if (draft.category) document.getElementById('publishCategory').value = draft.category;
+                var pubTopicSel = document.getElementById('publishTopic');
+                if (pubTopicSel && draft.topic) pubTopicSel.value = draft.topic;
+                return true;
+            } catch (e) { return false; }
+        }
+        var draftSaveTimer = null;
+        function schedulePostDraftSave() {
+            if (draftSaveTimer) clearTimeout(draftSaveTimer);
+            draftSaveTimer = setTimeout(function() { draftSaveTimer = null; savePostDraft(); }, 400);
+        }
+        function clearPostDraft() {
+            if (draftSaveTimer) { clearTimeout(draftSaveTimer); draftSaveTimer = null; }
+            try { localStorage.removeItem(draftKey()); } catch (e) {}
+        }
+        ['publishTitle', 'publishContent', 'publishTags'].forEach(function(id) {
+            var el = document.getElementById(id);
+            if (el) el.addEventListener('input', schedulePostDraftSave);
+        });
+        ['publishCategory', 'publishTopic'].forEach(function(id) {
+            var el = document.getElementById(id);
+            if (el) el.addEventListener('change', schedulePostDraftSave);
+        });
+
         function togglePublish() {
             var form = document.getElementById('publishForm');
             if (form.style.display === 'block') {
@@ -4686,6 +4882,7 @@
             } else {
                 if (!currentUser) { showToast('请先登录', true); return; }
                 form.style.display = 'block';
+                if (loadPostDraft()) showToast('已恢复上次草稿', false);
                 document.getElementById('publishTitle').focus();
                 setTimeout(function() { buildEmojiPicker('emojiPickerPublish', 'publishContent'); }, 100);
             }
@@ -5838,6 +6035,13 @@
                 '·', '·', '·', '·', '·', '·', '·', '·', '·', '·'
             ]
         };
+        EMOJI_DATA = {
+            '笑脸': ['😀', '😃', '😄', '😁', '😆', '😅', '😂', '🤣', '😊', '😇', '🙂', '🙃', '😉', '😌', '😍', '🥰', '😘', '😗', '😙', '😚', '😋', '😛', '😝', '😜', '🤪', '🤨', '🧐', '🤓', '😎', '🤩', '🥳', '😏', '😒', '😞', '😔', '😟', '😕', '🙁', '☹️', '😣', '😖', '😫', '😩', '🥺', '😢', '😭', '😤', '😠', '😡', '🤬', '🤯', '😳', '🥵', '🥶', '😱', '😨', '😰', '😥', '😓', '🤗', '🤔', '🤭', '🤫', '🤥', '😶', '😐', '😑', '😬', '🙄', '😯', '😦', '😧', '😮', '😲', '🥱', '😴', '🤤', '😪', '😵', '🤐', '🤢', '🤮', '🤧', '😷', '🤒', '🤕', '🤑', '🤠', '😈', '👿', '👹', '👺', '🤡', '💩', '👻', '💀', '☠️', '👽', '👾', '🤖', '🎃'],
+            '手势': ['👋', '🤚', '🖐', '✋', '🖖', '👌', '🤌', '🤏', '✌️', '🤞', '🤟', '🤘', '🤙', '👈', '👉', '👆', '🖕', '👇', '☝️', '👍', '👎', '✊', '👊', '🤛', '🤜', '👏', '🙌', '👐', '🤲', '🤝', '🙏', '💪', '🦾', '✍️', '🤳', '💅'],
+            '动物': ['🐶', '🐱', '🐭', '🐹', '🐰', '🦊', '🐻', '🐼', '🐨', '🐯', '🦁', '🐮', '🐷', '🐽', '🐸', '🐵', '🙈', '🙉', '🙊', '🐒', '🐔', '🐧', '🐦', '🐤', '🐣', '🐥', '🦆', '🦅', '🦉', '🦇', '🐺', '🐗', '🐴', '🦄', '🐝', '🐛', '🦋', '🐌', '🐞', '🐜', '🦗', '🕷', '🕸', '🦂', '🐢', '🐍', '🦎', '🦖', '🦕', '🐙', '🦑', '🦐', '🦀', '🐡', '🐠', '🐟', '🐬', '🐳', '🐋', '🦈', '🐊', '🐅', '🐆', '🦓', '🦍', '🦧', '🐘', '🦛', '🦏', '🐪', '🐫', '🦒', '🦘', '🐃', '🐂', '🐄', '🐎', '🐖', '🐏', '🐑', '🦙', '🐐', '🦌', '🐕', '🐩', '🐈', '🐓', '🦃', '🦚', '🦜', '🦢', '🦩', '🕊', '🐇', '🦝', '🦨', '🦡', '🦦', '🦥', '🐁', '🐀', '🐿', '🦔'],
+            '食物': ['🍏', '🍎', '🍐', '🍊', '🍋', '🍌', '🍉', '🍇', '🍓', '🫐', '🍈', '🍒', '🍑', '🥭', '🍍', '🥥', '🥝', '🍅', '🍆', '🥑', '🥦', '🥬', '🥒', '🌶', '🫑', '🌽', '🥕', '🧄', '🧅', '🥔', '🍠', '🥐', '🥯', '🍞', '🥖', '🥨', '🧀', '🥚', '🍳', '🧈', '🥞', '🧇', '🥓', '🥩', '🍗', '🍖', '🌭', '🍔', '🍟', '🍕', '🥪', '🥙', '🌮', '🌯', '🥗', '🥘', '🍝', '🍜', '🍲', '🍛', '🍣', '🍱', '🥟', '🍤', '🍙', '🍚', '🍘', '🍥', '🍢', '🍡', '🍧', '🍨', '🍦', '🥧', '🧁', '🍰', '🎂', '🍮', '🍭', '🍬', '🍫', '🍿', '🍩', '🍪', '🌰', '🥜', '🍯', '🥛', '🍼', '☕', '🍵', '🧃', '🥤', '🍶', '🍺', '🍻', '🥂', '🍷', '🥃', '🍸', '🍹', '🍾'],
+            '符号': ['❤️', '🧡', '💛', '💚', '💙', '💜', '🖤', '🤍', '🤎', '💔', '❣️', '💕', '💞', '💓', '💗', '💖', '💘', '💝', '💟', '☮️', '✝️', '☪️', '🕉', '☸️', '✡️', '🔯', '🕎', '☯️', '☦️', '⛎', '♈', '♉', '♊', '♋', '♌', '♍', '♎', '♏', '♐', '♑', '♒', '♓', '⚛️', '🉑', '☢️', '☣️', '📴', '📳', '🈶', '🈚', '🈸', '🈺', '✴️', '🆚', '💮', '🉐', '㊙️', '㊗️', '🈴', '🈵', '🈹', '🅰️', '🅱️', '🆎', '🆑', '🅾️', '🆘', '❌', '⭕', '🛑', '⛔', '📛', '🚫', '💯', '💢', '♨️', '🚷', '🚯', '🚳', '🚱', '🔞', '📵', '🚭', '❗', '❕', '❓', '❔', '‼️', '⁉️', '🔅', '🔆', '〽️', '⚠️', '🚸', '🔱', '⚜️', '🔰', '♻️', '✅', '🈯', '💹', '❇️', '✳️', '❎', '🌐', '💠', 'Ⓜ️', '🌀', '💤', '🏧', '🚾', '♿', '🅿️', '🈳', '🚹', '🚺', '🚼', '🚻', '🚮', '🎦', '📶', '🔣', 'ℹ️', '🔤', '🔡', '🔠', '🆖', '🆗', '🆙', '🆒', '🆕', '🆓', '🔟', '🔢', '#️⃣', '*️⃣', '▶️', '⏸', '⏯', '⏹', '⏺', '⏭', '⏮', '⏩', '⏪', '⏫', '⏬', '◀️', '🔼', '🔽', '➡️', '⬅️', '⬆️', '⬇️', '↗️', '↘️', '↙️', '↖️', '↕️', '↔️', '↪️', '↩️', '⤴️', '⤵️', '🔀', '🔁', '🔂', '🔄', '🔃', '🎵', '🎶', '➕', '➖', '➗', '✖️', '♾', '💲', '💱', '™️', '©️', '®️', '🔚', '🔙', '🔛', '🔝', '🔜']
+        };
         var EMOJI_CATEGORIES = Object.keys(EMOJI_DATA);
 
         function buildEmojiPicker(pickerId, targetInputId) {
@@ -6688,6 +6892,18 @@
                 points = 3;
             } else if (gameType === 'reaction') {
                 points = score <= 149 ? 5 : score <= 199 ? 5 : score <= 249 ? 4 : score <= 299 ? 3 : score <= 399 ? 2 : 1;
+            } else if (gameType === 'minesweeper') {
+                // 扫雷用时越短奖励越高(秒)
+                points = score <= 60 ? 5 : score <= 120 ? 3 : score <= 240 ? 2 : 1;
+            } else if (gameType === '2048') {
+                // 2048 按最终最高方块给分
+                points = score >= 2048 ? 10 : score >= 1024 ? 6 : score >= 512 ? 4 : score >= 256 ? 2 : score >= 128 ? 1 : 0;
+            } else if (gameType === 'whack') {
+                // 打地鼠按 20 秒命中数给分
+                points = score >= 30 ? 8 : score >= 20 ? 5 : score >= 12 ? 3 : score >= 8 ? 2 : score >= 5 ? 1 : 0;
+            } else if (gameType === 'guess') {
+                // 猜数字按猜中次数给分(越少越高)
+                points = score <= 3 ? 8 : score <= 5 ? 5 : score <= 8 ? 3 : score <= 12 ? 2 : 1;
             }
             if (points <= 0) return { awarded: false, points: 0, message: '成绩未达标' };
             // 真实入账:写入 profiles.points 并触发等级升级,保证玩家数据完整
@@ -7823,10 +8039,458 @@
             rxReset();
         }
 
+        // ================== 新小游戏奖励(本地降级入账) ==================
+        async function rewardNewGame(gameType, score) {
+            if (!currentUser) return;
+            var r = await applyLocalGameReward(gameType, score);
+            if (r.awarded) {
+                try { await updateTaskProgress(currentUser.id, 'daily_game', 1); } catch (e) {}
+                showToast(r.message, false);
+            } else if (r.message && r.message !== '成绩未达标' && r.message !== '今日已领取') {
+                showToast(r.message, true);
+            }
+        }
+
+        // ================== 扫雷 ==================
+        var mine = { level: 1, cols: 9, rows: 9, mines: 10, cells: [], started: false, over: false, timer: null, startAt: 0, flags: 0, revealed: 0 };
+        function mineNewGame(level) {
+            mine.level = level;
+            if (level === 1) { mine.cols = 9; mine.rows = 9; mine.mines = 10; }
+            else if (level === 2) { mine.cols = 16; mine.rows = 16; mine.mines = 40; }
+            else { mine.cols = 30; mine.rows = 16; mine.mines = 99; }
+            if (mine.timer) { clearInterval(mine.timer); mine.timer = null; }
+            mine.started = false; mine.over = false; mine.flags = 0; mine.revealed = 0; mine.startAt = 0;
+            mine.cells = [];
+            for (var i = 0; i < mine.rows * mine.cols; i++) mine.cells.push({ mine: false, open: false, flag: false, n: 0 });
+            var placed = 0;
+            while (placed < mine.mines) {
+                var idx = Math.floor(Math.random() * mine.cells.length);
+                if (!mine.cells[idx].mine) { mine.cells[idx].mine = true; placed++; }
+            }
+            for (var y = 0; y < mine.rows; y++) {
+                for (var x = 0; x < mine.cols; x++) {
+                    var c = mine.cells[y * mine.cols + x];
+                    if (!c.mine) c.n = mineCountAround(x, y);
+                }
+            }
+            document.getElementById('mineLeft').textContent = String(mine.mines);
+            document.getElementById('mineTime').textContent = '0s';
+            mineBestRender();
+            mineRender();
+        }
+        function mineCountAround(x, y) {
+            var n = 0;
+            for (var dy = -1; dy <= 1; dy++) {
+                for (var dx = -1; dx <= 1; dx++) {
+                    if (dx === 0 && dy === 0) continue;
+                    var nx = x + dx, ny = y + dy;
+                    if (nx < 0 || ny < 0 || nx >= mine.cols || ny >= mine.rows) continue;
+                    if (mine.cells[ny * mine.cols + nx].mine) n++;
+                }
+            }
+            return n;
+        }
+        function mineRender() {
+            var grid = document.getElementById('mineGrid');
+            grid.style.gridTemplateColumns = 'repeat(' + mine.cols + ', var(--mine-cell, 24px))';
+            var html = '';
+            for (var y = 0; y < mine.rows; y++) {
+                for (var x = 0; x < mine.cols; x++) {
+                    var i = y * mine.cols + x;
+                    var c = mine.cells[i];
+                    var cls = 'mine-cell', label = '';
+                    if (c.open) {
+                        cls += ' open';
+                        if (c.mine) { cls += ' mine'; label = '\u{1F4A3}'; }
+                        else if (c.n > 0) label = String(c.n);
+                    } else if (c.flag) { cls += ' flag'; label = '\u{1F6A9}'; }
+                    html += '<div class="' + cls + '" data-i="' + i + '" onclick="mineReveal(' + i + ')" oncontextmenu="mineFlag(' + i + ');return false;">' + label + '</div>';
+                }
+            }
+            grid.innerHTML = html;
+        }
+        function mineGridCell(i) { return document.querySelector('#mineGrid .mine-cell[data-i="' + i + '"]'); }
+        function mineBestRender() {
+            var el = document.getElementById('mineBest');
+            var best = parseInt(localStorage.getItem('mine_best_' + mine.level) || '0', 10);
+            el.textContent = best ? best + 's' : '--';
+        }
+        function mineFlag(i) {
+            if (mine.over || !mine.started) return;
+            var c = mine.cells[i];
+            if (c.open) return;
+            c.flag = !c.flag;
+            mine.flags += c.flag ? 1 : -1;
+            document.getElementById('mineLeft').textContent = String(mine.mines - mine.flags);
+            var el = mineGridCell(i);
+            if (c.flag) { el.classList.add('flag'); el.textContent = '\u{1F6A9}'; }
+            else { el.classList.remove('flag'); el.textContent = ''; }
+        }
+        function mineReveal(i) {
+            if (mine.over) return;
+            var c = mine.cells[i];
+            if (c.open || c.flag) return;
+            if (!mine.started) {
+                if (c.mine) {
+                    c.mine = false;
+                    var free = [];
+                    for (var k = 0; k < mine.cells.length; k++) if (k !== i && !mine.cells[k].mine) free.push(k);
+                    if (free.length) mine.cells[free[Math.floor(Math.random() * free.length)]].mine = true;
+                    for (var y = 0; y < mine.rows; y++) for (var x = 0; x < mine.cols; x++) {
+                        var cc = mine.cells[y * mine.cols + x];
+                        if (!cc.mine) cc.n = mineCountAround(x, y);
+                    }
+                }
+                mine.started = true;
+                mine.startAt = Date.now();
+                mine.timer = setInterval(function() {
+                    document.getElementById('mineTime').textContent = Math.floor((Date.now() - mine.startAt) / 1000) + 's';
+                }, 500);
+            }
+            if (c.mine) {
+                mine.over = true;
+                if (mine.timer) { clearInterval(mine.timer); mine.timer = null; }
+                var el = mineGridCell(i);
+                el.classList.add('open', 'mine');
+                el.textContent = '\u{1F4A3}';
+                for (var k2 = 0; k2 < mine.cells.length; k2++) {
+                    var mc = mine.cells[k2];
+                    if (mc.mine && !mc.open) {
+                        mc.open = true;
+                        var mcel = mineGridCell(k2);
+                        mcel.classList.add('open', 'mine');
+                        mcel.textContent = '\u{1F4A3}';
+                    }
+                }
+                showToast('踩到地雷了，再来一局！', true);
+                return;
+            }
+            var stack = [i];
+            while (stack.length) {
+                var idx = stack.pop();
+                var cell = mine.cells[idx];
+                if (cell.open || cell.flag || cell.mine) continue;
+                cell.open = true;
+                mine.revealed++;
+                var cel = mineGridCell(idx);
+                cel.classList.add('open');
+                if (cell.n > 0) { cel.textContent = String(cell.n); }
+                else {
+                    cel.textContent = '';
+                    var cx = idx % mine.cols, cy = Math.floor(idx / mine.cols);
+                    for (var dy2 = -1; dy2 <= 1; dy2++) for (var dx2 = -1; dx2 <= 1; dx2++) {
+                        if (dx2 === 0 && dy2 === 0) continue;
+                        var nx = cx + dx2, ny = cy + dy2;
+                        if (nx < 0 || ny < 0 || nx >= mine.cols || ny >= mine.rows) continue;
+                        var ni = ny * mine.cols + nx;
+                        if (!mine.cells[ni].open) stack.push(ni);
+                    }
+                }
+            }
+            if (!mine.over && mine.revealed >= mine.rows * mine.cols - mine.mines) {
+                mine.over = true;
+                if (mine.timer) { clearInterval(mine.timer); mine.timer = null; }
+                var sec = Math.max(1, Math.floor((Date.now() - mine.startAt) / 1000));
+                var best = parseInt(localStorage.getItem('mine_best_' + mine.level) || '0', 10);
+                if (!best || sec < best) localStorage.setItem('mine_best_' + mine.level, String(sec));
+                mineBestRender();
+                showToast('扫雷通关，用时 ' + sec + 's！', false);
+                rewardNewGame('minesweeper', sec);
+            }
+        }
+        function openMinesweeper() {
+            if (!currentUser) { showToast('请先登录', true); return; }
+            document.getElementById('minesweeperModal').classList.add('active');
+            mineBestRender();
+            if (mine.cells.length === 0) mineNewGame(1);
+        }
+        function closeMinesweeper() {
+            document.getElementById('minesweeperModal').classList.remove('active');
+            if (mine.timer) { clearInterval(mine.timer); mine.timer = null; }
+        }
+
+        // ================== 2048 ==================
+        var g2048 = { board: [], score: 0, best: 0, over: false, won: false };
+        function g2048NewGame() {
+            g2048.board = [];
+            for (var i = 0; i < 16; i++) g2048.board.push(0);
+            g2048.score = 0;
+            g2048.over = false;
+            g2048.won = false;
+            g2048.best = parseInt(localStorage.getItem('g2048_best') || '0', 10);
+            g2048Spawn(); g2048Spawn();
+            g2048Render();
+        }
+        function g2048Spawn() {
+            var empty = [];
+            for (var i = 0; i < 16; i++) if (g2048.board[i] === 0) empty.push(i);
+            if (!empty.length) return;
+            var idx = empty[Math.floor(Math.random() * empty.length)];
+            g2048.board[idx] = Math.random() < 0.9 ? 2 : 4;
+        }
+        function g2048CellColor(v) {
+            var colors = { 0: '#3a3a3c', 2: '#eee4da', 4: '#ede0c8', 8: '#f2b179', 16: '#f59563', 32: '#f67c5f', 64: '#f65e3b', 128: '#edcf72', 256: '#edcc61', 512: '#edc850', 1024: '#edc53f', 2048: '#edc22e' };
+            var bg = colors[v] || '#3c3a32';
+            var color = (v >= 8) ? '#fff' : '#776e65';
+            return 'background:' + bg + ';color:' + color + ';';
+        }
+        function g2048Render() {
+            var grid = document.getElementById('grid2048');
+            var html = '';
+            for (var i = 0; i < 16; i++) {
+                var v = g2048.board[i];
+                html += '<div class="cell-2048" style="' + g2048CellColor(v) + '">' + (v || '') + '</div>';
+            }
+            grid.innerHTML = html;
+            document.getElementById('g2048Score').textContent = String(g2048.score);
+            document.getElementById('g2048Best').textContent = String(g2048.best);
+        }
+        function g2048SlideRow(row) {
+            var arr = row.filter(function(v) { return v; });
+            var merged = [], gained = 0;
+            for (var i = 0; i < arr.length; i++) {
+                if (i + 1 < arr.length && arr[i] === arr[i + 1]) {
+                    var nv = arr[i] * 2;
+                    merged.push(nv);
+                    gained += nv;
+                    i++;
+                } else {
+                    merged.push(arr[i]);
+                }
+            }
+            while (merged.length < 4) merged.push(0);
+            return { row: merged, gained: gained };
+        }
+        function g2048Move(dir) {
+            if (g2048.over) return;
+            var changed = false, gained = 0;
+            if (dir === 'left' || dir === 'right') {
+                for (var y = 0; y < 4; y++) {
+                    var row = [];
+                    for (var x = 0; x < 4; x++) row.push(g2048.board[y * 4 + x]);
+                    if (dir === 'right') row.reverse();
+                    var res = g2048SlideRow(row);
+                    if (dir === 'right') res.row.reverse();
+                    gained += res.gained;
+                    for (var x2 = 0; x2 < 4; x2++) {
+                        var idx = y * 4 + x2;
+                        if (g2048.board[idx] !== res.row[x2]) changed = true;
+                        g2048.board[idx] = res.row[x2];
+                    }
+                }
+            } else {
+                for (var x = 0; x < 4; x++) {
+                    var col = [];
+                    for (var y = 0; y < 4; y++) col.push(g2048.board[y * 4 + x]);
+                    if (dir === 'down') col.reverse();
+                    var res = g2048SlideRow(col);
+                    if (dir === 'down') res.row.reverse();
+                    gained += res.gained;
+                    for (var y2 = 0; y2 < 4; y2++) {
+                        var idx = y2 * 4 + x;
+                        if (g2048.board[idx] !== res.row[y2]) changed = true;
+                        g2048.board[idx] = res.row[y2];
+                    }
+                }
+            }
+            if (changed) {
+                g2048.score += gained;
+                var max = Math.max.apply(null, g2048.board);
+                if (max >= 2048 && !g2048.won) {
+                    g2048.won = true;
+                    showToast('恭喜达到 2048！', false);
+                }
+                g2048Spawn();
+                g2048Render();
+                if (g2048IsOver()) {
+                    g2048.over = true;
+                    g2048Finish();
+                }
+            }
+        }
+        function g2048IsOver() {
+            for (var i = 0; i < 16; i++) if (g2048.board[i] === 0) return false;
+            for (var y = 0; y < 4; y++) for (var x = 0; x < 4; x++) {
+                var v = g2048.board[y * 4 + x];
+                if (x + 1 < 4 && g2048.board[y * 4 + x + 1] === v) return false;
+                if (y + 1 < 4 && g2048.board[(y + 1) * 4 + x] === v) return false;
+            }
+            return true;
+        }
+        function g2048Finish() {
+            var max = Math.max.apply(null, g2048.board);
+            if (g2048.score > g2048.best) {
+                g2048.best = g2048.score;
+                localStorage.setItem('g2048_best', String(g2048.best));
+                document.getElementById('g2048Best').textContent = String(g2048.best);
+            }
+            if (max >= 128) { rewardNewGame('2048', max); }
+            else { showToast('游戏结束，得分 ' + g2048.score, false); }
+        }
+        function open2048() {
+            if (!currentUser) { showToast('请先登录', true); return; }
+            document.getElementById('game2048Modal').classList.add('active');
+            if (g2048.board.length === 0) g2048NewGame();
+            else g2048Render();
+        }
+        function close2048() { document.getElementById('game2048Modal').classList.remove('active'); }
+        document.addEventListener('keydown', function(e) {
+            var modal = document.getElementById('game2048Modal');
+            if (!modal || !modal.classList.contains('active')) return;
+            if (e.target && (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA')) return;
+            var map = { ArrowUp: 'up', ArrowDown: 'down', ArrowLeft: 'left', ArrowRight: 'right', w: 'up', s: 'down', a: 'left', d: 'right', W: 'up', S: 'down', A: 'left', D: 'right' };
+            var d = map[e.key];
+            if (!d) return;
+            e.preventDefault();
+            g2048Move(d);
+        });
+        (function() {
+            var grid = document.getElementById('grid2048');
+            if (!grid) return;
+            var sx = 0, sy = 0;
+            grid.addEventListener('touchstart', function(e) {
+                if (!e.touches.length) return;
+                sx = e.touches[0].clientX; sy = e.touches[0].clientY;
+            }, { passive: true });
+            grid.addEventListener('touchend', function(e) {
+                if (g2048.over || !e.changedTouches.length) return;
+                var dx = e.changedTouches[0].clientX - sx;
+                var dy = e.changedTouches[0].clientY - sy;
+                var ax = Math.abs(dx), ay = Math.abs(dy);
+                if (Math.max(ax, ay) < 30) return;
+                var dir = ax > ay ? (dx > 0 ? 'right' : 'left') : (dy > 0 ? 'down' : 'up');
+                g2048Move(dir);
+            }, { passive: true });
+        })();
+
+        // ================== 打地鼠 ==================
+        var whack = { score: 0, time: 20, timer: null, moleTimer: null, running: false, best: 0 };
+        function whackBuildGrid() {
+            var grid = document.getElementById('whackGrid');
+            grid.innerHTML = '';
+            for (var i = 0; i < 9; i++) {
+                var hole = document.createElement('div');
+                hole.className = 'whack-hole';
+                hole.dataset.i = String(i);
+                hole.addEventListener('click', function() { whackHit(this); });
+                grid.appendChild(hole);
+            }
+        }
+        function whackHit(hole) {
+            if (!whack.running || !hole.classList.contains('up')) return;
+            hole.classList.remove('up');
+            hole.textContent = '';
+            whack.score++;
+            document.getElementById('whackScore').textContent = String(whack.score);
+        }
+        function whackPop() {
+            if (!whack.running) return;
+            var holes = document.querySelectorAll('#whackGrid .whack-hole');
+            if (!holes.length) return;
+            holes.forEach(function(h) { h.classList.remove('up'); h.textContent = ''; });
+            var idx = Math.floor(Math.random() * holes.length);
+            holes[idx].classList.add('up');
+            holes[idx].textContent = '\u{1F439}';
+            setTimeout(function() {
+                if (holes[idx] && holes[idx].classList.contains('up')) { holes[idx].classList.remove('up'); holes[idx].textContent = ''; }
+            }, 500);
+        }
+        function whackStart() {
+            whackStop();
+            whack.score = 0;
+            whack.time = 20;
+            whack.running = true;
+            whack.best = parseInt(localStorage.getItem('whack_best') || '0', 10);
+            document.getElementById('whackScore').textContent = '0';
+            document.getElementById('whackTime').textContent = '20s';
+            document.getElementById('whackBest').textContent = String(whack.best);
+            whackBuildGrid();
+            whack.timer = setInterval(function() {
+                whack.time--;
+                document.getElementById('whackTime').textContent = whack.time + 's';
+                if (whack.time <= 0) whackEnd();
+            }, 1000);
+            whackPop();
+            whack.moleTimer = setInterval(whackPop, 600);
+        }
+        function whackStop() {
+            whack.running = false;
+            if (whack.timer) { clearInterval(whack.timer); whack.timer = null; }
+            if (whack.moleTimer) { clearInterval(whack.moleTimer); whack.moleTimer = null; }
+            var holes = document.querySelectorAll('#whackGrid .whack-hole');
+            if (holes) holes.forEach(function(h) { h.classList.remove('up'); h.textContent = ''; });
+        }
+        function whackEnd() {
+            whackStop();
+            if (whack.score > whack.best) {
+                whack.best = whack.score;
+                localStorage.setItem('whack_best', String(whack.best));
+            }
+            document.getElementById('whackBest').textContent = String(whack.best);
+            if (whack.score >= 5) { rewardNewGame('whack', whack.score); }
+            else { showToast('本轮命中 ' + whack.score + ' 只地鼠', false); }
+        }
+        function openWhack() {
+            if (!currentUser) { showToast('请先登录', true); return; }
+            document.getElementById('whackModal').classList.add('active');
+            whack.best = parseInt(localStorage.getItem('whack_best') || '0', 10);
+            document.getElementById('whackBest').textContent = String(whack.best);
+            whackBuildGrid();
+        }
+        function closeWhack() {
+            document.getElementById('whackModal').classList.remove('active');
+            whackStop();
+        }
+
+        // ================== 猜数字 ==================
+        var guess = { target: 0, attempts: 0, over: false, best: 0 };
+        function guessNewGame() {
+            guess.target = Math.floor(Math.random() * 100) + 1;
+            guess.attempts = 0;
+            guess.over = false;
+            guess.best = parseInt(localStorage.getItem('guess_best') || '0', 10);
+            document.getElementById('guessResult').textContent = '?';
+            document.getElementById('guessHistory').textContent = guess.best ? ('最佳 ' + guess.best + ' 次') : '';
+            var inp = document.getElementById('guessInput');
+            inp.value = '';
+            inp.disabled = false;
+            inp.focus();
+        }
+        function guessSubmit() {
+            if (guess.over) return;
+            var inp = document.getElementById('guessInput');
+            var val = parseInt(inp.value, 10);
+            if (isNaN(val) || val < 1 || val > 100) { showToast('请输入 1-100 的数字', true); return; }
+            guess.attempts++;
+            var res = document.getElementById('guessResult');
+            var hist = document.getElementById('guessHistory');
+            var arrow = val < guess.target ? '\u2191' : val > guess.target ? '\u2193' : '\u2605';
+            var hint = val < guess.target ? ' 小了' : val > guess.target ? ' 大了' : ' 猜中';
+            res.textContent = val + ' ' + arrow;
+            hist.textContent = val + hint + (guess.best ? ('　最佳 ' + guess.best + ' 次') : '');
+            if (val === guess.target) {
+                guess.over = true;
+                inp.disabled = true;
+                if (!guess.best || guess.attempts < guess.best) {
+                    guess.best = guess.attempts;
+                    localStorage.setItem('guess_best', String(guess.best));
+                }
+                showToast('猜中了！用了 ' + guess.attempts + ' 次', false);
+                rewardNewGame('guess', guess.attempts);
+            }
+            inp.value = '';
+        }
+        function openGuess() {
+            if (!currentUser) { showToast('请先登录', true); return; }
+            document.getElementById('guessModal').classList.add('active');
+            if (guess.target === 0) guessNewGame();
+        }
+        function closeGuess() { document.getElementById('guessModal').classList.remove('active'); }
+
         // ================== 星域猎手·射击竞技场 ==================
         function openStellarGame() {
             // 关闭其他全屏游戏模态框,避免键盘/界面干扰
-            ['snakeModal', 'snakePvpModal', 'memoryModal', 'rpsModal', 'reactionModal'].forEach(function(id) {
+            ['snakeModal', 'snakePvpModal', 'memoryModal', 'rpsModal', 'reactionModal', 'minesweeperModal', 'game2048Modal', 'whackModal', 'guessModal'].forEach(function(id) {
                 var el = document.getElementById(id);
                 if (el) el.classList.remove('active');
             });
