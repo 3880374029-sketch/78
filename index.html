@@ -3602,6 +3602,16 @@
         // ================== 网络请求 ==================
         // 进行中的请求去重:并发调用(fetchPosts 被 loadPosts/refresh 重复触发)复用同一个 Promise,避免重复请求
         var pendingFetches = {};
+        // 短 TTL 缓存:帖子/评论数是全量拉取,来回导航时避免反复请求同一批数据
+        var _postsCache = { t: 0, data: null },
+            _ccCache = { t: 0, data: null };
+        var FETCH_TTL = 20000;
+        function bustDataCache() {
+            _postsCache.t = 0;
+            _postsCache.data = null;
+            _ccCache.t = 0;
+            _ccCache.data = null;
+        }
 
         async function authFetch(url, opts) {
             var h = opts.headers || {};
@@ -3684,14 +3694,21 @@
 
         async function fetchPosts() {
             if (pendingFetches['posts']) return pendingFetches['posts'];
-            // 实时拉取,不做本地缓存(帖子会实时新增/编辑/删除)
+            var now = Date.now();
+            if (_postsCache.t && now - _postsCache.t >= FETCH_TTL) { _postsCache.data = null;
+                _postsCache.t = 0; }
             var p = (async function() {
-                var r = await fetch(SUPABASE_URL + '/rest/v1/posts?order=created_at.desc', {
-                    headers: { 'apikey': SUPABASE_ANON_KEY, 'Content-Type': 'application/json' }
-                });
-                var posts = await handleResponse(r);
-                // 软删除过滤:后端若已打 deleted_at 标记,前端不再展示
-                return (posts || []).filter(function(x) { return !x.deleted_at; });
+                var raw = _postsCache.data;
+                if (!raw) {
+                    var r = await fetch(SUPABASE_URL + '/rest/v1/posts?order=created_at.desc', {
+                        headers: { 'apikey': SUPABASE_ANON_KEY, 'Content-Type': 'application/json' }
+                    });
+                    var posts = await handleResponse(r);
+                    raw = posts || [];
+                    _postsCache.data = raw;
+                    _postsCache.t = Date.now();
+                }
+                return raw.filter(function(x) { return !x.deleted_at && !isBlocked(x.author_id); });
             })();
             pendingFetches['posts'] = p;
             try { return await p; } finally { delete pendingFetches['posts']; }
@@ -3737,7 +3754,10 @@
 
         async function fetchCommentCounts() {
             if (pendingFetches['comment_counts']) return pendingFetches['comment_counts'];
-            // 实时拉取,不做本地缓存(评论数实时变化)
+            var now = Date.now();
+            if (_ccCache.t && now - _ccCache.t >= FETCH_TTL) { _ccCache.data = null;
+                _ccCache.t = 0; }
+            if (_ccCache.data) return _ccCache.data;
             var p = (async function() {
                 try {
                     var r = await fetch(SUPABASE_URL + '/rest/v1/comments?select=post_id', {
@@ -3747,9 +3767,10 @@
                     if (!d || !Array.isArray(d)) return {};
                     var m = {};
                     d.forEach(function(c) { var pid = c.post_id; if (pid) m[pid] = (m[pid] || 0) + 1; });
+                    _ccCache.data = m;
+                    _ccCache.t = Date.now();
                     return m;
                 } catch (e) {
-                    // 并行加载时单点失败不拖垮整个 loadPosts
                     console.warn('加载评论数失败', e);
                     return {};
                 }
@@ -4642,6 +4663,7 @@
                 }
                 await updateTaskProgress(currentUser.id, 'daily_post', 1);
                 await checkAchievements();
+                bustDataCache();
                 showToast('发布成功', false);
                 clearPostDraft();
                 updateStats(postsCache);
@@ -4721,6 +4743,7 @@
                     created_at: new Date().toISOString()
                 };
                 await createComment(data);
+                bustDataCache();
                 await showPost(postId);
                 await updateTaskProgress(currentUser.id, 'daily_comment', 1);
                 await checkAchievements();
@@ -6291,21 +6314,20 @@
             var progress = isMax ? 100 : Math.min(100, (expInLevel / expNeeded) * 100);
             document.getElementById('levelProgressBar').style.width = progress + '%';
             document.getElementById('levelProgressText').textContent = isMax ? '已满级' : (expInLevel + ' / ' + expNeeded);
-            var posts = await fetchPosts();
+            var [posts, commentsRes, followingRes, followersRes] = await Promise.all([
+                fetchPosts(),
+                sb.from('comments').select('id', { count: 'exact', head: true }).eq('author_id', currentUser.id),
+                sb.from('follows').select('id', { count: 'exact', head: true }).eq('follower_id', currentUser.id),
+                sb.from('follows').select('id', { count: 'exact', head: true }).eq('following_id', currentUser.id)
+            ]);
             var myPosts = posts.filter(function(p) { return p.author_id === currentUser.id; });
             document.getElementById('statPostsCount').textContent = myPosts.length;
-            var { count: commentsCount } = await sb.from('comments').select('id', { count: 'exact', head: true }).eq(
-                'author_id', currentUser.id);
-            document.getElementById('statCommentsCount').textContent = commentsCount || 0;
+            document.getElementById('statCommentsCount').textContent = commentsRes.count || 0;
             var likesReceived = 0;
             myPosts.forEach(function(p) { likesReceived += (p.likes || 0); });
             document.getElementById('statLikesReceived').textContent = likesReceived;
-            var { count: followingCount } = await sb.from('follows').select('id', { count: 'exact', head: true }).eq(
-                'follower_id', currentUser.id);
-            document.getElementById('statFollowing').textContent = followingCount || 0;
-            var { count: followersCount } = await sb.from('follows').select('id', { count: 'exact', head: true }).eq(
-                'following_id', currentUser.id);
-            document.getElementById('statFollowers').textContent = followersCount || 0;
+            document.getElementById('statFollowing').textContent = followingRes.count || 0;
+            document.getElementById('statFollowers').textContent = followersRes.count || 0;
             var myPostsHtml = '';
             if (myPosts.length === 0) {
                 myPostsHtml = '<p style="color:var(--text-muted);">暂无帖子</p>';
@@ -6719,6 +6741,7 @@
                     body: JSON.stringify({ title: title, content: content, category: category, topic_id: topicId || null })
                 });
                 showToast('帖子已更新', false);
+                bustDataCache();
                 cancelEdit();
                 await showPost(postId);
                 await loadPosts(currentCategory, currentSearch);
@@ -6852,6 +6875,7 @@
                 } catch (e) { console.warn('评论点赞清理失败(已忽略)', e); }
                 // 4. 记录删除日志
                 await logDeletion('post', postId, post);
+                bustDataCache();
                 // 5. 缓存与界面同步
                 postsCache = postsCache.filter(function(p) { return String(p.id) !== String(postId); });
                 commentCountMap[postId] = 0;
@@ -6888,6 +6912,7 @@
                     authMutate('DELETE', '/rest/v1/comment_likes?comment_id=eq.' + pad)
                 ]);
                 await logDeletion('comment', commentId, c);
+                bustDataCache();
                 // 界面即时移除(带过渡动画)
                 var items = document.querySelectorAll('#commentList .reply-item');
                 for (var i = 0; i < items.length; i++) {
