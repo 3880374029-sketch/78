@@ -3426,6 +3426,8 @@
         // 装扮库存: userId -> 已装备物品数组(从 inventory_items 表加载,全站可见)
         var equippedMap = new Map();
         var myEquipped = [];
+        // 黑名单(拉黑用户): 从本地存储恢复,否则 isBlocked 会因 undefined 而抛异常导致帖子列表整体加载失败
+        var blockedUsers = loadBlockedUsers();
         var actionLocks = new Set(),
             authorMap = {},
             currentPostId = null,
