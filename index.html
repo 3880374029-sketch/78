@@ -2,9 +2,25 @@
 <html lang="zh-CN">
 <head>
     <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>窍某论坛 · 完整最终版</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>窍某论坛 · 交流分享社区</title>
+    <meta name="description" content="窍某论坛——技术、生活、职业多话题交流社区，支持发帖评论、收藏、排行榜、小游戏与音乐播放器。">
+    <link rel="canonical" href="https://qmhub.cc.cd/">
     <link rel="icon" type="image/png" href="favicon.png">
+    <!-- Open Graph / 社交分享卡片 -->
+    <meta property="og:type" content="website">
+    <meta property="og:site_name" content="窍某论坛">
+    <meta property="og:title" content="窍某论坛 · 交流分享社区">
+    <meta property="og:description" content="技术、生活、职业多话题交流社区，发帖评论、收藏、排行榜、小游戏与音乐播放器一应俱全。">
+    <meta property="og:url" content="https://qmhub.cc.cd/">
+    <meta property="og:locale" content="zh_CN">
+    <meta name="twitter:card" content="summary">
+    <meta name="twitter:title" content="窍某论坛 · 交流分享社区">
+    <meta name="twitter:description" content="技术、生活、职业多话题交流社区。">
+    <meta name="theme-color" content="#14111f">
+    <link rel="manifest" href="manifest.json">
+    <link rel="preconnect" href="https://bkvsceiezbyexzqpvblj.supabase.co">
+    <link rel="dns-prefetch" href="https://bkvsceiezbyexzqpvblj.supabase.co">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400;500;600;700&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
@@ -2489,6 +2505,48 @@
         transform: translateX(12px);
         transition: opacity var(--dur-mid) var(--ease-out-soft), transform var(--dur-mid) var(--ease-out-soft);
     }
+
+    /* ===================== 移动端深度适配 ===================== */
+    html { -webkit-tap-highlight-color: transparent; }
+    /* 刘海屏安全区:在原有内边距基础上叠加,不清除 16px 基础留白与 110px 底部播放器预留 */
+    @supports (padding: env(safe-area-inset-top)) {
+        body {
+            padding-top: calc(16px + env(safe-area-inset-top));
+            padding-left: calc(16px + env(safe-area-inset-left));
+            padding-right: calc(16px + env(safe-area-inset-right));
+            padding-bottom: calc(110px + env(safe-area-inset-bottom));
+        }
+    }
+    @media (max-width: 768px) {
+        /* 触控区不小于 44px(仅作用于按钮/链接类块级可点元素,避免破坏内联徽标布局) */
+        button, .btn, .btn-sm, .btn-outline, .nav-link, .board-btn, .view-toggle button {
+            min-height: 44px;
+        }
+        .nav-link { display: inline-flex; align-items: center; }
+        /* 点赞/推荐/踩/收藏等内联动作,扩大点击热区而不改变视觉 */
+        .like-btn, .recommend-btn, .downvote-btn, .fav-btn { padding: 10px 8px; }
+        /* 输入框字号 ≥16px,防止 iOS 聚焦时自动放大页面 */
+        input, textarea, select {
+            font-size: 16px !important;
+        }
+        #musicPlayer,
+        .modal-box, .modal-box-sm {
+            /* 底部播放器/弹窗贴住安全区,不被 Home 指示条遮挡 */
+            padding-bottom: calc(env(safe-area-inset-bottom, 0px) + 8px);
+        }
+    }
+
+    /* ===================== 骨架屏 ===================== */
+    .skeleton {
+        background: linear-gradient(90deg, var(--bg-card, rgba(255,255,255,.07)) 25%, rgba(255,255,255,.12) 50%, var(--bg-card, rgba(255,255,255,.07)) 75%);
+        background-size: 200% 100%;
+        animation: skShimmer 1.2s ease infinite;
+        border-radius: 8px;
+    }
+    @keyframes skShimmer {
+        0% { background-position: 200% 0; }
+        100% { background-position: -200% 0; }
+    }
     </style>
 </head>
 <body>
@@ -3883,6 +3941,10 @@
         }
 
         document.addEventListener('DOMContentLoaded', function() {
+            // PWA:注册 Service Worker(仅生产 HTTP/HTTPS 环境生效,本地 file:// 自动跳过)
+            if ('serviceWorker' in navigator && location.protocol.indexOf('http') === 0) {
+                try { navigator.serviceWorker.register('sw.js').catch(function() {}); } catch (e) {}
+            }
             if (typeof supabase !== 'undefined') {
                 initSupabase();
             } else {
@@ -4155,9 +4217,26 @@
             } catch (e) { console.warn('加载用户操作记录失败', e); }
         }
 
+        function showPostSkeleton() {
+            var c = document.getElementById('postList');
+            if (!c) return;
+            var html = '';
+            for (var i = 0; i < 4; i++) {
+                html += '<div class="post-card" style="padding:16px;">' +
+                    '<div class="skeleton" style="height:18px;width:55%;margin-bottom:12px;"></div>' +
+                    '<div class="skeleton" style="height:13px;width:90%;margin-bottom:8px;"></div>' +
+                    '<div class="skeleton" style="height:13px;width:70%;"></div></div>';
+            }
+            c.innerHTML = html;
+        }
+
+        var _loadSeq = 0; // 加载请求序号:快速切换分类/搜索时丢弃过期响应,避免串页
         async function loadPosts(category, search) {
+            var seq = ++_loadSeq;
+            showPostSkeleton();
             try {
                 var posts = await fetchPosts();
+                if (seq !== _loadSeq) return;
                 if (category && category !== 'all') {
                     if (category === 'mine') {
                         posts = posts.filter(function(p) { return currentUser && String(p.author_id) === String(currentUser.id); });
@@ -4194,6 +4273,7 @@
                     loadUserActions(postIds),
                     loadEquippedFor(authorIds)
                 ]);
+                if (seq !== _loadSeq) return;
                 commentCountMap = results[1] || {};
                 postRenderLimit = POSTS_PAGE_SIZE;
                 renderPosts(posts);
@@ -4398,6 +4478,8 @@
                 if (!post) { showToast('帖子不存在', true); return; }
                 currentPostId = postId;
                 try { history.replaceState(null, '', '#post-' + encodeURIComponent(postId)); } catch (e) {}
+                var _excerpt = post.content ? post.content.replace(/<[^>]+>/g, '').substring(0, 80) : '';
+                setSeoMeta({ title: post.title + ' - 窍某论坛', description: _excerpt || post.title, url: 'https://qmhub.cc.cd/#post-' + post.id });
                 document.getElementById('postList').style.display = 'none';
                 document.getElementById('postDetail').style.display = 'block';
                 var comments = await fetchComments(postId);
@@ -4557,7 +4639,26 @@
             document.getElementById('postList').style.display = 'block';
             currentPostId = null;
             try { if (location.hash.indexOf('#post-') === 0) history.replaceState(null, '', location.pathname + location.search); } catch (e) {}
+            setSeoMeta({ title: '窍某论坛 · 交流分享社区', description: '技术、生活、职业多话题交流社区。' });
             loadPosts(currentCategory, currentSearch);
+        }
+
+        // 更新文档标题与社交分享信息(帖子详情时动态替换,返回列表时复位)
+        function setSeoMeta(opts) {
+            var o = opts || {},
+                t = o.title || '窍某论坛 · 交流分享社区',
+                d = o.description || '技术、生活、职业多话题交流社区。',
+                u = o.url || 'https://qmhub.cc.cd/';
+            document.title = t;
+            ['meta[property="og:title"]', 'meta[name="twitter:title"]'].forEach(function(sel) {
+                var el = document.querySelector(sel); if (el) el.setAttribute('content', t);
+            });
+            ['meta[name="description"]', 'meta[property="og:description"]', 'meta[name="twitter:description"]'].forEach(function(sel) {
+                var el = document.querySelector(sel); if (el) el.setAttribute('content', d);
+            });
+            ['link[rel="canonical"]', 'meta[property="og:url"]'].forEach(function(sel) {
+                var el = document.querySelector(sel); if (el) el.setAttribute(sel === 'link[rel="canonical"]' ? 'href' : 'content', u);
+            });
         }
 
         function matchesCurrentView(p) {
@@ -6350,14 +6451,41 @@
             renderBlockList();
         }
 
+        // 前端图片压缩:超出 maxW 的图片用 canvas 缩放为 JPEG,降低存储与列表流量
+        function compressImage(file, maxW, quality) {
+            return new Promise(function(resolve) {
+                if (!file || !file.type || file.type.indexOf('image/') !== 0) { resolve(file); return; }
+                var img = new Image();
+                var url = URL.createObjectURL(file);
+                img.onload = function() {
+                    URL.revokeObjectURL(url);
+                    var w = img.naturalWidth,
+                        h = img.naturalHeight,
+                        max = maxW || 1920;
+                    if (w <= max) { resolve(file); return; }
+                    var scale = max / w;
+                    var cw = Math.round(w * scale),
+                        ch = Math.round(h * scale);
+                    var canvas = document.createElement('canvas');
+                    canvas.width = cw;
+                    canvas.height = ch;
+                    canvas.getContext('2d').drawImage(img, 0, 0, cw, ch);
+                    canvas.toBlob(function(blob) { resolve(blob || file); }, 'image/jpeg', quality || 0.8);
+                };
+                img.onerror = function() { URL.revokeObjectURL(url); resolve(file); };
+                img.src = url;
+            });
+        }
+
         async function uploadAvatar(event) {
             var file = event.target.files[0];
             if (!file) return;
             if (!currentUser) { showToast('请先登录', true); return; }
             try {
-                var ext = file.name.split('.').pop();
-                var fileName = currentUser.id + '_' + Date.now() + '.' + ext;
-                var { data, error } = await sb.storage.from('avatars').upload(fileName, file);
+                var compressed = await compressImage(file, 512, 0.8);
+                var ext = (compressed && compressed.type === 'image/jpeg') ? 'jpg' : (file.name.split('.').pop() || 'png');
+                var fileName = currentUser.id + '_' + Date.now() + '.' + (ext === 'jpeg' ? 'jpg' : ext);
+                var { data, error } = await sb.storage.from('avatars').upload(fileName, compressed);
                 if (error) throw error;
                 var urlData = sb.storage.from('avatars').getPublicUrl(fileName);
                 var avatarUrl = urlData.publicUrl;
