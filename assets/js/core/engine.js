@@ -171,6 +171,10 @@
   }
 
   function addBuff(u, buff, ctx) {
+      function addBuff(u, buff, ctx) {
+    if (!u.alive) return;
+    if (!ctx || !ctx.timeline) { ctx = { timeline: [], tick: 0 }; }   // ← 新增这一行
+
     if (!u.alive) return;
     // 同名 buff 刷新回合数，不叠加数值（除 bleed 可叠加层数）
     if (buff.id === 'bleed') {
