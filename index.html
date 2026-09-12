@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="zh-CN">
 <head>
     <meta charset="utf-8">
@@ -2548,6 +2548,13 @@
         100% { background-position: -200% 0; }
     }
     </style>
+
+    <!-- =====================================================================
+         v2 新增：《灵兽家族》宣传海报样式
+         特性：自包含（自带变量与按钮样式）、全作用域隔离（仅 .qm-* 前缀）、
+              不写 :root 变量、不占用 .btn/.card 等通用类 → 对论坛主题零影响
+         ===================================================================== -->
+    <link rel="stylesheet" href="assets/css/poster.css">
 </head>
 <body>
     <div class="container">
@@ -2579,6 +2586,14 @@
             <span>积分 <strong id="myTotalPoints">0</strong></span>
             <span>收藏 <strong id="myFavCount">0</strong></span>
         </div>
+
+        <!-- =================================================================
+             v2 新增：宣传海报横幅（首屏视觉焦点）
+             由 assets/js/forum-embed.js 注入 QMPoster 轮播；
+             纯矢量 SVG，零图片请求，容器高度由 CSS clamp() 决定，不产生布局位移
+             ================================================================= -->
+        <div id="qmPosterMount" class="qm-on-dark"></div>
+
         <!-- 主布局 -->
         <div class="main-layout">
             <div class="main-content">
@@ -9354,6 +9369,17 @@
             if (f) f.src = 'about:blank'; // 停止游戏循环,释放资源
         }
     </script>
+
+    <!-- =====================================================================
+         v2 新增：《灵兽家族》玩法接入层
+         ① 海报矢量插画库 / ② 海报轮播组件 / ③ 论坛接入脚本（含 iframe 懒加载）
+         说明：游戏本体运行在 assets/petworld.html 的全屏 iframe 中，
+              首次点击入口才创建 src → 对论坛首屏加载性能无影响；
+              iframe 提供天然的 CSS/JS 作用域隔离 → 论坛既有功能零回归风险。
+         ===================================================================== -->
+    <script src="assets/js/ui/poster-art.js"></script>
+    <script src="assets/js/ui/poster.js"></script>
+    <script src="assets/js/forum-embed.js"></script>
 
 </body>
 </html>
