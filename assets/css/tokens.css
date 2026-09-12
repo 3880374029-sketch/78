@@ -1,0 +1,121 @@
+/* =========================================================================
+ * qmhub.cc.cd · 灵兽家族 · Design Tokens
+ * ---------------------------------------------------------------------
+ * 由 Ui Design System 规范产出：颜色 / 字体 / 间距 / 圆角 / 阴影 / 断点
+ * 全部以 CSS 变量暴露，视图层只引用变量，不写死数值。
+ * ========================================================================= */
+
+:root {
+  /* ---------- 色彩：语义化 ---------- */
+  --color-bg-base:      #f4f1e8;   /* 宣纸底 */
+  --color-bg-raised:    #ffffff;   /* 卡片面 */
+  --color-bg-sunken:    #faf8f2;   /* 次级面 */
+  --color-bg-inset:     #f3efe4;   /* 凹陷面 */
+  --color-border:       #e4ded0;
+  --color-border-strong:#d2c9b4;
+  --color-text:         #23282e;
+  --color-text-muted:   #5d6771;
+  --color-text-subtle:  #939ba4;
+
+  /* ---------- 色彩：品牌 / 功能 ---------- */
+  --color-brand:        #1f6f5c;   /* 玉青 */
+  --color-brand-strong: #2c8a72;
+  --color-brand-soft:   #e5f1ed;
+  --color-accent:       #c1462f;   /* 朱砂 */
+  --color-accent-soft:  #fbeae6;
+  --color-gold:         #b8860b;   /* 鎏金 */
+  --color-gold-strong:  #d9a520;
+  --color-gold-soft:    #fdf5e0;
+  --color-info:         #3b7dd8;
+  --color-info-soft:    #e8f0fc;
+  --color-epic:         #7d5ba6;
+  --color-danger:       #c1462f;
+  --color-success:      #1f6f5c;
+
+  /* ---------- 元素色（灵兽） ---------- */
+  --element-metal:      #b8860b;   /* 金 · 白虎 */
+  --element-earth:      #8b6a3f;   /* 土 · 黄牛 */
+  --element-wood:       #4c9a6a;   /* 木 · 司晨 */
+
+  /* ---------- 排版：1.25 比例尺 ---------- */
+  --font-family-base:  "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-family-title: "Songti SC", "STSong", "SimSun", Georgia, var(--font-family-base);
+
+  --font-size-xs:   11px;    /* 0.79rem */
+  --font-size-sm:   12.5px;  /* 0.89rem */
+  --font-size-base: 14px;    /* 1rem    */
+  --font-size-md:   17.5px;  /* 1.25rem */
+  --font-size-lg:   22px;    /* 1.56rem */
+  --font-size-xl:   27px;    /* 1.95rem */
+  --font-size-2xl:  34px;    /* 2.44rem */
+
+  --line-height-tight: 1.2;
+  --line-height-base:  1.6;
+  --letter-spacing-title: 3px;
+
+  /* ---------- 间距：4px 基准 ---------- */
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 20px;
+  --space-6: 24px;
+  --space-8: 32px;
+  --space-10: 40px;
+  --space-12: 48px;
+
+  /* ---------- 圆角 ---------- */
+  --radius-xs: 6px;
+  --radius-sm: 9px;
+  --radius-md: 14px;
+  --radius-lg: 22px;
+  --radius-full: 999px;
+
+  /* ---------- 阴影 ---------- */
+  --shadow-sm: 0 1px 2px rgba(60,50,30,.06), 0 2px 8px rgba(60,50,30,.05);
+  --shadow-md: 0 2px 6px rgba(60,50,30,.07), 0 10px 28px rgba(60,50,30,.08);
+  --shadow-lg: 0 8px 24px rgba(60,50,30,.12), 0 24px 64px rgba(60,50,30,.14);
+
+  /* ---------- 断点（供 JS / 文档引用；CSS 内直接写 min-width） ---------- */
+  --bp-sm: 640px;
+  --bp-md: 768px;
+  --bp-lg: 1024px;
+  --bp-xl: 1280px;
+  --bp-2xl: 1536px;
+
+  /* ---------- 动效 ---------- */
+  --ease-out: cubic-bezier(.4,0,.2,1);
+  --ease-spring: cubic-bezier(.2,.9,.3,1.15);
+  --duration-fast: .16s;
+  --duration-base: .28s;
+  --duration-slow: .7s;
+
+  /* ---------- 层级 ---------- */
+  --z-nav: 30;
+  --z-modal: 150;
+  --z-toast: 200;
+
+  /* ---------- 海报尺寸（响应式核心变量） ---------- */
+  --poster-height: clamp(210px, 29vw, 396px);
+  --poster-radius: var(--radius-lg);
+  --poster-padding: clamp(18px, 3.2vw, 44px);
+}
+
+/* 平板 */
+@media (max-width: 1023px) {
+  :root { --poster-height: clamp(240px, 34vw, 380px); }
+}
+/* 手机：图文改为上下叠压，需要更高的容器 */
+@media (max-width: 639px) {
+  :root {
+    --poster-height: clamp(330px, 96vw, 470px);
+    --poster-padding: 20px;
+    --font-size-2xl: 28px;
+    --font-size-xl: 22px;
+  }
+}
+
+/* 高对比度 / 减弱动效 无障碍适配 */
+@media (prefers-reduced-motion: reduce) {
+  :root { --duration-fast: 0s; --duration-base: 0s; --duration-slow: 0s; }
+}

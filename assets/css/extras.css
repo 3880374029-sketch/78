@@ -1,0 +1,279 @@
+/* =========================================================================
+ * qmhub.cc.cd · 灵兽家族 · 组件样式（v2 增量）
+ * 只新增类，不覆盖 main.css 既有规则 → 对旧页面零影响
+ * ========================================================================= */
+
+/* ------------------------------------------------------------ 通用小标题 */
+.sec-t {
+  font-size: 14px; font-weight: 700; letter-spacing: .5px;
+  margin-bottom: 10px; color: var(--ink);
+}
+
+/* ------------------------------------------------------------ 自适应栅格 */
+.g-split   { display: grid; gap: var(--space-4); grid-template-columns: minmax(0, 1.35fr) minmax(0, 1fr); }
+.g-side320 { display: grid; gap: var(--space-4); grid-template-columns: minmax(0, 1fr) 320px; }
+.g-side340 { display: grid; gap: var(--space-4); grid-template-columns: minmax(0, 1fr) 340px; }
+.g-col230  { display: grid; gap: var(--space-4); grid-template-columns: 230px minmax(0, 1fr); }
+@media (max-width: 1023px) {
+  .g-split, .g-side320, .g-side340 { grid-template-columns: 1fr; }
+}
+@media (max-width: 767px) {
+  .g-col230 { grid-template-columns: 1fr; }
+}
+
+/* ------------------------------------------------------------ 主城 · 快捷入口 */
+.quick-row {
+  display: grid; gap: 12px; margin-bottom: 18px;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+}
+@media (max-width: 1279px) { .quick-row { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+@media (max-width: 767px)  { .quick-row { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+
+.quick-card {
+  position: relative; overflow: hidden;
+  display: flex; align-items: center; gap: 11px;
+  padding: 13px 15px; text-align: left;
+  border-radius: var(--radius); border: 1px solid var(--border);
+  background: var(--panel); box-shadow: var(--shadow-s);
+  transition: transform var(--duration-fast), box-shadow var(--duration-fast), border-color var(--duration-fast);
+}
+.quick-card:hover { transform: translateY(-2px); box-shadow: var(--shadow-m); border-color: var(--border-2); }
+.quick-card::before {
+  content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 4px;
+  background: var(--jade);
+}
+.quick-card.gold::before { background: linear-gradient(180deg, var(--gold), var(--gold-2)); }
+.quick-card .qc-ico { font-size: 24px; line-height: 1; flex: 0 0 auto; }
+.quick-card .qc-txt { min-width: 0; display: flex; flex-direction: column; }
+.quick-card .qc-txt b { font-size: 13.5px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.quick-card .qc-txt small { font-size: 11px; color: var(--ink-3); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.quick-card .qc-new {
+  position: absolute; top: 0; right: 0;
+  background: linear-gradient(135deg, var(--cinnabar), #e2694f);
+  color: #fff; font-size: 9px; font-weight: 800; letter-spacing: .5px;
+  padding: 2px 7px; border-bottom-left-radius: 8px;
+}
+
+/* ------------------------------------------------------------ 编队卡槽 */
+.team-slot {
+  flex: 1 1 190px; min-width: 190px;
+  display: flex; align-items: center; gap: 12px;
+  padding: 12px; border-radius: var(--radius-sm);
+  border: 1px solid var(--border); background: #fff;
+  cursor: pointer; transition: transform var(--duration-fast), box-shadow var(--duration-fast);
+}
+.team-slot:hover { transform: translateY(-2px); box-shadow: var(--shadow-s); }
+.team-slot .ts-art {
+  width: 48px; height: 48px; border-radius: 13px; flex: 0 0 auto;
+  display: grid; place-items: center; font-size: 26px;
+  background: radial-gradient(circle at 50% 120%, var(--glow, #eee) 0%, transparent 62%), var(--tone, #f6f3ec);
+  border: 1px solid var(--border);
+}
+.team-slot .ts-info { flex: 1; min-width: 0; display: flex; flex-direction: column; }
+.team-slot .ts-info b { font-size: 13.5px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.team-slot .ts-info span { font-size: 11px; color: var(--ink-3); }
+.team-slot .ts-pw { font-size: 11.5px; font-weight: 700; color: var(--gold); flex: 0 0 auto; }
+.team-slot.empty-slot {
+  justify-content: center; text-align: center; font-size: 12px; color: var(--ink-3);
+  border-style: dashed; border-color: var(--border-2); background: var(--panel-2);
+}
+.team-slot.empty-slot small { font-size: 10px; opacity: .8; }
+
+/* ------------------------------------------------------------ 动向 */
+.log-line {
+  display: flex; gap: 10px; padding: 5px 0;
+  border-bottom: 1px dashed var(--border); font-size: 12.5px;
+}
+.log-line .hint { flex: 0 0 96px; }
+
+/* ------------------------------------------------------------ 每日委托 */
+.daily-row, .quest-row {
+  display: flex; align-items: center; gap: 12px;
+  padding: 11px 12px; border-radius: var(--radius-sm);
+  border: 1px solid var(--border); background: var(--panel-2);
+  transition: background var(--duration-fast);
+}
+.daily-row + .daily-row, .quest-row + .quest-row { margin-top: 8px; }
+.daily-row.done, .quest-row.done { background: var(--jade-soft); border-color: #cbe5dc; }
+.daily-row:hover, .quest-row:hover { background: #fff; }
+.daily-row .dr-ico { font-size: 22px; flex: 0 0 auto; width: 30px; text-align: center; }
+.daily-row .dr-body { flex: 1; min-width: 0; display: flex; flex-direction: column; }
+.daily-row .dr-body b { font-size: 13px; }
+.daily-row .dr-body small { font-size: 11px; color: var(--ink-3); }
+.quest-row { align-items: flex-start; }
+
+/* ------------------------------------------------------------ 图鉴卡 */
+.codex-card {
+  border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden;
+  background: var(--panel-2);
+}
+.codex-card .cc-art {
+  height: 112px; display: grid; place-items: center; font-size: 54px;
+  background: radial-gradient(circle at 50% 120%, var(--glow, #eee) 0%, transparent 62%), var(--tone, #f6f3ec);
+}
+.codex-card .cc-body { padding: 13px; }
+.codex-card .cc-body .kv { padding: 4px 0; }
+
+.codex-full {
+  border: 1px solid var(--border); border-radius: var(--radius);
+  padding: 18px; margin-bottom: 14px; background: var(--panel-2);
+}
+.codex-full .cf-art {
+  width: 96px; height: 96px; border-radius: 16px; flex: 0 0 auto;
+  display: grid; place-items: center; font-size: 52px;
+  background: radial-gradient(circle at 50% 120%, var(--glow, #eee) 0%, transparent 62%), var(--tone, #f6f3ec);
+  border: 1px solid var(--border);
+}
+.codex-full .cf-name { font-size: 19px; font-family: var(--font-title); letter-spacing: 2px; }
+.stat-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(104px, 1fr)); gap: 8px; }
+.stat-cell { background: #fff; border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 8px 11px; }
+.stat-cell .sv { font-weight: 800; font-variant-numeric: tabular-nums; }
+
+/* ------------------------------------------------------------ 羁绊 */
+.bond-card {
+  border: 1px solid var(--border); border-left: 4px solid var(--border-2);
+  border-radius: var(--radius-sm); padding: 14px; background: var(--panel-2);
+  transition: background var(--duration-fast), border-color var(--duration-fast);
+}
+.bond-card + .bond-card { margin-top: 10px; }
+.bond-card.active { border-left-color: var(--bond, var(--jade)); background: #fff; box-shadow: var(--shadow-s); }
+.bond-card .bc-head { display: flex; gap: 13px; align-items: flex-start; }
+.bond-card .bc-emoji { font-size: 30px; line-height: 1; flex: 0 0 auto; filter: grayscale(1) opacity(.45); }
+.bond-card.active .bc-emoji { filter: none; }
+.bond-card .bc-members { display: flex; flex-direction: column; gap: 5px; flex: 0 0 auto; }
+.bond-card .bc-m {
+  width: 30px; height: 30px; border-radius: 9px; display: grid; place-items: center; font-size: 17px;
+  background: var(--panel-3); border: 1px solid var(--border); opacity: .42;
+}
+.bond-card .bc-m.has { opacity: 1; background: #fff; border-color: var(--jade); box-shadow: 0 0 0 2px var(--jade-soft); }
+
+/* ------------------------------------------------------------ 繁育 */
+.breed-preview {
+  display: grid; grid-template-columns: auto auto auto auto; gap: 8px;
+  align-items: center; justify-items: center;
+  padding: 14px; border-radius: var(--radius-sm);
+  background: var(--panel-2); border: 1px dashed var(--border-2);
+}
+.breed-preview .bp-slot {
+  width: 68px; height: 78px; border-radius: var(--radius-sm);
+  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px;
+  background: #fff; border: 1px solid var(--border); font-size: 30px;
+}
+.breed-preview .bp-slot small { font-size: 10px; color: var(--ink-3); max-width: 62px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.breed-preview .bp-slot.result { border-style: dashed; border-color: var(--gold); background: var(--gold-soft); }
+.breed-preview .bp-plus, .breed-preview .bp-arrow { font-size: 18px; color: var(--ink-3); }
+.breed-preview .bp-detail { grid-column: 1 / -1; width: 100%; margin-top: 10px; }
+@media (max-width: 460px) {
+  .breed-preview { grid-template-columns: auto auto; }
+  .breed-preview .bp-arrow { grid-column: 1 / -1; }
+}
+
+/* ------------------------------------------------------------ 试炼塔 */
+.tower-hero {
+  display: flex; gap: 20px; flex-wrap: wrap; align-items: center;
+  padding: 18px; border-radius: var(--radius);
+  background: linear-gradient(125deg, var(--gold-soft), #fff 65%);
+  border: 1px solid #f0e0b4;
+}
+.tower-hero .th-floor { display: flex; align-items: baseline; gap: 4px; flex: 0 0 auto; }
+.tower-hero .th-floor span { font-size: 12px; color: var(--ink-3); writing-mode: vertical-rl; letter-spacing: 2px; margin-right: 6px; }
+.tower-hero .th-floor b { font-size: 52px; font-family: var(--font-title); color: var(--gold); line-height: 1; }
+.tower-hero .th-floor small { font-size: 13px; color: var(--ink-3); }
+.tower-hero .th-meta { flex: 1; min-width: 220px; }
+.tower-hero .th-meta .kv { padding: 5px 0; }
+
+.tower-preview {
+  margin-top: 16px; padding: 14px; border-radius: var(--radius-sm);
+  background: var(--panel-2); border: 1px solid var(--border);
+}
+.tower-enemy {
+  display: flex; flex-direction: column; align-items: center; gap: 5px;
+  padding: 10px; border-radius: var(--radius-sm);
+  background: #fff; border: 1px solid var(--border); min-width: 108px;
+}
+.tower-enemy .te-art {
+  width: 54px; height: 54px; border-radius: 14px; display: grid; place-items: center; font-size: 30px;
+  background: radial-gradient(circle at 50% 120%, var(--glow, #eee) 0%, transparent 62%), var(--tone, #f6f3ec);
+}
+.tower-enemy small { font-size: 11px; color: var(--ink-2); text-align: center; }
+
+/* ------------------------------------------------------------ 家族战 */
+.war-target {
+  border: 1px solid var(--border); border-radius: var(--radius-sm);
+  padding: 15px; background: var(--panel-2);
+  transition: background var(--duration-fast), border-color var(--duration-fast);
+}
+.war-target:hover { background: #fff; border-color: var(--border-2); }
+.war-target .wt-head { display: flex; align-items: center; gap: 11px; }
+.war-target .wt-emblem {
+  width: 42px; height: 42px; border-radius: 12px; display: grid; place-items: center;
+  font-size: 22px; background: #fff; border: 1px solid var(--border); flex: 0 0 auto;
+}
+
+/* ------------------------------------------------------------ 家族横幅补充 */
+.fam-rank-chip {
+  display: flex; align-items: center; gap: 9px;
+  padding: 7px 14px; border-radius: var(--radius-sm);
+  background: rgba(255,255,255,.18); border: 1px solid rgba(255,255,255,.3);
+  position: relative; z-index: 1;
+}
+.fam-rank-chip b { display: block; font-size: 13px; }
+.fam-rank-chip small { font-size: 10.5px; opacity: .82; }
+.fam-expbar { margin-top: 16px; position: relative; z-index: 1; }
+.fam-expbar .bar { background: rgba(255,255,255,.24); }
+.fam-expbar .bar > i { background: linear-gradient(90deg, #ffe9b0, #ffd275); }
+
+/* ------------------------------------------------------------ 家族科技 / 列表 */
+.tech-card {
+  border: 1px solid var(--border); border-radius: var(--radius-sm);
+  padding: 15px; background: var(--panel-2);
+}
+.fam-list-row {
+  display: flex; align-items: center; gap: 12px;
+  padding: 10px 12px; border-radius: var(--radius-sm);
+}
+.fam-list-row:hover { background: var(--panel-2); }
+.fam-list-row .flr-emblem {
+  width: 40px; height: 40px; border-radius: 11px; flex: 0 0 auto;
+  display: grid; place-items: center; font-size: 21px;
+  background: #fff; border: 1px solid var(--border);
+}
+
+.emblem-pick { display: flex; gap: 6px; flex-wrap: wrap; }
+.emblem-btn {
+  width: 38px; height: 38px; border-radius: 11px; font-size: 19px;
+  background: var(--panel-2); border: 1px solid var(--border);
+  display: grid; place-items: center; transition: all var(--duration-fast);
+}
+.emblem-btn:hover { transform: translateY(-2px); }
+.emblem-btn.on { border-color: var(--jade); box-shadow: 0 0 0 3px var(--jade-soft); background: #fff; }
+
+/* ------------------------------------------------------------ 竞技场 */
+.arena-intro {
+  display: flex; align-items: center; gap: 16px;
+  padding: 20px; border-radius: var(--radius);
+  background: linear-gradient(120deg, var(--panel-2), #fff);
+  border: 1px solid var(--border);
+}
+.arena-intro .ai-ico { font-size: 46px; flex: 0 0 auto; }
+
+/* ------------------------------------------------------------ 召唤球 */
+.gacha-orb {
+  font-size: 64px; line-height: 1;
+  animation: orbFloat 3.4s ease-in-out infinite;
+  filter: drop-shadow(0 8px 20px rgba(184,134,11,.35));
+}
+@keyframes orbFloat { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-10px); } }
+@media (prefers-reduced-motion: reduce) { .gacha-orb { animation: none; } }
+
+/* ------------------------------------------------------------ 移动端微调 */
+@media (max-width: 767px) {
+  .page-head h1 { font-size: 21px; letter-spacing: 2px; }
+  .tower-hero { gap: 14px; padding: 14px; }
+  .tower-hero .th-floor b { font-size: 40px; }
+  .stat-grid { grid-template-columns: repeat(auto-fit, minmax(88px, 1fr)); }
+  .codex-full { padding: 14px; }
+  .codex-full .cf-art { width: 74px; height: 74px; font-size: 40px; }
+  .skill-item { padding: 11px; }
+  .skill-item .sd { font-size: 11.5px; }
+}

@@ -1,0 +1,323 @@
+/* =========================================================================
+ * qmhub.cc.cd · 宣传海报样式 (QMPoster) · 自包含 · 全作用域隔离
+ * ---------------------------------------------------------------------
+ * 设计约束（为了能安全嵌入任何现有页面）：
+ *   1. 所有类名统一 `qm-` 前缀 —— 不会命中宿主页面的任何既有规则
+ *   2. 所有 CSS 变量定义在 .qm-poster 内部，不写 :root —— 不会污染宿主主题
+ *   3. 不继承宿主的 .btn / .card 等类 —— 按钮自带完整样式
+ *   4. 容器高度由 clamp() 决定 —— 不产生布局位移（CLS = 0）
+ *   5. 纯 CSS + 内联 SVG —— 零额外网络请求
+ *
+ * 版式：
+ *   桌面 ≥1024px   左文右图
+ *   平板 640-1023  左文右图（文案区收窄）
+ *   手机 ≤639px    图文叠压（插画在上、文案在下）+ 触摸滑动
+ * ========================================================================= */
+
+/* ------------------------------------------------------------------ 变量 */
+.qm-poster {
+  --qm-font: "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --qm-font-title: "Songti SC", "STSong", "SimSun", Georgia, serif;
+  --qm-ink: #23282e;
+  --qm-ink-2: #5d6771;
+  --qm-jade: #1f6f5c;
+  --qm-jade-2: #2c8a72;
+  --qm-gold: #b8860b;
+  --qm-gold-2: #d9a520;
+  --qm-cinnabar: #c1462f;
+  --qm-line: rgba(35, 40, 46, .12);
+  --qm-h: clamp(206px, 28vw, 392px);
+  --qm-pad: clamp(18px, 3.1vw, 44px);
+  --qm-radius: 20px;
+
+  position: relative;
+  display: block;
+  width: 100%;
+  margin: 0 0 22px;
+  border-radius: var(--qm-radius);
+  overflow: hidden;
+  background: #f3ead6;
+  box-shadow: 0 2px 6px rgba(20, 16, 40, .16), 0 18px 44px rgba(20, 16, 40, .22);
+  isolation: isolate;
+  outline: none;
+  font-family: var(--qm-font);
+  text-align: left;
+  line-height: 1.6;
+  box-sizing: border-box;
+}
+.qm-poster *,
+.qm-poster *::before,
+.qm-poster *::after { box-sizing: border-box; }
+.qm-poster:focus-visible { box-shadow: 0 0 0 3px rgba(31, 111, 92, .35), 0 18px 44px rgba(20, 16, 40, .22); }
+
+/* 顶部高光扫过 */
+.qm-poster::after {
+  content: '';
+  position: absolute; top: 0; bottom: 0; left: -46%; width: 32%;
+  background: linear-gradient(100deg, transparent 0%, rgba(255, 255, 255, .32) 50%, transparent 100%);
+  transform: skewX(-18deg);
+  animation: qmShine 8.5s cubic-bezier(.4, 0, .2, 1) infinite;
+  pointer-events: none; z-index: 3;
+}
+@keyframes qmShine { 0%, 70% { left: -46%; } 90%, 100% { left: 118%; } }
+
+.qm-viewport {
+  position: relative;
+  width: 100%;
+  height: var(--qm-h);
+  overflow: hidden;
+  contain: paint;
+  touch-action: pan-y;
+}
+
+/* ------------------------------------------------------------------ 幻灯片 */
+.qm-slide {
+  position: absolute; inset: 0;
+  opacity: 0;
+  transition: opacity .7s cubic-bezier(.4, 0, .2, 1);
+  will-change: opacity;
+  pointer-events: none;
+}
+.qm-slide.is-active { opacity: 1; pointer-events: auto; }
+
+.qm-art { position: absolute; inset: 0; z-index: 0; }
+.qm-art svg { width: 100%; height: 100%; display: block; }
+
+.qm-scrim {
+  position: absolute; inset: 0; z-index: 1;
+  background: linear-gradient(90deg,
+    rgba(252, 248, 238, .97) 0%, rgba(252, 248, 238, .92) 30%,
+    rgba(252, 248, 238, .62) 48%, rgba(252, 248, 238, .12) 68%, rgba(252, 248, 238, 0) 84%);
+}
+
+/* ------------------------------------------------------------------ 文案 */
+.qm-body {
+  position: absolute; inset: 0; z-index: 2;
+  display: flex; flex-direction: column; justify-content: center;
+  padding: var(--qm-pad);
+  max-width: min(58%, 640px);
+}
+.qm-badge {
+  align-self: flex-start;
+  padding: 4px 12px;
+  border-radius: 999px;
+  background: linear-gradient(120deg, var(--qm-gold), var(--qm-gold-2));
+  color: #fff;
+  font-size: 11px; font-weight: 700; letter-spacing: 1px;
+  box-shadow: 0 2px 8px rgba(184, 134, 11, .3);
+  margin-bottom: clamp(6px, 1vw, 12px);
+}
+.qm-title {
+  font-family: var(--qm-font-title);
+  font-size: clamp(26px, 3.6vw, 48px);
+  font-weight: 700;
+  letter-spacing: clamp(2px, .5vw, 7px);
+  line-height: 1.1;
+  color: #1c2a30;
+  text-shadow: 0 1px 0 rgba(255, 255, 255, .75);
+  margin: 0 0 clamp(3px, .6vw, 7px);
+}
+.qm-sub {
+  font-size: clamp(12px, 1.14vw, 16px);
+  font-weight: 700; letter-spacing: .6px;
+  color: var(--qm-jade);
+  margin: 0 0 clamp(4px, .8vw, 10px);
+}
+.qm-slogan {
+  font-size: clamp(11.5px, 1vw, 14px);
+  line-height: 1.7;
+  color: var(--qm-ink-2);
+  max-width: 40ch;
+  margin: 0 0 clamp(10px, 1.5vw, 20px);
+}
+.qm-cta { display: flex; gap: 8px; flex-wrap: wrap; }
+
+/* 自带按钮样式（不依赖宿主 .btn） */
+.qm-btn {
+  display: inline-flex; align-items: center; justify-content: center; gap: 6px;
+  padding: clamp(8px, 1.05vw, 12px) clamp(14px, 1.75vw, 24px);
+  border: 1px solid transparent;
+  border-radius: 10px;
+  font-family: inherit;
+  font-size: clamp(12.5px, 1.02vw, 15px);
+  font-weight: 700;
+  line-height: 1.2;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: transform .16s cubic-bezier(.4, 0, .2, 1), box-shadow .16s, background .16s;
+  box-shadow: 0 1px 2px rgba(60, 50, 30, .08), 0 2px 8px rgba(60, 50, 30, .1);
+}
+.qm-btn:hover { transform: translateY(-1px); }
+.qm-btn:active { transform: none; }
+.qm-btn.primary {
+  background: linear-gradient(140deg, var(--qm-jade), var(--qm-jade-2));
+  color: #fff;
+  box-shadow: 0 2px 10px rgba(31, 111, 92, .32);
+}
+.qm-btn.primary:hover { box-shadow: 0 6px 18px rgba(31, 111, 92, .38); }
+.qm-btn.ghost {
+  background: rgba(255, 255, 255, .86);
+  border-color: var(--qm-line);
+  color: var(--qm-ink);
+  backdrop-filter: blur(6px);
+}
+.qm-btn.ghost:hover { background: #fff; }
+
+/* 印章 */
+.qm-seal {
+  position: absolute; z-index: 2;
+  right: var(--qm-pad); bottom: var(--qm-pad);
+  display: flex; flex-direction: column; align-items: center; gap: 1px;
+  padding: 7px 5px;
+  border: 2px solid rgba(193, 70, 47, .62);
+  border-radius: 5px;
+  background: rgba(193, 70, 47, .07);
+  transform: rotate(-3deg);
+  pointer-events: none;
+}
+.qm-seal span {
+  font-family: var(--qm-font-title);
+  font-size: clamp(10px, .92vw, 13px);
+  line-height: 1.14;
+  font-weight: 700;
+  color: rgba(193, 70, 47, .82);
+}
+
+/* ------------------------------------------------------------------ 导航 */
+.qm-nav {
+  position: absolute; top: 50%; transform: translateY(-50%);
+  z-index: 4;
+  width: clamp(30px, 2.9vw, 40px); height: clamp(30px, 2.9vw, 40px);
+  border-radius: 50%;
+  background: rgba(255, 255, 255, .8);
+  border: 1px solid var(--qm-line);
+  color: var(--qm-ink-2);
+  font-size: 20px; line-height: 1;
+  display: grid; place-items: center;
+  cursor: pointer;
+  opacity: 0;
+  backdrop-filter: blur(8px);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, .12);
+  transition: opacity .16s, background .16s, transform .16s;
+}
+.qm-nav.prev { left: clamp(8px, 1.1vw, 16px); }
+.qm-nav.next { right: clamp(8px, 1.1vw, 16px); }
+.qm-poster:hover .qm-nav,
+.qm-poster:focus-within .qm-nav { opacity: 1; }
+.qm-nav:hover { background: #fff; color: var(--qm-jade); transform: translateY(-50%) scale(1.08); }
+
+.qm-dots {
+  position: absolute; z-index: 4;
+  left: 50%; transform: translateX(-50%);
+  bottom: 10px;
+  display: flex; gap: 7px;
+}
+.qm-dot {
+  width: 8px; height: 8px; padding: 0;
+  border: none; border-radius: 50%;
+  background: rgba(35, 40, 46, .22);
+  cursor: pointer;
+  transition: all .28s cubic-bezier(.4, 0, .2, 1);
+}
+.qm-dot:hover { background: rgba(35, 40, 46, .42); }
+.qm-dot.is-active {
+  width: 26px; border-radius: 999px;
+  background: linear-gradient(90deg, var(--qm-jade), var(--qm-jade-2));
+}
+
+.qm-progress {
+  position: absolute; left: 0; right: 0; bottom: 0; height: 3px;
+  background: rgba(35, 40, 46, .08);
+  z-index: 4; overflow: hidden;
+}
+.qm-progress > i {
+  display: block; height: 100%; width: 0;
+  background: linear-gradient(90deg, var(--qm-jade), var(--qm-gold));
+}
+.qm-poster.is-paused .qm-progress > i { transition: none !important; opacity: .45; }
+
+/* ------------------------------------------------------------------ 主题微调 */
+.qm-theme-gold .qm-sub { color: var(--qm-gold); }
+.qm-theme-gold .qm-scrim {
+  background: linear-gradient(90deg, rgba(253, 249, 238, .97) 0%, rgba(253, 249, 238, .93) 30%,
+    rgba(253, 249, 238, .6) 48%, rgba(253, 249, 238, .1) 68%, rgba(253, 249, 238, 0) 84%);
+}
+.qm-theme-jade .qm-scrim {
+  background: linear-gradient(90deg, rgba(244, 250, 247, .97) 0%, rgba(244, 250, 247, .93) 30%,
+    rgba(244, 250, 247, .6) 48%, rgba(244, 250, 247, .1) 68%, rgba(244, 250, 247, 0) 84%);
+}
+
+/* ================================================================ 响应式 */
+/* 平板 */
+@media (max-width: 1023px) {
+  .qm-poster { --qm-h: clamp(236px, 33vw, 372px); }
+  .qm-body { max-width: min(66%, 560px); }
+  .qm-slogan { max-width: 34ch; }
+}
+
+/* 手机：叠压版式 */
+@media (max-width: 639px) {
+  .qm-poster { --qm-h: clamp(330px, 96vw, 470px); --qm-pad: 20px; --qm-radius: 16px; margin-bottom: 16px; }
+  .qm-scrim {
+    background: linear-gradient(0deg, rgba(252, 248, 238, .98) 0%, rgba(252, 248, 238, .95) 34%,
+      rgba(252, 248, 238, .6) 60%, rgba(252, 248, 238, .06) 84%, rgba(252, 248, 238, 0) 100%);
+  }
+  .qm-theme-gold .qm-scrim {
+    background: linear-gradient(0deg, rgba(253, 249, 238, .98) 0%, rgba(253, 249, 238, .95) 34%,
+      rgba(253, 249, 238, .6) 60%, rgba(253, 249, 238, .06) 84%, rgba(253, 249, 238, 0) 100%);
+  }
+  .qm-theme-jade .qm-scrim {
+    background: linear-gradient(0deg, rgba(244, 250, 247, .98) 0%, rgba(244, 250, 247, .95) 34%,
+      rgba(244, 250, 247, .6) 60%, rgba(244, 250, 247, .06) 84%, rgba(244, 250, 247, 0) 100%);
+  }
+  .qm-body {
+    max-width: 100%;
+    justify-content: flex-end;
+    padding-bottom: calc(var(--qm-pad) + 14px);
+  }
+  .qm-title { font-size: clamp(24px, 7.2vw, 34px); letter-spacing: 3px; }
+  .qm-sub { font-size: 13px; }
+  .qm-slogan {
+    font-size: 12px; max-width: none;
+    display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
+  }
+  .qm-cta { width: 100%; }
+  .qm-btn { flex: 1 1 auto; }
+  .qm-seal { right: auto; left: var(--qm-pad); top: var(--qm-pad); bottom: auto; }
+  .qm-nav { opacity: .92; width: 30px; height: 30px; font-size: 17px; }
+  .qm-nav.prev { left: 6px; }
+  .qm-nav.next { right: 6px; }
+}
+
+/* 超窄屏 */
+@media (max-width: 380px) {
+  .qm-title { font-size: 22px; letter-spacing: 2px; }
+  .qm-slogan { display: none; }
+  .qm-btn { font-size: 12.5px; padding: 9px 12px; }
+}
+
+/* 超宽屏 */
+@media (min-width: 1600px) {
+  .qm-body { max-width: 700px; }
+  .qm-title { font-size: 54px; }
+}
+
+/* 无障碍 / 打印 */
+@media (prefers-reduced-motion: reduce) {
+  .qm-poster::after { display: none; }
+  .qm-slide, .qm-dot { transition: none; }
+}
+@media print {
+  .qm-poster { box-shadow: none; break-inside: avoid; }
+  .qm-nav, .qm-dots, .qm-progress, .qm-poster::after { display: none; }
+  .qm-slide { position: relative; opacity: 1; }
+}
+
+/* =========================================================================
+ * 宿主页为深色主题时：给海报加一圈描边，避免与深底糊在一起
+ * （用 @media prefers-color-scheme 不能覆盖站点自定义主题，
+ *   所以由宿主在包裹层加 .qm-on-dark 类显式声明）
+ * ========================================================================= */
+.qm-on-dark .qm-poster {
+  box-shadow: 0 0 0 1px rgba(255, 255, 255, .14), 0 10px 30px rgba(0, 0, 0, .38);
+}

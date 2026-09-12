@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>灵兽家族 · qmhub.cc.cd</title>
+<meta name="description" content="qmhub.cc.cd 灵兽家族 —— 白虎、黄牛、鸡三系灵兽养成 × 家族争霸 × 联盟协作">
+<meta name="theme-color" content="#f4f1e8">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🐯</text></svg>">
+
+<!-- 设计 Token（Ui Design System 规范） -->
+<link rel="stylesheet" href="assets/css/tokens.css">
+<!-- 主样式 -->
+<link rel="stylesheet" href="assets/css/main.css">
+<!-- 宣传海报（自包含、全作用域隔离） -->
+<link rel="stylesheet" href="assets/css/poster.css">
+<!-- 新玩法组件 -->
+<link rel="stylesheet" href="assets/css/extras.css">
+</head>
+<body>
+<div id="app">
+  <!-- ============ 顶栏 ============ -->
+  <header class="topbar">
+    <div class="brand" title="返回主城">
+      <div class="brand-mark">🐯</div>
+      <div class="brand-text">
+        <b>灵兽家族</b>
+        <span>qmhub.cc.cd</span>
+      </div>
+    </div>
+    <div class="res-bar" id="resBar"></div>
+    <div class="player-chip" id="playerChip" title="查看个人信息"></div>
+  </header>
+
+  <!-- ============ 主体 ============ -->
+  <div class="body-wrap">
+    <nav class="sidebar" id="sidebar"></nav>
+    <main class="content" id="content"></main>
+  </div>
+</div>
+
+<div id="toasts"></div>
+<div id="modalRoot"></div>
+
+<!-- 数据与规则层 -->
+<script src="assets/js/data/config.js"></script>
+<script src="assets/js/data/config-ext.js"></script>
+<script src="assets/js/core/store.js"></script>
+<script src="assets/js/core/store-ext.js"></script>
+<script src="assets/js/core/engine.js"></script>
+<script src="assets/js/core/api.js"></script>
+<script src="assets/js/core/api-ext.js"></script>
+<!-- 通用 UI -->
+<script src="assets/js/ui/kit.js"></script>
+<script src="assets/js/ui/poster-art.js"></script>
+<script src="assets/js/ui/poster.js"></script>
+<script src="assets/js/ui/battle.js"></script>
+<!-- 视图与主程序 -->
+<script src="assets/js/ui/views-a.js"></script>
+<script src="assets/js/ui/views-b.js"></script>
+<script src="assets/js/ui/app.js"></script>
+<script>
+  window.addEventListener('DOMContentLoaded', function () {
+    try {
+      QMHUB.App.boot();
+    } catch (err) {
+      console.error(err);
+      document.getElementById('content').innerHTML =
+        '<div style="padding:40px;text-align:center;color:#c1462f">灵兽世界加载失败：' + (err && err.message) + '</div>';
+    }
+  });
+</script>
+</body>
+</html>
